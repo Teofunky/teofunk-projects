@@ -87,7 +87,7 @@ struct LearnView: View {
                         .onTapGesture { selectedNode = node }
 
                     // Level label below node
-                    nodeLabelView(node: node)
+                    nodeLabelView(node)
                         .position(x: xPos, y: yPos + 42)
                 }
             }
