@@ -1,0 +1,100 @@
+diff --git a/KonnakolMaster/Core/Audio/AudioEngine.swift b/KonnakolMaster/Core/Audio/AudioEngine.swift
+index a73b8d0..b4697fb 100644
+--- a/KonnakolMaster/Core/Audio/AudioEngine.swift
++++ b/KonnakolMaster/Core/Audio/AudioEngine.swift
+@@ -196,6 +196,6 @@ enum AudioEngineError: Error, LocalizedError {
+ 
+ private extension Int {
+     func clamped(to range: ClosedRange<Int>) -> Int {
+-        max(range.lowerBound, min(self, range.upperBound))
++        Swift.max(range.lowerBound, Swift.min(self, range.upperBound))
+     }
+ }
+diff --git a/KonnakolMaster/Presentation/Learn/LearnView.swift b/KonnakolMaster/Presentation/Learn/LearnView.swift
+index f3f9703..abb6d62 100644
+--- a/KonnakolMaster/Presentation/Learn/LearnView.swift
++++ b/KonnakolMaster/Presentation/Learn/LearnView.swift
+@@ -87,7 +87,7 @@ struct LearnView: View {
+                         .onTapGesture { selectedNode = node }
+ 
+                     // Level label below node
+-                    nodeLabelView(node: node)
++                    nodeLabelView(node)
+                         .position(x: xPos, y: yPos + 42)
+                 }
+             }
+@@ -205,7 +205,3 @@ private struct TopographicBackground: View {
+         .ignoresSafeArea()
+     }
+ }
+-
+-// MARK: - LearnViewModel.LevelNode + Identifiable for sheet
+-
+-extension LearnViewModel.LevelNode: @retroactive Identifiable {}
+diff --git a/KonnakolMaster/Presentation/Lesson/LessonPlayerViewModel.swift b/KonnakolMaster/Presentation/Lesson/LessonPlayerViewModel.swift
+index 4289c5d..a1ebf9f 100644
+--- a/KonnakolMaster/Presentation/Lesson/LessonPlayerViewModel.swift
++++ b/KonnakolMaster/Presentation/Lesson/LessonPlayerViewModel.swift
+@@ -1,6 +1,6 @@
+ import Foundation
+ import Observation
+-
++import SwiftUI
+ // MARK: - LessonPlayerViewModel
+ //
+ // State machine for the lesson flow.
+diff --git a/KonnakolMaster/Presentation/Practice/PracticeViewModel.swift b/KonnakolMaster/Presentation/Practice/PracticeViewModel.swift
+index 220382e..8089cd0 100644
+--- a/KonnakolMaster/Presentation/Practice/PracticeViewModel.swift
++++ b/KonnakolMaster/Presentation/Practice/PracticeViewModel.swift
+@@ -30,7 +30,7 @@ final class PracticeViewModel {
+ 
+     // MARK: Public API
+ 
+-    func togglePlay(audio: AudioEngine) {
++    @MainActor func togglePlay(audio: AudioEngine) {
+         if isPlaying {
+             audio.stop()
+             stopTimers()
+@@ -42,20 +42,20 @@ final class PracticeViewModel {
+         }
+     }
+ 
+-    func applyBPM(_ newBPM: Int, audio: AudioEngine) {
++    @MainActor func applyBPM(_ newBPM: Int, audio: AudioEngine) {
+         bpm = newBPM
+         guard isPlaying else { return }
+         audio.changeBPM(newBPM)
+         restartSyllableTimer()
+     }
+ 
+-    func applyTala(_ tala: Tala, audio: AudioEngine) {
++    @MainActor func applyTala(_ tala: Tala, audio: AudioEngine) {
+         selectedTala = tala
+         guard isPlaying else { return }
+         audio.changeTala(tala)
+     }
+ 
+-    func applyNadai(_ nadai: Nadai, audio: AudioEngine) {
++    @MainActor func applyNadai(_ nadai: Nadai, audio: AudioEngine) {
+         selectedNadai = nadai
+         guard isPlaying else { return }
+         audio.changeNadai(nadai)
+diff --git a/KonnakolMaster/Presentation/RootView.swift b/KonnakolMaster/Presentation/RootView.swift
+index 9b433ad..ab97bd5 100644
+--- a/KonnakolMaster/Presentation/RootView.swift
++++ b/KonnakolMaster/Presentation/RootView.swift
+@@ -4,10 +4,11 @@ import SwiftUI
+ 
+ /// Entry-point view. Switches between onboarding and the main tab bar
+ /// based on whether the user has completed setup.
+-struct RootView: View {
++public struct RootView: View {
++    public init() {}
+     @Environment(ProgressStore.self) private var progressStore
+ 
+-    var body: some View {
++    public var body: some View {
+         if progressStore.hasCompletedOnboarding {
+             MainTabView()
+         } else {
