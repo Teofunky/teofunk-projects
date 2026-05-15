@@ -18,9 +18,7 @@ let package = Package(
                 "Resources/Lessons",
                 "Resources/Fonts",
             ],
-            swiftSettings: [
-                .enableExperimentalFeature("StrictConcurrency"),
-            ]
+            swiftSettings: []
         ),
         .testTarget(
             name: "KonnakolMasterTests",

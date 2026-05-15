@@ -8,10 +8,19 @@ struct RootView: View {
     @Environment(ProgressStore.self) private var progressStore
 
     var body: some View {
-        if progressStore.hasCompletedOnboarding {
-            MainTabView()
-        } else {
-            OnboardingView()
+        Group {
+            if progressStore.isLoaded {
+                if progressStore.hasCompletedOnboarding {
+                    MainTabView()
+                } else {
+                    OnboardingView()
+                }
+            } else {
+                Color.kmBase.ignoresSafeArea()
+            }
+        }
+        .task {
+            await progressStore.load()
         }
     }
 }

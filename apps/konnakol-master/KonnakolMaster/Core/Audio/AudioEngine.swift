@@ -122,22 +122,24 @@ final class AudioEngine {
 
         // Re-configure if AVAudioSession resets (e.g. phone call interruption).
         NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(handleInterruption),
-            name: AVAudioSession.interruptionNotification,
-            object: nil
-        )
+            forName: AVAudioSession.interruptionNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            self?.handleInterruption(notification)
+        }
         NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(handleRouteChange),
-            name: AVAudioSession.routeChangeNotification,
-            object: nil
-        )
+            forName: AVAudioSession.routeChangeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            self?.handleRouteChange(notification)
+        }
     }
 
     // MARK: Interruption Handling
 
-    @objc private func handleInterruption(_ notification: Notification) {
+    private func handleInterruption(_ notification: Notification) {
         guard
             let info = notification.userInfo,
             let typeValue = info[AVAudioSessionInterruptionTypeKey] as? UInt,
@@ -165,7 +167,7 @@ final class AudioEngine {
         }
     }
 
-    @objc private func handleRouteChange(_ notification: Notification) {
+    private func handleRouteChange(_ notification: Notification) {
         guard
             let info = notification.userInfo,
             let reasonValue = info[AVAudioSessionRouteChangeReasonKey] as? UInt,

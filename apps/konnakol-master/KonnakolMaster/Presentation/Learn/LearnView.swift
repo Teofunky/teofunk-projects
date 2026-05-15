@@ -206,6 +206,3 @@ private struct TopographicBackground: View {
     }
 }
 
-// MARK: - LearnViewModel.LevelNode + Identifiable for sheet
-
-extension LearnViewModel.LevelNode: @retroactive Identifiable {}
