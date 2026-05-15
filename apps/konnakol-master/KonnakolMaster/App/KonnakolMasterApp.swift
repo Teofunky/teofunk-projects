@@ -9,6 +9,7 @@ struct KonnakolMasterApp: App {
         WindowGroup {
             RootView()
                 .environment(container.progressStore)
+                .environment(container.audioEngine)
                 .modelContainer(container.modelContainer)
                 .preferredColorScheme(.dark) // Dark-first, light mode deferred to v1.1
         }
