@@ -77,6 +77,13 @@ struct LearnView: View {
                 // Connection lines drawn first (under nodes)
                 connectionLines(centerX: centerX, nodeSpacing: nodeSpacing)
 
+                // Tier dividers — positioned between tier boundaries
+                tierDivider(label: "BEGINNER", y: 16, width: geo.size.width)
+                // Intermediate starts at index 5 (level 6) → y = 5*100+32 = 532, midpoint = 482
+                tierDivider(label: "INTERMEDIATE", y: 482, width: geo.size.width)
+                // Advanced starts at index 10 (level 11) → y = 10*100+32 = 1032, midpoint = 982
+                tierDivider(label: "ADVANCED", y: 982, width: geo.size.width)
+
                 // Nodes
                 ForEach(Array(vm.nodes.enumerated()), id: \.element.id) { i, node in
                     let yPos = CGFloat(i) * nodeSpacing + 32
@@ -94,6 +101,23 @@ struct LearnView: View {
             .frame(height: CGFloat(vm.nodes.count) * nodeSpacing + 80)
         }
         .frame(height: CGFloat(LessonLibrary.all.count) * 100 + 80)
+    }
+
+    private func tierDivider(label: String, y: CGFloat, width: CGFloat) -> some View {
+        HStack(spacing: KMSpacing.pt8) {
+            Rectangle()
+                .fill(Color.kmSurface2)
+                .frame(height: 1)
+            Text(label)
+                .kmStyle(KMFont.micro, color: .kmTextTertiary, tracking: 2)
+                .fixedSize()
+            Rectangle()
+                .fill(Color.kmSurface2)
+                .frame(height: 1)
+        }
+        .padding(.horizontal, KMSpacing.pt32)
+        .frame(width: width)
+        .position(x: width / 2, y: y)
     }
 
     @ViewBuilder

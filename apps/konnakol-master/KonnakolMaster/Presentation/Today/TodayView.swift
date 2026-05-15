@@ -33,7 +33,7 @@ struct TodayView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(vm.greeting)
                     .kmStyle(KMFont.caption, color: .kmTextSecondary, tracking: 0.5)
-                Text("Teofunk")
+                Text("Your Practice")
                     .kmStyle(KMFont.title2)
             }
             Spacer()

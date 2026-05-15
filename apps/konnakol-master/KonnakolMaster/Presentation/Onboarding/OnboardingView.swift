@@ -102,6 +102,12 @@ private struct WelcomePage: View {
                     .kmStyle(KMFont.bodyLarge, color: .kmTextSecondary)
                     .multilineTextAlignment(.center)
                     .lineSpacing(4)
+
+                Text("Konnakol is the South Indian art of vocalising rhythm — speaking syllables (ta, ka, di, mi) as a complete musical language. Musicians and composers use it to master complex patterns, polyrhythm, and composition without any instrument.")
+                    .kmStyle(KMFont.caption, color: .kmTextTertiary)
+                    .multilineTextAlignment(.center)
+                    .lineSpacing(4)
+                    .padding(.top, KMSpacing.pt8)
             }
 
             KMCard(elevation: .standard) {
