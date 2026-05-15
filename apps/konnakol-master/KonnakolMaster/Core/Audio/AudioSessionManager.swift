@@ -14,10 +14,13 @@ enum AudioSessionManager {
     /// Throws if the system denies the configuration.
     static func activate() throws {
         let session = AVAudioSession.sharedInstance()
+        // Bluetooth headset support deferred — `.allowBluetooth` is deprecated and its
+        // replacement `.allowBluetoothHFP` requires iOS 18. Built-in mic + speaker work
+        // for the MVP.
         try session.setCategory(
             .playAndRecord,
             mode: .measurement,          // low-latency, no DSP processing
-            options: [.defaultToSpeaker, .allowBluetooth]
+            options: [.defaultToSpeaker]
         )
         try session.setPreferredIOBufferDuration(preferredBufferDuration)
         try session.setPreferredSampleRate(44_100)

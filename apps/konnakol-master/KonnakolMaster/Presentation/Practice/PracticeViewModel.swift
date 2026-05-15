@@ -73,9 +73,13 @@ final class PracticeViewModel {
 
     private func startSyllableTimer() {
         let interval = syllableInterval
+        // Timer fires on RunLoop.main → we are already on the main actor; the
+        // assumeIsolated wrapper lets us touch @MainActor state without a Task hop.
         sylTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { [weak self] _ in
-            guard let self else { return }
-            self.activeSyllableIndex = (self.activeSyllableIndex + 1) % self.syllableGroup.syllables.count
+            MainActor.assumeIsolated {
+                guard let self else { return }
+                self.activeSyllableIndex = (self.activeSyllableIndex + 1) % self.syllableGroup.syllables.count
+            }
         }
         RunLoop.main.add(sylTimer!, forMode: .common)
     }

@@ -48,41 +48,40 @@ enum SpectralFlux {
         var windowed = [Float](repeating: 0, count: windowSize)
         vDSP_vmul(samples, 1, hannWindow, 1, &windowed, 1, vDSP_Length(windowSize))
 
-        // 2. Pack real input as interleaved complex (imaginary = 0)
-        //    We treat pairs of real samples as a complex number for vDSP_ctoz.
         var realPart = [Float](repeating: 0, count: windowSize / 2)
         var imagPart = [Float](repeating: 0, count: windowSize / 2)
+        var mag      = [Float](repeating: 0, count: windowSize / 2)
+        let halfSize = vDSP_Length(windowSize / 2)
 
-        windowed.withUnsafeBufferPointer { buf in
-            buf.baseAddress!.withMemoryRebound(to: DSPComplex.self, capacity: windowSize / 2) { cBuf in
-                var split = DSPSplitComplex(realp: &realPart, imagp: &imagPart)
-                vDSP_ctoz(cBuf, 2, &split, 1, vDSP_Length(windowSize / 2))
-            }
-        }
-
-        // 3. In-place forward FFT
+        // Pin the real/imag buffers for the lifetime of the DSPSplitComplex —
+        // taking inout pointers to Array storage directly is undefined behaviour.
         realPart.withUnsafeMutableBufferPointer { rBuf in
             imagPart.withUnsafeMutableBufferPointer { iBuf in
-                var split = DSPSplitComplex(realp: rBuf.baseAddress!, imagp: iBuf.baseAddress!)
-                vDSP_fft_zrip(fftSetup, &split, 1, log2n, FFTDirection(FFT_FORWARD))
-            }
-        }
-
-        // 4. Power spectrum (squared magnitudes)
-        var mag = [Float](repeating: 0, count: windowSize / 2)
-        realPart.withUnsafeBufferPointer { rBuf in
-            imagPart.withUnsafeBufferPointer { iBuf in
                 var split = DSPSplitComplex(
-                    realp: UnsafeMutablePointer(mutating: rBuf.baseAddress!),
-                    imagp: UnsafeMutablePointer(mutating: iBuf.baseAddress!)
+                    realp: rBuf.baseAddress!,
+                    imagp: iBuf.baseAddress!
                 )
-                vDSP_zvmags(&split, 1, &mag, 1, vDSP_Length(windowSize / 2))
+
+                // 2. Pack real input as interleaved complex (imaginary = 0)
+                windowed.withUnsafeBufferPointer { buf in
+                    buf.baseAddress!.withMemoryRebound(to: DSPComplex.self, capacity: windowSize / 2) { cBuf in
+                        vDSP_ctoz(cBuf, 2, &split, 1, halfSize)
+                    }
+                }
+
+                // 3. In-place forward FFT
+                vDSP_fft_zrip(fftSetup, &split, 1, log2n, FFTDirection(FFT_FORWARD))
+
+                // 4. Power spectrum (squared magnitudes)
+                mag.withUnsafeMutableBufferPointer { mBuf in
+                    vDSP_zvmags(&split, 1, mBuf.baseAddress!, 1, halfSize)
+                }
             }
         }
 
         // 5. Normalise
         var scale = Float(windowSize)
-        vDSP_vsdiv(mag, 1, &scale, &mag, 1, vDSP_Length(windowSize / 2))
+        vDSP_vsdiv(mag, 1, &scale, &mag, 1, halfSize)
 
         return mag
     }
