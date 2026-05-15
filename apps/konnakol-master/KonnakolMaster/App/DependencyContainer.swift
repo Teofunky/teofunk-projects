@@ -40,4 +40,8 @@ final class DependencyContainer {
     // MARK: Audio (constructed lazily — microphone permission not yet requested)
 
     lazy var audioEngine: AudioEngine = AudioEngine()
+
+    // MARK: Voice Analysis
+
+    lazy var voiceAnalyzer: VoiceAnalyzer = VoiceAnalyzer()
 }

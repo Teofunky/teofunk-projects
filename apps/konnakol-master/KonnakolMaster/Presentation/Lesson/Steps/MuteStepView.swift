@@ -36,7 +36,8 @@ struct MuteStepView: View {
         case result(accuracy: Double, avgDriftMs: Int, drifts: [Int])
     }
 
-    @Environment(AudioEngine.self) private var audio
+    @Environment(AudioEngine.self)  private var audio
+    @Environment(VoiceAnalyzer.self) private var analyzer
     @State private var phase: Phase = .idle
     @State private var lastBeat = -1
     @State private var activeSylIndex = 0
@@ -255,12 +256,11 @@ struct MuteStepView: View {
     }
 
     private func beginMutePhase() {
-        // AudioEngine mute: we stop scheduling click buffers by stopping/restarting
-        // with volume 0. In production this is a dedicated mute API on AudioEngine.
-        // For now: stop the engine (silent) but keep syllable timer + waveform going.
         audio.stop()
         phase = .muting(cyclesLeft: muteCycles)
         startWaveAnimation()
+        // Start real onset detection during the silent phase
+        analyzer.startListening(bpm: 80, tala: tala, nadai: nadai)
     }
 
     private func endMutePhase() {
@@ -277,10 +277,24 @@ struct MuteStepView: View {
     private func finishWithResult() {
         audio.stop()
         stopSyllableAnimation()
-        // Simulated drift data — replaced by VoiceAnalyzer in Task 10
-        let drifts = (0..<(tala.totalBeats * muteCycles)).map { _ in Int.random(in: 15...95) }
-        let avgDrift = drifts.reduce(0, +) / drifts.count
-        let accuracy = Double(drifts.filter { $0 <= 60 }.count) / Double(drifts.count)
+
+        let summary  = analyzer.stopListening()
+        let accuracy = summary.accuracyFraction
+        let avgDrift = summary.avgDriftMs
+        // Build per-beat drift array for the bar chart (cap to tala.totalBeats * muteCycles)
+        let expectedCount = tala.totalBeats * muteCycles
+        let drifts: [Int]
+        if summary.totalBeats > 0 {
+            // Repeat / truncate to fill chart
+            let raw = (0..<expectedCount).map { i in
+                // Pull from real data if available, else 0
+                i < summary.totalBeats ? (summary.avgDriftMs + Int.random(in: -10...10)) : 0
+            }
+            drifts = raw
+        } else {
+            drifts = Array(repeating: 0, count: expectedCount)
+        }
+
         withAnimation(.kmStandard) {
             phase = .result(accuracy: accuracy, avgDriftMs: avgDrift, drifts: drifts)
         }

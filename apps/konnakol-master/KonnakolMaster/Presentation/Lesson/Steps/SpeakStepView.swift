@@ -6,6 +6,8 @@ struct SpeakStepView: View {
     let instruction: String
     let onComplete: (Double, Int) -> Void  // (accuracy, avgDriftMs)
 
+    @Environment(VoiceAnalyzer.self) private var analyzer
+
     enum RecState { case idle, countdown(Int), recording, done(Double, Int) }
 
     @State private var state: RecState = .idle
@@ -179,7 +181,10 @@ struct SpeakStepView: View {
         HapticEngine.impact(.medium)
         startWaveAnimation()
 
-        // Recording duration based on targetCount × syllable interval
+        // Estimate syllable tempo from targetCount and a nominal 80 BPM feel
+        let bpmEstimate = 80
+        analyzer.startListening(bpm: bpmEstimate, tala: TalaLibrary.adi, nadai: .chatusra)
+
         let duration = TimeInterval(targetCount) * 0.35 + 1.0
         DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
             finishRecording()
@@ -189,9 +194,9 @@ struct SpeakStepView: View {
     private func finishRecording() {
         stopWaveAnimation()
         HapticEngine.notification(.success)
-        // Simulated result — replaced by VoiceAnalyzer in Task 10
-        let accuracy = Double.random(in: 0.72...0.96)
-        let drift    = Int.random(in: 20...80)
+        let summary = analyzer.stopListening()
+        let accuracy = summary.accuracyFraction
+        let drift    = summary.avgDriftMs
         withAnimation(.kmStandard) { state = .done(accuracy, drift) }
     }
 
