@@ -13,10 +13,6 @@ let package = Package(
             exclude: [
                 "Tests",
                 "AppStore",
-                "Resources/Sounds",
-                "Resources/Videos",
-                "Resources/Lessons",
-                "Resources/Fonts",
             ],
             swiftSettings: []
         ),

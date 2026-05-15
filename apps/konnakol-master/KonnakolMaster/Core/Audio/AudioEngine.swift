@@ -126,14 +126,14 @@ final class AudioEngine {
             object: nil,
             queue: .main
         ) { [weak self] notification in
-            self?.handleInterruption(notification)
+            MainActor.assumeIsolated { self?.handleInterruption(notification) }
         }
         NotificationCenter.default.addObserver(
             forName: AVAudioSession.routeChangeNotification,
             object: nil,
             queue: .main
         ) { [weak self] notification in
-            self?.handleRouteChange(notification)
+            MainActor.assumeIsolated { self?.handleRouteChange(notification) }
         }
     }
 
@@ -198,6 +198,6 @@ enum AudioEngineError: Error, LocalizedError {
 
 private extension Int {
     func clamped(to range: ClosedRange<Int>) -> Int {
-        max(range.lowerBound, min(self, range.upperBound))
+        Swift.max(range.lowerBound, Swift.min(self, range.upperBound))
     }
 }

@@ -2,6 +2,7 @@ import Foundation
 import Observation
 
 @Observable
+@MainActor
 final class PracticeViewModel {
 
     // MARK: Controls (bound to UI)
