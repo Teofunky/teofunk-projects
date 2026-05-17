@@ -6,6 +6,7 @@ struct LearnView: View {
     @Environment(ProgressStore.self) private var progressStore
     @State private var vm = LearnViewModel()
     @State private var selectedNode: LearnViewModel.LevelNode?
+    @State private var lessonToOpen: Lesson?
 
     var body: some View {
         NavigationStack {
@@ -28,9 +29,19 @@ struct LearnView: View {
             .navigationBarHidden(true)
             .onAppear { vm.load(progress: progressStore.progress) }
             .sheet(item: $selectedNode) { node in
-                LessonPreviewSheet(node: node)
-                    .presentationDetents([.medium])
-                    .presentationDragIndicator(.visible)
+                LessonPreviewSheet(node: node) {
+                    // Begin Lesson — dismiss sheet and open player
+                    selectedNode = nil
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        lessonToOpen = LessonBuilder.build(forLevel: node.meta.level)
+                    }
+                }
+                .presentationDetents([.medium])
+                .presentationDragIndicator(.visible)
+            }
+            .fullScreenCover(item: $lessonToOpen) { lesson in
+                LessonPlayerView(lesson: lesson)
+                    .onDisappear { vm.load(progress: progressStore.progress) }
             }
         }
     }
@@ -169,6 +180,7 @@ struct LearnView: View {
 
 private struct LessonPreviewSheet: View {
     let node: LearnViewModel.LevelNode
+    let onBegin: () -> Void
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -195,7 +207,11 @@ private struct LessonPreviewSheet: View {
             Spacer()
 
             KMButton(node.state == .locked ? "Locked" : "Begin Lesson") {
-                dismiss()
+                if node.state == .locked {
+                    dismiss()
+                } else {
+                    onBegin()
+                }
             }
             .disabled(node.state == .locked)
         }

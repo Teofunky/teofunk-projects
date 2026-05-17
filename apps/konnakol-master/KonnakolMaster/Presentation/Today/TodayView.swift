@@ -5,7 +5,7 @@ import SwiftUI
 struct TodayView: View {
     @Environment(ProgressStore.self) private var progressStore
     @State private var vm = TodayViewModel()
-    @State private var navigateToLesson = false
+    @State private var lessonToOpen: Lesson?
 
     var body: some View {
         NavigationStack {
@@ -23,6 +23,10 @@ struct TodayView: View {
             .background(Color.kmBase.ignoresSafeArea())
             .navigationBarHidden(true)
             .onAppear { vm.load(progress: progressStore.progress) }
+            .fullScreenCover(item: $lessonToOpen) { lesson in
+                LessonPlayerView(lesson: lesson)
+                    .onDisappear { vm.load(progress: progressStore.progress) }
+            }
         }
     }
 
@@ -92,7 +96,7 @@ struct TodayView: View {
                     }
 
                     KMButton(lesson.isStarted ? "Continue" : "Start Lesson") {
-                        navigateToLesson = true
+                        lessonToOpen = LessonBuilder.build(forLevel: lesson.level)
                     }
                 }
                 .padding(KMSpacing.cardPadding)

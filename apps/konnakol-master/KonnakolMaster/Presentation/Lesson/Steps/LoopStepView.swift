@@ -7,11 +7,13 @@ struct LoopStepView: View {
     let cycles: Int
     let onComplete: (Double, Int) -> Void
 
-    @Environment(AudioEngine.self) private var audio
+    @Environment(AudioEngine.self)    private var audio
+    @Environment(VoiceAnalyzer.self)  private var analyzer
     @State private var cyclesCompleted = 0
     @State private var lastBeat = -1
     @State private var activeSylIndex = 0
     @State private var sylTimer: Timer?
+    @State private var isListening = false
 
     var body: some View {
         VStack(spacing: KMSpacing.sectionGap) {
@@ -56,8 +58,11 @@ struct LoopStepView: View {
             if cyclesCompleted >= cycles {
                 KMButton("Continue") {
                     stopMetronome()
-                    // Simulated — VoiceAnalyzer in Task 10
-                    onComplete(Double.random(in: 0.75...0.95), Int.random(in: 20...60))
+                    let summary = analyzer.stopListening()
+                    isListening = false
+                    let accuracy = summary.totalBeats > 0 ? summary.accuracyFraction : 1.0
+                    let drift    = summary.avgDriftMs
+                    onComplete(accuracy, drift)
                 }
                 .padding(.horizontal, KMSpacing.screenEdge)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
@@ -75,12 +80,20 @@ struct LoopStepView: View {
     private func startMetronome() {
         audio.start(bpm: 80, tala: tala, nadai: nadai)
         startSyllableAnimation()
+        if analyzer.permissionGranted && !isListening {
+            analyzer.startListening(bpm: 80, tala: tala, nadai: nadai)
+            isListening = true
+        }
     }
 
     private func stopMetronome() {
         audio.stop()
         sylTimer?.invalidate()
         sylTimer = nil
+        if isListening {
+            _ = analyzer.stopListening()
+            isListening = false
+        }
     }
 
     private func startSyllableAnimation() {

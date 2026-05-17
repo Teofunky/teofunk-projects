@@ -42,6 +42,13 @@ final class ProgressStore {
         guard !progress.completedLessons.contains(lessonId) else { return }
         progress.completedLessons.append(lessonId)
         progress.xp += xpGained
+
+        // Advance to next level if this lesson matches the current one
+        let completedLevel = Int(lessonId.replacingOccurrences(of: "level-", with: "")) ?? 0
+        if completedLevel == progress.currentLevel {
+            progress.currentLevel = min(completedLevel + 1, 16)
+        }
+
         updateStreak()
         persist()
     }

@@ -9,10 +9,20 @@ import SwiftUI
 struct LessonPlayerView: View {
     @State private var vm: LessonPlayerViewModel
     @Environment(ProgressStore.self) private var progressStore
+    @Environment(VoiceAnalyzer.self) private var voiceAnalyzer
     @Environment(\.dismiss) private var dismiss
 
     init(lesson: Lesson) {
         _vm = State(initialValue: LessonPlayerViewModel(lesson: lesson))
+    }
+
+    private var lessonNeedsMic: Bool {
+        vm.lesson.steps.contains { step in
+            switch step {
+            case .speak, .loop, .mute: return true
+            default: return false
+            }
+        }
     }
 
     var body: some View {
@@ -45,6 +55,15 @@ struct LessonPlayerView: View {
             }
         }
         .animation(.kmStandard, value: vm.phase)
+        .task {
+            guard lessonNeedsMic else { return }
+            if !voiceAnalyzer.permissionGranted {
+                await voiceAnalyzer.requestPermission()
+            }
+            if voiceAnalyzer.permissionGranted {
+                await voiceAnalyzer.calibrate()
+            }
+        }
     }
 
     // MARK: Lesson Content

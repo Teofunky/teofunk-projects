@@ -181,9 +181,10 @@ struct SpeakStepView: View {
         HapticEngine.impact(.medium)
         startWaveAnimation()
 
-        // Estimate syllable tempo from targetCount and a nominal 80 BPM feel
         let bpmEstimate = 80
-        analyzer.startListening(bpm: bpmEstimate, tala: TalaLibrary.adi, nadai: .chatusra)
+        if analyzer.permissionGranted {
+            analyzer.startListening(bpm: bpmEstimate, tala: TalaLibrary.adi, nadai: .chatusra)
+        }
 
         let duration = TimeInterval(targetCount) * 0.35 + 1.0
         DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
@@ -194,10 +195,15 @@ struct SpeakStepView: View {
     private func finishRecording() {
         stopWaveAnimation()
         HapticEngine.notification(.success)
-        let summary = analyzer.stopListening()
-        let accuracy = summary.accuracyFraction
-        let drift    = summary.avgDriftMs
-        withAnimation(.kmStandard) { state = .done(accuracy, drift) }
+        if analyzer.permissionGranted {
+            let summary  = analyzer.stopListening()
+            let accuracy = summary.totalBeats > 0 ? summary.accuracyFraction : 1.0
+            let drift    = summary.avgDriftMs
+            withAnimation(.kmStandard) { state = .done(accuracy, drift) }
+        } else {
+            // No mic permission — mark as passed so the lesson isn't blocked
+            withAnimation(.kmStandard) { state = .done(1.0, 0) }
+        }
     }
 
     private func cancelRecording() {

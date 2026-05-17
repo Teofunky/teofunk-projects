@@ -85,8 +85,9 @@ struct ClapStepView: View {
                         : Image(systemName: "hand.wave.fill")
                 case .laghu:
                     if beat == cursor { return Image(systemName: "hands.clap.fill") }
-                    let finger = beat - cursor // 1, 2, 3…
-                    return Image(systemName: "hand.\(min(finger, 5)).raised.fill")
+                    let finger = min(beat - cursor, 5)
+                    // SF Symbols: 1.circle.fill … 5.circle.fill show the finger count
+                    return Image(systemName: "\(finger).circle.fill")
                 }
             }
             cursor = end
