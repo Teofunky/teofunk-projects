@@ -131,11 +131,15 @@ final class AudioEngine {
         // Attach scheduler nodes before starting the engine.
         scheduler.attach(to: avEngine)
 
-        // Attach syllable player node
+        // Attach syllable player node.
+        // Use AVAudioSession sample rate — mainMixerNode returns sampleRate=0 before start.
         avEngine.attach(syllableNode)
-        let format = avEngine.mainMixerNode.outputFormat(forBus: 0)
+        let sr = AVAudioSession.sharedInstance().sampleRate
+        let format = AVAudioFormat(
+            standardFormatWithSampleRate: sr > 0 ? sr : 44_100,
+            channels: 2
+        )!
         avEngine.connect(syllableNode, to: avEngine.mainMixerNode, format: format)
-        syllableNode.play()
 
         // Pre-load synthesised syllable buffers
         let syllableNames = ["ta", "ka", "di", "mi", "ki", "tha", "tham", "dhin", "gi", "na"]
@@ -145,6 +149,7 @@ final class AudioEngine {
 
         avEngine.prepare()
         try avEngine.start()
+        syllableNode.play()
 
         isEngineReady = true
 
