@@ -15,7 +15,13 @@ enum TheoryContent {
         korvai,
         mora,
         yati,
-        improvisation
+        improvisation,
+        kanakku,
+        sarvalaghu,
+        instrumentTransfer,
+        commonMistakes,
+        dailyPractice,
+        weekPlan24
     ]
 
     // MARK: - 1. Что такое коннакол?
