@@ -31,30 +31,30 @@ struct MainTabView: View {
     @State private var selectedTab: Tab = .today
 
     enum Tab: Int {
-        case today, learn, practice, compose, profile
+        case today, learn, practice, theory, exercises
     }
 
     var body: some View {
         TabView(selection: $selectedTab) {
             TodayView()
-                .tabItem { Label("Today", systemImage: "sun.horizon") }
+                .tabItem { Label("Сегодня", systemImage: "sun.horizon.fill") }
                 .tag(Tab.today)
 
             LearnView()
-                .tabItem { Label("Learn", systemImage: "map") }
+                .tabItem { Label("Школа", systemImage: "graduationcap.fill") }
                 .tag(Tab.learn)
 
             PracticeView()
-                .tabItem { Label("Practice", systemImage: "scope") }
+                .tabItem { Label("Практика", systemImage: "scope") }
                 .tag(Tab.practice)
 
-            ComposeView()
-                .tabItem { Label("Compose", systemImage: "sparkles") }
-                .tag(Tab.compose)
+            TheoryView()
+                .tabItem { Label("Теория", systemImage: "book.closed.fill") }
+                .tag(Tab.theory)
 
-            ProfileView()
-                .tabItem { Label("Profile", systemImage: "person") }
-                .tag(Tab.profile)
+            ExercisesView()
+                .tabItem { Label("Упражнения", systemImage: "figure.run") }
+                .tag(Tab.exercises)
         }
         .tint(Color.kmPrimary)
         // Apply glassmorphism background to the tab bar via UIKit appearance —
