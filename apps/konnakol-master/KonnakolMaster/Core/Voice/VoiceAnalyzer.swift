@@ -159,17 +159,11 @@ final class VoiceAnalyzer {
 
     private func activateMicTap(handler: @escaping ([Float]) -> Void) throws {
         let inputNode = avEngine.inputNode
-        let format    = inputNode.outputFormat(forBus: 0)
+        // Use the hardware's native format — guarantees format validity.
+        // We read only channel 0, giving us the first (or only) channel.
+        let nativeFormat = inputNode.outputFormat(forBus: 0)
 
-        // Prefer mono; if hardware delivers stereo, we'll downmix below
-        let monoFormat = AVAudioFormat(
-            commonFormat: .pcmFormatFloat32,
-            sampleRate: format.sampleRate,
-            channels: 1,
-            interleaved: false
-        )!
-
-        inputNode.installTap(onBus: 0, bufferSize: 512, format: monoFormat) { buffer, _ in
+        inputNode.installTap(onBus: 0, bufferSize: 512, format: nativeFormat) { buffer, _ in
             guard let channelData = buffer.floatChannelData?[0] else { return }
             let samples = Array(UnsafeBufferPointer(start: channelData, count: Int(buffer.frameLength)))
             handler(samples)
