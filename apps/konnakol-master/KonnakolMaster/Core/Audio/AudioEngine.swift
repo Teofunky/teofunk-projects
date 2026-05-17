@@ -111,9 +111,9 @@ final class AudioEngine {
 
     /// Play a single syllable sound by name (e.g. "ta", "ka", "di", "mi").
     func playSyllable(_ name: String) {
+        if !isEngineReady { try? prepareEngineIfNeeded() }
         guard isEngineReady,
               let buffer = syllableBuffers[name.lowercased()] else { return }
-        syllableNode.play()
         syllableNode.scheduleBuffer(buffer, at: nil, options: .interrupts, completionHandler: nil)
     }
 
