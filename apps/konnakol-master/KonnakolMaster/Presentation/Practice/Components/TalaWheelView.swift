@@ -153,7 +153,7 @@ struct TalaWheelView: View {
             case .wave:
                 Image(systemName: "hand.wave\(isActive ? ".fill" : "")")
             case .finger(let n):
-                Image(systemName: "hand.\(min(n, 5)).raised\(isActive ? ".fill" : "")")
+                Image(systemName: "\(min(n, 5)).circle\(isActive ? ".fill" : "")")
             }
         }
         .font(.system(size: 11, weight: isActive ? .semibold : .regular))

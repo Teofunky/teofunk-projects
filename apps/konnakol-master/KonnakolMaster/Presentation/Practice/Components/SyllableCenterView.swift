@@ -19,6 +19,9 @@ struct SyllableCenterView: View {
                     syllableText(syl.display, isActive: i == activeIndex && isPlaying)
                 }
             }
+            .lineLimit(1)
+            .minimumScaleFactor(0.6)
+            .fixedSize(horizontal: false, vertical: true)
 
             // Nadai name beneath (tiny)
             if isPlaying {
