@@ -106,21 +106,25 @@ final class MetronomeScheduler {
 
     func start(bpm: Int, tala: Tala, nadai: Nadai) {
         schedulingQueue.sync {
+            // Capture render time BEFORE stop() — stop() clears lastRenderTime on the node.
+            let renderTimeBeforeStop = clickNode.lastRenderTime?.sampleTime ?? 0
+
             _stop()
             generationID += 1
 
-            currentTala = tala
-            currentNadai = nadai
+            currentTala    = tala
+            currentNadai   = nadai
             samplesPerBeat = sampleRate * 60.0 / Double(bpm)
 
             clickNode.play()
             samNode.play()
             waveNode.play()
 
-            // Anchor: current render position + short warm-up (50ms) to guarantee
-            // the first scheduled buffer has time to reach the hardware.
-            let warmupSamples = Int64(sampleRate * 0.05)
-            anchorSampleTime = (clickNode.lastRenderTime?.sampleTime ?? 0) + warmupSamples
+            // On first start the engine hasn't rendered yet (renderTime==0) so use a
+            // larger warmup (400 ms) to guarantee the first beat is in the future.
+            // On tala/nadai switches use a short warmup (80 ms) for tight transitions.
+            let warmup: Double = renderTimeBeforeStop > 0 ? 0.08 : 0.4
+            anchorSampleTime  = renderTimeBeforeStop + Int64(sampleRate * warmup)
             nextBeatToSchedule = 0
 
             fillSchedule(generation: generationID)
@@ -189,8 +193,9 @@ final class MetronomeScheduler {
 
     /// Schedule beats until the lookahead window is filled.
     private func fillSchedule(generation: Int) {
-        guard let renderTime = clickNode.lastRenderTime else { return }
-        let currentSample = renderTime.sampleTime
+        // Fall back to anchor when the node hasn't rendered its first frame yet
+        // (happens right after engine start or after a node stop/play cycle).
+        let currentSample = clickNode.lastRenderTime?.sampleTime ?? anchorSampleTime
         let lookaheadSamples = Int64(samplesPerBeat * Double(Self.lookaheadBeats))
         let scheduleUpTo = currentSample + lookaheadSamples
 
