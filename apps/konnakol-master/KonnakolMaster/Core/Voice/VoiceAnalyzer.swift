@@ -158,9 +158,10 @@ final class VoiceAnalyzer {
     // MARK: - Mic Tap
 
     private func activateMicTap(handler: @escaping ([Float]) -> Void) throws {
+        // Activate session first — inputNode.outputFormat returns sampleRate=0 otherwise.
+        try AudioSessionManager.activate()
+
         let inputNode = avEngine.inputNode
-        // Use the hardware's native format — guarantees format validity.
-        // We read only channel 0, giving us the first (or only) channel.
         let nativeFormat = inputNode.outputFormat(forBus: 0)
 
         inputNode.installTap(onBus: 0, bufferSize: 512, format: nativeFormat) { buffer, _ in
