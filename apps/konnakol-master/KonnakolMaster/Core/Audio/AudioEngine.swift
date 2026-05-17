@@ -84,6 +84,12 @@ final class AudioEngine {
         currentBeat = 0
     }
 
+    /// Prepare the engine for syllable playback without starting the metronome.
+    /// Call this when entering a lesson so audio is ready before the first Listen step.
+    func prepareForLesson() {
+        try? prepareEngineIfNeeded()
+    }
+
     /// Change BPM while running. Transition is sample-accurate:
     /// the new tempo takes effect at the next beat boundary.
     func changeBPM(_ newBPM: Int) {

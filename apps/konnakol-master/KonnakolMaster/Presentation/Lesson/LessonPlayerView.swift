@@ -9,6 +9,7 @@ import SwiftUI
 struct LessonPlayerView: View {
     @State private var vm: LessonPlayerViewModel
     @Environment(ProgressStore.self) private var progressStore
+    @Environment(AudioEngine.self) private var audio
     @Environment(VoiceAnalyzer.self) private var voiceAnalyzer
     @Environment(\.dismiss) private var dismiss
 
@@ -56,6 +57,8 @@ struct LessonPlayerView: View {
         }
         .animation(.kmStandard, value: vm.phase)
         .task {
+            // Always prepare audio so Listen steps can play syllables immediately.
+            audio.prepareForLesson()
             guard lessonNeedsMic else { return }
             if !voiceAnalyzer.permissionGranted {
                 await voiceAnalyzer.requestPermission()
