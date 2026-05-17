@@ -5,13 +5,14 @@ struct ListenStepView: View {
     let repetitions: Int
     let onComplete: () -> Void
 
+    @Environment(AudioEngine.self) private var audio
+
     @State private var isPlaying = false
     @State private var activeSyllableIndex: Int = -1
     @State private var playCount = 0
     @State private var timer: Timer?
 
-    // Tempo: one syllable per 0.35s at ~170 BPM feel for demo
-    private let syllableInterval: TimeInterval = 0.35
+    private let syllableInterval: TimeInterval = 0.38
 
     var body: some View {
         VStack(spacing: KMSpacing.sectionGap) {
@@ -81,6 +82,8 @@ struct ListenStepView: View {
 
         timer = Timer.scheduledTimer(withTimeInterval: syllableInterval, repeats: true) { _ in
             activeSyllableIndex = sylIdx
+            let syllableId = syllableGroup.syllables[sylIdx].id
+            audio.playSyllable(syllableId)
             HapticEngine.impact(.light)
             sylIdx += 1
 

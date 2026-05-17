@@ -42,9 +42,11 @@ final class AudioEngine {
 
     // MARK: Private
 
-    private let avEngine       = AVAudioEngine()
-    private let scheduler      = MetronomeScheduler()
-    private var isEngineReady  = false
+    private let avEngine        = AVAudioEngine()
+    private let scheduler       = MetronomeScheduler()
+    private let syllableNode    = AVAudioPlayerNode()
+    private var syllableBuffers: [String: AVAudioPCMBuffer] = [:]
+    private var isEngineReady   = false
 
     // MARK: Init
 
@@ -107,6 +109,14 @@ final class AudioEngine {
 
     // MARK: - Private
 
+    /// Play a single syllable sound by name (e.g. "ta", "ka", "di", "mi").
+    func playSyllable(_ name: String) {
+        guard isEngineReady,
+              let buffer = syllableBuffers[name.lowercased()] else { return }
+        syllableNode.play()
+        syllableNode.scheduleBuffer(buffer, at: nil, options: .interrupts, completionHandler: nil)
+    }
+
     private func prepareEngineIfNeeded() throws {
         guard !isEngineReady else { return }
 
@@ -114,6 +124,18 @@ final class AudioEngine {
 
         // Attach scheduler nodes before starting the engine.
         scheduler.attach(to: avEngine)
+
+        // Attach syllable player node
+        avEngine.attach(syllableNode)
+        let format = avEngine.mainMixerNode.outputFormat(forBus: 0)
+        avEngine.connect(syllableNode, to: avEngine.mainMixerNode, format: format)
+        syllableNode.play()
+
+        // Pre-load synthesised syllable buffers
+        let syllableNames = ["ta", "ka", "di", "mi", "ki", "tha", "tham", "dhin", "gi", "na"]
+        for name in syllableNames {
+            syllableBuffers[name] = SamplePlayer.buffer(named: "\(name).wav", format: format)
+        }
 
         avEngine.prepare()
         try avEngine.start()

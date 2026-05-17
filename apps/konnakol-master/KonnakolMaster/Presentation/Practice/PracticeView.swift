@@ -47,7 +47,8 @@ struct PracticeView: View {
                         controlsSection
                             .padding(.horizontal, KMSpacing.screenEdge)
 
-                        Spacer(minLength: KMSpacing.pt16)
+                        // Reserve space for the floating bottom bar
+                        Color.clear.frame(height: 140)
                     }
 
                     // Floating bottom action bar
