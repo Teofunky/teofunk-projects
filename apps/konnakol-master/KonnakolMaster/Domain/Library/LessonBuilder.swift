@@ -2,9 +2,9 @@ import Foundation
 
 // MARK: - LessonBuilder
 //
-// Constructs Lesson domain objects for MVP levels 1–5.
-// Levels 6–16 exist in the skill tree (locked) but their Lesson
-// objects are stubs — full content arrives in v1.1.
+// Constructs Lesson domain objects for all 16 levels.
+// Each level is written as a genuine pedagogical unit — not a stub.
+// Russian titles and intros reflect the app's primary language.
 
 enum LessonBuilder {
 
@@ -30,407 +30,606 @@ enum LessonBuilder {
         }
     }
 
-    // MARK: Level 1 — First Voice
+    // MARK: - Level 1: Первый голос
 
     private static func level1() -> Lesson {
         Lesson(
             id: "level-1",
             levelNumber: 1,
-            title: "First Voice",
-            subtitle: "Your first syllables",
-            description: "Learn the four foundational syllable groups without a metronome. Focus on even, clear articulation.",
+            title: "Первый голос",
+            subtitle: "Базовые слоги без метронома",
+            description: "Коннакол — это язык ритма. Прежде чем считать, нужно говорить. Изучите три фундаментальные слоговые группы и почувствуйте их звучание.",
             estimatedMinutes: 8,
             steps: [
-                .intro(text: "Konnakol is the language of rhythm. Every syllable is a sound, every group a building block. Let's begin with the simplest unit: Ta.", videoURL: nil),
+                .intro(
+                    text: "Коннакол — это система устной передачи ритма, существующая более двух тысяч лет. В западной музыке ритм записывают нотами. В карнатической традиции его произносят вслух — слогами, которые сами по себе несут в себе тайминг, ударение и форму.\n\nПочему слоги важнее нот? Потому что рот и ухо учатся вместе. Когда вы произносите «Та-Ки-Та», ваше тело запоминает ровно три шага. Когда вы читаете «три», — это только число. Слог живёт в мышцах.\n\nСегодня мы изучим три группы: Та-Ка (2 слога), Та-Ки-Та (3 слога), Та-Ка-Ди-Ми (4 слога). Метронома пока нет. Ваша задача — добиться ровности и ясности каждого слога.",
+                    videoURL: nil
+                ),
                 .listen(syllableGroupId: "jathi-2", repetitions: 4),
-                .speak(syllableGroupId: "jathi-2", targetCount: 16, instruction: "Say 'Ta-Ka' as one unit, 8 times. Keep it even."),
+                .speak(
+                    syllableGroupId: "jathi-2",
+                    targetCount: 16,
+                    instruction: "Та-Ка — два ровных слога, как шаги. Произнесите 8 раз подряд, не торопясь. Оба слога должны быть одинаковой длины."
+                ),
                 .listen(syllableGroupId: "jathi-3", repetitions: 4),
-                .speak(syllableGroupId: "jathi-3", targetCount: 24, instruction: "Ta-Ki-Ta is the triplet. Say it 8 times."),
+                .speak(
+                    syllableGroupId: "jathi-3",
+                    targetCount: 24,
+                    instruction: "Та-Ки-Та — триоль. Средний слог «Ки» легко сжать. Следите, чтобы все три были равномерными. Повторите 8 раз."
+                ),
                 .listen(syllableGroupId: "jathi-4", repetitions: 4),
-                .speak(syllableGroupId: "jathi-4", targetCount: 32, instruction: "The most important phrase in konnakol. Say it 8 times, evenly."),
-                .check(summary: "You now know the four foundational groups. Tomorrow we add the metronome."),
+                .speak(
+                    syllableGroupId: "jathi-4",
+                    targetCount: 32,
+                    instruction: "Та-Ка-Ди-Ми — самая важная группа в коннаколе. Четыре слога, ровно, уверенно. «Ди» и «Ми» в конце — не глотайте их. Повторите 8 раз."
+                ),
+                .check(
+                    summary: "Вы познакомились с тремя основными джати: двойкой, тройкой и четвёркой. Помните: ровность важнее скорости. На следующем уроке появятся все пять групп."
+                ),
             ],
-            passCriteria: PassCriteria(minAccuracy: 0.80, maxAvgDriftMs: 60),
+            passCriteria: PassCriteria(minAccuracy: 0.75, maxAvgDriftMs: 80),
             unlockCriteria: UnlockCriteria(kind: .first, requiredLessonId: nil)
         )
     }
 
-    // MARK: Level 2 — The Pulse
+    // MARK: - Level 2: Пять джати
 
     private static func level2() -> Lesson {
         Lesson(
             id: "level-2",
             levelNumber: 2,
-            title: "The Pulse",
-            subtitle: "Meet the metronome",
-            description: "Add the metronome at 60 BPM and practise the Mute step — where the click disappears and you hold the pulse alone.",
+            title: "Пять джати",
+            subtitle: "Освоение всех пяти групп",
+            description: "Джати — это слоговые группы от 3 до 9. Каждая группа имеет собственный характер и звучание. Сегодня вы освоите все пять.",
             estimatedMinutes: 10,
             steps: [
-                .intro(text: "The metronome is your heartbeat. Every syllable lands on — or between — its pulses. Today you'll also face the Mute test: the click disappears. Don't stop.", videoURL: nil),
-                .loop(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-4", cycles: 4),
-                .mute(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-4", normalCycles: 4, muteCycles: 2),
-                .check(summary: "If your drift was under 60 ms, your internal pulse is already strong. Keep it up."),
+                .intro(
+                    text: "В коннаколе существует пять фундаментальных слоговых групп — джати. Они образуют основу всего ритмического языка:\n\n• Тисра (3): Та-Ки-Та\n• Чатусра (4): Та-Ка-Ди-Ми\n• Кханда (5): Та-Ка-Та-Ки-На\n• Мисра (7): Та-Ки-Та-Та-Ка-Ди-Ми\n• Санкирна (9): Та-Ка-Та-Ки-На-Та-Ки-Та\n\nОбратите особое внимание на кханду (5) и мисру (7) — они нестандартные для европейского уха. Пять слогов имеют особое «плавающее» ощущение. Семь — ощущение волны с подъёмом в конце.\n\nСегодня слушайте каждую группу перед тем, как произносить.",
+                    videoURL: nil
+                ),
+                .listen(syllableGroupId: "jathi-3", repetitions: 3),
+                .speak(
+                    syllableGroupId: "jathi-3",
+                    targetCount: 18,
+                    instruction: "Та-Ки-Та, 6 раз. Ровно, как капли метронома."
+                ),
+                .listen(syllableGroupId: "jathi-4", repetitions: 3),
+                .speak(
+                    syllableGroupId: "jathi-4",
+                    targetCount: 24,
+                    instruction: "Та-Ка-Ди-Ми, 6 раз. Помните прошлый урок — «Ди-Ми» не проглатывать."
+                ),
+                .listen(syllableGroupId: "jathi-5", repetitions: 4),
+                .speak(
+                    syllableGroupId: "jathi-5",
+                    targetCount: 30,
+                    instruction: "Та-Ка-Та-Ки-На — кханда. Пять слогов. Не торопитесь на «Ки-На» в конце. Произнесите 6 раз."
+                ),
+                .listen(syllableGroupId: "jathi-7", repetitions: 4),
+                .speak(
+                    syllableGroupId: "jathi-7",
+                    targetCount: 42,
+                    instruction: "Та-Ки-Та-Та-Ка-Ди-Ми — мисра. Семь слогов. Это как «тройка + четвёрка» слитые вместе. Почувствуйте акцент в начале. Произнесите 6 раз."
+                ),
+                .listen(syllableGroupId: "jathi-9", repetitions: 3),
+                .speak(
+                    syllableGroupId: "jathi-9",
+                    targetCount: 27,
+                    instruction: "Та-Ка-Та-Ки-На-Та-Ки-Та — санкирна. Девять слогов. Это «пятёрка + тройка». Медленно. Произнесите 3 раза."
+                ),
+                .check(
+                    summary: "Теперь вы знаете все пять джати. Запомните: каждая группа — отдельная «единица мысли». Вы не считаете слоги — вы произносите имя. Следующий урок: ади тала."
+                ),
             ],
-            passCriteria: PassCriteria(minAccuracy: 0.70, maxAvgDriftMs: 60),
+            passCriteria: PassCriteria(minAccuracy: 0.75, maxAvgDriftMs: 75),
             unlockCriteria: UnlockCriteria(kind: .completePrevious, requiredLessonId: "level-1")
         )
     }
 
-    // MARK: Level 3 — Adi Tala
+    // MARK: - Level 3: Ади тала
 
     private static func level3() -> Lesson {
         Lesson(
             id: "level-3",
             levelNumber: 3,
-            title: "Adi Tala",
-            subtitle: "The king of rhythmic cycles",
-            description: "Adi Tala is 8 beats with a specific hand pattern. You'll learn to clap, count fingers, and wave — all while speaking.",
+            title: "Ади тала",
+            subtitle: "Первый ритмический цикл — 8 долей",
+            description: "Тала — это повторяющийся цикл. Ади тала — 8 долей, и это основа карнатической музыки. Сегодня вы научитесь хлопать её и говорить внутри.",
             estimatedMinutes: 12,
             steps: [
-                .intro(text: "Adi Tala: 8 beats structured as Laghu(4) + Drutam + Drutam. Your hands map the structure: clap → 3 fingers → clap+wave → clap+wave.", videoURL: nil),
+                .intro(
+                    text: "Тала — это структура времени. Представьте тактовую черту, которая возвращается снова и снова. Каждый возврат к началу цикла называется авартанам, а сама точка возврата — сам.\n\nАди тала — восемь долей. Структура:\n• Доли 1–4: лагху (один хлопок + три касания пальцами)\n• Доли 5–6: друтам (хлопок + волна)\n• Доли 7–8: друтам (хлопок + волна)\n\nСам — это доля 1. Это момент «возвращения домой». В карнатической музыке всё — мелодия, ритм, импровизация — рассчитывается так, чтобы разрешиться на самé.\n\nСначала просто хлопайте. Потом добавим слоги.",
+                    videoURL: nil
+                ),
                 .clap(talaId: "adi", nadai: .chatusra, cycles: 4),
-                .loop(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-4", cycles: 8),
-                .mute(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-4", normalCycles: 4, muteCycles: 2),
-                .play(instrument: .guitar, prompt: "Play Ta-Ka-Di-Mi as down-up-down-up strokes at 80 BPM in Adi Tala."),
-                .check(summary: "You can now navigate the 8-beat cycle. This is the foundation of 50% of all Carnatic music."),
+                .listen(syllableGroupId: "jathi-4", repetitions: 4),
+                .loop(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-4", cycles: 4),
+                .speak(
+                    syllableGroupId: "jathi-4",
+                    targetCount: 32,
+                    instruction: "Произносите Та-Ка-Ди-Ми, чувствуя границу такта. Первый слог каждых восьми — это сам. Попробуйте выделить его голосом."
+                ),
+                .loop(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-4", cycles: 4),
+                .check(
+                    summary: "Вы прошли первый ритмический цикл. Ади тала — основа половины всей карнатической музыки. Чувствуете, как цикл «замыкается»? Это сам. Это будет вашей точкой опоры на все следующие уроки."
+                ),
             ],
-            passCriteria: PassCriteria(minAccuracy: 0.70, maxAvgDriftMs: 70),
+            passCriteria: PassCriteria(minAccuracy: 0.78, maxAvgDriftMs: 70),
             unlockCriteria: UnlockCriteria(kind: .completePrevious, requiredLessonId: "level-2")
         )
     }
 
-    // MARK: Level 4 — Trikalam
+    // MARK: - Level 4: Трикалам
 
     private static func level4() -> Lesson {
         Lesson(
             id: "level-4",
             levelNumber: 4,
-            title: "Trikalam",
-            subtitle: "Three speeds, one pulse",
-            description: "The same phrase at ×1, ×2, ×4 density — without changing the BPM. This reveals every weakness in your timing.",
-            estimatedMinutes: 12,
+            title: "Трикалам",
+            subtitle: "Три скорости — один пульс",
+            description: "Трикалам — это одна и та же фраза в трёх плотностях: ×1, ×2, ×4. Метроном не ускоряется. Меняется только количество слогов на долю.",
+            estimatedMinutes: 13,
             steps: [
-                .intro(text: "Trikalam = three speeds. The BPM doesn't change. What changes is how many syllables you fit per beat: 1, 2, then 4. The pulse is the anchor.", videoURL: nil),
-                .loop(talaId: "adi", nadai: .tisra,    syllableGroupId: "jathi-3", cycles: 4),
+                .intro(
+                    text: "Трикалам означает «три скорости». Это не ускорение темпа — это увеличение плотности слогов внутри того же пульса.\n\n• Калам 1 (пратхама): один слог на долю — Та\n• Калам 2 (двития): два слога на долю — Та-Ка\n• Калам 4 (чатурта): четыре слога на долю — Та-Ка-Ди-Ми\n\nВ живом исполнении музыкант переходит от одной скорости к другой без остановки. Пульс — как якорь: он не двигается. Меняется то, что внутри.\n\nЭто первый настоящий тест вашего внутреннего метронома. Если вы «поплыли» при смене скорости — значит, держитесь за плотность, а не за пульс. Слушайте долю, а не слоги.",
+                    videoURL: nil
+                ),
+                .listen(syllableGroupId: "jathi-2", repetitions: 4),
+                .listen(syllableGroupId: "jathi-4", repetitions: 4),
+                .loop(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-2", cycles: 2),
                 .loop(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-4", cycles: 4),
-                .mute(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-4", normalCycles: 4, muteCycles: 2),
-                .check(summary: "If you can hold the pulse through the density change, your internal clock is strong."),
+                .speak(
+                    syllableGroupId: "jathi-4",
+                    targetCount: 32,
+                    instruction: "Произнесите трикалам вслух: сначала Та-Ка (8 раз), затем без паузы Та-Ка-Ди-Ми (8 раз). Доли не меняются — только плотность."
+                ),
+                .mute(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-4", normalCycles: 2, muteCycles: 2),
+                .check(
+                    summary: "Трикалам — это разговор между плотностью и пульсом. Если метроном пропал и вы удержали темп — ваш внутренний часовой работает. Следующий шаг: другая тала."
+                ),
             ],
-            passCriteria: PassCriteria(minAccuracy: 0.70, maxAvgDriftMs: 65),
+            passCriteria: PassCriteria(minAccuracy: 0.78, maxAvgDriftMs: 65),
             unlockCriteria: UnlockCriteria(kind: .completePrevious, requiredLessonId: "level-3")
         )
     }
 
-    // MARK: Level 5 — Tisra
+    // MARK: - Level 5: Рупака тала
 
     private static func level5() -> Lesson {
         Lesson(
             id: "level-5",
             levelNumber: 5,
-            title: "Tisra",
-            subtitle: "The art of triplets",
-            description: "Tisra = 3 subdivisions per beat. Ta-Ki-Ta. This is the first nadai shift — the rhythm feels like it leans.",
-            estimatedMinutes: 10,
+            title: "Рупака тала",
+            subtitle: "Шестидольный цикл",
+            description: "Рупака тала — 6 долей: 2 + 4. Первая доля — не хлопок, а волна. Это меняет всё ощущение от цикла.",
+            estimatedMinutes: 12,
             steps: [
-                .intro(text: "Tisra is triplets. Three syllables per beat instead of four. Ta-Ki-Ta. The 'Ki' is the middle child — it's easy to rush it.", videoURL: nil),
-                .listen(syllableGroupId: "jathi-3", repetitions: 6),
-                .speak(syllableGroupId: "jathi-3", targetCount: 24, instruction: "Ta-Ki-Ta, 8 times at your own pace. Keep the middle syllable even."),
-                .loop(talaId: "adi", nadai: .tisra, syllableGroupId: "jathi-3", cycles: 6),
-                .mute(talaId: "adi", nadai: .tisra, syllableGroupId: "jathi-3", normalCycles: 4, muteCycles: 2),
-                .check(summary: "You've crossed into Tisra. The triplet feel is now in your body."),
+                .intro(
+                    text: "Рупака тала состоит из шести долей. Структура:\n• Доли 1–2: друтам (хлопок + волна)\n• Доли 3–6: лагху (хлопок + три пальца)\n\nКлючевое отличие от ади талы: сам здесь — это первая доля друтама, которая начинается с хлопка-и-волны. Ощущение «возвращения» другое — оно мягче, как вдох перед новым шагом.\n\nЧтобы считать: 1-2-3-4-5-6 становится «хлоп-волна-хлоп-2-3-4». Отрабатывайте хлопки до того, как добавите слоги — руки должны быть уверенными.",
+                    videoURL: nil
+                ),
+                .clap(talaId: "rupaka", nadai: .chatusra, cycles: 4),
+                .listen(syllableGroupId: "jathi-4", repetitions: 4),
+                .loop(talaId: "rupaka", nadai: .chatusra, syllableGroupId: "jathi-4", cycles: 4),
+                .speak(
+                    syllableGroupId: "jathi-4",
+                    targetCount: 24,
+                    instruction: "Говорите Та-Ка-Ди-Ми внутри рупаки, продолжая хлопать. Шесть долей — это три раза по Та-Ка плюс начало следующей группы. Почувствуйте, где начинается новый цикл."
+                ),
+                .mute(talaId: "rupaka", nadai: .chatusra, syllableGroupId: "jathi-4", normalCycles: 2, muteCycles: 2),
+                .check(
+                    summary: "Рупака — ваша вторая тала. Обратите внимание: цикл из 6 долей воспринимается иначе, чем 8. Он короче и «острее» — сам появляется быстрее. Следующий урок: нечётные метры."
+                ),
             ],
-            passCriteria: PassCriteria(minAccuracy: 0.70, maxAvgDriftMs: 70),
+            passCriteria: PassCriteria(minAccuracy: 0.78, maxAvgDriftMs: 70),
             unlockCriteria: UnlockCriteria(kind: .completePrevious, requiredLessonId: "level-4")
         )
     }
 
-    // MARK: Level 6 — Pancha Nadai
+    // MARK: - Level 6: Чапу талы
 
     private static func level6() -> Lesson {
         Lesson(
             id: "level-6",
             levelNumber: 6,
-            title: "Pancha Nadai",
-            subtitle: "All five subdivisions",
-            description: "Cycle through all five nadais — Tisra, Chatusra, Khanda, Misra, Sankeerna — within the same Adi Tala frame. This is the gateway to full rhythmic fluency.",
-            estimatedMinutes: 15,
+            title: "Чапу талы",
+            subtitle: "Мисра (7) и Кханда (5) Чапу",
+            description: "Чапу талы — это асимметричные циклы. Мисра чапу — 7 долей (3+4), кханда чапу — 5 долей (2+3). Они звучат как «хромающий» шаг — и в этом их красота.",
+            estimatedMinutes: 14,
             steps: [
-                .intro(text: "Pancha means five. Today you'll speak in all five nadais — 3, 4, 5, 7, and 9 — each inside the same 8-beat tala. The pulse stays fixed; the density shifts.", videoURL: nil),
-                .listen(syllableGroupId: "jathi-3", repetitions: 4),
-                .listen(syllableGroupId: "jathi-5", repetitions: 4),
+                .intro(
+                    text: "Чапу — особый класс тала. В отличие от «классических» тала, чапу нечётны и не разбиты на равные части. Это делает их самыми «народными» и «земными» из всех тала.\n\nМисра чапу: 7 долей = 3 + 4. Структура: короткая единица (3) + длинная единица (4). Счёт: «раз-два-три / раз-два-три-четыре».\n\nКханда чапу: 5 долей = 2 + 3. Структура: короткая (2) + длинная (3). Счёт: «раз-два / раз-два-три».\n\nОщущение у обеих — качание, «лимп» (limp). Не пытайтесь выровнять их — асимметрия и есть характер чапу.",
+                    videoURL: nil
+                ),
                 .listen(syllableGroupId: "jathi-7", repetitions: 4),
-                .speak(syllableGroupId: "jathi-5", targetCount: 40, instruction: "Khanda: Ta-Ka-Tha-Ki-Na. Five syllables per beat. Say it 8 times evenly."),
-                .loop(talaId: "adi", nadai: .khanda, syllableGroupId: "jathi-5", cycles: 4),
-                .speak(syllableGroupId: "jathi-7", targetCount: 56, instruction: "Misra: seven syllables per beat. Say it 8 times without rushing the end."),
-                .loop(talaId: "adi", nadai: .misra, syllableGroupId: "jathi-7", cycles: 4),
-                .mute(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-4", normalCycles: 2, muteCycles: 2),
-                .check(summary: "You now speak all five nadais. Each is a different shade of the same pulse."),
+                .clap(talaId: "misra-chapu", nadai: .chatusra, cycles: 4),
+                .loop(talaId: "misra-chapu", nadai: .chatusra, syllableGroupId: "jathi-7", cycles: 4),
+                .speak(
+                    syllableGroupId: "jathi-7",
+                    targetCount: 28,
+                    instruction: "Та-Ки-Та-Та-Ка-Ди-Ми в мисра чапу. Четыре раза. Чувствуете, как семь долей делятся 3+4? Акцент на первом слоге каждой группы."
+                ),
+                .listen(syllableGroupId: "jathi-5", repetitions: 4),
+                .clap(talaId: "khanda-chapu", nadai: .chatusra, cycles: 4),
+                .loop(talaId: "khanda-chapu", nadai: .chatusra, syllableGroupId: "jathi-5", cycles: 4),
+                .speak(
+                    syllableGroupId: "jathi-5",
+                    targetCount: 20,
+                    instruction: "Та-Ка-Та-Ки-На в кханда чапу. Четыре раза. Пять долей — 2+3. Короткая-длинная. Почувствуйте «спотыкание» на стыке."
+                ),
+                .check(
+                    summary: "Чапу талы — сердце народной и кинематографической музыки Южной Индии. Их асимметрия — не дефект, а суть. Если вы можете качаться в 7 и 5, ваше ритмическое ухо расширилось."
+                ),
             ],
-            passCriteria: PassCriteria(minAccuracy: 0.68, maxAvgDriftMs: 75),
+            passCriteria: PassCriteria(minAccuracy: 0.77, maxAvgDriftMs: 70),
             unlockCriteria: UnlockCriteria(kind: .completePrevious, requiredLessonId: "level-5")
         )
     }
 
-    // MARK: Level 7 — Rupaka Tala
+    // MARK: - Level 7: Надаи — Тисра
 
     private static func level7() -> Lesson {
         Lesson(
             id: "level-7",
             levelNumber: 7,
-            title: "Rupaka Tala",
-            subtitle: "The six-beat cycle",
-            description: "Rupaka Tala is 6 beats: Drutam(2) + Laghu(4). The first beat is a rest — you wave, not clap. This asymmetry is its defining character.",
+            title: "Надаи — Тисра",
+            subtitle: "Трёхдольное подразделение внутри талы",
+            description: "Надаи — это сетка внутри каждой доли талы. Тисра надаи означает три подразделения на каждую долю. Это другое ощущение от той же ади талы.",
             estimatedMinutes: 12,
             steps: [
-                .intro(text: "Rupaka Tala is 6 beats: a wave on beat 1, then a clap on beat 3. If Adi is the heartbeat, Rupaka is the breath — two unequal halves that balance each other.", videoURL: nil),
-                .clap(talaId: "rupaka", nadai: .chatusra, cycles: 6),
-                .loop(talaId: "rupaka", nadai: .chatusra, syllableGroupId: "jathi-4", cycles: 6),
-                .mute(talaId: "rupaka", nadai: .chatusra, syllableGroupId: "jathi-4", normalCycles: 4, muteCycles: 2),
-                .play(instrument: .guitar, prompt: "In Rupaka Tala, play a chord on beat 1 (wave) and strum on beats 3 and 5. Try at 80 BPM."),
-                .check(summary: "You can navigate the 6-beat wave. Notice how Sam (beat 1) has a different quality here."),
+                .intro(
+                    text: "До сих пор вы работали с чатусра надаи — четыре подразделения на долю (Та-Ка-Ди-Ми). Это «стандартная сетка».\n\nНадаи меняет эту сетку, не меняя тала. В тисра надаи каждая доля делится на три: Та-Ки-Та. Тала остаётся той же — например, ади тала с её восемью долями. Но внутри каждой доли теперь три пульса вместо четырёх.\n\nРезультат: в одном авартанаме ади талы (8 долей × 3) = 24 слога вместо 32.\n\nОщущение меняется. Цикл становится «мягче», «тягучее». Слушайте внимательно перед тем, как говорить.",
+                    videoURL: nil
+                ),
+                .listen(syllableGroupId: "jathi-3", repetitions: 6),
+                .loop(talaId: "adi", nadai: .tisra, syllableGroupId: "jathi-3", cycles: 4),
+                .speak(
+                    syllableGroupId: "jathi-3",
+                    targetCount: 24,
+                    instruction: "Та-Ки-Та в тисра надаи внутри ади талы. Восемь хлопков — и на каждый приходится ровно три слога. Почувствуйте разницу с четвёркой."
+                ),
+                .mute(talaId: "adi", nadai: .tisra, syllableGroupId: "jathi-3", normalCycles: 2, muteCycles: 2),
+                .check(
+                    summary: "Тисра надаи — ваш первый шаг в мир подразделений. Обратите внимание: восемь долей ади талы остались теми же. Изменилось то, что «внутри». Следующий урок: пять внутри каждой доли."
+                ),
             ],
-            passCriteria: PassCriteria(minAccuracy: 0.68, maxAvgDriftMs: 75),
+            passCriteria: PassCriteria(minAccuracy: 0.78, maxAvgDriftMs: 65),
             unlockCriteria: UnlockCriteria(kind: .completePrevious, requiredLessonId: "level-6")
         )
     }
 
-    // MARK: Level 8 — Chapu Talas
+    // MARK: - Level 8: Надаи — Кханда
 
     private static func level8() -> Lesson {
         Lesson(
             id: "level-8",
             levelNumber: 8,
-            title: "Chapu Talas",
-            subtitle: "Misra 7 and Khanda 5",
-            description: "Chapu talas are asymmetric and folk-flavoured — 3+4 for Misra (7 beats) and 2+3 for Khanda (5 beats). They are the rhythmic lifeblood of folk and film music.",
-            estimatedMinutes: 15,
+            title: "Надаи — Кханда",
+            subtitle: "Пятидольное подразделение",
+            description: "Кханда надаи: пять слогов на каждую долю талы. Это «плавающее» ощущение — пять не делится на два, поэтому акценты всё время смещаются.",
+            estimatedMinutes: 13,
             steps: [
-                .intro(text: "Misra Chapu is 3+4: a short unit and a long one. Khanda Chapu is 2+3. The asymmetry is intentional — it creates a limping, forward-leaning feel that is deeply characteristic.", videoURL: nil),
-                .clap(talaId: "misra-chapu", nadai: .chatusra, cycles: 4),
-                .loop(talaId: "misra-chapu", nadai: .chatusra, syllableGroupId: "jathi-7", cycles: 4),
-                .mute(talaId: "misra-chapu", nadai: .chatusra, syllableGroupId: "jathi-7", normalCycles: 4, muteCycles: 2),
-                .clap(talaId: "khanda-chapu", nadai: .chatusra, cycles: 4),
-                .loop(talaId: "khanda-chapu", nadai: .chatusra, syllableGroupId: "jathi-5", cycles: 4),
-                .mute(talaId: "khanda-chapu", nadai: .chatusra, syllableGroupId: "jathi-5", normalCycles: 4, muteCycles: 2),
-                .check(summary: "Chapu talas add asymmetry and groove to your rhythmic vocabulary."),
+                .intro(
+                    text: "Кханда надаи — пять подразделений на долю: Та-Ка-Та-Ки-На. В ади тале (8 долей × 5 = 40 слогов на авартанам) это создаёт особое «плавающее» ощущение.\n\nПочему оно плавающее? Потому что 5 не делится на 2. В чатусра (4) и тисра (3) акценты предсказуемы. В кханда (5) каждый раз кажется, что ритм «скользит» — а на самом деле просто нет привычных кратных двойке опорных точек.\n\nСовет: не пытайтесь «посчитать» пятёрку. Произносите «Та-Ка-Та-Ки-На» как одно слово. Пусть рот знает его, а не разум.",
+                    videoURL: nil
+                ),
+                .listen(syllableGroupId: "jathi-5", repetitions: 6),
+                .loop(talaId: "adi", nadai: .khanda, syllableGroupId: "jathi-5", cycles: 4),
+                .speak(
+                    syllableGroupId: "jathi-5",
+                    targetCount: 40,
+                    instruction: "Та-Ка-Та-Ки-На, 8 раз подряд. Все пять слогов — одинаковой длины. Не торопитесь на «Ки-На» в конце."
+                ),
+                .mute(talaId: "adi", nadai: .khanda, syllableGroupId: "jathi-5", normalCycles: 2, muteCycles: 2),
+                .check(
+                    summary: "Кханда надаи освоена. Пять — самое «странное» подразделение для европейского уха. Если вы дошли до конца без потери пульса — поздравляем. Следующий урок: первая корваи."
+                ),
             ],
-            passCriteria: PassCriteria(minAccuracy: 0.65, maxAvgDriftMs: 80),
+            passCriteria: PassCriteria(minAccuracy: 0.77, maxAvgDriftMs: 65),
             unlockCriteria: UnlockCriteria(kind: .completePrevious, requiredLessonId: "level-7")
         )
     }
 
-    // MARK: Level 9 — Gati Bhedam
+    // MARK: - Level 9: Первая корваи
 
     private static func level9() -> Lesson {
         Lesson(
             id: "level-9",
             levelNumber: 9,
-            title: "Gati Bhedam",
-            subtitle: "Nadai switching within tala",
-            description: "Gati Bhedam is the art of seamlessly switching nadai mid-tala cycle — from Chatusra to Tisra and back — while the pulse stays locked. This is advanced polyrhythm.",
-            estimatedMinutes: 15,
+            title: "Первая корваи",
+            subtitle: "Ритмическая каденция",
+            description: "Корваи — это ритмическая фраза, повторяющаяся три раза, которая точно попадает на сам. Это «предложение» в языке ритма.",
+            estimatedMinutes: 14,
             steps: [
-                .intro(text: "Gati means gait, Bhedam means difference. You will shift from 4-per-beat to 3-per-beat mid-cycle — without pausing, without rushing the transition. The tala is the anchor.", videoURL: nil),
-                .listen(syllableGroupId: "jathi-4", repetitions: 4),
-                .listen(syllableGroupId: "jathi-3", repetitions: 4),
-                .speak(syllableGroupId: "jathi-4", targetCount: 32, instruction: "Say Ta-Ka-Di-Mi 4 times, then immediately switch to Ta-Ki-Ta 4 times. The beat doesn't change."),
-                .loop(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-4", cycles: 4),
-                .loop(talaId: "adi", nadai: .tisra, syllableGroupId: "jathi-3", cycles: 4),
-                .mute(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-4", normalCycles: 4, muteCycles: 2),
-                .check(summary: "Your ear now hears the pulse independently from the density. This is the beginning of real rhythmic independence."),
+                .intro(
+                    text: "Корваи (korvai) — один из важнейших понятий карнатического ритма. Это каденция: фраза повторяется ровно три раза, и конец третьего повтора попадает точно на сам — начало нового авартанама.\n\nФормула: (длина фразы + промежуток) × 3 = кратно количеству долей в цикле.\n\nПростой пример. Возьмём Та-Ка-Та-Ки-На (5 слогов) в ади тале (8 долей × чатусра = 32 пульса на авартанам). Пять слогов три раза = 15 слогов. Добавим промежуток из 1 слога: (5+1) × 3 = 18 слогов. Не делится ровно. Пробуем без промежутка, или берём другое соотношение.\n\nСегодня — самый простой вариант: просто произносите Та-Ка-Та-Ки-На три раза подряд в такт. Слушайте, попадаете ли вы на сам после третьего.",
+                    videoURL: nil
+                ),
+                .listen(syllableGroupId: "jathi-5", repetitions: 6),
+                .loop(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-5", cycles: 3),
+                .speak(
+                    syllableGroupId: "jathi-5",
+                    targetCount: 15,
+                    instruction: "Произнесите Та-Ка-Та-Ки-На ровно три раза подряд — без остановки. После третьего «На» должен быть сам. Повторите всю конструкцию несколько раз подряд."
+                ),
+                .loop(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-5", cycles: 6),
+                .check(
+                    summary: "Вы сделали первую корваи. Это ещё простая форма, но механизм тот же: фраза × 3 → сам. В следующих уроках мы усложним структуру. Но суть не изменится: всё разрешается на единице."
+                ),
             ],
-            passCriteria: PassCriteria(minAccuracy: 0.65, maxAvgDriftMs: 80),
+            passCriteria: PassCriteria(minAccuracy: 0.78, maxAvgDriftMs: 60),
             unlockCriteria: UnlockCriteria(kind: .completePrevious, requiredLessonId: "level-8")
         )
     }
 
-    // MARK: Level 10 — Yati Phrases
+    // MARK: - Level 10: Мора
 
     private static func level10() -> Lesson {
         Lesson(
             id: "level-10",
             levelNumber: 10,
-            title: "Yati Phrases",
-            subtitle: "Geometry of rhythm",
-            description: "Yati phrases grow or shrink in specific geometric patterns. Srotovaha yati expands (3-4-5-6), Gopucha contracts (6-5-4-3). The shape of the phrase is the composition.",
-            estimatedMinutes: 15,
+            title: "Мора",
+            subtitle: "Тройное разрешение без промежутков",
+            description: "Мора — это фраза без пауз между повторениями, которая попадает на сам. В отличие от корваи, здесь нет «зазоров» — чистый поток, три раза.",
+            estimatedMinutes: 14,
             steps: [
-                .intro(text: "Yati is pattern with geometric form. Srotovaha expands like a river widening. Gopucha contracts like a cow's tail tapering. Mridanga yati forms a diamond — expand then contract.", videoURL: nil),
-                .listen(syllableGroupId: "jathi-3", repetitions: 3),
-                .listen(syllableGroupId: "jathi-4", repetitions: 3),
-                .listen(syllableGroupId: "jathi-5", repetitions: 3),
-                .speak(syllableGroupId: "jathi-3", targetCount: 12, instruction: "3-syllable group × 3 reps, then 4-syllable × 3 reps, then 5-syllable × 3 reps. This is Srotovaha yati."),
-                .loop(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-4", cycles: 6),
-                .mute(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-4", normalCycles: 4, muteCycles: 3),
-                .check(summary: "Yati phrases are the architecture of konnakol composition. Each shape has a name and a character."),
+                .intro(
+                    text: "Мора (mora) — это конкретный тип ритмической каденции. Фраза повторяется три раза подряд без пауз, и конец третьего повтора точно совпадает с самом.\n\nОтличие от корваи: в корваи могут быть промежутки (gaps) между повторениями. В море — только непрерывный поток.\n\nКлассический пример моры в ади тале:\nТа-Ки-Та-Та-Ка-Ди-Ми (7 слогов) × 3 = 21 слог. Ади тала в чатусра надаи = 32 пульса. 21 не делится на 32. Значит, мора занимает больше одного авартанама.\n\nНо сегодня мы работаем с семью слогами как потоком. Ваша задача: произнести мору три раза — и почувствовать, куда она ведёт.",
+                    videoURL: nil
+                ),
+                .listen(syllableGroupId: "jathi-7", repetitions: 6),
+                .loop(talaId: "adi", nadai: .misra, syllableGroupId: "jathi-7", cycles: 4),
+                .speak(
+                    syllableGroupId: "jathi-7",
+                    targetCount: 21,
+                    instruction: "Та-Ки-Та-Та-Ка-Ди-Ми три раза подряд — без паузы, без остановки. Это ваша мора. Почувствуйте её как единое высказывание из 21 слога."
+                ),
+                .loop(talaId: "adi", nadai: .misra, syllableGroupId: "jathi-7", cycles: 6),
+                .mute(talaId: "adi", nadai: .misra, syllableGroupId: "jathi-7", normalCycles: 2, muteCycles: 2),
+                .check(
+                    summary: "Мора — это «предложение из трёх слов», где каждое слово одинаково. Чувствуете нарастание к третьему? Это напряжение — и его разрешение на самé — электрическое ощущение коннакола."
+                ),
             ],
-            passCriteria: PassCriteria(minAccuracy: 0.65, maxAvgDriftMs: 80),
+            passCriteria: PassCriteria(minAccuracy: 0.78, maxAvgDriftMs: 60),
             unlockCriteria: UnlockCriteria(kind: .completePrevious, requiredLessonId: "level-9")
         )
     }
 
-    // MARK: Level 11 — Mora Builder
+    // MARK: - Level 11: Мисра надаи
 
     private static func level11() -> Lesson {
         Lesson(
             id: "level-11",
             levelNumber: 11,
-            title: "Mora Builder",
-            subtitle: "Statement · Gap · Resolution",
-            description: "A Mora is a 3× repetition of a phrase with gaps calculated to resolve exactly on Sam. The gap calculation is the mathematical heart of konnakol.",
-            estimatedMinutes: 20,
+            title: "Мисра надаи",
+            subtitle: "Семидольное подразделение",
+            description: "Мисра надаи — семь подразделений на каждую долю. Это продвинутый уровень: семёрка нечётна и не делится ни на 2, ни на 3. Ади тала × 7 = 56 слогов на авартанам.",
+            estimatedMinutes: 15,
             steps: [
-                .intro(text: "Mora formula: (phrase × gapBeats) × 3 = Sam. A 3-beat phrase with 1 gap: (3+1) × 3 = 12 beats. In Adi Tala (8 beats), 12 beats = 1 cycle + 4 beats — Sam lands mid-cycle. Adjust until it resolves on beat 1.", videoURL: nil),
-                .listen(syllableGroupId: "jathi-4", repetitions: 6),
-                .speak(syllableGroupId: "jathi-4", targetCount: 48, instruction: "Say Ta-Ka-Di-Mi, pause 1 beat, repeat 3 times total. The third Ta-Ka-Di-Mi should land on Sam."),
-                .loop(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-4", cycles: 6),
-                .mute(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-4", normalCycles: 4, muteCycles: 3),
-                .check(summary: "You've built your first Mora. Resolution on Sam is the electric feeling every konnakol student chases."),
+                .intro(
+                    text: "Мисра надаи — семь подразделений на долю: Та-Ки-Та-Та-Ка-Ди-Ми. В ади тале (8 долей) это 8 × 7 = 56 слогов на авартанам.\n\n56 — это большое число. Но обращайте внимание не на количество, а на ощущение: семёрка внутри каждой доли делает всю структуру «тягучей», почти как slowmo-версия мисра чапу.\n\nТехника: не считайте «один-два-три-четыре-пять-шесть-семь». Произносите «Та-Ки-Та-Та-Ка-Ди-Ми» как одно слово. Рот знает его форму. Доверьтесь форме.\n\nЭто один из самых сложных надаи. Не спешите — точность важнее скорости.",
+                    videoURL: nil
+                ),
+                .listen(syllableGroupId: "jathi-7", repetitions: 6),
+                .loop(talaId: "adi", nadai: .misra, syllableGroupId: "jathi-7", cycles: 4),
+                .speak(
+                    syllableGroupId: "jathi-7",
+                    targetCount: 56,
+                    instruction: "Та-Ки-Та-Та-Ка-Ди-Ми, 8 раз подряд без остановки. Каждая группа — ровно одна доля ади талы. Медленно и уверенно."
+                ),
+                .mute(talaId: "adi", nadai: .misra, syllableGroupId: "jathi-7", normalCycles: 2, muteCycles: 2),
+                .check(
+                    summary: "Мисра надаи освоена. Вы теперь можете говорить в 3, 4, 5 и 7 подразделений. Остался последний — санкирна (9). До него — освоим сложные корваи с промежутками."
+                ),
             ],
-            passCriteria: PassCriteria(minAccuracy: 0.65, maxAvgDriftMs: 80),
+            passCriteria: PassCriteria(minAccuracy: 0.77, maxAvgDriftMs: 60),
             unlockCriteria: UnlockCriteria(kind: .completePrevious, requiredLessonId: "level-10")
         )
     }
 
-    // MARK: Level 12 — Mukthay
+    // MARK: - Level 12: Корваи с промежутками
 
     private static func level12() -> Lesson {
         Lesson(
             id: "level-12",
             levelNumber: 12,
-            title: "Mukthay",
-            subtitle: "Triple repetition + resolution",
-            description: "A Mukthay is a phrase repeated exactly 3 times so that the end of the third repetition lands precisely on Sam. Unlike a Mora, there are no gaps — the calculation is in the phrase length itself.",
-            estimatedMinutes: 20,
+            title: "Корваи с промежутками",
+            subtitle: "Расчёт гэпов и сложные каденции",
+            description: "Промежуток (gap) между повторами фразы в корваи — это не пустота, а точно рассчитанная пауза или фраза-заполнитель. Сегодня мы считаем гэпы.",
+            estimatedMinutes: 16,
             steps: [
-                .intro(text: "Mukthay means liberation. The phrase must be a length that divides evenly into the tala (or a full cycle multiple) when tripled. In Adi Tala × 3 cycles = 24 beats. A 8-beat phrase × 3 = 24. Perfect.", videoURL: nil),
-                .listen(syllableGroupId: "jathi-4", repetitions: 6),
-                .listen(syllableGroupId: "jathi-5", repetitions: 6),
-                .speak(syllableGroupId: "jathi-5", targetCount: 120, instruction: "Khanda (5-syllable) phrase × 3 reps. Count to make sure the third ends on beat 1 of the next cycle."),
-                .loop(talaId: "adi", nadai: .khanda, syllableGroupId: "jathi-5", cycles: 6),
-                .mute(talaId: "adi", nadai: .khanda, syllableGroupId: "jathi-5", normalCycles: 4, muteCycles: 3),
-                .check(summary: "You can now construct a Mukthay. This is a complete compositional statement in itself."),
+                .intro(
+                    text: "Корваи с промежутками — следующий уровень мастерства. Формула:\n\n(длина фразы + длина промежутка) × 3 = полное число слогов корваи\n\nПолное число слогов должно быть кратно длине авартанама (или нескольких авартанамов).\n\nПример: фраза из 7 слогов (мисра) в ади тале с чатусра надаи (32 пульса).\n(7 + 1) × 3 = 24 слога — не кратно 32.\n(7 + 3) × 3 = 30 слогов — не кратно 32.\n(7 + 4) × 3 = 33 слога — не кратно 32.\nНо (7 + 0) × 3 = 21 слог — это три авартанама минус 11 слогов. Не совпадает.\n\nНа самом деле кратность ищется на нескольких авартанамах. Это математика коннакола — она сложная, но вознаграждающая. Сегодня мы практикуем на готовых примерах.",
+                    videoURL: nil
+                ),
+                .listen(syllableGroupId: "jathi-7", repetitions: 4),
+                .loop(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-7", cycles: 4),
+                .speak(
+                    syllableGroupId: "jathi-7",
+                    targetCount: 21,
+                    instruction: "Мора из мисра-джати: произнесите Та-Ки-Та-Та-Ка-Ди-Ми три раза — без промежутков. Это базовая форма. Запомните её ощущение."
+                ),
+                .loop(talaId: "adi", nadai: .misra, syllableGroupId: "jathi-7", cycles: 6),
+                .speak(
+                    syllableGroupId: "jathi-5",
+                    targetCount: 15,
+                    instruction: "Теперь корваи с промежутком: Та-Ка-Та-Ки-На [пауза 2] × 3. Произнесите пять слогов, выдержите два пульса тишины, повторите три раза. Конец третьего попадает на сам."
+                ),
+                .mute(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-5", normalCycles: 3, muteCycles: 2),
+                .check(
+                    summary: "Промежуток — не пустота, а пространство, рассчитанное математически. Мастера коннакола строят каденции в голове, как шахматисты строят партии. Вы сделали первый шаг в эту сторону."
+                ),
             ],
-            passCriteria: PassCriteria(minAccuracy: 0.65, maxAvgDriftMs: 80),
+            passCriteria: PassCriteria(minAccuracy: 0.77, maxAvgDriftMs: 55),
             unlockCriteria: UnlockCriteria(kind: .completePrevious, requiredLessonId: "level-11")
         )
     }
 
-    // MARK: Level 13 — Korvai Construction
+    // MARK: - Level 13: Санкирна надаи
 
     private static func level13() -> Lesson {
         Lesson(
             id: "level-13",
             levelNumber: 13,
-            title: "Korvai Construction",
-            subtitle: "Purvangam + Uttarangam",
-            description: "A Korvai is a complete rhythmic composition with two parts: the Purvangam (setup, typically 3+ cycles) and the Uttarangam (conclusion, typically a Mukthay). Both must resolve on the same Sam.",
-            estimatedMinutes: 25,
+            title: "Санкирна надаи",
+            subtitle: "Девятидольное подразделение",
+            description: "Санкирна надаи — девять подразделений на долю. Это самое сложное и редкое подразделение. Ади тала × 9 = 72 слога на авартанам.",
+            estimatedMinutes: 16,
             steps: [
-                .intro(text: "Korvai is the crown of konnakol. Purvangam establishes the character — a repeating pattern or yati phrase. Uttarangam is the Mukthay that closes it. Both parts are calculated to land on the same Sam.", videoURL: nil),
-                .listen(syllableGroupId: "jathi-4", repetitions: 6),
-                .listen(syllableGroupId: "jathi-5", repetitions: 6),
-                .speak(syllableGroupId: "jathi-4", targetCount: 64, instruction: "Purvangam: Chatusra × 2 cycles (16 beats). Speak 4 times through, evenly."),
-                .speak(syllableGroupId: "jathi-5", targetCount: 120, instruction: "Uttarangam: Khanda Mukthay × 3 repetitions. End must land on Sam."),
-                .loop(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-4", cycles: 8),
-                .mute(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-4", normalCycles: 4, muteCycles: 4),
-                .check(summary: "You have performed your first Korvai. Welcome to the art of rhythmic composition."),
+                .intro(
+                    text: "Санкирна надаи — девять подразделений на каждую долю: Та-Ка-Та-Ки-На-Та-Ки-Та. Это «пятёрка + тройка» слитые вместе.\n\nВ ади тале (8 долей) получается 8 × 9 = 72 слога за один авартанам. Это очень плотная ткань — почти непрерывный поток слогов.\n\nСанкирна редко используется в чистом виде в классической музыке, но она венчает пятёрку надаи. Освоив её, вы завершаете «пять скоростей» — панча надаи.\n\nПодход: санкирна — это «Та-Ка-Та-Ки-На» плюс «Та-Ки-Та». Объедините их как одно девятисложное слово. Медленно. Очень медленно. Не спешите.",
+                    videoURL: nil
+                ),
+                .listen(syllableGroupId: "jathi-9", repetitions: 6),
+                .speak(
+                    syllableGroupId: "jathi-9",
+                    targetCount: 18,
+                    instruction: "Та-Ка-Та-Ки-На-Та-Ки-Та — произнесите дважды медленно, потом ещё раз. Пусть рот запомнит всё слово целиком, а не девять отдельных слогов."
+                ),
+                .loop(talaId: "adi", nadai: .sankeerna, syllableGroupId: "jathi-9", cycles: 4),
+                .mute(talaId: "adi", nadai: .sankeerna, syllableGroupId: "jathi-9", normalCycles: 2, muteCycles: 2),
+                .check(
+                    summary: "Санкирна надаи завершена. Вы теперь владеете всеми пятью надаи — тисра, чатусра, кханда, мисра и санкирна. Панча надаи — ваш. Следующий урок: архитектура ритмических фраз."
+                ),
             ],
-            passCriteria: PassCriteria(minAccuracy: 0.60, maxAvgDriftMs: 90),
+            passCriteria: PassCriteria(minAccuracy: 0.76, maxAvgDriftMs: 55),
             unlockCriteria: UnlockCriteria(kind: .completePrevious, requiredLessonId: "level-12")
         )
     }
 
-    // MARK: Level 14 — Jathi Bhedam
+    // MARK: - Level 14: Яти паттерны
 
     private static func level14() -> Lesson {
         Lesson(
             id: "level-14",
             levelNumber: 14,
-            title: "Jathi Bhedam",
-            subtitle: "Accent displacement",
-            description: "Jathi Bhedam takes a fixed syllable pattern and displaces the accent across different groupings — 3, 4, 5, 7 — while the total number of syllables stays constant. The pulse reorganises around the accent.",
-            estimatedMinutes: 20,
+            title: "Яти паттерны",
+            subtitle: "Архитектура ритмических фраз",
+            description: "Яти — это паттерны с геометрической формой: возрастающие, убывающие, симметричные. Они придают ритму форму в пространстве времени.",
+            estimatedMinutes: 16,
             steps: [
-                .intro(text: "Jathi Bhedam: the same string of syllables, but accented differently. Ta-Ka-Di-Mi | Ta-Ka-Di-Mi sounds different from Ta-Ka-Di | Mi-Ta-Ka | Di-Mi-Ta. Your mouth says the same thing. Your ear hears different rhythms.", videoURL: nil),
-                .listen(syllableGroupId: "jathi-4", repetitions: 6),
-                .listen(syllableGroupId: "jathi-3", repetitions: 6),
-                .speak(syllableGroupId: "jathi-4", targetCount: 48, instruction: "Accent every 3rd syllable in a stream of 4-syllable groups. Feel the 3-beat accent against the 4-beat pattern."),
-                .loop(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-4", cycles: 6),
-                .loop(talaId: "adi", nadai: .tisra, syllableGroupId: "jathi-3", cycles: 6),
-                .mute(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-4", normalCycles: 4, muteCycles: 4),
-                .check(summary: "Jathi Bhedam is where rhythm becomes language — the same words in different cadences."),
+                .intro(
+                    text: "Яти — это способ организации серий ритмических фраз по форме. Существует пять видов яти:\n\n• Сама яти: все фразы одинаковой длины (3-3-3-3)\n• Сротовахá яти: возрастающие фразы (3-4-5-6-7)\n• Гопуча яти: убывающие фразы (7-6-5-4-3)\n• Мридангам яти: расширение затем сужение (3-5-7-5-3)\n• Вишхам яти: асимметричные длины\n\nЯти-паттерны — это архитектура. Они определяют не только тайминг, но и эмоциональный «контур» фразы: нарастание, спад, пульсация, волна.\n\nСегодня мы практикуем сама, сротоваха и гопуча яти.",
+                    videoURL: nil
+                ),
+                .listen(syllableGroupId: "jathi-3", repetitions: 3),
+                .listen(syllableGroupId: "jathi-5", repetitions: 3),
+                .listen(syllableGroupId: "jathi-7", repetitions: 3),
+                .speak(
+                    syllableGroupId: "jathi-3",
+                    targetCount: 9,
+                    instruction: "Сама яти: Та-Ки-Та три раза. Все одинаковые. Это основа."
+                ),
+                .loop(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-3", cycles: 2),
+                .speak(
+                    syllableGroupId: "jathi-5",
+                    targetCount: 15,
+                    instruction: "Сротоваха яти — возрастание: произнесите тройку, пятёрку, затем семёрку. Три разных группы подряд. Ощущение нарастания."
+                ),
+                .loop(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-7", cycles: 3),
+                .speak(
+                    syllableGroupId: "jathi-7",
+                    targetCount: 21,
+                    instruction: "Гопуча яти — убывание: произнесите семёрку, пятёрку, тройку. Ощущение схождения, сжатия. Третья фраза должна попасть на сам."
+                ),
+                .mute(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-5", normalCycles: 3, muteCycles: 2),
+                .check(
+                    summary: "Яти-паттерны дают ритму форму. Не просто «звуки во времени», а архитектура — как у здания: фундамент, подъём, завершение. Следующий урок: полиритмия."
+                ),
             ],
-            passCriteria: PassCriteria(minAccuracy: 0.60, maxAvgDriftMs: 90),
+            passCriteria: PassCriteria(minAccuracy: 0.77, maxAvgDriftMs: 55),
             unlockCriteria: UnlockCriteria(kind: .completePrevious, requiredLessonId: "level-13")
         )
     }
 
-    // MARK: Level 15 — Anuloma-Pratiloma
+    // MARK: - Level 15: Полиритмия
 
     private static func level15() -> Lesson {
         Lesson(
             id: "level-15",
             levelNumber: 15,
-            title: "Anuloma-Pratiloma",
-            subtitle: "Phrase in five speeds",
-            description: "Anuloma is with the pulse; Pratiloma is against it. The same phrase is performed at ×1, ×1.5, ×2, ×3, and ×4 against a fixed tala. This is the ultimate test of internal rhythmic independence.",
-            estimatedMinutes: 25,
+            title: "Полиритмия",
+            subtitle: "Скрещивание ритмов: джати против надаи",
+            description: "Полиритмия — это когда два ритма звучат одновременно. В коннаколе это достигается сочетанием джати и надаи, которые не кратны друг другу: 3 против 4, 5 против 4.",
+            estimatedMinutes: 18,
             steps: [
-                .intro(text: "Anuloma: phrase at its natural speed. Pratiloma: phrase squeezed against a different pulse. To speak 3 syllables where 4 are expected, or 5 where 3 are expected, your internal pulse must be absolute.", videoURL: nil),
-                .listen(syllableGroupId: "jathi-4", repetitions: 4),
+                .intro(
+                    text: "Полиритмия — вершина ритмического мышления. В западной музыке это редкость. В карнатической — повседневность.\n\nКак это работает в коннаколе: вы произносите джати (слоговую группу) внутри надаи, которая не кратна этой группе. Результат — два ритма «скрещиваются» и встречаются только в определённых точках.\n\nПример 1: Та-Ки-Та (3) внутри чатусра надаи (4). Три слога против четырёх пульсов. Они встретятся через 12 позиций — три цикла надаи.\n\nПример 2: Та-Ка-Та-Ки-На (5) внутри чатусра надаи (4). Они встретятся через 20 позиций — пять циклов надаи.\n\nЭто не «ошибка ритма» — это намеренное перекрещивание двух сеток. Слушайте оба ритма одновременно.",
+                    videoURL: nil
+                ),
                 .listen(syllableGroupId: "jathi-3", repetitions: 4),
+                .loop(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-3", cycles: 6),
+                .speak(
+                    syllableGroupId: "jathi-3",
+                    targetCount: 18,
+                    instruction: "3 против 4: произнесите Та-Ки-Та внутри чатусра надаи. Слоги не совпадают с пульсами. Не пытайтесь их выровнять — доверьтесь «3». Повторите 6 раз."
+                ),
                 .listen(syllableGroupId: "jathi-5", repetitions: 4),
-                .speak(syllableGroupId: "jathi-4", targetCount: 32, instruction: "Speak Ta-Ka-Di-Mi at ×1 speed, then at ×2 (twice as dense), staying in Adi Tala."),
-                .loop(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-4", cycles: 4),
-                .loop(talaId: "adi", nadai: .misra, syllableGroupId: "jathi-7", cycles: 4),
-                .mute(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-4", normalCycles: 4, muteCycles: 4),
-                .check(summary: "Anuloma-Pratiloma separates the practitioner from the master. If you can hold the pulse here, you hold it everywhere."),
+                .loop(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-5", cycles: 6),
+                .speak(
+                    syllableGroupId: "jathi-5",
+                    targetCount: 30,
+                    instruction: "5 против 4: произнесите Та-Ка-Та-Ки-На внутри чатусра надаи. Пять слогов на четыре пульса — пляж и волна. Повторите 6 раз."
+                ),
+                .mute(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-3", normalCycles: 3, muteCycles: 3),
+                .check(
+                    summary: "Полиритмия — это разговор двух голосов. Один держит пульс, другой плетёт узор поверх. Вы научились слышать оба одновременно. Это мышление, которое меняет восприятие музыки навсегда."
+                ),
             ],
-            passCriteria: PassCriteria(minAccuracy: 0.58, maxAvgDriftMs: 100),
+            passCriteria: PassCriteria(minAccuracy: 0.76, maxAvgDriftMs: 50),
             unlockCriteria: UnlockCriteria(kind: .completePrevious, requiredLessonId: "level-14")
         )
     }
 
-    // MARK: Level 16 — Compose Your Korvai
+    // MARK: - Level 16: Тани Авартанам
 
     private static func level16() -> Lesson {
         Lesson(
             id: "level-16",
             levelNumber: 16,
-            title: "Compose Your Korvai",
-            subtitle: "Your own composition",
-            description: "Bring everything together. Choose your tala, choose your nadai, design your Purvangam, calculate your Uttarangam Mukthay, and perform it from start to Sam without the metronome.",
-            estimatedMinutes: 30,
+            title: "Тани Авартанам",
+            subtitle: "Сольная импровизация",
+            description: "Тани авартанам — это сольная ритмическая каденция. Финальный урок объединяет всё: талу, надаи, корваи, яти и паузу. Это ваш первый шаг к живому исполнению.",
+            estimatedMinutes: 20,
             steps: [
-                .intro(text: "This is the graduation lesson. You have learned every tool — tala, nadai, yati, mora, mukthay, korvai, jathi bhedam, anuloma-pratiloma. Now compose something that is yours. It can be simple. Make it resolve on Sam.", videoURL: nil),
-                .speak(syllableGroupId: "jathi-4", targetCount: 64, instruction: "Perform your Purvangam. Any nadai, any pattern. Maintain it for 2–4 cycles."),
-                .speak(syllableGroupId: "jathi-5", targetCount: 120, instruction: "Perform your Uttarangam — 3× repetition of your chosen phrase. Resolve on Sam."),
-                .loop(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-4", cycles: 8),
-                .mute(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-4", normalCycles: 2, muteCycles: 6),
-                .check(summary: "You are a konnakol practitioner. The art is now yours to carry, develop, and teach."),
+                .intro(
+                    text: "Тани авартанам (tani avartanam) — это сольная импровизация в карнатическом концерте. Обычно исполняется перцуссионистом (мридангистом) в конце произведения. Но в коннаколе это может быть голос.\n\nСтруктура тани:\n1. Pallavi — вступительный раздел: установить тала и темп\n2. Развитие — серии яти, корваи, гати бхедам\n3. Тирманам (tirmanam) — финальная серия корваи, разрешающаяся точно на сам\n\nЭто не исполнение по нотам. Это импровизация в рамках структуры. Вы знаете все инструменты — теперь используйте их свободно.\n\nСегодняшний урок — это ваш тани. Начните с ади талы. Говорите. Слушайте. Разрешайтесь на сам.",
+                    videoURL: nil
+                ),
+                .clap(talaId: "adi", nadai: .chatusra, cycles: 2),
+                .loop(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-4", cycles: 4),
+                .loop(talaId: "adi", nadai: .tisra, syllableGroupId: "jathi-3", cycles: 4),
+                .loop(talaId: "adi", nadai: .khanda, syllableGroupId: "jathi-5", cycles: 4),
+                .speak(
+                    syllableGroupId: "jathi-7",
+                    targetCount: 21,
+                    instruction: "Тирманам — финальная корваи: Та-Ки-Та-Та-Ка-Ди-Ми три раза подряд. Это ваша финальная каденция. Произнесите её уверенно — конец должен совпасть с самом."
+                ),
+                .mute(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-4", normalCycles: 2, muteCycles: 4),
+                .check(
+                    summary: "Вы прошли все 16 уровней Konnakol Master.\n\nВы освоили пять джати, пять надаи, четыре талы, корваи, мору, яти и полиритмию. Вы стали способны удерживать пульс в тишине.\n\nНо путь в коннаколе не заканчивается — он только разворачивается. Практикуйте каждый день. Пойте с другими. Слушайте мастеров. И помните: главное не скорость — главное попасть на сам.\n\nНамаскарам."
+                ),
             ],
-            passCriteria: PassCriteria(minAccuracy: 0.55, maxAvgDriftMs: 100),
+            passCriteria: PassCriteria(minAccuracy: 0.80, maxAvgDriftMs: 40),
             unlockCriteria: UnlockCriteria(kind: .completePrevious, requiredLessonId: "level-15")
         )
     }
 
-    // MARK: Stub for locked levels
+    // MARK: - Stub for unknown levels
 
     private static func stub(level: Int) -> Lesson {
-        let meta = LessonLibrary.meta(forLevel: level)
-        return Lesson(
+        Lesson(
             id: "level-\(level)",
             levelNumber: level,
-            title: meta?.title ?? "Level \(level)",
-            subtitle: meta?.subtitle ?? "",
-            description: "Content coming in v1.1.",
-            estimatedMinutes: meta?.estimatedMinutes ?? 15,
+            title: "Уровень \(level)",
+            subtitle: "",
+            description: "Этот уровень ещё в разработке.",
+            estimatedMinutes: 15,
             steps: [
-                .intro(text: "This level is coming soon. Keep practising the earlier levels to prepare.", videoURL: nil),
+                .intro(text: "Контент этого уровня появится в следующей версии. Продолжайте практиковаться на предыдущих уровнях.", videoURL: nil),
                 .check(summary: ""),
             ],
-            passCriteria: PassCriteria(minAccuracy: 0.70, maxAvgDriftMs: 70),
+            passCriteria: PassCriteria(minAccuracy: 0.75, maxAvgDriftMs: 70),
             unlockCriteria: UnlockCriteria(kind: .completePrevious, requiredLessonId: "level-\(level - 1)")
         )
     }
