@@ -16,38 +16,46 @@ struct ReferenceView: View {
         }
     }
 
+    /// When embedded inside TheoryView set standalone=false to skip NavigationStack and header.
+    var standalone: Bool = true
+
     @State private var selectedSection: Section = .syllables
 
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 0) {
+        let content = VStack(spacing: 0) {
+            if standalone {
                 header
                     .padding(.horizontal, KMSpacing.screenEdge)
                     .padding(.top, KMSpacing.pt12)
                     .padding(.bottom, KMSpacing.pt16)
-
-                KMSegmentedControl(
-                    options: Section.allCases,
-                    selection: $selectedSection,
-                    labelBuilder: { $0.label }
-                )
-                .padding(.horizontal, KMSpacing.screenEdge)
-                .padding(.bottom, KMSpacing.pt16)
-
-                ScrollView {
-                    Group {
-                        switch selectedSection {
-                        case .syllables: SyllablesSection()
-                        case .talas:     TalasSection()
-                        case .glossary:  GlossarySection()
-                        }
-                    }
-                    .padding(.horizontal, KMSpacing.screenEdge)
-                    .padding(.bottom, KMSpacing.pt48)
-                }
             }
-            .background(Color.kmBase.ignoresSafeArea())
-            .navigationBarHidden(true)
+
+            KMSegmentedControl(
+                options: Section.allCases,
+                selection: $selectedSection,
+                labelBuilder: { $0.label }
+            )
+            .padding(.horizontal, KMSpacing.screenEdge)
+            .padding(.bottom, KMSpacing.pt16)
+
+            ScrollView {
+                Group {
+                    switch selectedSection {
+                    case .syllables: SyllablesSection()
+                    case .talas:     TalasSection()
+                    case .glossary:  GlossarySection()
+                    }
+                }
+                .padding(.horizontal, KMSpacing.screenEdge)
+                .padding(.bottom, KMSpacing.pt48)
+            }
+        }
+        .background(Color.kmBase.ignoresSafeArea())
+
+        if standalone {
+            NavigationStack { content.navigationBarHidden(true) }
+        } else {
+            content
         }
     }
 
