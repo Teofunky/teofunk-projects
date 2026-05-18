@@ -54,11 +54,8 @@ struct TheoryView: View {
             }
         }
         .background(Color.kmBase.ignoresSafeArea())
-        .sheet(item: $selectedArticle) { article in
+        .fullScreenCover(item: $selectedArticle) { article in
             ArticleDetailView(article: article)
-                .presentationDetents([.large])
-                .presentationDragIndicator(.hidden)
-                .interactiveDismissDisabled(true)
         }
     }
 
