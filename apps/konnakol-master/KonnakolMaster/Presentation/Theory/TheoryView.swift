@@ -55,7 +55,9 @@ struct TheoryView: View {
         }
         .background(Color.kmBase.ignoresSafeArea())
         .fullScreenCover(item: $selectedArticle) { article in
-            ArticleDetailView(article: article)
+            NavigationStack {
+                ArticleDetailView(article: article)
+            }
         }
     }
 
@@ -127,9 +129,6 @@ struct ArticleDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: KMSpacing.sectionGap) {
-                // Top padding for the pinned close button
-                Color.clear.frame(height: 52)
-
                 // Hero header
                 VStack(alignment: .leading, spacing: KMSpacing.pt8) {
                     HStack(spacing: KMSpacing.pt12) {
@@ -163,15 +162,18 @@ struct ArticleDetailView: View {
                     ArticleSectionView(section: section)
                 }
             }
+            .padding(.top, KMSpacing.pt16)
             .padding(.bottom, KMSpacing.pt48)
         }
         .background(Color.kmBase.ignoresSafeArea())
-        .overlay(alignment: .topTrailing) {
-            Button("Готово") { dismiss() }
-                .foregroundStyle(Color.kmPrimary)
-                .padding(.horizontal, KMSpacing.screenEdge)
-                .padding(.vertical, KMSpacing.pt12)
-                .background(Color.kmBase.opacity(0.95))
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(Color.kmBase, for: .navigationBar)
+        .toolbarBackground(.visible, for: .navigationBar)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button("Готово") { dismiss() }
+                    .foregroundStyle(Color.kmPrimary)
+            }
         }
     }
 }
