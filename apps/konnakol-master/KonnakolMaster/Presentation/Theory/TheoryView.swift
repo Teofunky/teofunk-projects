@@ -128,59 +128,54 @@ struct ArticleDetailView: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Top bar
-            HStack {
-                Spacer()
-                Button("Готово") { dismiss() }
-                    .foregroundStyle(Color.kmPrimary)
-                    .padding(.trailing, KMSpacing.screenEdge)
-            }
-            .frame(height: 44)
-            .background(Color.kmBase)
+        ScrollView {
+            VStack(alignment: .leading, spacing: KMSpacing.sectionGap) {
+                // Top padding for the pinned close button
+                Color.clear.frame(height: 52)
 
-            Divider().background(Color.kmSurface2)
-
-            ScrollView(.vertical, showsIndicators: true) {
-                VStack(alignment: .leading, spacing: KMSpacing.sectionGap) {
-                    // Hero header
-                    VStack(alignment: .leading, spacing: KMSpacing.pt8) {
-                        HStack(spacing: KMSpacing.pt12) {
-                            ZStack {
-                                RoundedRectangle(cornerRadius: 12)
-                                    .fill(Color.kmPrimary.opacity(0.15))
-                                    .frame(width: 56, height: 56)
-                                Image(systemName: article.icon)
-                                    .font(.system(size: 26))
-                                    .foregroundStyle(Color.kmPrimary)
-                            }
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(article.title)
-                                    .kmStyle(KMFont.title1)
-                                HStack(spacing: 6) {
-                                    Image(systemName: "clock")
-                                        .font(.system(size: 11))
-                                    Text("\(article.readingMinutes) минут чтения")
-                                }
-                                .kmStyle(KMFont.caption, color: .kmTextTertiary)
-                            }
+                // Hero header
+                VStack(alignment: .leading, spacing: KMSpacing.pt8) {
+                    HStack(spacing: KMSpacing.pt12) {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(Color.kmPrimary.opacity(0.15))
+                                .frame(width: 56, height: 56)
+                            Image(systemName: article.icon)
+                                .font(.system(size: 26))
+                                .foregroundStyle(Color.kmPrimary)
                         }
-                        Text(article.subtitle)
-                            .kmStyle(KMFont.body, color: .kmTextSecondary)
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(article.title)
+                                .kmStyle(KMFont.title1)
+                            HStack(spacing: 6) {
+                                Image(systemName: "clock")
+                                    .font(.system(size: 11))
+                                Text("\(article.readingMinutes) минут чтения")
+                            }
+                            .kmStyle(KMFont.caption, color: .kmTextTertiary)
+                        }
                     }
-                    .padding(.horizontal, KMSpacing.screenEdge)
-
-                    Divider().background(Color.kmSurface2)
-
-                    ForEach(article.sections) { section in
-                        ArticleSectionView(section: section)
-                    }
+                    Text(article.subtitle)
+                        .kmStyle(KMFont.body, color: .kmTextSecondary)
                 }
-                .padding(.top, KMSpacing.pt16)
-                .padding(.bottom, KMSpacing.pt48)
+                .padding(.horizontal, KMSpacing.screenEdge)
+
+                Divider().background(Color.kmSurface2)
+
+                ForEach(article.sections) { section in
+                    ArticleSectionView(section: section)
+                }
             }
+            .padding(.bottom, KMSpacing.pt48)
         }
         .background(Color.kmBase.ignoresSafeArea())
+        .overlay(alignment: .topTrailing) {
+            Button("Готово") { dismiss() }
+                .foregroundStyle(Color.kmPrimary)
+                .padding(.horizontal, KMSpacing.screenEdge)
+                .padding(.vertical, KMSpacing.pt12)
+                .background(Color.kmBase.opacity(0.95))
+        }
     }
 }
 
