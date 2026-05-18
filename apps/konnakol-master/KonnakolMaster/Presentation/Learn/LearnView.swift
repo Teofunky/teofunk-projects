@@ -78,104 +78,106 @@ struct LearnView: View {
     }
 
     // MARK: Skill Tree
+    // Uses VStack + offset() instead of GeometryReader + position() to avoid
+    // the SwiftUI hit-testing bug where position() in ScrollView→GeometryReader
+    // produces stale tap regions that don't match the rendered node positions.
+
+    private static let nodeSpacing: CGFloat = 100
+    private static let zigzagAmplitude: CGFloat = 110
 
     private var skillTree: some View {
-        GeometryReader { geo in
-            let centerX = geo.size.width / 2
-            let nodeSpacing: CGFloat = 100
+        VStack(spacing: 0) {
+            tierDividerRow("BEGINNER")
 
-            ZStack(alignment: .top) {
-                // Connection lines drawn first (under nodes)
-                connectionLines(centerX: centerX, nodeSpacing: nodeSpacing)
-
-                // Tier dividers — positioned between tier boundaries
-                tierDivider(label: "BEGINNER", y: 16, width: geo.size.width)
-                // Intermediate starts at index 5 (level 6) → y = 5*100+32 = 532, midpoint = 482
-                tierDivider(label: "INTERMEDIATE", y: 482, width: geo.size.width)
-                // Advanced starts at index 10 (level 11) → y = 10*100+32 = 1032, midpoint = 982
-                tierDivider(label: "ADVANCED", y: 982, width: geo.size.width)
-
-                // Nodes
-                ForEach(Array(vm.nodes.enumerated()), id: \.element.id) { i, node in
-                    let yPos = CGFloat(i) * nodeSpacing + 32
-                    let xPos = centerX + CGFloat(node.xOffset) * geo.size.width
-
-                    SkillNodeView(node: node)
-                        .position(x: xPos, y: yPos)
-                        .onTapGesture {
-                            HapticEngine.impact(.light)
-                            selectedNode = node
-                        }
-
-                    // Level label below node
-                    nodeLabelView(node)
-                        .position(x: xPos, y: yPos + 42)
-                }
+            ForEach(Array(vm.nodes.enumerated()), id: \.element.id) { i, node in
+                if i == 5  { tierDividerRow("INTERMEDIATE") }
+                if i == 10 { tierDividerRow("ADVANCED") }
+                nodeRow(node, index: i)
             }
-            .frame(height: CGFloat(vm.nodes.count) * nodeSpacing + 80)
         }
-        .frame(height: CGFloat(LessonLibrary.all.count) * 100 + 80)
+        .background(connectionLinesBackground)
     }
 
-    private func tierDivider(label: String, y: CGFloat, width: CGFloat) -> some View {
+    private func nodeRow(_ node: LearnViewModel.LevelNode, index: Int) -> some View {
+        ZStack {
+            VStack(spacing: 4) {
+                SkillNodeView(node: node)
+                Text(node.meta.title)
+                    .kmStyle(
+                        KMFont.caption,
+                        color: node.state == .locked ? .kmTextDisabled : .kmTextSecondary
+                    )
+                    .lineLimit(1)
+                    .frame(width: 110)
+            }
+            .offset(x: CGFloat(node.xOffset) * Self.zigzagAmplitude)
+        }
+        .frame(maxWidth: .infinity, minHeight: Self.nodeSpacing)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            HapticEngine.impact(.light)
+            selectedNode = node
+        }
+    }
+
+    private func tierDividerRow(_ label: String) -> some View {
         HStack(spacing: KMSpacing.pt8) {
-            Rectangle()
-                .fill(Color.kmSurface2)
-                .frame(height: 1)
+            Rectangle().fill(Color.kmSurface2).frame(height: 1)
             Text(label)
                 .kmStyle(KMFont.micro, color: .kmTextTertiary, tracking: 2)
+                .kmTrackingMicro()
                 .fixedSize()
-            Rectangle()
-                .fill(Color.kmSurface2)
-                .frame(height: 1)
+            Rectangle().fill(Color.kmSurface2).frame(height: 1)
         }
         .padding(.horizontal, KMSpacing.pt32)
-        .frame(width: width)
-        .position(x: width / 2, y: y)
+        .padding(.vertical, KMSpacing.pt8)
     }
 
-    @ViewBuilder
-    private func nodeLabelView(_ node: LearnViewModel.LevelNode) -> some View {
-        Text(node.meta.title)
-            .kmStyle(
-                KMFont.caption,
-                color: node.state == .locked ? .kmTextDisabled : .kmTextSecondary
-            )
-            .lineLimit(1)
-            .frame(width: 100)
-    }
-
-    private func connectionLines(centerX: CGFloat, nodeSpacing: CGFloat) -> some View {
+    // Canvas drawn as a non-interactive background so it never intercepts taps.
+    private var connectionLinesBackground: some View {
         Canvas { ctx, size in
-            for i in 0..<(vm.nodes.count - 1) {
-                let curr = vm.nodes[i]
-                let next = vm.nodes[i + 1]
-                let y1 = CGFloat(i) * nodeSpacing + 32
-                let y2 = CGFloat(i + 1) * nodeSpacing + 32
-                let x1 = centerX + CGFloat(curr.xOffset) * size.width
-                let x2 = centerX + CGFloat(next.xOffset) * size.width
+            let nodes = vm.nodes
+            guard nodes.count > 1 else { return }
+            let spacing = Self.nodeSpacing
+            let amp = Self.zigzagAmplitude
+            let cx = size.width / 2
+
+            // Approximate node y-positions within the VStack.
+            // Each tier divider row adds ~36pt (8+8 vertical padding + ~20 text).
+            var yOffsets: [CGFloat] = []
+            var runningY: CGFloat = 36   // BEGINNER divider height
+            for i in 0..<nodes.count {
+                if i == 5  { runningY += 36 }
+                if i == 10 { runningY += 36 }
+                yOffsets.append(runningY + 32)  // 32 = half node spacing for center of node
+                runningY += spacing
+            }
+
+            for i in 0..<(nodes.count - 1) {
+                let curr = nodes[i]
+                let next = nodes[i + 1]
+                let x1 = cx + CGFloat(curr.xOffset) * amp
+                let x2 = cx + CGFloat(next.xOffset) * amp
+                let y1 = yOffsets[i]
+                let y2 = yOffsets[i + 1]
 
                 var path = Path()
                 path.move(to: CGPoint(x: x1, y: y1))
-                // Bezier curve for organic feel
                 path.addCurve(
                     to: CGPoint(x: x2, y: y2),
-                    control1: CGPoint(x: x1, y: y1 + nodeSpacing * 0.5),
-                    control2: CGPoint(x: x2, y: y2 - nodeSpacing * 0.5)
+                    control1: CGPoint(x: x1, y: y1 + spacing * 0.5),
+                    control2: CGPoint(x: x2, y: y2 - spacing * 0.5)
                 )
 
-                let isCompleted = curr.state == .completed
-                let color = isCompleted
-                    ? Color.kmPrimary.opacity(0.6)
-                    : Color.kmSurface2.opacity(0.8)
-
-                if isCompleted {
-                    ctx.stroke(path, with: .color(color), style: StrokeStyle(lineWidth: 2))
-                } else {
-                    ctx.stroke(path, with: .color(color), style: StrokeStyle(lineWidth: 1.5, dash: [6, 5]))
-                }
+                let done = curr.state == .completed
+                let color = done ? Color.kmPrimary.opacity(0.5) : Color.kmSurface2.opacity(0.7)
+                let style = done
+                    ? StrokeStyle(lineWidth: 2)
+                    : StrokeStyle(lineWidth: 1.5, dash: [6, 5])
+                ctx.stroke(path, with: .color(color), style: style)
             }
         }
+        .allowsHitTesting(false)
     }
 }
 

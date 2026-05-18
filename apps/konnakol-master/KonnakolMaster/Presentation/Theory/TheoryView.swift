@@ -19,46 +19,45 @@ struct TheoryView: View {
     @State private var selectedArticle: TheoryArticle?
 
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 0) {
-                // Header
-                HStack {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(selectedTab == .articles ? "Теория" : "Справочник")
-                            .kmStyle(KMFont.title1)
-                        Text(selectedTab == .articles
-                             ? "Методика и принципы коннакола"
-                             : "Слоги, талы, глоссарий")
-                            .kmStyle(KMFont.caption, color: .kmTextTertiary)
-                    }
-                    Spacer()
+        VStack(spacing: 0) {
+            // Header
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(selectedTab == .articles ? "Теория" : "Справочник")
+                        .kmStyle(KMFont.title1)
+                    Text(selectedTab == .articles
+                         ? "Методика и принципы коннакола"
+                         : "Слоги, талы, глоссарий")
+                        .kmStyle(KMFont.caption, color: .kmTextTertiary)
                 }
-                .padding(.horizontal, KMSpacing.screenEdge)
-                .padding(.top, KMSpacing.pt16)
-                .padding(.bottom, KMSpacing.pt12)
-
-                // Tab picker
-                KMSegmentedControl(
-                    options: Tab.allCases,
-                    selection: $selectedTab,
-                    labelBuilder: { $0.label }
-                )
-                .padding(.horizontal, KMSpacing.screenEdge)
-                .padding(.bottom, KMSpacing.pt16)
-
-                // Content
-                switch selectedTab {
-                case .articles:
-                    articlesList
-                case .reference:
-                    ReferenceView(standalone: false)
-                }
+                Spacer()
             }
-            .background(Color.kmBase.ignoresSafeArea())
-            .navigationBarHidden(true)
+            .padding(.horizontal, KMSpacing.screenEdge)
+            .padding(.top, KMSpacing.pt16)
+            .padding(.bottom, KMSpacing.pt12)
+
+            // Tab picker
+            KMSegmentedControl(
+                options: Tab.allCases,
+                selection: $selectedTab,
+                labelBuilder: { $0.label }
+            )
+            .padding(.horizontal, KMSpacing.screenEdge)
+            .padding(.bottom, KMSpacing.pt16)
+
+            // Content
+            switch selectedTab {
+            case .articles:
+                articlesList
+            case .reference:
+                ReferenceView(standalone: false)
+            }
         }
+        .background(Color.kmBase.ignoresSafeArea())
         .sheet(item: $selectedArticle) { article in
             ArticleDetailView(article: article)
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)
         }
     }
 
