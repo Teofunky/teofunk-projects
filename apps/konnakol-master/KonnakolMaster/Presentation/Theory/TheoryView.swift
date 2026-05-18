@@ -57,7 +57,8 @@ struct TheoryView: View {
         .sheet(item: $selectedArticle) { article in
             ArticleDetailView(article: article)
                 .presentationDetents([.large])
-                .presentationDragIndicator(.visible)
+                .presentationDragIndicator(.hidden)
+                .interactiveDismissDisabled(true)
         }
     }
 
