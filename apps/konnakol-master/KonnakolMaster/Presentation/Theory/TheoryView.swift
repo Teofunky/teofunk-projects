@@ -128,8 +128,20 @@ struct ArticleDetailView: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        NavigationStack {
-            ScrollView {
+        VStack(spacing: 0) {
+            // Top bar
+            HStack {
+                Spacer()
+                Button("Готово") { dismiss() }
+                    .foregroundStyle(Color.kmPrimary)
+                    .padding(.trailing, KMSpacing.screenEdge)
+            }
+            .frame(height: 44)
+            .background(Color.kmBase)
+
+            Divider().background(Color.kmSurface2)
+
+            ScrollView(.vertical, showsIndicators: true) {
                 VStack(alignment: .leading, spacing: KMSpacing.sectionGap) {
                     // Hero header
                     VStack(alignment: .leading, spacing: KMSpacing.pt8) {
@@ -165,17 +177,10 @@ struct ArticleDetailView: View {
                     }
                 }
                 .padding(.top, KMSpacing.pt16)
-                .padding(.bottom, KMSpacing.pt32)
-            }
-            .background(Color.kmBase.ignoresSafeArea())
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Готово") { dismiss() }
-                        .foregroundStyle(Color.kmPrimary)
-                }
+                .padding(.bottom, KMSpacing.pt48)
             }
         }
+        .background(Color.kmBase.ignoresSafeArea())
     }
 }
 

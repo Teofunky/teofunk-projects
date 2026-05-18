@@ -102,7 +102,10 @@ struct LearnView: View {
 
                     SkillNodeView(node: node)
                         .position(x: xPos, y: yPos)
-                        .onTapGesture { selectedNode = node }
+                        .onTapGesture {
+                            HapticEngine.impact(.light)
+                            selectedNode = node
+                        }
 
                     // Level label below node
                     nodeLabelView(node)

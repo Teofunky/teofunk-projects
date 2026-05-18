@@ -17,36 +17,32 @@ struct SkillNodeView: View {
     }
 
     var body: some View {
-        Button {
-            HapticEngine.impact(.light)
-        } label: {
-            ZStack {
-                // Glow ring for current node
-                if node.state == .current {
-                    Circle()
-                        .fill(Color.kmPrimary.opacity(0.15))
-                        .frame(width: diameter + 20, height: diameter + 20)
-                        .scaleEffect(isPulsing ? 1.12 : 1.0)
-                        .animation(
-                            .easeInOut(duration: 1.8).repeatForever(autoreverses: true),
-                            value: isPulsing
-                        )
-                }
-
-                // Main circle
+        ZStack {
+            // Glow ring for current node
+            if node.state == .current {
                 Circle()
-                    .fill(fillColor)
-                    .frame(width: diameter, height: diameter)
-                    .overlay(
-                        Circle().strokeBorder(strokeColor, lineWidth: strokeWidth)
+                    .fill(Color.kmPrimary.opacity(0.15))
+                    .frame(width: diameter + 20, height: diameter + 20)
+                    .scaleEffect(isPulsing ? 1.12 : 1.0)
+                    .animation(
+                        .easeInOut(duration: 1.8).repeatForever(autoreverses: true),
+                        value: isPulsing
                     )
-                    .shadow(color: shadowColor, radius: 12)
-
-                // Icon / content
-                nodeIcon
             }
+
+            // Main circle
+            Circle()
+                .fill(fillColor)
+                .frame(width: diameter, height: diameter)
+                .overlay(
+                    Circle().strokeBorder(strokeColor, lineWidth: strokeWidth)
+                )
+                .shadow(color: shadowColor, radius: 8)
+
+            // Icon / content
+            nodeIcon
         }
-        .buttonStyle(.plain)
+        .contentShape(Circle())
         .onAppear { if node.state == .current { isPulsing = true } }
     }
 
