@@ -7,122 +7,171 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		86CAB3192FB75AF400870B75 /* KonnakolMaster in Frameworks */ = {isa = PBXBuildFile; productRef = 86CAB3182FB75AF400870B75 /* KonnakolMaster */; };
+		604431EA8CC8E60F8B9A0EA5 /* TheoryContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = E22645A36AF5C039172186E1 /* TheoryContent.swift */; };
+		85F580C566F8A48706BD2BF4 /* TheoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 197516003B10E9D3EB536654 /* TheoryView.swift */; };
+		A2BDDA2702BBC7C66600125C /* TheoryArticle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 93C2547C168FD51EB3E55730 /* TheoryArticle.swift */; };
+		CBABB6518E308BB3DA0B6D9A /* ReferenceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9861ABA621AF6B019B231DAF /* ReferenceView.swift */; };
+		CE855466805BC59A6B31AB92 /* ExercisesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5AFDF8C76723DF5BB6A0E4F /* ExercisesView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		868D4B692FB74B8900B703AC /* KonnakolApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KonnakolApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		197516003B10E9D3EB536654 /* TheoryView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = TheoryView.swift; path = KonnakolApp/Presentation/Theory/TheoryView.swift; sourceTree = "<group>"; };
+		866DCA6E2FB7A6D9000BACB8 /* KonnakolApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KonnakolApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		93C2547C168FD51EB3E55730 /* TheoryArticle.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = TheoryArticle.swift; path = KonnakolApp/Domain/Content/TheoryArticle.swift; sourceTree = "<group>"; };
+		9861ABA621AF6B019B231DAF /* ReferenceView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ReferenceView.swift; path = KonnakolApp/Presentation/Reference/ReferenceView.swift; sourceTree = "<group>"; };
+		E22645A36AF5C039172186E1 /* TheoryContent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = TheoryContent.swift; path = KonnakolApp/Domain/Content/TheoryContent.swift; sourceTree = "<group>"; };
+		E5AFDF8C76723DF5BB6A0E4F /* ExercisesView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExercisesView.swift; path = KonnakolApp/Presentation/Exercises/ExercisesView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		868D4B6B2FB74B8900B703AC /* KonnakolApp */ = {
+		866DCA702FB7A6D9000BACB8 /* KonnakolApp */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+			);
 			path = KonnakolApp;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		868D4B662FB74B8900B703AC /* Frameworks */ = {
+		866DCA6B2FB7A6D9000BACB8 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				86CAB3192FB75AF400870B75 /* KonnakolMaster in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		868D4B602FB74B8900B703AC = {
+		31A90E110C26049817A39CBE /* Domain */ = {
 			isa = PBXGroup;
 			children = (
-				868D4B6B2FB74B8900B703AC /* KonnakolApp */,
-				86CAB3122FB7548B00870B75 /* Frameworks */,
-				868D4B6A2FB74B8900B703AC /* Products */,
+				5A6D1DC7360F9A8F4E153E60 /* Content */,
+			);
+			name = Domain;
+			sourceTree = "<group>";
+		};
+		5A6D1DC7360F9A8F4E153E60 /* Content */ = {
+			isa = PBXGroup;
+			children = (
+				93C2547C168FD51EB3E55730 /* TheoryArticle.swift */,
+				E22645A36AF5C039172186E1 /* TheoryContent.swift */,
+			);
+			name = Content;
+			sourceTree = "<group>";
+		};
+		63C222CFEC0CD4414AF8B0A5 /* Presentation */ = {
+			isa = PBXGroup;
+			children = (
+				D339666FA44C9ECD0B1C32FD /* Theory */,
+				C7BD956B9823A96F860BA6AB /* Reference */,
+				72EA47AF500B6FC2AEF051CA /* Exercises */,
+			);
+			name = Presentation;
+			sourceTree = "<group>";
+		};
+		72EA47AF500B6FC2AEF051CA /* Exercises */ = {
+			isa = PBXGroup;
+			children = (
+				E5AFDF8C76723DF5BB6A0E4F /* ExercisesView.swift */,
+			);
+			name = Exercises;
+			sourceTree = "<group>";
+		};
+		866DCA652FB7A6D9000BACB8 = {
+			isa = PBXGroup;
+			children = (
+				866DCA702FB7A6D9000BACB8 /* KonnakolApp */,
+				866DCA6F2FB7A6D9000BACB8 /* Products */,
+				63C222CFEC0CD4414AF8B0A5 /* Presentation */,
+				31A90E110C26049817A39CBE /* Domain */,
 			);
 			sourceTree = "<group>";
 		};
-		868D4B6A2FB74B8900B703AC /* Products */ = {
+		866DCA6F2FB7A6D9000BACB8 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				868D4B692FB74B8900B703AC /* KonnakolApp.app */,
+				866DCA6E2FB7A6D9000BACB8 /* KonnakolApp.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		86CAB3122FB7548B00870B75 /* Frameworks */ = {
+		C7BD956B9823A96F860BA6AB /* Reference */ = {
 			isa = PBXGroup;
 			children = (
+				9861ABA621AF6B019B231DAF /* ReferenceView.swift */,
 			);
-			name = Frameworks;
+			name = Reference;
+			sourceTree = "<group>";
+		};
+		D339666FA44C9ECD0B1C32FD /* Theory */ = {
+			isa = PBXGroup;
+			children = (
+				197516003B10E9D3EB536654 /* TheoryView.swift */,
+			);
+			name = Theory;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		868D4B682FB74B8900B703AC /* KonnakolApp */ = {
+		866DCA6D2FB7A6D9000BACB8 /* KonnakolApp */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 868D4B742FB74B8A00B703AC /* Build configuration list for PBXNativeTarget "KonnakolApp" */;
+			buildConfigurationList = 866DCA792FB7A6D9000BACB8 /* Build configuration list for PBXNativeTarget "KonnakolApp" */;
 			buildPhases = (
-				868D4B652FB74B8900B703AC /* Sources */,
-				868D4B662FB74B8900B703AC /* Frameworks */,
-				868D4B672FB74B8900B703AC /* Resources */,
+				866DCA6A2FB7A6D9000BACB8 /* Sources */,
+				866DCA6B2FB7A6D9000BACB8 /* Frameworks */,
+				866DCA6C2FB7A6D9000BACB8 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				868D4B6B2FB74B8900B703AC /* KonnakolApp */,
+				866DCA702FB7A6D9000BACB8 /* KonnakolApp */,
 			);
 			name = KonnakolApp;
-			packageProductDependencies = (
-				86CAB3182FB75AF400870B75 /* KonnakolMaster */,
-			);
 			productName = KonnakolApp;
-			productReference = 868D4B692FB74B8900B703AC /* KonnakolApp.app */;
+			productReference = 866DCA6E2FB7A6D9000BACB8 /* KonnakolApp.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		868D4B612FB74B8900B703AC /* Project object */ = {
+		866DCA662FB7A6D9000BACB8 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 2650;
 				LastUpgradeCheck = 2650;
 				TargetAttributes = {
-					868D4B682FB74B8900B703AC = {
+					866DCA6D2FB7A6D9000BACB8 = {
 						CreatedOnToolsVersion = 26.5;
 					};
 				};
 			};
-			buildConfigurationList = 868D4B642FB74B8900B703AC /* Build configuration list for PBXProject "KonnakolApp" */;
+			buildConfigurationList = 866DCA692FB7A6D9000BACB8 /* Build configuration list for PBXProject "KonnakolApp" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
 			);
-			mainGroup = 868D4B602FB74B8900B703AC;
+			mainGroup = 866DCA652FB7A6D9000BACB8;
 			minimizedProjectReferenceProxies = 1;
-			packageReferences = (
-				86CAB3152FB75A3000870B75 /* XCLocalSwiftPackageReference "../../Teofunky" */,
-			);
 			preferredProjectObjectVersion = 77;
-			productRefGroup = 868D4B6A2FB74B8900B703AC /* Products */;
+			productRefGroup = 866DCA6F2FB7A6D9000BACB8 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				868D4B682FB74B8900B703AC /* KonnakolApp */,
+				866DCA6D2FB7A6D9000BACB8 /* KonnakolApp */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		868D4B672FB74B8900B703AC /* Resources */ = {
+		866DCA6C2FB7A6D9000BACB8 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -132,17 +181,22 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		868D4B652FB74B8900B703AC /* Sources */ = {
+		866DCA6A2FB7A6D9000BACB8 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				85F580C566F8A48706BD2BF4 /* TheoryView.swift in Sources */,
+				CBABB6518E308BB3DA0B6D9A /* ReferenceView.swift in Sources */,
+				CE855466805BC59A6B31AB92 /* ExercisesView.swift in Sources */,
+				A2BDDA2702BBC7C66600125C /* TheoryArticle.swift in Sources */,
+				604431EA8CC8E60F8B9A0EA5 /* TheoryContent.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		868D4B722FB74B8A00B703AC /* Debug */ = {
+		866DCA772FB7A6D9000BACB8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -205,7 +259,7 @@
 			};
 			name = Debug;
 		};
-		868D4B732FB74B8A00B703AC /* Release */ = {
+		866DCA782FB7A6D9000BACB8 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -261,7 +315,7 @@
 			};
 			name = Release;
 		};
-		868D4B752FB74B8A00B703AC /* Debug */ = {
+		866DCA7A2FB7A6D9000BACB8 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -270,6 +324,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Konnakol Master listens to your voice to measure rhythm accuracy.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -292,7 +347,7 @@
 			};
 			name = Debug;
 		};
-		868D4B762FB74B8A00B703AC /* Release */ = {
+		866DCA7B2FB7A6D9000BACB8 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -301,6 +356,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Konnakol Master listens to your voice to measure rhythm accuracy.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -326,40 +382,25 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		868D4B642FB74B8900B703AC /* Build configuration list for PBXProject "KonnakolApp" */ = {
+		866DCA692FB7A6D9000BACB8 /* Build configuration list for PBXProject "KonnakolApp" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				868D4B722FB74B8A00B703AC /* Debug */,
-				868D4B732FB74B8A00B703AC /* Release */,
+				866DCA772FB7A6D9000BACB8 /* Debug */,
+				866DCA782FB7A6D9000BACB8 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		868D4B742FB74B8A00B703AC /* Build configuration list for PBXNativeTarget "KonnakolApp" */ = {
+		866DCA792FB7A6D9000BACB8 /* Build configuration list for PBXNativeTarget "KonnakolApp" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				868D4B752FB74B8A00B703AC /* Debug */,
-				868D4B762FB74B8A00B703AC /* Release */,
+				866DCA7A2FB7A6D9000BACB8 /* Debug */,
+				866DCA7B2FB7A6D9000BACB8 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCLocalSwiftPackageReference section */
-		86CAB3152FB75A3000870B75 /* XCLocalSwiftPackageReference "../../Teofunky" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = ../../Teofunky;
-		};
-/* End XCLocalSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		86CAB3182FB75AF400870B75 /* KonnakolMaster */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 86CAB3152FB75A3000870B75 /* XCLocalSwiftPackageReference "../../Teofunky" */;
-			productName = KonnakolMaster;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
-	rootObject = 868D4B612FB74B8900B703AC /* Project object */;
+	rootObject = 866DCA662FB7A6D9000BACB8 /* Project object */;
 }
