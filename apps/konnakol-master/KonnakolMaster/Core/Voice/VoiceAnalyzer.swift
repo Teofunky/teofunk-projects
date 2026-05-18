@@ -164,6 +164,7 @@ final class VoiceAnalyzer {
         let inputNode = avEngine.inputNode
         let nativeFormat = inputNode.outputFormat(forBus: 0)
 
+        inputNode.removeTap(onBus: 0)   // remove any stale tap before installing
         inputNode.installTap(onBus: 0, bufferSize: 512, format: nativeFormat) { buffer, _ in
             guard let channelData = buffer.floatChannelData?[0] else { return }
             let samples = Array(UnsafeBufferPointer(start: channelData, count: Int(buffer.frameLength)))
