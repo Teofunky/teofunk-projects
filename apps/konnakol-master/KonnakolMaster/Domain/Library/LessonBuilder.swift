@@ -30,41 +30,51 @@ enum LessonBuilder {
         }
     }
 
-    // MARK: - Level 1: Первый голос
+    // MARK: - Level 1: Первый голос (Jois EP 3-6)
 
     private static func level1() -> Lesson {
         Lesson(
             id: "level-1",
             levelNumber: 1,
             title: "Первый голос",
-            subtitle: "Базовые слоги без метронома",
-            description: "Коннакол — это язык ритма. Прежде чем считать, нужно говорить. Изучите три фундаментальные слоговые группы и почувствуйте их звучание.",
-            estimatedMinutes: 8,
+            subtitle: "Та, Та-Ка, Та-Ки-Та, Та-Ка-Ди-Ми без метронома",
+            description: "Коннакол начинается с произношения. Четыре базовые слоговые единицы — четыре кирпича всего ритмического языка. Сначала слушаем, потом говорим. Метронома пока нет.",
+            estimatedMinutes: 10,
             steps: [
                 .intro(
-                    text: "Коннакол — это система устной передачи ритма, существующая более двух тысяч лет. В западной музыке ритм записывают нотами. В карнатической традиции его произносят вслух — слогами, которые сами по себе несут в себе тайминг, ударение и форму.\n\nПочему слоги важнее нот? Потому что рот и ухо учатся вместе. Когда вы произносите «Та-Ки-Та», ваше тело запоминает ровно три шага. Когда вы читаете «три», — это только число. Слог живёт в мышцах.\n\nСегодня мы изучим три группы: Та-Ка (2 слога), Та-Ки-Та (3 слога), Та-Ка-Ди-Ми (4 слога). Метронома пока нет. Ваша задача — добиться ровности и ясности каждого слога.",
+                    text: "Коннакол — это система устной передачи ритма, которой более двух тысяч лет. В западной традиции ритм записывают нотами. В карнатической — его произносят вслух, слогами, которые сами по себе несут в себе тайминг, акцент и форму.\n\nПочему слоги работают лучше, чем счёт? Потому что слог живёт в теле. Когда вы произносите «Та-Ки-Та», ваш рот знает ровно три шага. Когда вы считаете «1-2-3», мозг считает, но тело не чувствует.\n\nМетод Сомашекара Джоиса (Somashekar Jois), которому следует этот курс, всегда начинает так: сначала слушаешь, потом говоришь. Никакого метронома — пока рот не запомнит форму.\n\nСегодня четыре единицы:\n• Там (1 слог) — базовый удар\n• Та-Ка (2 слога) — двойка\n• Та-Ки-Та (3 слога) — триоль\n• Та-Ка-Ди-Ми (4 слога) — самая важная фраза коннакола\n\nПравило: ровность важнее скорости. Медленно и чётко — лучше, чем быстро и нечётко.",
                     videoURL: nil
                 ),
+                // Ta: single accent syllable
+                .listen(syllableGroupId: "jathi-1", repetitions: 4),
+                .speak(
+                    syllableGroupId: "jathi-1",
+                    targetCount: 8,
+                    instruction: "Там — базовый акцентный слог. Произносите коротко и ясно, как удар. Восемь раз подряд с равными интервалами между ними. Не торопитесь."
+                ),
+                // Ta-Ka: two syllables
                 .listen(syllableGroupId: "jathi-2", repetitions: 4),
                 .speak(
                     syllableGroupId: "jathi-2",
                     targetCount: 16,
-                    instruction: "Та-Ка — два ровных слога, как шаги. Произнесите 8 раз подряд, не торопясь. Оба слога должны быть одинаковой длины."
+                    instruction: "Та-Ка — одна единица, не два отдельных слога. Произносите слитно, как одно слово «така». Оба слога равной длины. Восемь раз подряд."
                 ),
+                // Ta-Ki-Ta: three syllables
                 .listen(syllableGroupId: "jathi-3", repetitions: 4),
                 .speak(
                     syllableGroupId: "jathi-3",
                     targetCount: 24,
-                    instruction: "Та-Ки-Та — триоль. Средний слог «Ки» легко сжать. Следите, чтобы все три были равномерными. Повторите 8 раз."
+                    instruction: "Та-Ки-Та — триоль. Все три слога одинаковой длительности. Средний «Ки» легко сократить — не давайте ему это. Восемь раз подряд."
                 ),
+                // Ta-Ka-Di-Mi: four syllables
                 .listen(syllableGroupId: "jathi-4", repetitions: 4),
                 .speak(
                     syllableGroupId: "jathi-4",
                     targetCount: 32,
-                    instruction: "Та-Ка-Ди-Ми — самая важная группа в коннаколе. Четыре слога, ровно, уверенно. «Ди» и «Ми» в конце — не глотайте их. Повторите 8 раз."
+                    instruction: "Та-Ка-Ди-Ми — фундаментальная фраза чатушра-гати. Все четыре слога одинаковы. «Ди» и «Ми» в конце — не глотайте. Произнесите восемь раз чётко и ровно."
                 ),
                 .check(
-                    summary: "Вы познакомились с тремя основными джати: двойкой, тройкой и четвёркой. Помните: ровность важнее скорости. На следующем уроке появятся все пять групп."
+                    summary: "Вы освоили четыре базовые единицы коннакола: одиночный слог, двойку, тройку и четвёрку. Запомните их как имена, а не как счёт — «такадими», а не «один-два-три-четыре». На следующем уроке придёт метроном."
                 ),
             ],
             passCriteria: PassCriteria(minAccuracy: 0.75, maxAvgDriftMs: 80),
@@ -72,120 +82,102 @@ enum LessonBuilder {
         )
     }
 
-    // MARK: - Level 2: Пять джати
+    // MARK: - Level 2: Пульс (Jois EP 7-12 + Mute Step)
 
     private static func level2() -> Lesson {
         Lesson(
             id: "level-2",
             levelNumber: 2,
-            title: "Пять джати",
-            subtitle: "Освоение всех пяти групп",
-            description: "Джати — это слоговые группы от 3 до 9. Каждая группа имеет собственный характер и звучание. Сегодня вы освоите все пять.",
-            estimatedMinutes: 10,
+            title: "Пульс",
+            subtitle: "Слоги с метрономом и первый Mute Step",
+            description: "Метроном — это друг, который иногда уходит, чтобы ты сам доказал, что выучил. Слоги с пульсом, а потом — тишина. Главный урок: держать темп без поддержки.",
+            estimatedMinutes: 12,
             steps: [
                 .intro(
-                    text: "В коннаколе существует пять фундаментальных слоговых групп — джати. Они образуют основу всего ритмического языка:\n\n• Тисра (3): Та-Ки-Та\n• Чатусра (4): Та-Ка-Ди-Ми\n• Кханда (5): Та-Ка-Та-Ки-На\n• Мисра (7): Та-Ки-Та-Та-Ка-Ди-Ми\n• Санкирна (9): Та-Ка-Та-Ки-На-Та-Ки-Та\n\nОбратите особое внимание на кханду (5) и мисру (7) — они нестандартные для европейского уха. Пять слогов имеют особое «плавающее» ощущение. Семь — ощущение волны с подъёмом в конце.\n\nСегодня слушайте каждую группу перед тем, как произносить.",
+                    text: "До сих пор вы говорили свободно — без пульса, без ограничений. Теперь появляется метроном.\n\nПо методу Jois, метроном — это не «контроль», а партнёр. Он задаёт долю. Вы наполняете её слогами. Сначала — один слог на долю. Потом — два. Потом — четыре.\n\nГлавный шаг этого урока — Mute Step (шаг тишины). Метроном играет несколько долей, потом замолкает. Вы продолжаете произносить через тишину. Потом метроном возвращается — и показывает, насколько вы убежали или отстали.\n\nЭто первый настоящий тест внутреннего ритма. Не пугайтесь результата — на первом разе всегда есть drift. Важно, что вы его видите.\n\nТемп сегодня: 60 BPM. Медленно. Это правильно.",
                     videoURL: nil
                 ),
-                .listen(syllableGroupId: "jathi-3", repetitions: 3),
-                .speak(
-                    syllableGroupId: "jathi-3",
-                    targetCount: 18,
-                    instruction: "Та-Ки-Та, 6 раз. Ровно, как капли метронома."
-                ),
-                .listen(syllableGroupId: "jathi-4", repetitions: 3),
-                .speak(
-                    syllableGroupId: "jathi-4",
-                    targetCount: 24,
-                    instruction: "Та-Ка-Ди-Ми, 6 раз. Помните прошлый урок — «Ди-Ми» не проглатывать."
-                ),
-                .listen(syllableGroupId: "jathi-5", repetitions: 4),
-                .speak(
-                    syllableGroupId: "jathi-5",
-                    targetCount: 30,
-                    instruction: "Та-Ка-Та-Ки-На — кханда. Пять слогов. Не торопитесь на «Ки-На» в конце. Произнесите 6 раз."
-                ),
-                .listen(syllableGroupId: "jathi-7", repetitions: 4),
-                .speak(
-                    syllableGroupId: "jathi-7",
-                    targetCount: 42,
-                    instruction: "Та-Ки-Та-Та-Ка-Ди-Ми — мисра. Семь слогов. Это как «тройка + четвёрка» слитые вместе. Почувствуйте акцент в начале. Произнесите 6 раз."
-                ),
-                .listen(syllableGroupId: "jathi-9", repetitions: 3),
-                .speak(
-                    syllableGroupId: "jathi-9",
-                    targetCount: 27,
-                    instruction: "Та-Ка-Та-Ки-На-Та-Ки-Та — санкирна. Девять слогов. Это «пятёрка + тройка». Медленно. Произнесите 3 раза."
-                ),
+                // Clap along to feel the pulse before adding syllables
+                .clap(talaId: "adi", nadai: .chatusra, cycles: 2),
+                // One syllable per beat
+                .loop(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-1", cycles: 4),
+                // Two syllables per beat
+                .loop(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-2", cycles: 4),
+                // Four syllables per beat (chatusra gati — the standard density)
+                .loop(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-4", cycles: 4),
+                // ★ MUTE STEP — Chatusra
+                .mute(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-4", normalCycles: 2, muteCycles: 2),
+                // Three syllables per beat — tisra feel
+                .loop(talaId: "adi", nadai: .tisra, syllableGroupId: "jathi-3", cycles: 4),
+                // ★ MUTE STEP — Tisra
+                .mute(talaId: "adi", nadai: .tisra, syllableGroupId: "jathi-3", normalCycles: 2, muteCycles: 2),
                 .check(
-                    summary: "Теперь вы знаете все пять джати. Запомните: каждая группа — отдельная «единица мысли». Вы не считаете слоги — вы произносите имя. Следующий урок: ади тала."
+                    summary: "Drift — это расстояние между вашим темпом и метрономом в миллисекундах. Если drift ≤60ms — вы уже хороший музыкант. Больше — продолжайте практику. Внутренний метроном развивается только через тишину."
                 ),
             ],
-            passCriteria: PassCriteria(minAccuracy: 0.75, maxAvgDriftMs: 75),
+            passCriteria: PassCriteria(minAccuracy: 0.75, maxAvgDriftMs: 60),
             unlockCriteria: UnlockCriteria(kind: .completePrevious, requiredLessonId: "level-1")
         )
     }
 
-    // MARK: - Level 3: Ади тала
+    // MARK: - Level 3: Жесты талы (Jois EP 2 — Tala Gestures)
 
     private static func level3() -> Lesson {
         Lesson(
             id: "level-3",
             levelNumber: 3,
-            title: "Ади тала",
-            subtitle: "Первый ритмический цикл — 8 долей",
-            description: "Тала — это повторяющийся цикл. Ади тала — 8 долей, и это основа карнатической музыки. Сегодня вы научитесь хлопать её и говорить внутри.",
-            estimatedMinutes: 12,
+            title: "Жесты талы",
+            subtitle: "Ади тала — только движения, без слогов",
+            description: "По методу Jois: сначала рука знает цикл, потом голос. Сегодня — только жесты Ади талы без слогов. Рука — это метроном тела.",
+            estimatedMinutes: 10,
             steps: [
                 .intro(
-                    text: "Тала — это структура времени. Представьте тактовую черту, которая возвращается снова и снова. Каждый возврат к началу цикла называется авартанам, а сама точка возврата — сам.\n\nАди тала — восемь долей. Структура:\n• Доли 1–4: лагху (один хлопок + три касания пальцами)\n• Доли 5–6: друтам (хлопок + волна)\n• Доли 7–8: друтам (хлопок + волна)\n\nСам — это доля 1. Это момент «возвращения домой». В карнатической музыке всё — мелодия, ритм, импровизация — рассчитывается так, чтобы разрешиться на самé.\n\nСначала просто хлопайте. Потом добавим слоги.",
+                    text: "Тала — это не просто счёт. Это физический цикл, закреплённый в движении. Именно поэтому Somashekar Jois в своём курсе сначала учит жестам — и только потом добавляет слоги.\n\nАди тала состоит из 8 долей и трёх разделов (анга):\n\n• Лагху (доли 1–4): хлопок ладонью + три касания пальцами (указательный, средний, безымянный)\n• Друтам (доли 5–6): хлопок + ладонь вверх (волна)\n• Друтам (доли 7–8): хлопок + ладонь вверх (волна)\n\nДоля 1 — это Сам. Это точка возврата. Всё, что вы будете делать в коннаколе, рассчитывается так, чтобы разрешиться именно здесь.\n\nСегодняшняя задача: научить руку идти по циклу уверенно, без раздумий. Слогов пока нет. Только движение.",
                     videoURL: nil
                 ),
+                // Laghu practice: first 4 beats (just clapping the full cycle but focusing on laghu)
                 .clap(talaId: "adi", nadai: .chatusra, cycles: 4),
-                .listen(syllableGroupId: "jathi-4", repetitions: 4),
-                .loop(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-4", cycles: 4),
-                .speak(
-                    syllableGroupId: "jathi-4",
-                    targetCount: 32,
-                    instruction: "Произносите Та-Ка-Ди-Ми, чувствуя границу такта. Первый слог каждых восьми — это сам. Попробуйте выделить его голосом."
-                ),
-                .loop(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-4", cycles: 4),
+                // More clap cycles to internalize the drutam wave gesture
+                .clap(talaId: "adi", nadai: .chatusra, cycles: 8),
+                // Full Adi at moderate pace
+                .clap(talaId: "adi", nadai: .chatusra, cycles: 16),
+                // Adi at increased cycles to fully internalize the cycle
+                .clap(talaId: "adi", nadai: .chatusra, cycles: 12),
                 .check(
-                    summary: "Вы прошли первый ритмический цикл. Ади тала — основа половины всей карнатической музыки. Чувствуете, как цикл «замыкается»? Это сам. Это будет вашей точкой опоры на все следующие уроки."
+                    summary: "Рука знает цикл — это уже половина коннакола. Жесты закрепляют Сам в теле. На следующем уроке мы наложим слоги на эти жесты. Продолжайте делать жесты во время всех последующих уроков."
                 ),
             ],
-            passCriteria: PassCriteria(minAccuracy: 0.78, maxAvgDriftMs: 70),
+            passCriteria: PassCriteria(minAccuracy: 0.75, maxAvgDriftMs: 70),
             unlockCriteria: UnlockCriteria(kind: .completePrevious, requiredLessonId: "level-2")
         )
     }
 
-    // MARK: - Level 4: Трикалам
+    // MARK: - Level 4: Ади тала + слоги (Jois EP 13-18)
 
     private static func level4() -> Lesson {
         Lesson(
             id: "level-4",
             levelNumber: 4,
-            title: "Трикалам",
-            subtitle: "Три скорости — один пульс",
-            description: "Трикалам — это одна и та же фраза в трёх плотностях: ×1, ×2, ×4. Метроном не ускоряется. Меняется только количество слогов на долю.",
+            title: "Ади тала + слоги",
+            subtitle: "Наложение слогов на жестовый цикл",
+            description: "Голос накладывается на жест. Четыре слога на долю, три слога на долю, два слога — всё внутри одного цикла. Чувствуйте, как Сам возвращается.",
             estimatedMinutes: 13,
             steps: [
                 .intro(
-                    text: "Трикалам означает «три скорости». Это не ускорение темпа — это увеличение плотности слогов внутри того же пульса.\n\n• Калам 1 (пратхама): один слог на долю — Та\n• Калам 2 (двития): два слога на долю — Та-Ка\n• Калам 4 (чатурта): четыре слога на долю — Та-Ка-Ди-Ми\n\nВ живом исполнении музыкант переходит от одной скорости к другой без остановки. Пульс — как якорь: он не двигается. Меняется то, что внутри.\n\nЭто первый настоящий тест вашего внутреннего метронома. Если вы «поплыли» при смене скорости — значит, держитесь за плотность, а не за пульс. Слушайте долю, а не слоги.",
+                    text: "Теперь у вас есть два навыка: слоги (Урок 1-2) и жесты (Урок 3). Сегодня они соединяются.\n\nВ Ади тале 8 долей. В чатушра-гати (четвёрка) каждая доля несёт 4 слога: 8 × 4 = 32 слога за один цикл.\n\nКак это звучит? «Та-Ка-Ди-Ми, Та-Ка-Ди-Ми, Та-Ка-Ди-Ми, Та-Ка-Ди-Ми...» — восемь раз, и первый слог восьмой группы — это снова Сам.\n\nПотом мы уменьшим плотность:\n• Та-Ки-Та: 24 слога на цикл (тисра-гати)\n• Та-Ка: 16 слогов на цикл (по два на долю)\n\nЭто называется Сарвалагху (sarvalaghu) — «равномерное заполнение цикла». По методу Jois, именно с него нужно начинать — не со сложных фигур, а с чистого заполнения. Пульс оседает в теле только через многократное повторение.",
                     videoURL: nil
                 ),
-                .listen(syllableGroupId: "jathi-2", repetitions: 4),
+                // Ta-Ka-Di-Mi in Adi — the primary exercise (sarvalaghu chatusra)
                 .listen(syllableGroupId: "jathi-4", repetitions: 4),
-                .loop(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-2", cycles: 2),
-                .loop(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-4", cycles: 4),
-                .speak(
-                    syllableGroupId: "jathi-4",
-                    targetCount: 32,
-                    instruction: "Произнесите трикалам вслух: сначала Та-Ка (8 раз), затем без паузы Та-Ка-Ди-Ми (8 раз). Доли не меняются — только плотность."
-                ),
-                .mute(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-4", normalCycles: 2, muteCycles: 2),
+                .loop(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-4", cycles: 8),
+                // Ta-Ki-Ta in Adi (tisra gati — 24 syllables per cycle)
+                .loop(talaId: "adi", nadai: .tisra, syllableGroupId: "jathi-3", cycles: 6),
+                // Ta-Ka in Adi (sparse — 16 syllables per cycle, two per beat)
+                .loop(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-2", cycles: 8),
+                // Mute Step in Adi with chatusra (the key skill)
+                .mute(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-4", normalCycles: 2, muteCycles: 1),
                 .check(
-                    summary: "Трикалам — это разговор между плотностью и пульсом. Если метроном пропал и вы удержали темп — ваш внутренний часовой работает. Следующий шаг: другая тала."
+                    summary: "Вы завершили Сарвалагху в Ади тале. Это базовая практика, к которой возвращаются даже опытные музыканты. Чем ровнее и спокойнее звучит цикл — тем глубже он оседает. Следующий урок: три скорости."
                 ),
             ],
             passCriteria: PassCriteria(minAccuracy: 0.78, maxAvgDriftMs: 65),
@@ -193,35 +185,36 @@ enum LessonBuilder {
         )
     }
 
-    // MARK: - Level 5: Рупака тала
+    // MARK: - Level 5: Трикалам (Jois EP 19-26)
 
     private static func level5() -> Lesson {
         Lesson(
             id: "level-5",
             levelNumber: 5,
-            title: "Рупака тала",
-            subtitle: "Шестидольный цикл",
-            description: "Рупака тала — 6 долей: 2 + 4. Первая доля — не хлопок, а волна. Это меняет всё ощущение от цикла.",
-            estimatedMinutes: 12,
+            title: "Трикалам",
+            subtitle: "Три скорости — один пульс",
+            description: "Трикалам: одна и та же фраза в трёх плотностях — медленной (½×), средней (1×) и быстрой (2×). Метроном не меняется. Меняется только количество слогов на долю.",
+            estimatedMinutes: 14,
             steps: [
                 .intro(
-                    text: "Рупака тала состоит из шести долей. Структура:\n• Доли 1–2: друтам (хлопок + волна)\n• Доли 3–6: лагху (хлопок + три пальца)\n\nКлючевое отличие от ади талы: сам здесь — это первая доля друтама, которая начинается с хлопка-и-волны. Ощущение «возвращения» другое — оно мягче, как вдох перед новым шагом.\n\nЧтобы считать: 1-2-3-4-5-6 становится «хлоп-волна-хлоп-2-3-4». Отрабатывайте хлопки до того, как добавите слоги — руки должны быть уверенными.",
+                    text: "Трикалам означает «три времени». Это один из главных принципов карнатической ритмики.\n\nОдна фраза — три плотности произношения внутри одного и того же пульса:\n\n• Виламба кала (медленная): Та-Ка — два слога на долю. Чувствуется как растянутое, просторное время.\n• Мадхьяма кала (средняя): Та-Ка-Ди-Ми — четыре слога на долю. Это стандартная плотность.\n• Друта кала (быстрая): Та-Ка-Ди-Ми Та-Ка-Ди-Ми — восемь слогов на долю. Плотно, почти слитно.\n\nМетроном не ускоряется — он стоит на месте. Меняется только то, сколько слогов вы вкладываете в каждую долю.\n\nЭто первый настоящий тест внутреннего метронома. При смене плотности очень легко «поплыть» — начать ориентироваться на слоги, а не на долю. Держитесь за пульс метронома, а не за собственные слоги.",
                     videoURL: nil
                 ),
-                .clap(talaId: "rupaka", nadai: .chatusra, cycles: 4),
+                // Vilamba Kala (slow) — Ta-Ka, 2 syllables per beat
+                .listen(syllableGroupId: "jathi-2", repetitions: 4),
+                .loop(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-2", cycles: 8),
+                // Madhyama Kala (medium) — Ta-Ka-Di-Mi, 4 syllables per beat
                 .listen(syllableGroupId: "jathi-4", repetitions: 4),
-                .loop(talaId: "rupaka", nadai: .chatusra, syllableGroupId: "jathi-4", cycles: 4),
-                .speak(
-                    syllableGroupId: "jathi-4",
-                    targetCount: 24,
-                    instruction: "Говорите Та-Ка-Ди-Ми внутри рупаки, продолжая хлопать. Шесть долей — это три раза по Та-Ка плюс начало следующей группы. Почувствуйте, где начинается новый цикл."
-                ),
-                .mute(talaId: "rupaka", nadai: .chatusra, syllableGroupId: "jathi-4", normalCycles: 2, muteCycles: 2),
+                .loop(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-4", cycles: 8),
+                // Dhruta Kala (fast) — Ta-Ka-Di-Mi twice, 8 syllables per beat
+                .loop(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-8", cycles: 4),
+                // Mute Step — hold pulse through silence while switching densities
+                .mute(talaId: "adi", nadai: .chatusra, syllableGroupId: "jathi-4", normalCycles: 2, muteCycles: 2),
                 .check(
-                    summary: "Рупака — ваша вторая тала. Обратите внимание: цикл из 6 долей воспринимается иначе, чем 8. Он короче и «острее» — сам появляется быстрее. Следующий урок: нечётные метры."
+                    summary: "Трикалам — это разговор между плотностью и пульсом. Если вы прошли Mute Step без потери пульса, ваш внутренний метроном работает. Следующий урок: тисра-гати в Ади — переключение между тройкой и четвёркой внутри цикла."
                 ),
             ],
-            passCriteria: PassCriteria(minAccuracy: 0.78, maxAvgDriftMs: 70),
+            passCriteria: PassCriteria(minAccuracy: 0.78, maxAvgDriftMs: 60),
             unlockCriteria: UnlockCriteria(kind: .completePrevious, requiredLessonId: "level-4")
         )
     }
