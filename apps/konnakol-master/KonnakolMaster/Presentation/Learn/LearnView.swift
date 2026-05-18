@@ -247,6 +247,7 @@ private struct TopographicBackground: View {
                 ctx.stroke(path, with: .color(Color.kmSurface1.opacity(0.5)), lineWidth: 0.5)
             }
         }
+        .allowsHitTesting(false)
         .ignoresSafeArea()
     }
 }
