@@ -1,0 +1,236 @@
+import AVFoundation
+import Observation
+
+// MARK: - AudioEngine
+//
+// Public interface for all audio in Konnakol Master.
+// Owns the AVAudioEngine and MetronomeScheduler; exposed to SwiftUI
+// views via the environment as an @Observable object.
+//
+// Thread model
+// ------------
+// - All `@Observable` property mutations happen on @MainActor.
+// - MetronomeScheduler's internal scheduling runs on its own high-priority
+//   queue; it calls back to AudioEngine via `onBeatDidChange` which dispatches
+//   to main automatically.
+// - AVAudioEngine start/stop is called synchronously on the calling actor;
+//   calling from a Task is fine.
+
+@Observable
+@MainActor
+final class AudioEngine {
+
+    // MARK: Observable State (drives UI)
+
+    /// Zero-indexed beat within the current tala cycle (updates ~every beat).
+    private(set) var currentBeat: Int = 0
+
+    /// Whether the metronome is actively running.
+    private(set) var isPlaying: Bool = false
+
+    /// Current BPM, kept in sync after `changeBPM(_:)` calls.
+    private(set) var bpm: Int = 80
+
+    /// Active tala.
+    private(set) var tala: Tala = TalaLibrary.adi
+
+    /// Active nadai.
+    private(set) var nadai: Nadai = .chatusra
+
+    /// Non-nil when the engine failed to start — surface to the user.
+    private(set) var engineError: AudioEngineError?
+
+    // MARK: Private
+
+    private let avEngine        = AVAudioEngine()
+    private let scheduler       = MetronomeScheduler()
+    private let syllableNode    = AVAudioPlayerNode()
+    private var syllableBuffers: [String: AVAudioPCMBuffer] = [:]
+    private var isEngineReady   = false
+
+    // MARK: Init
+
+    init() {
+        scheduler.onBeatDidChange = { [weak self] beat in
+            self?.currentBeat = beat
+        }
+    }
+
+    // MARK: - Public API
+
+    /// Start the metronome.
+    /// Activates AVAudioSession and starts the engine on first call.
+    func start(bpm: Int? = nil, tala: Tala? = nil, nadai: Nadai? = nil) {
+        if let bpm   { self.bpm   = bpm   }
+        if let tala  { self.tala  = tala  }
+        if let nadai { self.nadai = nadai }
+
+        do {
+            try prepareEngineIfNeeded()
+        } catch {
+            engineError = .setupFailed(error)
+            return
+        }
+
+        scheduler.start(bpm: self.bpm, tala: self.tala, nadai: self.nadai)
+        isPlaying = true
+        engineError = nil
+    }
+
+    /// Stop the metronome. Does not tear down AVAudioEngine.
+    func stop() {
+        scheduler.stop()
+        isPlaying = false
+        currentBeat = 0
+    }
+
+    /// Prepare the engine for syllable playback without starting the metronome.
+    /// Call this when entering a lesson so audio is ready before the first Listen step.
+    func prepareForLesson() {
+        try? prepareEngineIfNeeded()
+    }
+
+    /// Change BPM while running. Transition is sample-accurate:
+    /// the new tempo takes effect at the next beat boundary.
+    func changeBPM(_ newBPM: Int) {
+        bpm = newBPM.clamped(to: 30...300)
+        guard isPlaying else { return }
+        scheduler.changeBPM(bpm, tala: tala, nadai: nadai)
+    }
+
+    /// Switch tala. Restarts scheduling from beat 0.
+    func changeTala(_ newTala: Tala) {
+        tala = newTala
+        guard isPlaying else { return }
+        scheduler.start(bpm: bpm, tala: tala, nadai: nadai)
+        currentBeat = 0
+    }
+
+    /// Switch nadai subdivision. Restarts scheduling.
+    func changeNadai(_ newNadai: Nadai) {
+        nadai = newNadai
+        guard isPlaying else { return }
+        scheduler.start(bpm: bpm, tala: tala, nadai: nadai)
+    }
+
+    // MARK: - Private
+
+    /// Play a single syllable sound by name (e.g. "ta", "ka", "di", "mi").
+    func playSyllable(_ name: String) {
+        if !isEngineReady { try? prepareEngineIfNeeded() }
+        guard isEngineReady,
+              let buffer = syllableBuffers[name.lowercased()] else { return }
+        syllableNode.scheduleBuffer(buffer, at: nil, options: .interrupts, completionHandler: nil)
+    }
+
+    private func prepareEngineIfNeeded() throws {
+        guard !isEngineReady else { return }
+
+        try AudioSessionManager.activate()
+
+        // Attach scheduler nodes before starting the engine.
+        scheduler.attach(to: avEngine)
+
+        // Prepare first so mainMixerNode negotiates the hardware format.
+        // Connecting syllableNode before prepare with a guessed format can cause
+        // avEngine.start() to throw a format-mismatch exception.
+        avEngine.prepare()
+
+        // After prepare the mixer has a valid hardware format — use it for everything.
+        let format = avEngine.mainMixerNode.outputFormat(forBus: 0)
+
+        avEngine.attach(syllableNode)
+        avEngine.connect(syllableNode, to: avEngine.mainMixerNode, format: format)
+
+        // Pre-load synthesised syllable buffers with the confirmed hardware format.
+        let syllableNames = ["ta", "ka", "di", "mi", "ki", "tha", "tham", "dhin", "gi", "na"]
+        for name in syllableNames {
+            syllableBuffers[name] = SamplePlayer.buffer(named: "\(name).wav", format: format)
+        }
+
+        try avEngine.start()
+        syllableNode.play()
+
+        isEngineReady = true
+
+        // Re-configure if AVAudioSession resets (e.g. phone call interruption).
+        NotificationCenter.default.addObserver(
+            forName: AVAudioSession.interruptionNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            MainActor.assumeIsolated { self?.handleInterruption(notification) }
+        }
+        NotificationCenter.default.addObserver(
+            forName: AVAudioSession.routeChangeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            MainActor.assumeIsolated { self?.handleRouteChange(notification) }
+        }
+    }
+
+    // MARK: Interruption Handling
+
+    private func handleInterruption(_ notification: Notification) {
+        guard
+            let info = notification.userInfo,
+            let typeValue = info[AVAudioSessionInterruptionTypeKey] as? UInt,
+            let type = AVAudioSession.InterruptionType(rawValue: typeValue)
+        else { return }
+
+        switch type {
+        case .began:
+            // System interrupted (call, Siri). Stop gracefully.
+            if isPlaying { stop() }
+
+        case .ended:
+            // Reactivate session; user must tap play again.
+            let shouldResume = (info[AVAudioSessionInterruptionOptionKey] as? UInt)
+                .flatMap(AVAudioSession.InterruptionOptions.init)
+                .map { $0.contains(.shouldResume) } ?? false
+
+            try? AudioSessionManager.activate()
+            if shouldResume && isPlaying {
+                start()
+            }
+
+        @unknown default:
+            break
+        }
+    }
+
+    private func handleRouteChange(_ notification: Notification) {
+        guard
+            let info = notification.userInfo,
+            let reasonValue = info[AVAudioSessionRouteChangeReasonKey] as? UInt,
+            let reason = AVAudioSession.RouteChangeReason(rawValue: reasonValue)
+        else { return }
+
+        // Headphones unplugged — pause to avoid blasting speakers unexpectedly.
+        if reason == .oldDeviceUnavailable && isPlaying {
+            stop()
+        }
+    }
+}
+
+// MARK: - AudioEngineError
+
+enum AudioEngineError: Error, LocalizedError {
+    case setupFailed(Error)
+
+    var errorDescription: String? {
+        switch self {
+        case .setupFailed(let underlying):
+            return "Audio engine failed to start: \(underlying.localizedDescription)"
+        }
+    }
+}
+
+// MARK: - Int Clamp Helper
+
+private extension Int {
+    func clamped(to range: ClosedRange<Int>) -> Int {
+        Swift.max(range.lowerBound, Swift.min(self, range.upperBound))
+    }
+}
