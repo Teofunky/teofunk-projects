@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Film Lab</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0e0e0e; --surface: #1a1a1a; --surface2: #222;
+  --border: #2e2e2e; --border2: #444;
+  --text: #e8e8e8; --text2: #999; --text3: #555;
+  --accent: #c8a96e; --radius: 10px; --radius-sm: 6px;
+}
+body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif; min-height: 100vh; padding: 1.25rem 0.875rem 3rem; -webkit-text-size-adjust: 100%; }
+.app { max-width: 980px; margin: 0 auto; }
+header { display: flex; align-items: baseline; gap: 1rem; border-bottom: 0.5px solid var(--border2); padding-bottom: 1rem; margin-bottom: 1.25rem; }
+h1 { font-size: 17px; font-weight: 400; letter-spacing: 0.1em; text-transform: uppercase; }
+.tagline { font-size: 11px; color: var(--text3); letter-spacing: 0.05em; }
+.layout { display: grid; grid-template-columns: 300px 1fr; gap: 1.25rem; align-items: start; }
+@media (max-width: 700px) { .layout { grid-template-columns: 1fr; } }
+.panel { background: var(--surface); border: 0.5px solid var(--border2); border-radius: var(--radius); padding: 1rem; display: flex; flex-direction: column; gap: 1rem; }
+.section-label { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text3); margin-bottom: 0.5rem; }
+.layers-list { display: flex; flex-direction: column; gap: 6px; }
+.layer-card { background: var(--surface2); border: 0.5px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; transition: border-color 0.15s; }
+.layer-card.active { border-color: var(--accent); }
+.layer-header { display: flex; align-items: center; gap: 8px; padding: 10px; cursor: pointer; -webkit-tap-highlight-color: transparent; user-select: none; }
+.layer-toggle { width: 18px; height: 18px; border-radius: 4px; border: 1.5px solid var(--border2); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; color: transparent; transition: all 0.15s; }
+.layer-card.active .layer-toggle { background: var(--accent); border-color: var(--accent); color: #1a1000; }
+.layer-icon { font-size: 15px; }
+.layer-name { font-size: 13px; font-weight: 500; color: var(--text2); flex: 1; }
+.layer-card.active .layer-name { color: var(--text); }
+.layer-body { padding: 0 10px 10px; display: none; }
+.layer-card.active .layer-body { display: block; }
+.layer-strength { display: flex; align-items: center; gap: 10px; }
+.layer-strength label { font-size: 11px; color: var(--text3); white-space: nowrap; }
+.layer-strength span { font-size: 11px; color: var(--accent); min-width: 32px; text-align: right; }
+.sliders { display: flex; flex-direction: column; gap: 12px; }
+.slider-row { display: flex; flex-direction: column; gap: 5px; }
+.slider-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--text2); }
+.slider-label span:last-child { color: var(--accent); font-weight: 500; }
+input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 4px; background: var(--border2); border-radius: 2px; outline: none; cursor: pointer; }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: var(--accent); cursor: pointer; border: none; }
+input[type=range]::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; }
+.canvas-panel { display: flex; flex-direction: column; gap: 1rem; }
+
+/* Upload button — reliable on iOS */
+.upload-area { text-align: center; }
+.upload-btn { display: inline-flex; align-items: center; gap: 8px; background: var(--surface); border: 1.5px dashed var(--border2); border-radius: var(--radius); padding: 2rem 2.5rem; cursor: pointer; color: var(--text2); font-size: 14px; font-family: inherit; -webkit-tap-highlight-color: transparent; transition: border-color 0.2s; width: 100%; justify-content: center; flex-direction: column; }
+.upload-btn:active { border-color: var(--accent); background: rgba(200,169,110,0.06); }
+.upload-icon { font-size: 30px; opacity: 0.4; margin-bottom: 6px; }
+.upload-sub { font-size: 11px; color: var(--text3); margin-top: 4px; }
+#fileInput { display: none; }
+
+.canvas-wrap { background: #111; border-radius: var(--radius); overflow: hidden; display: none; }
+canvas { display: block; width: 100%; height: auto; max-height: 60vh; object-fit: contain; }
+
+.actions { display: flex; gap: 8px; }
+.btn { flex: 1; padding: 12px 14px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.15s; letter-spacing: 0.04em; border: 0.5px solid var(--border2); background: var(--surface); color: var(--text2); font-family: inherit; -webkit-tap-highlight-color: transparent; }
+.btn:active { opacity: 0.75; }
+.btn-primary { background: var(--accent); color: #1a1000; border-color: var(--accent); }
+
+.status { font-size: 11px; color: var(--text3); text-align: center; padding: 4px; min-height: 18px; line-height: 1.4; }
+.divider { height: 0.5px; background: var(--border); }
+.film-strip { display: flex; gap: 4px; justify-content: center; opacity: 0.15; }
+.sprocket { width: 7px; height: 7px; border-radius: 2px; background: var(--border2); }
+
+/* iOS save hint */
+.save-hint { display: none; background: var(--surface2); border: 0.5px solid var(--border2); border-radius: var(--radius-sm); padding: 10px 12px; font-size: 12px; color: var(--text2); line-height: 1.5; text-align: center; margin-top: 0; }
+.save-hint a { color: var(--accent); text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>Film Lab</h1>
+    <span class="tagline">многослойная аналоговая обработка</span>
+  </header>
+  <div class="layout">
+    <div class="panel">
+      <div>
+        <div class="section-label">Слои — включи несколько</div>
+        <div class="layers-list" id="layersList"></div>
+      </div>
+      <div class="divider"></div>
+      <div>
+        <div class="section-label">Тонкая настройка</div>
+        <div class="sliders">
+          <div class="slider-row">
+            <div class="slider-label"><span>Зерно</span><span id="grain-val">35</span></div>
+            <input type="range" min="0" max="100" value="35" id="grain" step="1">
+          </div>
+          <div class="slider-row">
+            <div class="slider-label"><span>Виньетка</span><span id="vignette-val">45</span></div>
+            <input type="range" min="0" max="100" value="45" id="vignette" step="1">
+          </div>
+          <div class="slider-row">
+            <div class="slider-label"><span>Пересвет</span><span id="overexp-val">15</span></div>
+            <input type="range" min="0" max="100" value="15" id="overexp" step="1">
+          </div>
+          <div class="slider-row">
+            <div class="slider-label"><span>Шевелёнка</span><span id="blur-val">0</span></div>
+            <input type="range" min="0" max="40" value="0" id="blur" step="1">
+          </div>
+          <div class="slider-row">
+            <div class="slider-label"><span>Выцветание</span><span id="fade-val">25</span></div>
+            <input type="range" min="0" max="100" value="25" id="fade" step="1">
+          </div>
+          <div class="slider-row">
+            <div class="slider-label"><span>Царапины</span><span id="scratch-val">10</span></div>
+            <input type="range" min="0" max="100" value="10" id="scratch" step="1">
+          </div>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="actions">
+        <button class="btn btn-primary" onclick="applyEffects()">▶ Применить</button>
+        <button class="btn" onclick="saveResult()">↓ Сохранить</button>
+      </div>
+      <div id="status" class="status">Загрузите фото для начала</div>
+      <div id="saveHint" class="save-hint"></div>
+      <div class="film-strip">
+        <div class="sprocket"></div><div class="sprocket"></div>
+        <div class="sprocket"></div><div class="sprocket"></div>
+        <div class="sprocket"></div><div class="sprocket"></div>
+      </div>
+    </div>
+
+    <div class="canvas-panel">
+      <div class="upload-area">
+        <input type="file" id="fileInput" accept="image/*">
+        <label for="fileInput" class="upload-btn">
+          <span class="upload-icon">📷</span>
+          <span>Нажмите чтобы выбрать фото</span>
+          <span class="upload-sub">JPG · PNG · WebP · HEIC</span>
+        </label>
+      </div>
+      <div class="canvas-wrap" id="canvasWrap">
+        <canvas id="canvas"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+function clamp(v) { return v < 0 ? 0 : v > 255 ? 255 : v; }
+function lerp(a, b, t) { return a + (b - a) * t; }
+
+var EFFECTS = [
+  {
+    id: 'kodak', name: 'Kodak Gold', icon: '🎞',
+    apply: function(d, w, h, str) {
+      for (var i = 0; i < d.length; i += 4) {
+        var lum = 0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2];
+        d[i]   = lerp(d[i],   clamp(d[i]*1.08 + (d[i]-lum)*0.12), str);
+        d[i+1] = lerp(d[i+1], clamp(d[i+1]*0.97),                  str);
+        d[i+2] = lerp(d[i+2], clamp(d[i+2]*0.80),                  str);
+      }
+    }
+  },
+  {
+    id: 'fuji', name: 'Fuji Velvia', icon: '🌿',
+    apply: function(d, w, h, str) {
+      for (var i = 0; i < d.length; i += 4) {
+        var lum = 0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2];
+        d[i]   = lerp(d[i],   clamp(lum + (d[i]-lum)*1.14),   str);
+        d[i+1] = lerp(d[i+1], clamp(lum + (d[i+1]-lum)*1.62), str);
+        d[i+2] = lerp(d[i+2], clamp(lum + (d[i+2]-lum)*1.24), str);
+      }
+    }
+  },
+  {
+    id: 'lomo', name: 'Lomo LC-A', icon: '🔴',
+    apply: function(d, w, h, str) {
+      for (var i = 0; i < d.length; i += 4) {
+        var lum = 0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2];
+        d[i]   = lerp(d[i],   clamp(lum + (d[i]-lum)*1.77),   str);
+        d[i+1] = lerp(d[i+1], clamp(lum + (d[i+1]-lum)*1.15), str);
+        d[i+2] = lerp(d[i+2], clamp(lum + (d[i+2]-lum)*0.94), str);
+      }
+    }
+  },
+  {
+    id: 'cyanotype', name: 'Цианотипия', icon: '🔵',
+    apply: function(d, w, h, str) {
+      for (var i = 0; i < d.length; i += 4) {
+        var lum = 0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2];
+        d[i]   = lerp(d[i],   clamp(lum*0.22 + 18), str);
+        d[i+1] = lerp(d[i+1], clamp(lum*0.55 + 28), str);
+        d[i+2] = lerp(d[i+2], clamp(lum*1.0  + 40), str);
+      }
+    }
+  },
+  {
+    id: 'daguerro', name: 'Дагерротип', icon: '🪞',
+    apply: function(d, w, h, str) {
+      for (var i = 0; i < d.length; i += 4) {
+        var lum = 0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2];
+        d[i]   = lerp(d[i],   clamp(lum*1.04 + 6), str);
+        d[i+1] = lerp(d[i+1], clamp(lum*1.0),       str);
+        d[i+2] = lerp(d[i+2], clamp(lum*0.80 - 4),  str);
+      }
+    }
+  },
+  {
+    id: 'double', name: 'Двойная экспозиция', icon: '👁',
+    apply: function(d, w, h, str) {
+      var shift = Math.floor(w * 0.13);
+      var src = new Uint8ClampedArray(d);
+      for (var i = 0; i < d.length; i += 4) {
+        var px = (i >> 2) % w;
+        var row = Math.floor((i >> 2) / w);
+        var si = (row * w + Math.min(w-1, px + shift)) * 4;
+        d[i]   = lerp(d[i],   clamp(d[i]*0.65   + src[si]  *0.38), str);
+        d[i+1] = lerp(d[i+1], clamp(d[i+1]*0.65 + src[si+1]*0.30), str);
+        d[i+2] = lerp(d[i+2], clamp(d[i+2]*0.65 + src[si+2]*0.40), str);
+      }
+    }
+  },
+  {
+    id: 'bleach', name: 'Bleach Bypass', icon: '⚗️',
+    apply: function(d, w, h, str) {
+      for (var i = 0; i < d.length; i += 4) {
+        var lum = 0.299*d[i] + 0.587*d[i+1] + 0.114*d[i+2];
+        d[i]   = lerp(d[i],   clamp((d[i]*0.5   + lum*0.5 - 128)*1.35 + 128), str);
+        d[i+1] = lerp(d[i+1], clamp((d[i+1]*0.5 + lum*0.5 - 128)*1.35 + 128), str);
+        d[i+2] = lerp(d[i+2], clamp((d[i+2]*0.5 + lum*0.5 - 128)*1.35 + 128), str);
+      }
+    }
+  },
+  {
+    id: 'xpro', name: 'Cross Process', icon: '🌈',
+    apply: function(d, w, h, str) {
+      for (var i = 0; i < d.length; i += 4) {
+        var r = d[i]/255, g = d[i+1]/255, b = d[i+2]/255;
+        d[i]   = lerp(d[i],   clamp(255*(r*r*0.5 + r*0.7 + 0.05)*1.1), str);
+        d[i+1] = lerp(d[i+1], clamp(255*(g*0.85)),                       str);
+        d[i+2] = lerp(d[i+2], clamp(255*(1-(1-b)*(1-b)*0.6)),           str);
+      }
+    }
+  }
+];
+
+var layerState = {};
+EFFECTS.forEach(function(e) { layerState[e.id] = { active: false, strength: 0.8 }; });
+
+// Build layer UI
+var list = document.getElementById('layersList');
+EFFECTS.forEach(function(e) {
+  var card = document.createElement('div');
+  card.className = 'layer-card';
+  card.id = 'card-' + e.id;
+  card.innerHTML =
+    '<div class="layer-header" onclick="toggleLayer(\'' + e.id + '\')">' +
+      '<div class="layer-toggle" id="tog-' + e.id + '">✓</div>' +
+      '<span class="layer-icon">' + e.icon + '</span>' +
+      '<span class="layer-name">' + e.name + '</span>' +
+    '</div>' +
+    '<div class="layer-body">' +
+      '<div class="layer-strength">' +
+        '<label>Сила</label>' +
+        '<input type="range" min="0.1" max="1" step="0.05" value="0.8" id="str-' + e.id + '">' +
+        '<span id="strv-' + e.id + '">80</span>%' +
+      '</div>' +
+    '</div>';
+  list.appendChild(card);
+
+  document.getElementById('str-' + e.id).addEventListener('input', function() {
+    layerState[e.id].strength = parseFloat(this.value);
+    document.getElementById('strv-' + e.id).textContent = Math.round(this.value * 100);
+  });
+  document.getElementById('str-' + e.id).addEventListener('change', function() {
+    if (sourceImg) applyEffects();
+  });
+});
+
+function toggleLayer(id) {
+  layerState[id].active = !layerState[id].active;
+  document.getElementById('card-' + id).classList.toggle('active', layerState[id].active);
+  if (sourceImg) applyEffects();
+}
+
+// Fine-tuning sliders
+['grain','vignette','overexp','blur','fade','scratch'].forEach(function(k) {
+  var el = document.getElementById(k);
+  el.addEventListener('input', function() { document.getElementById(k+'-val').textContent = el.value; });
+  el.addEventListener('change', function() { if (sourceImg) applyEffects(); });
+});
+
+var sourceImg = null;
+var MAX_DIM = 2000; // cap for iOS memory safety
+
+document.getElementById('fileInput').addEventListener('change', function(e) {
+  if (e.target.files && e.target.files[0]) loadImage(e.target.files[0]);
+});
+
+function loadImage(file) {
+  setStatus('Загружаю...');
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    var img = new Image();
+    img.onload = function() {
+      // Scale down large photos for iOS memory safety
+      var scale = 1;
+      if (img.width > MAX_DIM || img.height > MAX_DIM) {
+        scale = Math.min(MAX_DIM / img.width, MAX_DIM / img.height);
+      }
+      var w = Math.round(img.width * scale);
+      var h = Math.round(img.height * scale);
+
+      // Draw to offscreen canvas at safe size
+      var off = document.createElement('canvas');
+      off.width = w; off.height = h;
+      var octx = off.getContext('2d');
+      octx.drawImage(img, 0, 0, w, h);
+
+      // Create a new Image from scaled canvas (avoids EXIF rotation issues too)
+      var scaled = new Image();
+      scaled.onload = function() {
+        sourceImg = scaled;
+        sourceImg._w = w;
+        sourceImg._h = h;
+        document.querySelector('.upload-area').style.display = 'none';
+        var wrap = document.getElementById('canvasWrap');
+        wrap.style.display = 'block';
+        setStatus('Загружено · ' + img.width + 'x' + img.height + (scale < 1 ? ' (масштаб ' + Math.round(scale*100) + '%)' : ''));
+        applyEffects();
+      };
+      scaled.src = off.toDataURL('image/jpeg', 0.92);
+    };
+    img.onerror = function() { setStatus('Ошибка загрузки файла'); };
+    img.src = ev.target.result;
+  };
+  reader.onerror = function() { setStatus('Не удалось прочитать файл'); };
+  reader.readAsDataURL(file);
+}
+
+function getVal(id) { return parseFloat(document.getElementById(id).value); }
+function setStatus(msg) { document.getElementById('status').textContent = msg; }
+
+function applyEffects() {
+  if (!sourceImg) return;
+  setStatus('Обрабатываю...');
+
+  // Use rAF to let browser paint "Обрабатываю..." first
+  requestAnimationFrame(function() {
+    setTimeout(function() {
+      try {
+        doProcess();
+      } catch(err) {
+        setStatus('Ошибка: ' + err.message);
+      }
+    }, 50);
+  });
+}
+
+function doProcess() {
+  var canvas = document.getElementById('canvas');
+  var w = sourceImg._w || sourceImg.width;
+  var h = sourceImg._h || sourceImg.height;
+  canvas.width = w; canvas.height = h;
+
+  // willReadFrequently: true — critical for iOS performance
+  var ctx = canvas.getContext('2d', { willReadFrequently: true });
+  ctx.drawImage(sourceImg, 0, 0, w, h);
+
+  var imgData = ctx.getImageData(0, 0, w, h);
+  var d = imgData.data;
+
+  var activeEffects = EFFECTS.filter(function(e) { return layerState[e.id].active; });
+  activeEffects.forEach(function(e) { e.apply(d, w, h, layerState[e.id].strength); });
+
+  var fade = getVal('fade');
+  if (fade > 0) {
+    var ff = fade / 100 * 0.35;
+    for (var i = 0; i < d.length; i += 4) {
+      d[i]   = lerp(d[i],   255, ff);
+      d[i+1] = lerp(d[i+1], 255, ff);
+      d[i+2] = lerp(d[i+2], 255, ff);
+    }
+  }
+
+  var overexp = getVal('overexp');
+  if (overexp > 0) {
+    var of2 = overexp / 100;
+    for (var i = 0; i < d.length; i += 4) {
+      var px = (i>>2) % w, py = Math.floor((i>>2) / w);
+      var dx = px/w - 0.28, dy = py/h - 0.18;
+      var boost = 1 + Math.max(0, 1 - Math.sqrt(dx*dx + dy*dy)*2.8) * of2 * 1.4;
+      d[i]   = clamp(d[i]   * boost);
+      d[i+1] = clamp(d[i+1] * boost);
+      d[i+2] = clamp(d[i+2] * boost);
+    }
+  }
+
+  var grain = getVal('grain');
+  if (grain > 0) {
+    var gs = grain / 100 * 48;
+    for (var i = 0; i < d.length; i += 4) {
+      var n = (Math.random() - 0.5) * gs * 2;
+      d[i]   = clamp(d[i]   + n);
+      d[i+1] = clamp(d[i+1] + n * 0.94);
+      d[i+2] = clamp(d[i+2] + n * 0.88);
+    }
+  }
+
+  ctx.putImageData(imgData, 0, 0);
+
+  var blurPx = getVal('blur');
+  if (blurPx > 0) {
+    var tmp = document.createElement('canvas');
+    tmp.width = w; tmp.height = h;
+    var tc = tmp.getContext('2d');
+    var angle = -8 * Math.PI / 180;
+    var steps = Math.min(Math.floor(blurPx), 20);
+    tc.drawImage(canvas, 0, 0);
+    for (var s = 1; s <= steps; s++) {
+      tc.globalAlpha = 0.06 * (1 - s/steps);
+      tc.drawImage(canvas, Math.cos(angle)*s*2.5, Math.sin(angle)*s*2.5);
+    }
+    ctx.globalAlpha = 0.75;
+    ctx.drawImage(tmp, 0, 0);
+    ctx.globalAlpha = 1;
+  }
+
+  var vignette = getVal('vignette');
+  if (vignette > 0) {
+    var vStr = vignette/100, cx = w/2, cy = h/2;
+    var r = Math.sqrt(cx*cx + cy*cy) * 0.95;
+    var grad = ctx.createRadialGradient(cx, cy, r*0.25, cx, cy, r);
+    grad.addColorStop(0, 'rgba(0,0,0,0)');
+    grad.addColorStop(0.6, 'rgba(0,0,0,' + (vStr*0.3) + ')');
+    grad.addColorStop(1,   'rgba(0,0,0,' + (vStr*0.92) + ')');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, w, h);
+  }
+
+  var scratch = getVal('scratch');
+  if (scratch > 0) {
+    var count = Math.floor(scratch / 100 * 14);
+    for (var s = 0; s < count; s++) {
+      var sx = Math.random()*w, len = h*(0.25 + Math.random()*0.75), y0 = Math.random()*(h-len);
+      var alpha = 0.1 + Math.random()*0.28;
+      ctx.strokeStyle = Math.random()>0.5
+        ? 'rgba(255,255,255,' + alpha + ')'
+        : 'rgba(0,0,0,' + (alpha*0.8) + ')';
+      ctx.lineWidth = Math.random()>0.75 ? 1.5 : 0.8;
+      var wb = (Math.random()-0.5)*6;
+      ctx.beginPath();
+      ctx.moveTo(sx, y0);
+      ctx.bezierCurveTo(sx+wb, y0+len*0.33, sx-wb, y0+len*0.66, sx+(Math.random()-0.5)*4, y0+len);
+      ctx.stroke();
+    }
+  }
+
+  var names = activeEffects.map(function(e) { return e.name; }).join(' + ') || 'оригинал';
+  setStatus('Готово · ' + names);
+}
+
+function saveResult() {
+  if (!sourceImg) { setStatus('Сначала загрузите фото'); return; }
+  var canvas = document.getElementById('canvas');
+  var ids = EFFECTS.filter(function(e) { return layerState[e.id].active; }).map(function(e){ return e.id; }).join('_') || 'raw';
+  var dataUrl = canvas.toDataURL('image/jpeg', 0.93);
+
+  if (isIOS) {
+    // iOS Safari can't do programmatic download — open in new tab so user can long-press Save
+    var win = window.open('', '_blank');
+    if (win) {
+      win.document.write('<html><head><title>Film Lab — сохранить</title><meta name="viewport" content="width=device-width"><style>body{margin:0;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:16px}img{max-width:100%;height:auto}p{color:#aaa;font-family:-apple-system,sans-serif;font-size:14px;text-align:center;padding:0 20px}</style></head><body><img src="' + dataUrl + '"><p>Нажмите и удерживайте изображение → «Сохранить изображение»</p></body></html>');
+      win.document.close();
+    } else {
+      // Popup blocked — show inline image link
+      showIOSSaveHint(dataUrl);
+    }
+  } else {
+    var a = document.createElement('a');
+    a.download = 'film_' + ids + '_' + Date.now() + '.jpg';
+    a.href = dataUrl;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setStatus('Сохранено: ' + a.download);
+  }
+}
+
+function showIOSSaveHint(dataUrl) {
+  var hint = document.getElementById('saveHint');
+  hint.innerHTML = 'На iOS: <a href="' + dataUrl + '" target="_blank">откройте фото</a> и нажмите удерживайте → Сохранить';
+  hint.style.display = 'block';
+  setStatus('Нажмите ссылку выше чтобы сохранить');
+}
+</script>
+</body>
+</html>

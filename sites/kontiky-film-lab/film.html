@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Плёночный процессор</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0e0e0e;
+  --surface: #1a1a1a;
+  --surface2: #222;
+  --border: #333;
+  --border2: #444;
+  --text: #e8e8e8;
+  --text2: #999;
+  --text3: #666;
+  --accent: #c8a96e;
+  --accent2: #a07a40;
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  min-height: 100vh;
+  padding: 2rem 1rem;
+}
+
+.app {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+header {
+  margin-bottom: 2rem;
+  border-bottom: 0.5px solid var(--border);
+  padding-bottom: 1.25rem;
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+}
+
+h1 {
+  font-size: 20px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.tagline {
+  font-size: 12px;
+  color: var(--text3);
+  letter-spacing: 0.05em;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 680px) {
+  .layout { grid-template-columns: 1fr; }
+}
+
+/* Left panel */
+.panel {
+  background: var(--surface);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.section-label {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 0.6rem;
+}
+
+/* Presets */
+.preset-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.preset-btn {
+  background: var(--surface2);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: var(--text2);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+}
+
+.preset-btn:hover {
+  border-color: var(--border2);
+  color: var(--text);
+}
+
+.preset-btn.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(200, 169, 110, 0.08);
+}
+
+.preset-icon { font-size: 16px; display: block; margin-bottom: 5px; }
+
+/* Sliders */
+.sliders { display: flex; flex-direction: column; gap: 12px; }
+
+.slider-row { display: flex; flex-direction: column; gap: 5px; }
+
+.slider-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: var(--text2);
+}
+
+.slider-val {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--accent);
+  min-width: 28px;
+  text-align: right;
+}
+
+input[type=range] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 3px;
+  background: var(--border2);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: none;
+  transition: transform 0.1s;
+}
+
+input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+/* Right panel — canvas */
+.canvas-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.dropzone {
+  background: var(--surface);
+  border: 1.5px dashed var(--border2);
+  border-radius: var(--radius);
+  padding: 3rem 1rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.dropzone:hover, .dropzone.drag {
+  border-color: var(--accent);
+  background: rgba(200, 169, 110, 0.04);
+}
+
+.dropzone input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+}
+
+.drop-icon { font-size: 36px; margin-bottom: 12px; opacity: 0.4; }
+.drop-title { font-size: 14px; color: var(--text2); font-weight: 400; }
+.drop-sub { font-size: 11px; color: var(--text3); margin-top: 6px; }
+
+.canvas-wrap {
+  background: #000;
+  border-radius: var(--radius);
+  overflow: hidden;
+  position: relative;
+  min-height: 320px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+canvas {
+  display: block;
+  max-width: 100%;
+  max-height: 600px;
+  object-fit: contain;
+}
+
+.processing-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  color: var(--text2);
+  display: none;
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  flex: 1;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: 0.03em;
+  border: 0.5px solid var(--border2);
+  background: var(--surface);
+  color: var(--text2);
+}
+
+.btn:hover { border-color: var(--accent2); color: var(--text); }
+
+.btn-primary {
+  background: var(--accent);
+  color: #1a1000;
+  border-color: var(--accent);
+  font-weight: 600;
+}
+
+.btn-primary:hover { background: #d4b97e; border-color: #d4b97e; }
+
+/* Status bar */
+.status {
+  font-size: 11px;
+  color: var(--text3);
+  text-align: center;
+  padding: 6px;
+}
+
+/* Film strip decoration */
+.film-strip {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  opacity: 0.3;
+  margin-top: 0.5rem;
+}
+
+.sprocket {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--border2);
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>Film Lab</h1>
+    <span class="tagline">аналоговая обработка фотографий</span>
+  </header>
+
+  <div class="layout">
+    <!-- Left: controls -->
+    <div class="panel">
+      <div>
+        <div class="section-label">Пресет</div>
+        <div class="preset-grid">
+          <div class="preset-btn active" data-preset="kodak"><span class="preset-icon">🎞</span>Kodak Gold</div>
+          <div class="preset-btn" data-preset="fuji"><span class="preset-icon">🌿</span>Fuji Velvia</div>
+          <div class="preset-btn" data-preset="lomo"><span class="preset-icon">🔴</span>Lomo LC-A</div>
+          <div class="preset-btn" data-preset="cyanotype"><span class="preset-icon">🔵</span>Цианотипия</div>
+          <div class="preset-btn" data-preset="daguerro"><span class="preset-icon">🪞</span>Дагерротип</div>
+          <div class="preset-btn" data-preset="double"><span class="preset-icon">👁</span>Двойная экспозиция</div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-label">Параметры</div>
+        <div class="sliders">
+          <div class="slider-row">
+            <div class="slider-label"><span>Зерно</span><span class="slider-val" id="grain-val">40</span></div>
+            <input type="range" min="0" max="100" value="40" id="grain" step="1">
+          </div>
+          <div class="slider-row">
+            <div class="slider-label"><span>Виньетка</span><span class="slider-val" id="vignette-val">50</span></div>
+            <input type="range" min="0" max="100" value="50" id="vignette" step="1">
+          </div>
+          <div class="slider-row">
+            <div class="slider-label"><span>Пересвет</span><span class="slider-val" id="overexp-val">20</span></div>
+            <input type="range" min="0" max="100" value="20" id="overexp" step="1">
+          </div>
+          <div class="slider-row">
+            <div class="slider-label"><span>Шевелёнка</span><span class="slider-val" id="blur-val">0</span></div>
+            <input type="range" min="0" max="40" value="0" id="blur" step="1">
+          </div>
+          <div class="slider-row">
+            <div class="slider-label"><span>Выцветание</span><span class="slider-val" id="fade-val">30</span></div>
+            <input type="range" min="0" max="100" value="30" id="fade" step="1">
+          </div>
+          <div class="slider-row">
+            <div class="slider-label"><span>Царапины</span><span class="slider-val" id="scratch-val">20</span></div>
+            <input type="range" min="0" max="100" value="20" id="scratch" step="1">
+          </div>
+          <div class="slider-row">
+            <div class="slider-label"><span>Насыщенность</span><span class="slider-val" id="sat-val">115</span></div>
+            <input type="range" min="0" max="200" value="115" id="sat" step="1">
+          </div>
+          <div class="slider-row">
+            <div class="slider-label"><span>Тёплый тон</span><span class="slider-val" id="warm-val">8</span></div>
+            <input type="range" min="-50" max="50" value="8" id="warm" step="1">
+          </div>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-primary" onclick="applyEffects()">▶ Применить</button>
+        <button class="btn" onclick="downloadResult()">↓ Сохранить</button>
+      </div>
+
+      <div id="status" class="status">Загрузите фото для начала работы</div>
+
+      <div class="film-strip">
+        <div class="sprocket"></div><div class="sprocket"></div>
+        <div class="sprocket"></div><div class="sprocket"></div>
+        <div class="sprocket"></div><div class="sprocket"></div>
+        <div class="sprocket"></div><div class="sprocket"></div>
+      </div>
+    </div>
+
+    <!-- Right: canvas -->
+    <div class="canvas-panel">
+      <div class="dropzone" id="dropzone">
+        <input type="file" accept="image/*" id="fileInput">
+        <div class="drop-icon">📷</div>
+        <div class="drop-title">Нажмите или перетащите фото сюда</div>
+        <div class="drop-sub">JPG · PNG · WebP · HEIC</div>
+      </div>
+
+      <div class="canvas-wrap" id="canvasWrap">
+        <canvas id="canvas"></canvas>
+        <div class="processing-overlay" id="overlay">Обрабатываю...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const PRESETS = {
+  kodak:     { grain:45, vignette:55, overexp:25, blur:0,  fade:35, scratch:15, sat:115, warm:8,   toneR:1.08, toneG:0.98, toneB:0.82 },
+  fuji:      { grain:25, vignette:40, overexp:10, blur:0,  fade:20, scratch:8,  sat:135, warm:-5,  toneR:0.92, toneG:1.06, toneB:0.95 },
+  lomo:      { grain:65, vignette:85, overexp:45, blur:0,  fade:15, scratch:35, sat:145, warm:12,  toneR:1.18, toneG:0.82, toneB:0.72 },
+  cyanotype: { grain:20, vignette:60, overexp:0,  blur:0,  fade:60, scratch:10, sat:0,   warm:-30, toneR:0.25, toneG:0.55, toneB:1.35 },
+  daguerro:  { grain:60, vignette:80, overexp:15, blur:0,  fade:70, scratch:50, sat:0,   warm:5,   toneR:1.05, toneG:1.0,  toneB:0.82 },
+  double:    { grain:40, vignette:50, overexp:50, blur:0,  fade:40, scratch:20, sat:70,  warm:0,   toneR:1.0,  toneG:0.88, toneB:1.08 },
+};
+
+let currentPreset = 'kodak';
+let sourceImg = null;
+
+// Preset buttons
+document.querySelectorAll('.preset-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentPreset = btn.dataset.preset;
+    applyPresetValues(currentPreset);
+    if (sourceImg) applyEffects();
+  });
+});
+
+function applyPresetValues(name) {
+  const p = PRESETS[name];
+  ['grain','vignette','overexp','blur','fade','scratch','sat','warm'].forEach(k => {
+    const el = document.getElementById(k);
+    if (el && p[k] !== undefined) {
+      el.value = p[k];
+      document.getElementById(k+'-val').textContent = p[k];
+    }
+  });
+}
+
+// Slider live update
+document.querySelectorAll('input[type=range]').forEach(el => {
+  el.addEventListener('input', () => {
+    document.getElementById(el.id+'-val').textContent = el.value;
+  });
+  el.addEventListener('change', () => {
+    if (sourceImg) applyEffects();
+  });
+});
+
+// File input
+const fileInput = document.getElementById('fileInput');
+const dropzone  = document.getElementById('dropzone');
+
+fileInput.addEventListener('change', e => { if (e.target.files[0]) loadImage(e.target.files[0]); });
+dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag'); });
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag'));
+dropzone.addEventListener('drop', e => {
+  e.preventDefault(); dropzone.classList.remove('drag');
+  if (e.dataTransfer.files[0]) loadImage(e.dataTransfer.files[0]);
+});
+
+function loadImage(file) {
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = new Image();
+    img.onload = () => {
+      sourceImg = img;
+      dropzone.style.display = 'none';
+      document.getElementById('canvasWrap').style.display = 'flex';
+      setStatus('Фото загружено · ' + img.width + '×' + img.height);
+      applyEffects();
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function getVal(id) { return parseFloat(document.getElementById(id).value); }
+
+function setStatus(msg) { document.getElementById('status').textContent = msg; }
+
+function applyEffects() {
+  if (!sourceImg) return;
+  const p = PRESETS[currentPreset];
+
+  const grain    = getVal('grain');
+  const vignette = getVal('vignette');
+  const overexp  = getVal('overexp');
+  const blurPx   = getVal('blur');
+  const fade     = getVal('fade');
+  const scratch  = getVal('scratch');
+  const sat      = getVal('sat') / 100;
+  const warm     = getVal('warm') / 100;
+  const tR       = p.toneR, tG = p.toneG, tB = p.toneB;
+  const fadeFactor = fade / 100 * 0.38;
+
+  setStatus('Обрабатываю...');
+
+  setTimeout(() => {
+    const canvas = document.getElementById('canvas');
+    const w = sourceImg.width, h = sourceImg.height;
+    canvas.width = w; canvas.height = h;
+    const ctx = canvas.getContext('2d');
+
+    // Draw source
+    ctx.drawImage(sourceImg, 0, 0);
+    const src = ctx.getImageData(0, 0, w, h);
+    const d = src.data;
+    const out = ctx.createImageData(w, h);
+    const od = out.data;
+
+    const grainStr = grain / 100 * 50;
+    const overFactor = overexp / 100;
+    const preset = currentPreset;
+
+    for (let i = 0; i < d.length; i += 4) {
+      let r = d[i], g = d[i+1], b = d[i+2];
+
+      // Saturation
+      const lum = 0.299*r + 0.587*g + 0.114*b;
+      r = lum + (r - lum) * sat;
+      g = lum + (g - lum) * sat;
+      b = lum + (b - lum) * sat;
+
+      // Tone mapping
+      r *= tR; g *= tG; b *= tB;
+
+      // Warm/cool shift
+      if (warm > 0) { r += warm * 30; b -= warm * 20; }
+      else if (warm < 0) { b -= warm * 30; r += warm * 20; }
+
+      // Fade (lift blacks)
+      r = r + (255 - r) * fadeFactor;
+      g = g + (255 - g) * fadeFactor;
+      b = b + (255 - b) * fadeFactor;
+
+      // Hotspot overexposure
+      if (overFactor > 0) {
+        const pix = i >> 2;
+        const px = pix % w, py = (pix / w) | 0;
+        const dx = px/w - 0.28, dy = py/h - 0.18;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        const hotspot = Math.max(0, 1 - dist * 2.8);
+        const boost = 1 + hotspot * overFactor * 1.4;
+        r *= boost; g *= boost; b *= boost;
+      }
+
+      // Double exposure ghost
+      if (preset === 'double') {
+        const pix = i >> 2;
+        const px = pix % w;
+        const shiftX = Math.floor(w * 0.12);
+        const srcPx = Math.min(w-1, px + shiftX);
+        const si = ((pix / w | 0) * w + srcPx) * 4;
+        r = r * 0.65 + d[si]   * 0.35;
+        g = g * 0.65 + d[si+1] * 0.28;
+        b = b * 0.65 + d[si+2] * 0.38;
+      }
+
+      // Grain
+      if (grainStr > 0) {
+        const n = (Math.random() - 0.5) * grainStr * 2;
+        r += n; g += n * 0.94; b += n * 0.88;
+      }
+
+      od[i]   = Math.min(255, Math.max(0, r));
+      od[i+1] = Math.min(255, Math.max(0, g));
+      od[i+2] = Math.min(255, Math.max(0, b));
+      od[i+3] = 255;
+    }
+
+    ctx.putImageData(out, 0, 0);
+
+    // Motion blur (shevyolka)
+    if (blurPx > 0) {
+      const tmp = document.createElement('canvas');
+      tmp.width = w; tmp.height = h;
+      const tc = tmp.getContext('2d');
+      const angle = -8 * Math.PI / 180;
+      const steps = Math.min(blurPx, 25);
+      tc.drawImage(canvas, 0, 0);
+      for (let s = 1; s <= steps; s++) {
+        tc.globalAlpha = 0.06 * (1 - s/steps);
+        tc.drawImage(canvas,
+          Math.cos(angle) * s * 2.5,
+          Math.sin(angle) * s * 2.5
+        );
+      }
+      ctx.save();
+      ctx.globalAlpha = 0.75;
+      ctx.drawImage(tmp, 0, 0);
+      ctx.restore();
+    }
+
+    // Vignette
+    if (vignette > 0) {
+      const vStr = vignette / 100;
+      const cx = w/2, cy = h/2;
+      const radius = Math.sqrt(cx*cx + cy*cy) * 0.95;
+      const grad = ctx.createRadialGradient(cx, cy, radius * 0.25, cx, cy, radius);
+      grad.addColorStop(0, 'rgba(0,0,0,0)');
+      grad.addColorStop(0.6, `rgba(0,0,0,${vStr * 0.3})`);
+      grad.addColorStop(1, `rgba(0,0,0,${vStr * 0.92})`);
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, w, h);
+    }
+
+    // Scratches
+    if (scratch > 0) {
+      ctx.save();
+      const count = Math.floor(scratch / 100 * 15);
+      for (let s = 0; s < count; s++) {
+        const x = Math.random() * w;
+        const len = h * (0.25 + Math.random() * 0.75);
+        const y0 = Math.random() * (h - len);
+        const isLight = Math.random() > 0.5;
+        const alpha = 0.12 + Math.random() * 0.28;
+        ctx.strokeStyle = isLight
+          ? `rgba(255,255,255,${alpha})`
+          : `rgba(0,0,0,${alpha * 0.8})`;
+        ctx.lineWidth = Math.random() > 0.75 ? 1.5 : 0.8;
+        ctx.beginPath();
+        const wobble = (Math.random()-0.5)*6;
+        ctx.moveTo(x, y0);
+        ctx.bezierCurveTo(
+          x + wobble, y0 + len * 0.33,
+          x - wobble, y0 + len * 0.66,
+          x + (Math.random()-0.5)*4, y0 + len
+        );
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    // Daguerreotype metallic sheen
+    if (preset === 'daguerro') {
+      ctx.save();
+      const met = ctx.createLinearGradient(0, 0, w, h);
+      met.addColorStop(0, 'rgba(255,248,200,0.07)');
+      met.addColorStop(0.45, 'rgba(160,140,80,0.03)');
+      met.addColorStop(0.7, 'rgba(255,248,200,0.05)');
+      met.addColorStop(1, 'rgba(100,90,50,0.06)');
+      ctx.fillStyle = met;
+      ctx.fillRect(0, 0, w, h);
+      ctx.restore();
+    }
+
+    // Cyanotype blue tint overlay
+    if (preset === 'cyanotype') {
+      ctx.save();
+      ctx.globalAlpha = 0.08;
+      ctx.fillStyle = '#1a4a8a';
+      ctx.fillRect(0, 0, w, h);
+      ctx.restore();
+    }
+
+    setStatus('Готово · ' + w + '×' + h + ' px');
+  }, 20);
+}
+
+function downloadResult() {
+  const canvas = document.getElementById('canvas');
+  if (!sourceImg) { setStatus('Сначала загрузите фото'); return; }
+  const a = document.createElement('a');
+  const preset = currentPreset;
+  a.download = 'film_' + preset + '_' + Date.now() + '.jpg';
+  a.href = canvas.toDataURL('image/jpeg', 0.93);
+  a.click();
+  setStatus('Сохранено как ' + a.download);
+}
+</script>
+</body>
+</html>
