@@ -1,0 +1,16 @@
+{
+  "name": "J&Joy",
+  "short_name": "J&Joy",
+  "description": "Приватный защищённый мессенджер для двоих",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#090b10",
+  "theme_color": "#0b0d13",
+  "categories": ["social", "productivity"],
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
