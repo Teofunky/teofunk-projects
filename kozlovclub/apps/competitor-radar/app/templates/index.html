@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Обзор конкурентов</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <div class="eyebrow">КЛУБ АЛЕКСЕЯ КОЗЛОВА · ВНУТРЕННЯЯ АНАЛИТИКА</div>
+      <h1>Обзор конкурентов</h1>
+      <p>Афиша, артисты, привозы, фестивали, специальные форматы, новости и PR-активности.</p>
+    </div>
+    <div class="schedule-badge">
+      <span>Автообзор</span>
+      <strong>{{ weekly_schedule }}</strong>
+    </div>
+  </header>
+
+  <main>
+    <section class="control-panel">
+      <div class="date-grid">
+        <label>С даты<input id="dateFrom" type="date" value="{{ default_from }}"></label>
+        <label>По дату<input id="dateTo" type="date" value="{{ default_to }}"></label>
+      </div>
+
+      <div class="competitor-head">
+        <span>Конкуренты</span>
+        <button id="toggleAll" class="link-button" type="button">Снять выделение</button>
+      </div>
+      <div class="competitor-grid" id="competitorGrid">
+        {% for competitor in competitors %}
+        <label class="check-card">
+          <input type="checkbox" name="competitor" value="{{ competitor }}" checked>
+          <span>{{ competitor }}</span>
+        </label>
+        {% endfor %}
+      </div>
+
+      <div class="actions-row">
+        <label class="switch-label">
+          <input id="includeNews" type="checkbox" checked>
+          <span class="switch"></span>
+          Добавлять новости и PR
+        </label>
+        <div class="actions">
+          <button id="showStored" class="secondary" type="button">Показать собранное</button>
+          <button id="runButton" class="primary" type="button">Собрать обзор</button>
+        </div>
+      </div>
+      <div id="status" class="status" aria-live="polite"></div>
+    </section>
+
+    <section id="emptyState" class="empty-state">
+      <div class="empty-mark">ОК</div>
+      <h2>Выберите период и нажмите «Собрать обзор»</h2>
+      <p>Приложение проверит официальные сайты, агрегаторы и новостные RSS, устранит дубли и соберёт сравнительную сводку.</p>
+    </section>
+
+    <section id="dashboard" class="dashboard hidden">
+      <div class="metric-row" id="metricRow"></div>
+
+      <nav class="tabs" aria-label="Разделы отчёта">
+        <button class="tab active" data-tab="summary">Сводка</button>
+        <button class="tab" data-tab="events">Афиша</button>
+        <button class="tab" data-tab="news">Новости и PR</button>
+        <button class="tab" data-tab="sources">Источники</button>
+      </nav>
+
+      <section id="tab-summary" class="tab-panel"></section>
+      <section id="tab-events" class="tab-panel hidden"></section>
+      <section id="tab-news" class="tab-panel hidden"></section>
+      <section id="tab-sources" class="tab-panel hidden"></section>
+
+      <div class="export-row">
+        <button id="exportMd" class="secondary">Скачать Markdown</button>
+        <button id="exportCsv" class="secondary">Скачать CSV</button>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    Источники настраиваются в <code>config/sources.yaml</code>. Данные требуют редакторской проверки перед публичным использованием.
+  </footer>
+  <script src="/static/app.js"></script>
+</body>
+</html>

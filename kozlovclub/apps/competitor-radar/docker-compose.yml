@@ -1,0 +1,14 @@
+services:
+  competitor-review:
+    build: .
+    ports:
+      - "8765:8765"
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config:ro
+    environment:
+      - APP_HOST=0.0.0.0
+      - APP_PORT=8765
+      - TIMEZONE=Europe/Moscow
+      - ENABLE_SCHEDULER=true
+    restart: unless-stopped

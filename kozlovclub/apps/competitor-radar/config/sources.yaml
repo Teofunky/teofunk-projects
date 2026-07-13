@@ -1,0 +1,148 @@
+competitors:
+  - name: "Клуб Игоря Бутмана"
+    aliases: ["бутман", "butman", "igor butman"]
+  - name: "Эссе"
+    aliases: ["эссе", "esse", "jazzesse"]
+  - name: "Louis"
+    aliases: ["louis", "луи", "louis jazz club"]
+  - name: "Академ Джаз Клуб"
+    aliases: ["академ джаз", "academ jazz", "academjazz", "академический джаз"]
+  - name: "Союз Композиторов"
+    aliases: ["союз композиторов", "ucclub"]
+  - name: "Jam Club Music"
+    aliases: ["jam club", "джем клуб", "jamclub"]
+  - name: "Rhythm & Blues Cafe"
+    aliases: ["ритм блюз", "rhythm & blues", "rhythm-blues", "rhythm blues"]
+  - name: "Gamma More"
+    aliases: ["gamma more", "гамма", "gamma на садовом"]
+
+benchmark:
+  name: "Клуб Алексея Козлова"
+  aliases: ["клуб алексея козлова", "kozlov club", "клуб козлова"]
+
+sources:
+  - name: "Бутман — официальный сайт"
+    competitor: "Клуб Игоря Бутмана"
+    source_type: "official"
+    kind: "html"
+    url: "https://butmanclub.ru/"
+    enabled: true
+
+  - name: "Эссе — официальный сайт"
+    competitor: "Эссе"
+    source_type: "official"
+    kind: "html"
+    url: "https://www.jazzesse.ru/"
+    enabled: true
+
+  - name: "Louis — официальный сайт"
+    competitor: "Louis"
+    source_type: "official"
+    kind: "html"
+    url: "https://louisjazzclub.com/"
+    enabled: true
+
+  - name: "Академ Джаз — официальный сайт"
+    competitor: "Академ Джаз Клуб"
+    source_type: "official"
+    kind: "html"
+    url: "https://academjazzclub.ru/events/"
+    enabled: true
+
+  - name: "Союз Композиторов — официальный сайт"
+    competitor: "Союз Композиторов"
+    source_type: "official"
+    kind: "html"
+    url: "https://ucclub.ru/schedule/"
+    enabled: true
+
+  - name: "Jam Club — официальный сайт"
+    competitor: "Jam Club Music"
+    source_type: "official"
+    kind: "html"
+    url: "https://jamclub.moscow/concerts"
+    enabled: true
+
+  - name: "Rhythm & Blues Cafe — официальный сайт"
+    competitor: "Rhythm & Blues Cafe"
+    source_type: "official"
+    kind: "html"
+    url: "https://rhythm-blues-cafe.ru/"
+    enabled: true
+
+  - name: "Gamma More — официальный сайт"
+    competitor: "Gamma More"
+    source_type: "official"
+    kind: "html"
+    url: "https://www.gammamore.ru/gammaevents"
+    enabled: true
+
+  - name: "JazzMap — общая афиша"
+    competitor: "__multi__"
+    source_type: "aggregator"
+    kind: "html"
+    url: "https://www.jazzmap.ru/afisha/"
+    enabled: true
+
+  - name: "JazzMap — Бутман"
+    competitor: "Клуб Игоря Бутмана"
+    source_type: "aggregator"
+    kind: "html"
+    url: "https://www.jazzmap.ru/afisha/butman"
+    enabled: true
+
+  - name: "JazzMap — Эссе"
+    competitor: "Эссе"
+    source_type: "aggregator"
+    kind: "html"
+    url: "https://www.jazzmap.ru/afisha/esseclub"
+    enabled: true
+
+  - name: "JazzMap — Rhythm & Blues Cafe"
+    competitor: "Rhythm & Blues Cafe"
+    source_type: "aggregator"
+    kind: "html"
+    url: "https://www.jazzmap.ru/rus/clubs/Ritm-Blyuz-Kafe-klub.php"
+    enabled: true
+
+  - name: "Яндекс Афиша — Бутман"
+    competitor: "Клуб Игоря Бутмана"
+    source_type: "aggregator"
+    kind: "html"
+    url: "https://afisha.yandex.ru/moscow/concert/places/dzhaz-klub-igoria-butmana-na-taganke/schedule"
+    enabled: false
+
+  - name: "Яндекс Афиша — Jam Club"
+    competitor: "Jam Club Music"
+    source_type: "aggregator"
+    kind: "html"
+    url: "https://afisha.yandex.ru/moscow/concert/places/jam-club"
+    enabled: false
+
+  - name: "Яндекс Афиша — Союз Композиторов"
+    competitor: "Союз Композиторов"
+    source_type: "aggregator"
+    kind: "html"
+    url: "https://afisha.yandex.ru/moscow/concert/places/soiuz-kompozitorov"
+    enabled: false
+
+  - name: "Ticketland — Эссе"
+    competitor: "Эссе"
+    source_type: "aggregator"
+    kind: "html"
+    url: "https://www.ticketland.ru/kluby/dzhaz-klub-esse/afisha/"
+    enabled: false
+
+  - name: "MTS Live — Союз Композиторов"
+    competitor: "Союз Композиторов"
+    source_type: "aggregator"
+    kind: "html"
+    url: "https://live.mts.ru/moscow/venues/club/club-soyuz-kompozitorov"
+    enabled: false
+
+  - name: "Клуб Козлова — benchmark"
+    competitor: "Клуб Алексея Козлова"
+    source_type: "benchmark"
+    kind: "html"
+    url: "https://kozlovclub.ru/calendar/"
+    enabled: true
