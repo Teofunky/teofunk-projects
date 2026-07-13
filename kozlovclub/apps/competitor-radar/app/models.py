@@ -18,9 +18,16 @@ class CollectedItem:
     published_at: datetime | None = None
     price_min: int | None = None
     venue: str = ""
+    stage: str = ""
     item_type: str = "event"
     categories: list[str] = field(default_factory=list)
+    genres: list[str] = field(default_factory=list)
+    artists: list[str] = field(default_factory=list)
+    program_entities: list[str] = field(default_factory=list)
     is_import: bool = False
+    is_free: bool = False
+    confidence: float = 0.5
+    parser_name: str = ""
     raw_hash: str = ""
     collected_at: datetime = field(default_factory=datetime.utcnow)
 

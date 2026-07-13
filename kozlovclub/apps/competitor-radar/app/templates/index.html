@@ -1,89 +1,22 @@
-<!doctype html>
-<html lang="ru">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Обзор конкурентов</title>
-  <link rel="stylesheet" href="/static/styles.css">
-</head>
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Конкурентный радар · Клуб Козлова</title><link rel="stylesheet" href="/static/styles.css"></head>
 <body>
-  <header class="topbar">
-    <div>
-      <div class="eyebrow">КЛУБ АЛЕКСЕЯ КОЗЛОВА · ВНУТРЕННЯЯ АНАЛИТИКА</div>
-      <h1>Обзор конкурентов</h1>
-      <p>Афиша, артисты, привозы, фестивали, специальные форматы, новости и PR-активности.</p>
-    </div>
-    <div class="schedule-badge">
-      <span>Автообзор</span>
-      <strong>{{ weekly_schedule }}</strong>
-    </div>
-  </header>
-
-  <main>
-    <section class="control-panel">
-      <div class="date-grid">
-        <label>С даты<input id="dateFrom" type="date" value="{{ default_from }}"></label>
-        <label>По дату<input id="dateTo" type="date" value="{{ default_to }}"></label>
-      </div>
-
-      <div class="competitor-head">
-        <span>Конкуренты</span>
-        <button id="toggleAll" class="link-button" type="button">Снять выделение</button>
-      </div>
-      <div class="competitor-grid" id="competitorGrid">
-        {% for competitor in competitors %}
-        <label class="check-card">
-          <input type="checkbox" name="competitor" value="{{ competitor }}" checked>
-          <span>{{ competitor }}</span>
-        </label>
-        {% endfor %}
-      </div>
-
-      <div class="actions-row">
-        <label class="switch-label">
-          <input id="includeNews" type="checkbox" checked>
-          <span class="switch"></span>
-          Добавлять новости и PR
-        </label>
-        <div class="actions">
-          <button id="showStored" class="secondary" type="button">Показать собранное</button>
-          <button id="runButton" class="primary" type="button">Собрать обзор</button>
-        </div>
-      </div>
-      <div id="status" class="status" aria-live="polite"></div>
-    </section>
-
-    <section id="emptyState" class="empty-state">
-      <div class="empty-mark">ОК</div>
-      <h2>Выберите период и нажмите «Собрать обзор»</h2>
-      <p>Приложение проверит официальные сайты, агрегаторы и новостные RSS, устранит дубли и соберёт сравнительную сводку.</p>
-    </section>
-
-    <section id="dashboard" class="dashboard hidden">
-      <div class="metric-row" id="metricRow"></div>
-
-      <nav class="tabs" aria-label="Разделы отчёта">
-        <button class="tab active" data-tab="summary">Сводка</button>
-        <button class="tab" data-tab="events">Афиша</button>
-        <button class="tab" data-tab="news">Новости и PR</button>
-        <button class="tab" data-tab="sources">Источники</button>
-      </nav>
-
-      <section id="tab-summary" class="tab-panel"></section>
-      <section id="tab-events" class="tab-panel hidden"></section>
-      <section id="tab-news" class="tab-panel hidden"></section>
-      <section id="tab-sources" class="tab-panel hidden"></section>
-
-      <div class="export-row">
-        <button id="exportMd" class="secondary">Скачать Markdown</button>
-        <button id="exportCsv" class="secondary">Скачать CSV</button>
-      </div>
-    </section>
-  </main>
-
-  <footer>
-    Источники настраиваются в <code>config/sources.yaml</code>. Данные требуют редакторской проверки перед публичным использованием.
-  </footer>
-  <script src="/static/app.js"></script>
-</body>
-</html>
+<header class="top"><div><div class="eyebrow">КЛУБ АЛЕКСЕЯ КОЗЛОВА</div><h1>Конкурентный радар</h1><p>Афиши, артисты, пересечения дат, PR-активности и управленческие выводы.</p></div><div class="top-actions"><button id="printBtn" class="ghost">Печать / PDF</button><button id="runButton" class="primary">Собрать обзор</button></div></header>
+<main>
+<section class="control-panel">
+  <div class="dates"><label>С <input id="dateFrom" type="date" value="{{ default_from }}"></label><label>По <input id="dateTo" type="date" value="{{ default_to }}"></label></div>
+  <label class="check"><input id="includeNews" type="checkbox" checked> Новости и PR</label>
+  <button id="showStored" class="secondary">Открыть базу</button>
+  <div class="exports"><button id="exportArtists" class="ghost">Артисты CSV</button><button id="exportEvents" class="ghost">Афиша CSV</button><button id="exportMd" class="ghost">Резюме MD</button><button id="sendTelegram" class="ghost">В Telegram</button><button id="sendEmail" class="ghost">По email</button></div>
+  <div id="status" class="status">Еженедельный запуск: {{ weekly_schedule }}</div>
+</section>
+<section class="clubs"><div class="section-title"><h2>Площадки</h2><button id="toggleAll" class="link-btn">Снять выделение</button></div><div class="club-grid">{% for c in competitors %}<label class="club-check"><input type="checkbox" name="competitor" value="{{ c }}" checked><span>{{ c }}</span></label>{% endfor %}</div></section>
+<section class="internal-box"><div><h3>Внутреннее расписание Клуба Козлова</h3><p>Загрузите CSV, чтобы сравнивать ещё не опубликованные концерты. Колонки: <code>date,time,title,stage,price,description</code>.</p></div><form id="csvForm"><input id="csvFile" type="file" accept=".csv,text/csv"><button class="secondary" type="submit">Импортировать CSV</button></form></section>
+<div id="emptyState" class="empty"><strong>Нажмите «Собрать обзор»</strong><span>или откройте ранее сохранённые данные.</span></div>
+<section id="dashboard" class="hidden">
+  <div id="metricRow" class="metrics"></div>
+  <nav class="tabs">
+    <button class="tab active" data-tab="summary">Резюме</button><button class="tab" data-tab="artists">Все артисты</button><button class="tab" data-tab="overlaps">Пересечения</button><button class="tab" data-tab="calendar">Календарь рисков</button><button class="tab" data-tab="events">Вся афиша</button><button class="tab" data-tab="pr">PR и инфоповоды</button><button class="tab" data-tab="competitors">По клубам</button><button class="tab" data-tab="sources">Источники</button><button class="tab" data-tab="aliases">Склейка артистов</button>
+  </nav>
+  <div id="tab-summary" class="tab-panel"></div><div id="tab-artists" class="tab-panel hidden"></div><div id="tab-overlaps" class="tab-panel hidden"></div><div id="tab-calendar" class="tab-panel hidden"></div><div id="tab-events" class="tab-panel hidden"></div><div id="tab-pr" class="tab-panel hidden"></div><div id="tab-competitors" class="tab-panel hidden"></div><div id="tab-sources" class="tab-panel hidden"></div><div id="tab-aliases" class="tab-panel hidden"></div>
+</section>
+</main><script src="/static/app.js"></script></body></html>

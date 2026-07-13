@@ -1,248 +1,39 @@
-const state = { report: null, stats: null };
-
-const $ = (id) => document.getElementById(id);
-const esc = (value = "") => String(value)
-  .replaceAll("&", "&amp;")
-  .replaceAll("<", "&lt;")
-  .replaceAll(">", "&gt;")
-  .replaceAll('"', "&quot;")
-  .replaceAll("'", "&#039;");
-
-function selectedCompetitors() {
-  return [...document.querySelectorAll('input[name="competitor"]:checked')].map(x => x.value);
-}
-
-function currentParams() {
-  return {
-    date_from: $("dateFrom").value,
-    date_to: $("dateTo").value,
-    competitors: selectedCompetitors(),
-    include_news: $("includeNews").checked,
-  };
-}
-
-function setStatus(text, kind = "") {
-  const node = $("status");
-  node.textContent = text;
-  node.className = `status ${kind}`;
-}
-
-function money(value) {
-  return value ? new Intl.NumberFormat("ru-RU").format(value) + " ₽" : "—";
-}
-
-function dateText(value) {
-  if (!value) return "—";
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return value.slice(0, 16);
-  return new Intl.DateTimeFormat("ru-RU", { day: "2-digit", month: "short", hour: value.includes("T") ? "2-digit" : undefined, minute: value.includes("T") ? "2-digit" : undefined }).format(d);
-}
-
-function categoriesHtml(categories = []) {
-  return categories.slice(0, 4).map(c => `<span class="pill">${esc(c)}</span>`).join("");
-}
-
-function sourceLink(item) {
-  const url = item.item_url || item.source_url || "#";
-  return `<a href="${esc(url)}" target="_blank" rel="noopener">${esc(item.title)}</a>`;
-}
-
-function renderMetrics(report) {
-  const cards = [
-    ["События конкурентов", report.totals.events],
-    ["Новости и PR", report.totals.news],
-    ["Источники", report.totals.sources],
-    ["События Клуба Козлова", report.totals.benchmark_events],
-  ];
-  $("metricRow").innerHTML = cards.map(([label, value]) => `
-    <div class="metric-card"><span>${esc(label)}</span><strong>${esc(value)}</strong></div>
-  `).join("");
-}
-
-function renderBars(counts = {}) {
-  const rows = Object.entries(counts).slice(0, 6);
-  if (!rows.length) return '<div class="compact-list"><span>Нет данных</span></div>';
-  const max = Math.max(...rows.map(([, v]) => v), 1);
-  return rows.map(([name, value]) => `
-    <div class="bar-row">
-      <span>${esc(name)}</span>
-      <div class="bar"><i style="width:${Math.max(5, Math.round(value / max * 100))}%"></i></div>
-      <strong>${value}</strong>
-    </div>
-  `).join("");
-}
-
-function renderSummary(report) {
-  const signals = report.signals.length
-    ? `<div class="signal-box"><h3>Главные сигналы периода</h3><ul>${report.signals.map(x => `<li>${esc(x)}</li>`).join("")}</ul></div>`
-    : `<div class="signal-box"><h3>Главные сигналы периода</h3><p>Пока недостаточно данных для выводов.</p></div>`;
-
-  const cards = report.competitors.map(comp => {
-    const repeated = comp.repeated_programs.length
-      ? `<div class="mini-title">Повторяющиеся программы</div><ul class="compact-list">${comp.repeated_programs.slice(0, 5).map(x => `<li>${esc(x.title)} — <strong>${x.count}</strong></li>`).join("")}</ul>`
-      : "";
-    const overlap = comp.overlap_with_kozlov.length
-      ? `<div class="mini-title">Пересечения с Клубом Козлова</div><ul class="compact-list">${comp.overlap_with_kozlov.slice(0, 5).map(x => `<li>${esc(x.competitor_title)} <span class="source-tag">${x.score}%</span></li>`).join("")}</ul>`
-      : "";
-    const notable = comp.notable.length
-      ? `<div class="mini-title">Заметные активности</div><ul class="compact-list">${comp.notable.slice(0, 5).map(item => `<li>${sourceLink(item)}<br><span class="source-tag">${esc((item.starts_at || item.published_at || "").slice(0, 10))}</span> ${categoriesHtml(item.categories)}</li>`).join("")}</ul>`
-      : "";
-    return `
-      <article class="competitor-card">
-        <h3>${esc(comp.name)}</h3>
-        <div class="statline">
-          <span class="pill hot">${comp.event_count} событий</span>
-          <span class="pill">${comp.news_count} PR</span>
-          <span class="pill">${comp.imports} привозов</span>
-          <span class="pill">${comp.festivals} фестивалей</span>
-          <span class="pill">${comp.special_formats} спецформатов</span>
-        </div>
-        <div class="mini-title">Цены</div>
-        <div><strong>${money(comp.price_min)}</strong>${comp.price_average ? ` · средняя минимальная ${money(comp.price_average)}` : ""}</div>
-        <div class="mini-title">Жанровая активность</div>
-        ${renderBars(comp.genre_counts)}
-        ${repeated}${overlap}${notable}
-      </article>
-    `;
-  }).join("");
-  $("tab-summary").innerHTML = signals + `<div class="competitor-list">${cards}</div>`;
-}
-
-function renderEvents(report) {
-  const rows = report.events.map(item => `
-    <tr>
-      <td>${esc(dateText(item.starts_at))}</td>
-      <td><strong>${esc(item.competitor)}</strong></td>
-      <td>${sourceLink(item)}<div class="statline">${categoriesHtml(item.categories)}</div></td>
-      <td>${money(item.price_min)}</td>
-      <td>${item.is_import ? '<span class="pill hot">привоз</span>' : "—"}</td>
-      <td>${(item.sources || []).map(s => `<span class="source-tag">${esc(s.type)}</span>`).join(" ")}</td>
-    </tr>
-  `).join("");
-  $("tab-events").innerHTML = `
-    <table class="data-table">
-      <thead><tr><th>Дата</th><th>Площадка</th><th>Артист / программа</th><th>Цена от</th><th>Привоз</th><th>Проверка</th></tr></thead>
-      <tbody>${rows || '<tr><td colspan="6">Событий за выбранный период нет.</td></tr>'}</tbody>
-    </table>`;
-}
-
-function renderNews(report) {
-  const rows = report.news.map(item => `
-    <tr>
-      <td>${esc(dateText(item.published_at))}</td>
-      <td><strong>${esc(item.competitor)}</strong></td>
-      <td>${sourceLink(item)}<div class="statline">${categoriesHtml(item.categories)}</div></td>
-      <td>${esc(item.source_name)}</td>
-    </tr>
-  `).join("");
-  $("tab-news").innerHTML = `
-    <table class="data-table">
-      <thead><tr><th>Дата</th><th>Площадка</th><th>Инфоповод</th><th>Источник</th></tr></thead>
-      <tbody>${rows || '<tr><td colspan="4">Новостных упоминаний за выбранный период нет.</td></tr>'}</tbody>
-    </table>`;
-}
-
-function renderSources(stats) {
-  const sourceRows = (stats?.sources || []).map(item => `
-    <tr>
-      <td>${esc(item.source_name)}</td>
-      <td class="${item.status === "ok" ? "status-ok" : "status-error"}">${item.status === "ok" ? "ОК" : "Ошибка"}</td>
-      <td>${item.count}</td>
-      <td>${item.duration_seconds} сек.</td>
-      <td>${esc(item.error || "")}</td>
-    </tr>
-  `).join("");
-  $("tab-sources").innerHTML = stats
-    ? `<p>Получено записей: <strong>${stats.collected}</strong>. Новых или обновлённых: <strong>${stats.inserted_or_updated}</strong>.</p>
-       <table class="data-table"><thead><tr><th>Источник</th><th>Статус</th><th>Записей</th><th>Время</th><th>Комментарий</th></tr></thead><tbody>${sourceRows}</tbody></table>`
-    : `<p>Диагностика источников появится после нового запуска.</p>`;
-}
-
-function renderReport(report, stats = null) {
-  state.report = report;
-  state.stats = stats;
-  $("emptyState").classList.add("hidden");
-  $("dashboard").classList.remove("hidden");
-  renderMetrics(report);
-  renderSummary(report);
-  renderEvents(report);
-  renderNews(report);
-  renderSources(stats);
-}
-
-async function runCollection() {
-  const params = currentParams();
-  if (!params.date_from || !params.date_to) return setStatus("Укажите обе даты.", "error");
-  if (!params.competitors.length) return setStatus("Выберите хотя бы одного конкурента.", "error");
-  const button = $("runButton");
-  button.disabled = true;
-  button.textContent = "Собираю…";
-  setStatus("Проверяю официальные сайты, агрегаторы и новости. Некоторые источники могут отвечать медленно.");
-  try {
-    const response = await fetch("/api/run", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(params),
-    });
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.detail || "Ошибка сбора");
-    renderReport(data.report, data.stats);
-    const errors = data.stats.sources.filter(x => x.status !== "ok").length;
-    setStatus(`Обзор готов. Получено ${data.stats.collected} записей${errors ? `; источников с ошибками: ${errors}` : ""}.`, errors ? "" : "success");
-  } catch (error) {
-    setStatus(error.message, "error");
-  } finally {
-    button.disabled = false;
-    button.textContent = "Собрать обзор";
-  }
-}
-
-async function showStored() {
-  const params = currentParams();
-  const q = new URLSearchParams({
-    date_from: params.date_from,
-    date_to: params.date_to,
-    competitors: params.competitors.join("|"),
-  });
-  setStatus("Открываю ранее собранные данные…");
-  try {
-    const response = await fetch(`/api/report?${q}`);
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.detail || "Ошибка отчёта");
-    renderReport(data, null);
-    setStatus("Показаны данные, уже сохранённые в базе.", "success");
-  } catch (error) {
-    setStatus(error.message, "error");
-  }
-}
-
-function exportFile(kind) {
-  const params = currentParams();
-  const q = new URLSearchParams({
-    date_from: params.date_from,
-    date_to: params.date_to,
-    competitors: params.competitors.join("|"),
-  });
-  window.location.href = `/api/export.${kind}?${q}`;
-}
-
-$("runButton").addEventListener("click", runCollection);
-$("showStored").addEventListener("click", showStored);
-$("exportMd").addEventListener("click", () => exportFile("md"));
-$("exportCsv").addEventListener("click", () => exportFile("csv"));
-
-$("toggleAll").addEventListener("click", () => {
-  const boxes = [...document.querySelectorAll('input[name="competitor"]')];
-  const allChecked = boxes.every(x => x.checked);
-  boxes.forEach(x => { x.checked = !allChecked; });
-  $("toggleAll").textContent = allChecked ? "Выбрать всех" : "Снять выделение";
-});
-
-document.querySelectorAll(".tab").forEach(button => {
-  button.addEventListener("click", () => {
-    document.querySelectorAll(".tab").forEach(x => x.classList.remove("active"));
-    document.querySelectorAll(".tab-panel").forEach(x => x.classList.add("hidden"));
-    button.classList.add("active");
-    $(`tab-${button.dataset.tab}`).classList.remove("hidden");
-  });
-});
+const $=id=>document.getElementById(id); const state={report:null,stats:null};
+const esc=v=>String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+const selected=()=>[...document.querySelectorAll('input[name="competitor"]:checked')].map(x=>x.value);
+const params=()=>({date_from:$('dateFrom').value,date_to:$('dateTo').value,competitors:selected(),include_news:$('includeNews').checked});
+function status(t,k=""){$('status').textContent=t;$('status').className=`status ${k}`}
+function fmtDate(v){if(!v)return"—";try{return new Intl.DateTimeFormat('ru-RU',{day:'2-digit',month:'short',year:'numeric',hour:v.includes('T')?'2-digit':undefined,minute:v.includes('T')?'2-digit':undefined}).format(new Date(v))}catch{return v}}
+function money(v){return v?new Intl.NumberFormat('ru-RU').format(v)+' ₽':'—'}
+function link(x,label){const u=x.item_url||x.source_url||'';return u?`<a target="_blank" rel="noopener" href="${esc(u)}">${esc(label||x.title)}</a>`:esc(label||x.title)}
+function pills(xs=[]){return xs.slice(0,5).map(x=>`<span class="pill">${esc(x)}</span>`).join('')}
+function sourceLinks(x){return (x.sources||[]).map(s=>`<a class="source" target="_blank" rel="noopener" href="${esc(s.url)}">${esc(s.name)}</a>`).join(' ')}
+function currentQ(){const p=params();return new URLSearchParams({date_from:p.date_from,date_to:p.date_to,competitors:p.competitors.join('|')})}
+function metric(label,value,note=''){return `<article class="metric"><span>${esc(label)}</span><strong>${esc(value)}</strong><small>${esc(note)}</small></article>`}
+function renderMetrics(r){$('metricRow').innerHTML=[metric('Концерты конкурентов',r.totals.events),metric('Концерты Клуба Козлова',r.totals.kozlov_events),metric('Уникальные артисты',r.totals.artists),metric('Общие артисты',r.totals.shared_artists),metric('Совпадения в один день',r.totals.same_day_overlaps),metric('PR и новости',r.totals.news)].join('')}
+function evidenceHtml(e=[]){return e.length?`<div class="evidence">${e.map(x=>link(x,x.competitor?`${x.competitor}: ${x.title}`:x.title)).join(' · ')}</div>`:''}
+function renderSummary(r){const e=r.executive;const block=(title,items,kind)=>`<section class="summary-block ${kind}"><h2>${title}</h2>${items.length?items.map(x=>`<article><p>${esc(x.text)}</p>${x.artists?.length?`<div>${pills(x.artists)}</div>`:''}${evidenceHtml(x.evidence)}</article>`).join(''):'<p>Недостаточно данных для вывода.</p>'}</section>`;
+ const actions=`<section class="summary-block actions"><h2>Рекомендуемые действия</h2><ol>${e.actions.map(x=>`<li>${esc(x)}</li>`).join('')}</ol></section>`;
+ const top=r.competitors.slice(0,4).map(c=>`<article class="pressure"><div><h3>${esc(c.name)}</h3><p>${c.event_count} событий · ${c.artist_count} артистов · ${c.shared_artists.length} общих с нами</p></div><strong>${c.pressure_score}<small>/100</small></strong></article>`).join('');
+ $('tab-summary').innerHTML=`<div class="summary-grid">${block('Главное за период',e.facts,'facts')}${block('Риски',e.risks,'risks')}${block('Возможности',e.opportunities,'opportunities')}${actions}</div><section class="panel"><h2>Конкурентное давление</h2>${top||'<p>Нет данных.</p>'}</section>`}
+function artistRows(rows){return rows.map(a=>`<tr data-search="${esc((a.artist+' '+a.clubs.join(' ')).toLowerCase())}" data-overlap="${a.has_kozlov&&a.has_competitors}"><td><strong>${esc(a.artist)}</strong><div class="sub">${a.appearances} выступл.</div></td><td>${a.kozlov_dates.length?a.kozlov_dates.map(d=>`<span class="date koz">${esc(d)}</span>`).join(' '):'—'}</td><td>${a.clubs.length?a.clubs.map(c=>`<span class="club-tag">${esc(c)}</span>`).join(' '):'—'}</td><td>${a.competitor_dates.length?a.competitor_dates.map(d=>`<span class="date">${esc(d)}</span>`).join(' '):'—'}</td><td>${a.same_day.length?'<span class="risk-badge high">В один день</span>':a.nearest_gap_days!==null?`<span class="risk-badge">${a.nearest_gap_days} дн.</span>`:'—'}</td></tr>`).join('')}
+function renderArtists(r){$('tab-artists').innerHTML=`<div class="toolbar"><input id="artistSearch" placeholder="Поиск артиста или клуба"><label><input id="onlyShared" type="checkbox"> Только общие с Клубом Козлова</label><strong>${r.artists.length} артистов</strong></div><div class="table-wrap"><table><thead><tr><th>Артист</th><th>Клуб Козлова</th><th>Другие клубы</th><th>Даты у конкурентов</th><th>Ближайшее пересечение</th></tr></thead><tbody id="artistBody">${artistRows(r.artists)}</tbody></table></div>`;
+ const filter=()=>{const q=$('artistSearch').value.toLowerCase();const only=$('onlyShared').checked;[...$('artistBody').children].forEach(tr=>tr.hidden=!(tr.dataset.search.includes(q)&&(!only||tr.dataset.overlap==='true')))};$('artistSearch').oninput=filter;$('onlyShared').onchange=filter}
+function eventMini(e){return `<div class="event-mini"><strong>${fmtDate(e.starts_at)}</strong><span>${link(e)}</span><small>${esc(e.stage||e.competitor)}</small></div>`}
+function renderOverlaps(r){$('tab-overlaps').innerHTML=r.overlaps.length?r.overlaps.map(x=>`<article class="overlap-card ${x.same_day?'danger':''}"><div class="overlap-head"><h3>${esc(x.artist)}</h3><span class="risk-badge ${x.same_day?'high':''}">${x.same_day?'ОДНА ДАТА':x.gap_days+' дн.'}</span></div><div class="versus"><div><b>Клуб Козлова</b>${eventMini(x.kozlov)}</div><div class="vs">↔</div><div><b>${esc(x.competitor.competitor)}</b>${eventMini(x.competitor)}</div></div></article>`).join(''):'<div class="empty-inline">Пересечений артистов за период не найдено.</div>'}
+function renderCalendar(r){$('tab-calendar').innerHTML=`<div class="table-wrap"><table><thead><tr><th>Дата</th><th>Риск</th><th>Клуб Козлова</th><th>Конкуренты</th><th>Совпадения</th></tr></thead><tbody>${r.calendar.map(d=>`<tr><td><strong>${esc(d.date)}</strong></td><td><span class="score ${d.risk>=50?'red':d.risk>=25?'amber':''}">${d.risk}/100</span></td><td>${d.kozlov.map(x=>link(x)).join('<br>')||'—'}</td><td>${d.competitors.map(x=>`<b>${esc(x.competitor)}</b>: ${link(x)}`).join('<br>')||'—'}</td><td>${pills([...d.same_artists,...d.same_genres])||'—'}</td></tr>`).join('')}</tbody></table></div>`}
+function renderEvents(r){const all=[...r.kozlov_events,...r.events].sort((a,b)=>(a.starts_at||'').localeCompare(b.starts_at||''));$('tab-events').innerHTML=`<div class="toolbar"><input id="eventSearch" placeholder="Поиск по афише"><strong>${all.length} событий</strong></div><div class="table-wrap"><table><thead><tr><th>Дата</th><th>Площадка / сцена</th><th>Артисты</th><th>Программа</th><th>Цена</th><th>Источники</th></tr></thead><tbody id="eventBody">${all.map(x=>`<tr data-search="${esc((x.competitor+' '+x.title+' '+x.artists.join(' ')).toLowerCase())}"><td>${fmtDate(x.starts_at)}</td><td><strong>${esc(x.competitor)}</strong><div class="sub">${esc(x.stage||'')}</div></td><td>${x.artists.length?x.artists.map(a=>`<span class="artist-tag">${esc(a)}</span>`).join(' '):'<span class="warn">Не распознан</span>'}</td><td>${link(x)}<div>${pills(x.categories)}</div></td><td>${x.is_free?'Бесплатно':money(x.price_min)}</td><td>${sourceLinks(x)}</td></tr>`).join('')}</tbody></table></div>`;$('eventSearch').oninput=()=>{const q=$('eventSearch').value.toLowerCase();[...$('eventBody').children].forEach(x=>x.hidden=!x.dataset.search.includes(q))}}
+function renderPR(r){$('tab-pr').innerHTML=r.news.length?`<div class="feed">${r.news.map(x=>`<article><div><span class="club-tag">${esc(x.competitor)}</span><time>${fmtDate(x.published_at)}</time></div><h3>${link(x)}</h3><p>${esc((x.description||'').slice(0,360))}</p><div>${pills(x.categories)} ${sourceLinks(x)}</div></article>`).join('')}</div>`:'<div class="empty-inline">PR-упоминаний за период не найдено.</div>'}
+function renderCompetitors(r){$('tab-competitors').innerHTML=`<div class="cards">${r.competitors.map(c=>`<article class="club-card"><div class="club-card-head"><h2>${esc(c.name)}</h2><span class="score ${c.pressure_score>=70?'red':c.pressure_score>=45?'amber':''}">${c.pressure_score}/100</span></div><div class="club-kpis"><b>${c.event_count}<small> событий</small></b><b>${c.artist_count}<small> артистов</small></b><b>${c.imports}<small> привозов</small></b><b>${c.delta>=0?'+':''}${c.delta}<small> к прошлому периоду</small></b></div><p><strong>Общие артисты:</strong> ${c.shared_artists.length?c.shared_artists.join(', '):'нет'}</p><p><strong>Цена:</strong> от ${money(c.price_min)}, медиана ${money(c.price_median)}</p><div>${pills(Object.keys(c.genre_counts))}</div><h3>Заметные активности</h3>${c.notable.slice(0,5).map(x=>`<p>${link(x)}</p>`).join('')||'<p>Нет выделенных сигналов.</p>'}</article>`).join('')}</div>`}
+function renderSources(stats){$('tab-sources').innerHTML=stats?`<div class="table-wrap"><table><thead><tr><th>Источник</th><th>Площадка</th><th>Тип</th><th>Парсер</th><th>Статус</th><th>Записей</th><th>Комментарий</th></tr></thead><tbody>${stats.sources.map(s=>`<tr><td>${esc(s.source_name)}</td><td>${esc(s.competitor)}</td><td>${esc(s.source_type)}</td><td>${esc(s.parser)}</td><td><span class="status-dot ${s.status==='ok'?'ok':'bad'}">${s.status==='ok'?'OK':s.status==='empty'?'Пусто':'Ошибка'}</span></td><td>${s.count}</td><td>${esc(s.error||'')}</td></tr>`).join('')}</tbody></table></div>`:'<p>Диагностика появится после нового сбора.</p>'}
+async function renderAliases(){const rows=await fetch('/api/aliases').then(r=>r.json());$('tab-aliases').innerHTML=`<section class="alias-form"><h2>Склеить варианты имени</h2><input id="aliasCanonical" placeholder="Каноническое имя"><input id="aliasValue" placeholder="Вариант написания"><button id="aliasAdd" class="secondary">Добавить</button></section><div class="table-wrap"><table><thead><tr><th>Каноническое имя</th><th>Вариант</th><th>Источник</th><th></th></tr></thead><tbody>${rows.map(x=>`<tr><td>${esc(x.canonical)}</td><td>${esc(x.alias)}</td><td>${esc(x.source)}</td><td>${x.source==='seed'?'':`<button class="tiny delete-alias" data-id="${x.id}">Удалить</button>`}</td></tr>`).join('')}</tbody></table></div>`;$('aliasAdd').onclick=async()=>{await fetch('/api/aliases',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({canonical:$('aliasCanonical').value,alias:$('aliasValue').value})});await renderAliases();if(state.report)loadStored()};document.querySelectorAll('.delete-alias').forEach(b=>b.onclick=async()=>{await fetch('/api/aliases/'+b.dataset.id,{method:'DELETE'});await renderAliases()})}
+function render(r,stats=null){state.report=r;state.stats=stats;$('emptyState').classList.add('hidden');$('dashboard').classList.remove('hidden');renderMetrics(r);renderSummary(r);renderArtists(r);renderOverlaps(r);renderCalendar(r);renderEvents(r);renderPR(r);renderCompetitors(r);renderSources(stats);renderAliases()}
+async function run(){const p=params();if(!p.competitors.length)return status('Выберите хотя бы одну площадку','error');$('runButton').disabled=true;status('Собираю сайты, агрегаторы, Telegram и новости…');try{const res=await fetch('/api/run',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(p)});const d=await res.json();if(!res.ok)throw Error(d.detail||'Ошибка');render(d.report,d.stats);const bad=d.stats.sources.filter(x=>x.status!=='ok').length;status(`Обзор готов: ${d.report.totals.events} концертов, ${d.report.totals.artists} артистов${bad?`; ошибок источников: ${bad}`:''}`,'success')}catch(e){status(e.message,'error')}finally{$('runButton').disabled=false}}
+async function loadStored(){const res=await fetch('/api/report?'+currentQ());const d=await res.json();if(!res.ok)throw Error(d.detail||'Ошибка');render(d,null);status('Открыты сохранённые данные.','success')}
+$('runButton').onclick=run;$('showStored').onclick=()=>loadStored().catch(e=>status(e.message,'error'));$('printBtn').onclick=()=>window.print();
+$('exportArtists').onclick=()=>location.href='/api/export-artists.csv?'+currentQ();$('exportEvents').onclick=()=>location.href='/api/export-events.csv?'+currentQ();$('exportMd').onclick=()=>location.href='/api/export.md?'+currentQ();
+async function deliver(channel){status('Отправляю отчёт…');const q=new URLSearchParams({date_from:$('dateFrom').value,date_to:$('dateTo').value});const res=await fetch(`/api/deliver/${channel}?${q}`,{method:'POST'});const d=await res.json();if(!res.ok)return status(d.detail||'Ошибка отправки','error');status(d.sent?'Отчёт отправлен.':d.reason,'success')}
+$('sendTelegram').onclick=()=>deliver('telegram');$('sendEmail').onclick=()=>deliver('email');
+$('toggleAll').onclick=()=>{const bs=[...document.querySelectorAll('input[name="competitor"]')],on=bs.every(x=>x.checked);bs.forEach(x=>x.checked=!on);$('toggleAll').textContent=on?'Выбрать всех':'Снять выделение'};
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.tab-panel').forEach(x=>x.classList.add('hidden'));b.classList.add('active');$('tab-'+b.dataset.tab).classList.remove('hidden')});
+$('csvForm').onsubmit=async e=>{e.preventDefault();if(!$('csvFile').files[0])return status('Выберите CSV-файл','error');const f=new FormData();f.append('file',$('csvFile').files[0]);f.append('date_from',$('dateFrom').value);f.append('date_to',$('dateTo').value);status('Импортирую внутреннее расписание…');const res=await fetch('/api/import-kozlov-csv',{method:'POST',body:f});const d=await res.json();if(!res.ok)return status(d.detail||'Ошибка импорта','error');render(d.report,null);status(`Импортировано ${d.result.imported} событий. Ошибок строк: ${d.result.errors.length}`,'success')};

@@ -1,148 +1,248 @@
 competitors:
   - name: "Клуб Игоря Бутмана"
-    aliases: ["бутман", "butman", "igor butman"]
+    short: "Бутман"
+    aliases: ["бутман", "butman", "igor butman", "джаз-клуб игоря бутмана"]
   - name: "Эссе"
-    aliases: ["эссе", "esse", "jazzesse"]
+    short: "Эссе"
+    aliases: ["эссе", "esse", "jazzesse", "esse jazz club"]
   - name: "Louis"
-    aliases: ["louis", "луи", "louis jazz club"]
+    short: "Louis"
+    aliases: ["louis", "луи", "louis jazz club", "louis the claw"]
   - name: "Академ Джаз Клуб"
-    aliases: ["академ джаз", "academ jazz", "academjazz", "академический джаз"]
+    short: "Академ Джаз"
+    aliases: ["академ джаз", "academ jazz", "academjazz", "академ-джаз-клуб"]
   - name: "Союз Композиторов"
+    short: "Союз Композиторов"
     aliases: ["союз композиторов", "ucclub"]
   - name: "Jam Club Music"
-    aliases: ["jam club", "джем клуб", "jamclub"]
+    short: "Jam Club"
+    aliases: ["jam club", "джем клуб", "jamclub", "джем клуб мьюзик"]
   - name: "Rhythm & Blues Cafe"
-    aliases: ["ритм блюз", "rhythm & blues", "rhythm-blues", "rhythm blues"]
+    short: "Rhythm & Blues"
+    aliases: ["ритм блюз", "rhythm & blues", "rhythm-blues", "rhythm blues", "ритм-блюз кафе"]
   - name: "Gamma More"
-    aliases: ["gamma more", "гамма", "gamma на садовом"]
+    short: "Gamma More"
+    aliases: ["gamma more", "гамма", "gamma на садовом", "гамма на садовом"]
 
 benchmark:
   name: "Клуб Алексея Козлова"
-  aliases: ["клуб алексея козлова", "kozlov club", "клуб козлова"]
+  short: "Клуб Козлова"
+  aliases: ["клуб алексея козлова", "kozlov club", "клуб козлова", "джаз-клуб алексея козлова"]
 
+# parser: auto | esse | louis | academ | union | ticketscloud | telegram | wordpress_events
 sources:
-  - name: "Бутман — официальный сайт"
+  - name: "Бутман Москва — официальный сайт"
     competitor: "Клуб Игоря Бутмана"
     source_type: "official"
     kind: "html"
-    url: "https://butmanclub.ru/"
+    parser: "butman"
+    url: "https://moscow.butmanclub.ru/"
+    enabled: true
+
+  - name: "Бутман — Ticketland"
+    competitor: "Клуб Игоря Бутмана"
+    source_type: "aggregator"
+    kind: "html"
+    parser: "ticketland"
+    url: "https://www.ticketland.ru/kluby/dzhazovyy-klub-igorya-butmana/afisha/"
+    enabled: true
+
+  - name: "Бутман — Telegram"
+    competitor: "Клуб Игоря Бутмана"
+    source_type: "social"
+    kind: "telegram"
+    parser: "telegram"
+    url: "https://t.me/s/butmanjazz"
     enabled: true
 
   - name: "Эссе — официальный сайт"
     competitor: "Эссе"
     source_type: "official"
     kind: "html"
+    parser: "esse"
     url: "https://www.jazzesse.ru/"
+    enabled: true
+
+  - name: "Эссе — Ticketland"
+    competitor: "Эссе"
+    source_type: "aggregator"
+    kind: "html"
+    parser: "ticketland"
+    url: "https://www.ticketland.ru/kluby/dzhaz-klub-esse/afisha/"
+    enabled: true
+
+  - name: "Эссе — Telegram"
+    competitor: "Эссе"
+    source_type: "social"
+    kind: "telegram"
+    parser: "telegram"
+    url: "https://t.me/s/essejazzclub"
     enabled: true
 
   - name: "Louis — официальный сайт"
     competitor: "Louis"
     source_type: "official"
     kind: "html"
+    parser: "louis"
     url: "https://louisjazzclub.com/"
+    enabled: true
+
+  - name: "Louis — Яндекс Афиша"
+    competitor: "Louis"
+    source_type: "aggregator"
+    kind: "html"
+    parser: "yandex"
+    url: "https://afisha.yandex.ru/moscow/other/places/louis-the-claw"
     enabled: true
 
   - name: "Академ Джаз — официальный сайт"
     competitor: "Академ Джаз Клуб"
     source_type: "official"
     kind: "html"
+    parser: "academ"
     url: "https://academjazzclub.ru/events/"
+    enabled: true
+
+  - name: "Академ Джаз — Афиша.ru"
+    competitor: "Академ Джаз Клуб"
+    source_type: "aggregator"
+    kind: "html"
+    parser: "afisha"
+    url: "https://www.afisha.ru/msk/club/akadem-dzhaz-klub-prospekt-mira-63463/"
     enabled: true
 
   - name: "Союз Композиторов — официальный сайт"
     competitor: "Союз Композиторов"
     source_type: "official"
     kind: "html"
+    parser: "union"
     url: "https://ucclub.ru/schedule/"
+    enabled: true
+
+  - name: "Союз Композиторов — Яндекс Афиша"
+    competitor: "Союз Композиторов"
+    source_type: "aggregator"
+    kind: "html"
+    parser: "yandex"
+    url: "https://afisha.yandex.ru/moscow/concert/places/soiuz-kompozitorov/schedule"
+    enabled: true
+
+  - name: "Союз Композиторов — Афиша.ru"
+    competitor: "Союз Композиторов"
+    source_type: "aggregator"
+    kind: "html"
+    parser: "afisha"
+    url: "https://www.afisha.ru/msk/club/soyuz-kompozitorov-13776/concert/"
+    enabled: true
+
+  - name: "Jam Club — официальный TicketsCloud"
+    competitor: "Jam Club Music"
+    source_type: "official"
+    kind: "html"
+    parser: "ticketscloud"
+    url: "https://jamclub.ticketscloud.org/"
     enabled: true
 
   - name: "Jam Club — официальный сайт"
     competitor: "Jam Club Music"
     source_type: "official"
     kind: "html"
+    parser: "jam_site"
     url: "https://jamclub.moscow/concerts"
+    enabled: true
+
+  - name: "Jam Club — Telegram"
+    competitor: "Jam Club Music"
+    source_type: "social"
+    kind: "telegram"
+    parser: "telegram"
+    url: "https://t.me/s/jamclubmoscow"
     enabled: true
 
   - name: "Rhythm & Blues Cafe — официальный сайт"
     competitor: "Rhythm & Blues Cafe"
     source_type: "official"
     kind: "html"
+    parser: "rhythm_blues"
     url: "https://rhythm-blues-cafe.ru/"
+    enabled: true
+
+  - name: "Rhythm & Blues Cafe — Ticketland"
+    competitor: "Rhythm & Blues Cafe"
+    source_type: "aggregator"
+    kind: "html"
+    parser: "ticketland"
+    url: "https://www.ticketland.ru/kluby/ritm-blyuz-kafe/afisha/"
+    enabled: true
+
+  - name: "Rhythm & Blues Cafe — Яндекс Афиша"
+    competitor: "Rhythm & Blues Cafe"
+    source_type: "aggregator"
+    kind: "html"
+    parser: "yandex"
+    url: "https://afisha.yandex.ru/moscow/concert/places/rhythm-blues-cafe/schedule"
     enabled: true
 
   - name: "Gamma More — официальный сайт"
     competitor: "Gamma More"
     source_type: "official"
     kind: "html"
+    parser: "gamma"
     url: "https://www.gammamore.ru/gammaevents"
+    enabled: true
+
+  - name: "Gamma More — MTS Live"
+    competitor: "Gamma More"
+    source_type: "aggregator"
+    kind: "html"
+    parser: "mts_live"
+    url: "https://live.mts.ru/moscow/venues/club/muzykalnyy-klub-gamma-more"
+    enabled: true
+
+  - name: "Gamma More — Ticketland"
+    competitor: "Gamma More"
+    source_type: "aggregator"
+    kind: "html"
+    parser: "ticketland"
+    url: "https://www.ticketland.ru/kluby/muzykalnyy-klub-gamma-more/afisha/"
+    enabled: true
+
+  - name: "Gamma More — Telegram"
+    competitor: "Gamma More"
+    source_type: "social"
+    kind: "telegram"
+    parser: "telegram"
+    url: "https://t.me/s/gammamore"
     enabled: true
 
   - name: "JazzMap — общая афиша"
     competitor: "__multi__"
     source_type: "aggregator"
     kind: "html"
+    parser: "jazzmap"
     url: "https://www.jazzmap.ru/afisha/"
     enabled: true
 
-  - name: "JazzMap — Бутман"
-    competitor: "Клуб Игоря Бутмана"
-    source_type: "aggregator"
-    kind: "html"
-    url: "https://www.jazzmap.ru/afisha/butman"
-    enabled: true
-
-  - name: "JazzMap — Эссе"
-    competitor: "Эссе"
-    source_type: "aggregator"
-    kind: "html"
-    url: "https://www.jazzmap.ru/afisha/esseclub"
-    enabled: true
-
-  - name: "JazzMap — Rhythm & Blues Cafe"
-    competitor: "Rhythm & Blues Cafe"
-    source_type: "aggregator"
-    kind: "html"
-    url: "https://www.jazzmap.ru/rus/clubs/Ritm-Blyuz-Kafe-klub.php"
-    enabled: true
-
-  - name: "Яндекс Афиша — Бутман"
-    competitor: "Клуб Игоря Бутмана"
-    source_type: "aggregator"
-    kind: "html"
-    url: "https://afisha.yandex.ru/moscow/concert/places/dzhaz-klub-igoria-butmana-na-taganke/schedule"
-    enabled: false
-
-  - name: "Яндекс Афиша — Jam Club"
-    competitor: "Jam Club Music"
-    source_type: "aggregator"
-    kind: "html"
-    url: "https://afisha.yandex.ru/moscow/concert/places/jam-club"
-    enabled: false
-
-  - name: "Яндекс Афиша — Союз Композиторов"
-    competitor: "Союз Композиторов"
-    source_type: "aggregator"
-    kind: "html"
-    url: "https://afisha.yandex.ru/moscow/concert/places/soiuz-kompozitorov"
-    enabled: false
-
-  - name: "Ticketland — Эссе"
-    competitor: "Эссе"
-    source_type: "aggregator"
-    kind: "html"
-    url: "https://www.ticketland.ru/kluby/dzhaz-klub-esse/afisha/"
-    enabled: false
-
-  - name: "MTS Live — Союз Композиторов"
-    competitor: "Союз Композиторов"
-    source_type: "aggregator"
-    kind: "html"
-    url: "https://live.mts.ru/moscow/venues/club/club-soyuz-kompozitorov"
-    enabled: false
-
-  - name: "Клуб Козлова — benchmark"
+  - name: "Клуб Козлова — официальный календарь"
     competitor: "Клуб Алексея Козлова"
     source_type: "benchmark"
     kind: "html"
+    parser: "wordpress_events"
     url: "https://kozlovclub.ru/calendar/"
+    enabled: true
+
+  - name: "Клуб Козлова — Афиша.ru"
+    competitor: "Клуб Алексея Козлова"
+    source_type: "benchmark_aggregator"
+    kind: "html"
+    parser: "afisha"
+    url: "https://www.afisha.ru/msk/club/klub-alekseya-kozlova-17780/concert/"
+    enabled: true
+
+  - name: "Клуб Козлова — Telegram"
+    competitor: "Клуб Алексея Козлова"
+    source_type: "benchmark_social"
+    kind: "telegram"
+    parser: "telegram"
+    url: "https://t.me/s/kozlovclub"
     enabled: true
