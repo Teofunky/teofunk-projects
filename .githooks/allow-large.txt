@@ -1,1 +1,3 @@
 # Файлы больше 5 МБ, которые положены сюда сознательно (по одному пути на строку)
+texts/ne-selinger/smisly-variant.html
+texts/ne-selinger/smisly.html
