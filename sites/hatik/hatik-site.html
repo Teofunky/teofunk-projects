@@ -1,0 +1,2588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>HATIK — shelf-sharing makers market, Yerevan</title>
+<meta name="description" content="HATIK is a curated shelf-sharing makers market in central Yerevan. Rent a shelf, sell your work. Or come shop a hundred local makers under one roof.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+Armenian:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23F7F1E3'/%3E%3Crect x='5' y='5' width='7' height='7' rx='2' fill='none' stroke='%2326241F' stroke-width='1.6'/%3E%3Crect x='13' y='5' width='7' height='7' rx='2' fill='%23E08D82'/%3E%3Crect x='21' y='5' width='7' height='7' rx='2' fill='none' stroke='%2326241F' stroke-width='1.6'/%3E%3Crect x='5' y='13' width='7' height='7' rx='2' fill='none' stroke='%2326241F' stroke-width='1.6'/%3E%3Crect x='13' y='13' width='7' height='7' rx='2' fill='%239CB584'/%3E%3Crect x='21' y='13' width='7' height='7' rx='2' fill='none' stroke='%2326241F' stroke-width='1.6'/%3E%3Crect x='5' y='21' width='7' height='7' rx='2' fill='%23F3C761'/%3E%3Crect x='13' y='21' width='7' height='7' rx='2' fill='none' stroke='%2326241F' stroke-width='1.6'/%3E%3Crect x='21' y='21' width='7' height='7' rx='2' fill='%23A6C3DF'/%3E%3C/svg%3E">
+<style>
+/* ============================================================
+   HATIK — design tokens
+   Palette taken from the logo: pastel cells on warm cream paper.
+   ============================================================ */
+:root{
+  --paper:#F7F1E3;
+  --card:#FFFCF5;
+  --ink:#26241F;
+  --ink-soft:#5C574C;
+  --ink-faint:#948C7C;
+  --line:#E2D8C2;
+  --coral:#E08D82;
+  --sage:#9CB584;
+  --sun:#F3C761;
+  --sky:#A6C3DF;
+  --accent:var(--coral);
+  --ok:#4C8C5A;
+  --warn:#C2603E;
+
+  --r-sm:8px; --r:14px; --r-lg:22px; --r-pill:999px;
+  --shadow-1:0 1px 2px rgba(38,36,31,.05), 0 4px 14px rgba(38,36,31,.05);
+  --shadow-2:0 2px 6px rgba(38,36,31,.07), 0 18px 40px rgba(38,36,31,.10);
+  --pad:clamp(18px,4vw,44px);
+  --maxw:1220px;
+
+  --f-display:"Outfit","Noto Sans Armenian",system-ui,sans-serif;
+  --f-body:"Instrument Sans","Noto Sans Armenian",system-ui,-apple-system,sans-serif;
+  --f-mono:"JetBrains Mono","Noto Sans Armenian",ui-monospace,monospace;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:var(--f-body); font-size:16px; line-height:1.6;
+  -webkit-font-smoothing:antialiased; overflow-x:hidden;
+}
+body.is-locked{overflow:hidden}
+img{max-width:100%; display:block}
+a{color:inherit}
+button,input,select,textarea{font:inherit; color:inherit}
+:focus-visible{outline:2.5px solid var(--ink); outline-offset:2px; border-radius:4px}
+::selection{background:var(--sun); color:var(--ink)}
+
+/* ---------- type ---------- */
+h1,h2,h3,h4{font-family:var(--f-display); font-weight:600; line-height:1.1; margin:0; letter-spacing:-.015em}
+h1{font-size:clamp(2.3rem,6vw,4.2rem)}
+h2{font-size:clamp(1.7rem,3.6vw,2.7rem)}
+h3{font-size:clamp(1.15rem,2vw,1.4rem)}
+p{margin:0 0 1em}
+.eyebrow{
+  font-family:var(--f-mono); font-size:.7rem; font-weight:500;
+  letter-spacing:.22em; text-transform:uppercase; color:var(--ink-faint);
+  display:flex; align-items:center; gap:10px; margin-bottom:14px;
+}
+.eyebrow::before{content:""; width:14px; height:14px; border-radius:4px; background:var(--accent); flex:none}
+.lede{font-size:clamp(1.02rem,1.5vw,1.18rem); color:var(--ink-soft); max-width:58ch}
+.mono{font-family:var(--f-mono)}
+.muted{color:var(--ink-soft)}
+.tiny{font-size:.82rem}
+
+/* ---------- layout ---------- */
+.wrap{max-width:var(--maxw); margin:0 auto; padding-inline:var(--pad)}
+.section{padding-block:clamp(52px,8vw,96px)}
+.section--tight{padding-block:clamp(34px,5vw,56px)}
+.section-head{display:flex; flex-wrap:wrap; gap:18px 26px; align-items:flex-end; justify-content:space-between; margin-bottom:clamp(24px,4vw,42px)}
+.section-head p{margin:8px 0 0}
+.grid{display:grid; gap:clamp(14px,2vw,22px)}
+.hr{height:1px; background:var(--line); border:0; margin:0}
+
+/* ---------- buttons ---------- */
+.btn{
+  --bg:var(--ink); --fg:var(--card);
+  display:inline-flex; align-items:center; justify-content:center; gap:9px;
+  background:var(--bg); color:var(--fg); border:1.5px solid var(--bg);
+  padding:13px 22px; border-radius:var(--r-pill); cursor:pointer;
+  font-family:var(--f-display); font-weight:600; font-size:.94rem; letter-spacing:.01em;
+  text-decoration:none; transition:transform .16s ease, box-shadow .16s ease, background .16s ease, color .16s ease;
+  white-space:nowrap;
+}
+.btn:hover{transform:translateY(-2px); box-shadow:var(--shadow-2)}
+.btn:active{transform:translateY(0)}
+.btn--ghost{--bg:transparent; --fg:var(--ink); border-color:var(--ink)}
+.btn--ghost:hover{--bg:var(--ink); --fg:var(--card)}
+.btn--line{--bg:transparent; --fg:var(--ink); border-color:var(--line); background:var(--card)}
+.btn--line:hover{border-color:var(--ink)}
+.btn--accent{--bg:var(--accent); --fg:var(--ink); border-color:var(--accent)}
+.btn--sm{padding:8px 15px; font-size:.84rem}
+.btn--wide{width:100%}
+.btn[disabled]{opacity:.45; pointer-events:none}
+.btn--danger{--bg:transparent; --fg:var(--warn); border-color:var(--warn)}
+.btn--danger:hover{--bg:var(--warn); --fg:#fff}
+
+/* ---------- header ---------- */
+.site-head{
+  position:sticky; top:0; z-index:60; background:rgba(247,241,227,.86);
+  backdrop-filter:blur(14px) saturate(1.3); border-bottom:1px solid var(--line);
+}
+.site-head__in{display:flex; align-items:center; gap:14px; min-height:72px}
+.brand{display:flex; align-items:center; gap:12px; text-decoration:none; margin-right:auto; flex:none}
+.brand svg{width:34px; height:34px; flex:none}
+.brand__name{font-family:var(--f-display); font-weight:600; font-size:1.15rem; letter-spacing:.34em; text-indent:.34em; line-height:1}
+.brand__sub{font-family:var(--f-mono); font-size:.53rem; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-faint); margin-top:4px}
+.nav{display:flex; align-items:center; gap:4px}
+.nav a{
+  text-decoration:none; padding:9px 13px; border-radius:var(--r-pill); font-size:.93rem;
+  font-family:var(--f-display); font-weight:500; transition:background .15s ease;
+}
+.nav a:hover{background:rgba(38,36,31,.07)}
+.nav a[aria-current="page"]{background:var(--ink); color:var(--card)}
+.head-tools{display:flex; align-items:center; gap:8px; flex:none}
+
+.lang{display:flex; background:var(--card); border:1.5px solid var(--line); border-radius:var(--r-pill); padding:3px; gap:2px}
+.lang button{
+  border:0; background:transparent; cursor:pointer; padding:6px 11px; border-radius:var(--r-pill);
+  font-family:var(--f-mono); font-size:.73rem; font-weight:500; letter-spacing:.08em; color:var(--ink-soft);
+  transition:background .15s ease,color .15s ease;
+}
+.lang button:hover{background:rgba(38,36,31,.06)}
+.lang button[aria-pressed="true"]{background:var(--ink); color:var(--card)}
+
+.cart-btn{
+  position:relative; border:1.5px solid var(--line); background:var(--card); cursor:pointer;
+  width:44px; height:44px; border-radius:var(--r-pill); display:grid; place-items:center;
+  transition:border-color .15s ease, transform .15s ease;
+}
+.cart-btn:hover{border-color:var(--ink); transform:translateY(-1px)}
+.cart-btn__n{
+  position:absolute; top:-5px; right:-5px; min-width:21px; height:21px; padding:0 5px;
+  background:var(--coral); color:var(--ink); border-radius:var(--r-pill);
+  font-family:var(--f-mono); font-size:.68rem; font-weight:700; display:grid; place-items:center;
+  border:2px solid var(--paper);
+}
+.burger{display:none; width:44px; height:44px; border-radius:var(--r-pill); border:1.5px solid var(--line); background:var(--card); cursor:pointer; place-items:center}
+
+/* ---------- the shelf grid: the signature element ---------- */
+.shelfwall{
+  display:grid; grid-template-columns:repeat(var(--cols,12),1fr); gap:6px;
+  padding:14px; background:var(--card); border:1.5px solid var(--line); border-radius:var(--r-lg);
+  box-shadow:var(--shadow-1);
+}
+.cell{
+  aspect-ratio:1; border-radius:6px; border:1.5px solid var(--line); background:var(--paper);
+  position:relative; transition:transform .22s cubic-bezier(.2,.8,.3,1), background .22s ease, border-color .22s ease;
+  animation:pop .5s cubic-bezier(.2,.9,.3,1.2) backwards;
+}
+.cell--full{border-color:transparent}
+.cell:hover{transform:scale(1.16); z-index:2; border-color:var(--ink)}
+@keyframes pop{from{opacity:0; transform:scale(.4)} to{opacity:1; transform:scale(1)}}
+
+/* ---------- hero ---------- */
+.hero{padding-block:clamp(38px,6vw,72px) clamp(46px,7vw,86px); position:relative; overflow:hidden}
+.hero__grid{display:grid; grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr); gap:clamp(28px,5vw,64px); align-items:center}
+.hero h1{letter-spacing:-.03em}
+.hero h1 em{font-style:normal; position:relative; white-space:nowrap}
+.hero h1 em::after{
+  content:""; position:absolute; left:-2px; right:-2px; bottom:.06em; height:.34em;
+  background:var(--sun); border-radius:4px; z-index:-1;
+}
+.hero__cta{display:flex; flex-wrap:wrap; gap:12px; margin-top:30px}
+.hero__stats{display:flex; flex-wrap:wrap; gap:12px 30px; margin-top:34px; padding-top:26px; border-top:1px solid var(--line)}
+.stat__n{font-family:var(--f-display); font-size:1.7rem; font-weight:600; line-height:1}
+.stat__l{font-family:var(--f-mono); font-size:.66rem; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-faint); margin-top:6px}
+.hero__wall{position:relative}
+.wall-tag{
+  position:absolute; bottom:-16px; left:50%; transform:translateX(-50%);
+  background:var(--ink); color:var(--card); padding:8px 18px; border-radius:var(--r-pill);
+  font-family:var(--f-mono); font-size:.72rem; letter-spacing:.1em; white-space:nowrap; box-shadow:var(--shadow-2);
+}
+
+/* ---------- marquee strip ---------- */
+.strip{background:var(--ink); color:var(--paper); overflow:hidden; padding:13px 0; border-block:1.5px solid var(--ink)}
+.strip__row{display:flex; gap:0; width:max-content; animation:slide 42s linear infinite}
+.strip span{font-family:var(--f-mono); font-size:.76rem; letter-spacing:.2em; text-transform:uppercase; padding-inline:26px; opacity:.9; white-space:nowrap}
+.strip span::after{content:"◆"; margin-left:26px; opacity:.45}
+@keyframes slide{from{transform:translateX(0)} to{transform:translateX(-50%)}}
+
+/* ---------- cards ---------- */
+.card{background:var(--card); border:1.5px solid var(--line); border-radius:var(--r); padding:clamp(18px,2.4vw,26px)}
+.card--flat{box-shadow:none}
+.tile{
+  background:var(--card); border:1.5px solid var(--line); border-radius:var(--r); overflow:hidden;
+  display:flex; flex-direction:column; text-align:left; text-decoration:none; cursor:pointer;
+  transition:transform .2s ease, box-shadow .2s ease, border-color .2s ease; padding:0; font:inherit; color:inherit;
+}
+.tile:hover{transform:translateY(-4px); box-shadow:var(--shadow-2); border-color:var(--ink)}
+.tile__img{aspect-ratio:1; background:var(--paper); position:relative; overflow:hidden; border-bottom:1.5px solid var(--line)}
+.tile__img img{width:100%; height:100%; object-fit:cover}
+.tile__body{padding:15px 16px 17px; display:flex; flex-direction:column; gap:5px; flex:1}
+.tile__maker{font-family:var(--f-mono); font-size:.66rem; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-faint)}
+.tile__name{font-family:var(--f-display); font-weight:600; font-size:1.02rem; line-height:1.25}
+.tile__foot{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:auto; padding-top:10px}
+.price{font-family:var(--f-mono); font-weight:700; font-size:.95rem}
+.cellid{
+  position:absolute; top:10px; left:10px; background:rgba(255,252,245,.92); border:1px solid var(--line);
+  padding:3px 8px; border-radius:var(--r-sm); font-family:var(--f-mono); font-size:.64rem; letter-spacing:.08em;
+}
+.badge{
+  display:inline-flex; align-items:center; gap:6px; padding:4px 11px; border-radius:var(--r-pill);
+  font-family:var(--f-mono); font-size:.66rem; letter-spacing:.1em; text-transform:uppercase;
+  background:var(--paper); border:1px solid var(--line);
+}
+.badge--sold{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.iconbtn{
+  border:1.5px solid var(--line); background:var(--card); width:38px; height:38px; border-radius:var(--r-pill);
+  display:grid; place-items:center; cursor:pointer; transition:border-color .15s, background .15s, transform .15s;
+}
+.iconbtn:hover{border-color:var(--ink); transform:translateY(-1px)}
+
+/* ---------- category chips ---------- */
+.chips{display:flex; gap:9px; flex-wrap:wrap}
+.chip{
+  border:1.5px solid var(--line); background:var(--card); border-radius:var(--r-pill);
+  padding:9px 16px; cursor:pointer; font-family:var(--f-display); font-weight:500; font-size:.9rem;
+  display:inline-flex; align-items:center; gap:8px; transition:all .15s ease;
+}
+.chip:hover{border-color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.chip__dot{width:10px; height:10px; border-radius:3px; flex:none}
+.chip__n{font-family:var(--f-mono); font-size:.72rem; opacity:.6}
+
+/* ---------- forms ---------- */
+.field{display:flex; flex-direction:column; gap:7px; margin-bottom:16px}
+.field > label, .lbl{font-family:var(--f-display); font-weight:600; font-size:.88rem}
+.hint{font-size:.79rem; color:var(--ink-faint); line-height:1.45}
+.inp, .sel, .ta{
+  width:100%; background:var(--card); border:1.5px solid var(--line); border-radius:var(--r-sm);
+  padding:12px 14px; font-size:.95rem; transition:border-color .15s ease, box-shadow .15s ease;
+}
+.inp:focus, .sel:focus, .ta:focus{outline:0; border-color:var(--ink); box-shadow:0 0 0 3px rgba(38,36,31,.08)}
+.ta{min-height:110px; resize:vertical; line-height:1.55}
+.sel{appearance:none; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235C574C' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 14px center; padding-right:38px}
+.row2{display:grid; grid-template-columns:1fr 1fr; gap:0 16px}
+.err{color:var(--warn); font-size:.79rem; font-weight:600}
+.inp[aria-invalid="true"], .ta[aria-invalid="true"], .sel[aria-invalid="true"]{border-color:var(--warn)}
+.check{display:flex; gap:10px; align-items:flex-start; cursor:pointer; font-size:.9rem; line-height:1.45}
+.check input{margin-top:3px; width:17px; height:17px; accent-color:var(--ink); flex:none}
+.radio-cards{display:grid; gap:10px}
+.radio-card{
+  display:flex; gap:12px; align-items:flex-start; padding:14px 16px; border:1.5px solid var(--line);
+  border-radius:var(--r); background:var(--card); cursor:pointer; transition:border-color .15s ease, background .15s ease;
+}
+.radio-card:hover{border-color:var(--ink-faint)}
+.radio-card input{margin-top:3px; accent-color:var(--ink); width:17px; height:17px; flex:none}
+.radio-card:has(input:checked){border-color:var(--ink); background:var(--paper)}
+.radio-card__t{font-family:var(--f-display); font-weight:600; font-size:.95rem}
+
+/* file drop */
+.drop{
+  border:2px dashed var(--line); border-radius:var(--r); padding:26px 18px; text-align:center;
+  background:var(--card); cursor:pointer; transition:border-color .15s ease, background .15s ease;
+}
+.drop:hover, .drop.is-over{border-color:var(--ink); background:var(--paper)}
+.thumbs{display:flex; flex-wrap:wrap; gap:10px; margin-top:12px}
+.thumb{position:relative; width:84px; height:84px; border-radius:var(--r-sm); overflow:hidden; border:1.5px solid var(--line)}
+.thumb img{width:100%; height:100%; object-fit:cover}
+.thumb button{
+  position:absolute; top:3px; right:3px; width:20px; height:20px; border-radius:50%; border:0;
+  background:var(--ink); color:var(--card); cursor:pointer; font-size:12px; line-height:1; display:grid; place-items:center;
+}
+
+/* ---------- tables ---------- */
+.table{width:100%; border-collapse:collapse; font-size:.92rem}
+.table th{
+  text-align:left; font-family:var(--f-mono); font-size:.67rem; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--ink-faint); font-weight:500; padding:0 14px 10px; border-bottom:1.5px solid var(--line);
+}
+.table td{padding:14px; border-bottom:1px solid var(--line); vertical-align:top}
+.table tr:last-child td{border-bottom:0}
+.tablewrap{overflow-x:auto; -webkit-overflow-scrolling:touch}
+
+/* ---------- steps ---------- */
+.steps{counter-reset:s; display:grid; gap:2px}
+.step{display:grid; grid-template-columns:52px 1fr; gap:16px; padding:20px 0; border-top:1px solid var(--line)}
+.step:last-child{border-bottom:1px solid var(--line)}
+.step__n{
+  counter-increment:s; font-family:var(--f-mono); font-size:.72rem; letter-spacing:.1em; color:var(--ink-faint);
+  padding-top:4px;
+}
+.step__n::before{content:"0" counter(s)}
+.step h3{margin-bottom:5px}
+
+/* ---------- accordion ---------- */
+.acc{border-top:1px solid var(--line)}
+.acc:last-of-type{border-bottom:1px solid var(--line)}
+.acc__q{
+  width:100%; background:0; border:0; cursor:pointer; text-align:left; padding:20px 44px 20px 0;
+  font-family:var(--f-display); font-weight:600; font-size:1.02rem; position:relative; line-height:1.35;
+}
+.acc__q::after{
+  content:""; position:absolute; right:8px; top:50%; width:11px; height:11px; margin-top:-8px;
+  border-right:2px solid var(--ink); border-bottom:2px solid var(--ink); transform:rotate(45deg);
+  transition:transform .22s ease;
+}
+.acc[open] .acc__q::after{transform:rotate(-135deg); margin-top:-3px}
+.acc__a{padding:0 40px 22px 0; color:var(--ink-soft); max-width:70ch}
+.acc__a p:last-child{margin-bottom:0}
+
+/* ---------- dark band ---------- */
+.band{background:var(--ink); color:var(--paper)}
+.band .lede,.band .muted{color:rgba(247,241,227,.72)}
+.band .eyebrow{color:rgba(247,241,227,.6)}
+.band .btn--ghost{--fg:var(--paper); border-color:rgba(247,241,227,.4)}
+.band .btn--ghost:hover{--bg:var(--paper); --fg:var(--ink)}
+.band .card{background:rgba(247,241,227,.06); border-color:rgba(247,241,227,.16); color:var(--paper)}
+.band .hr{background:rgba(247,241,227,.16)}
+
+/* ---------- drawer & modal ---------- */
+.scrim{
+  position:fixed; inset:0; background:rgba(38,36,31,.45); z-index:80; opacity:0; pointer-events:none;
+  transition:opacity .24s ease; backdrop-filter:blur(2px);
+}
+.scrim.is-open{opacity:1; pointer-events:auto}
+.drawer{
+  position:fixed; top:0; right:0; bottom:0; width:min(430px,100%); background:var(--paper); z-index:90;
+  transform:translateX(102%); transition:transform .3s cubic-bezier(.3,.8,.3,1); display:flex; flex-direction:column;
+  box-shadow:var(--shadow-2);
+}
+.drawer.is-open{transform:none}
+.drawer__head{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:20px 22px; border-bottom:1.5px solid var(--line)}
+.drawer__body{flex:1; overflow-y:auto; padding:20px 22px}
+.drawer__foot{padding:18px 22px; border-top:1.5px solid var(--line); background:var(--card)}
+.modal{
+  position:fixed; inset:0; z-index:210; display:grid; place-items:center; padding:18px;
+  opacity:0; pointer-events:none; transition:opacity .2s ease;
+}
+.modal.is-open{opacity:1; pointer-events:auto}
+.modal__panel{
+  background:var(--paper); border-radius:var(--r-lg); width:min(880px,100%); max-height:92vh; overflow-y:auto;
+  box-shadow:var(--shadow-2); transform:translateY(14px) scale(.98); transition:transform .24s cubic-bezier(.2,.8,.3,1);
+}
+.modal.is-open .modal__panel{transform:none}
+
+.cartline{display:grid; grid-template-columns:70px 1fr auto; gap:13px; padding:14px 0; border-bottom:1px solid var(--line); align-items:start}
+.cartline__img{width:70px; height:70px; border-radius:var(--r-sm); overflow:hidden; border:1.5px solid var(--line); background:var(--card)}
+.qty{display:inline-flex; align-items:center; border:1.5px solid var(--line); border-radius:var(--r-pill); background:var(--card); overflow:hidden}
+.qty button{width:30px; height:30px; border:0; background:0; cursor:pointer; font-size:1rem; line-height:1}
+.qty button:hover{background:var(--paper)}
+.qty span{min-width:26px; text-align:center; font-family:var(--f-mono); font-size:.86rem; font-weight:500}
+.sumline{display:flex; justify-content:space-between; gap:12px; padding:7px 0; font-size:.93rem}
+.sumline--total{border-top:1.5px solid var(--line); margin-top:8px; padding-top:13px; font-family:var(--f-display); font-weight:600; font-size:1.12rem}
+
+/* ---------- toast ---------- */
+.toasts{position:fixed; left:50%; bottom:22px; transform:translateX(-50%); z-index:240; display:flex; flex-direction:column; gap:8px; align-items:center; pointer-events:none; width:min(440px,92vw)}
+.toast{
+  background:var(--ink); color:var(--paper); padding:12px 20px; border-radius:var(--r-pill);
+  font-size:.9rem; box-shadow:var(--shadow-2); animation:toastin .3s cubic-bezier(.2,.9,.3,1.2);
+  display:flex; gap:10px; align-items:center; max-width:100%;
+}
+@keyframes toastin{from{opacity:0; transform:translateY(14px)} to{opacity:1; transform:none}}
+
+/* ---------- checkout progress ---------- */
+.progress{display:flex; gap:8px; margin-bottom:28px; flex-wrap:wrap}
+.progress__i{
+  flex:1; min-width:96px; padding-top:11px; border-top:3px solid var(--line);
+  font-family:var(--f-mono); font-size:.68rem; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-faint);
+}
+.progress__i.is-on{border-top-color:var(--ink); color:var(--ink)}
+.progress__i.is-done{border-top-color:var(--sage); color:var(--ink-soft)}
+
+/* ---------- footer ---------- */
+.foot{background:var(--ink); color:var(--paper); padding-block:clamp(46px,6vw,72px) 26px; margin-top:auto}
+.foot a{color:rgba(247,241,227,.74); text-decoration:none; transition:color .15s}
+.foot a:hover{color:var(--paper)}
+.foot__cols{display:grid; grid-template-columns:1.6fr 1fr 1fr 1fr; gap:34px}
+.foot h4{font-family:var(--f-mono); font-size:.67rem; letter-spacing:.18em; text-transform:uppercase; color:rgba(247,241,227,.5); font-weight:500; margin-bottom:14px}
+.foot ul{list-style:none; margin:0; padding:0; display:grid; gap:9px; font-size:.92rem}
+.foot__bar{display:flex; flex-wrap:wrap; gap:12px 22px; justify-content:space-between; align-items:center; margin-top:44px; padding-top:22px; border-top:1px solid rgba(247,241,227,.16); font-size:.8rem; color:rgba(247,241,227,.55)}
+.dot-admin{width:9px; height:9px; border-radius:3px; background:rgba(247,241,227,.3); border:0; cursor:pointer; padding:0}
+.dot-admin:hover{background:var(--coral)}
+
+/* ---------- admin ---------- */
+.admin{position:fixed; inset:0; z-index:150; background:var(--paper); display:none; grid-template-rows:auto 1fr}
+.admin.is-open{display:grid}
+.admin__top{
+  display:flex; align-items:center; gap:12px; padding:12px var(--pad); border-bottom:1.5px solid var(--line);
+  background:var(--card); flex-wrap:wrap;
+}
+.admin__title{font-family:var(--f-display); font-weight:600; font-size:1rem; margin-right:auto; display:flex; align-items:center; gap:10px}
+.admin__body{display:grid; grid-template-columns:214px 1fr; min-height:0; overflow:hidden}
+.admin__nav{border-right:1.5px solid var(--line); padding:14px 10px; overflow-y:auto; background:var(--card)}
+.admin__nav button{
+  display:flex; align-items:center; gap:10px; width:100%; text-align:left; border:0; background:0; cursor:pointer;
+  padding:10px 12px; border-radius:var(--r-sm); font-family:var(--f-display); font-weight:500; font-size:.9rem; margin-bottom:2px;
+}
+.admin__nav button:hover{background:var(--paper)}
+.admin__nav button[aria-current="true"]{background:var(--ink); color:var(--card)}
+.admin__nav .grp{font-family:var(--f-mono); font-size:.6rem; letter-spacing:.16em; text-transform:uppercase; color:var(--ink-faint); padding:16px 12px 6px}
+.admin__main{overflow-y:auto; padding:clamp(18px,3vw,32px); min-height:0}
+.admin h2{font-size:1.5rem; margin-bottom:6px}
+.adm-sec{max-width:900px}
+.adm-block{background:var(--card); border:1.5px solid var(--line); border-radius:var(--r); padding:18px; margin-bottom:14px}
+.adm-block > summary{cursor:pointer; font-family:var(--f-display); font-weight:600; font-size:1rem; list-style:none; display:flex; align-items:center; gap:10px}
+.adm-block > summary::-webkit-details-marker{display:none}
+.adm-block > summary::before{content:"▸"; color:var(--ink-faint); transition:transform .2s}
+.adm-block[open] > summary::before{transform:rotate(90deg)}
+.adm-block[open] > summary{margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--line)}
+.lang-tabs{display:flex; gap:4px; margin-bottom:8px}
+.lang-tabs button{
+  border:1.5px solid var(--line); background:var(--card); border-radius:var(--r-sm); padding:4px 10px; cursor:pointer;
+  font-family:var(--f-mono); font-size:.66rem; letter-spacing:.08em;
+}
+.lang-tabs button[aria-pressed="true"]{background:var(--ink); color:var(--card); border-color:var(--ink)}
+.adm-row{
+  display:grid; grid-template-columns:auto 60px 1fr auto; gap:12px; align-items:center;
+  padding:10px; border:1.5px solid var(--line); border-radius:var(--r-sm); background:var(--card); margin-bottom:8px;
+}
+.adm-row.is-drag{opacity:.4}
+.adm-row__handle{cursor:grab; color:var(--ink-faint); font-size:1.05rem; user-select:none; padding:0 2px}
+.adm-row__img{width:52px; height:52px; border-radius:var(--r-sm); overflow:hidden; border:1px solid var(--line); background:var(--paper)}
+.adm-row__t{font-family:var(--f-display); font-weight:600; font-size:.93rem; line-height:1.3}
+.adm-row__s{font-size:.78rem; color:var(--ink-faint); font-family:var(--f-mono)}
+.adm-actions{display:flex; gap:6px; flex-wrap:wrap}
+.swatch-row{display:flex; gap:12px; flex-wrap:wrap}
+.swatch{display:flex; flex-direction:column; gap:6px; align-items:center; font-family:var(--f-mono); font-size:.66rem}
+.swatch input[type=color]{width:52px; height:44px; border:1.5px solid var(--line); border-radius:var(--r-sm); background:var(--card); cursor:pointer; padding:3px}
+.pill-tabs{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:16px}
+.inbox-item{border:1.5px solid var(--line); border-radius:var(--r); background:var(--card); padding:16px; margin-bottom:10px}
+.inbox-item__h{display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap; margin-bottom:8px}
+.kv{display:grid; grid-template-columns:150px 1fr; gap:5px 14px; font-size:.88rem}
+.kv dt{font-family:var(--f-mono); font-size:.7rem; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-faint); padding-top:2px}
+.kv dd{margin:0}
+.empty{text-align:center; padding:52px 20px; color:var(--ink-faint)}
+.empty h3{color:var(--ink); margin-bottom:8px}
+
+/* ---------- utilities ---------- */
+.stack{display:grid; gap:12px}
+.flexrow{display:flex; gap:10px; flex-wrap:wrap; align-items:center}
+.spread{display:flex; gap:14px; justify-content:space-between; align-items:center; flex-wrap:wrap}
+.center{text-align:center}
+.sr{position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0}
+.g-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.g-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.g-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.g-auto{grid-template-columns:repeat(auto-fill,minmax(214px,1fr))}
+.mt-0{margin-top:0}.mb-0{margin-bottom:0}
+.pagehead{padding-block:clamp(34px,5vw,58px) 0}
+.pagehead h1{font-size:clamp(2rem,4.6vw,3.2rem)}
+
+/* ---------- responsive ---------- */
+@media (max-width:1000px){
+  .hero__grid{grid-template-columns:1fr}
+  .hero__wall{order:-1}
+  .foot__cols{grid-template-columns:1fr 1fr}
+  .g-4{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:820px){
+  .nav{
+    position:fixed; inset:72px 0 auto; background:var(--paper); flex-direction:column; align-items:stretch;
+    padding:14px var(--pad) 22px; border-bottom:1.5px solid var(--line); gap:2px; display:none; z-index:59;
+    box-shadow:var(--shadow-2);
+  }
+  .nav.is-open{display:flex}
+  .nav a{padding:13px 14px; font-size:1.02rem}
+  .burger{display:grid}
+  .g-3{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .admin__body{grid-template-columns:1fr}
+  .admin__nav{border-right:0; border-bottom:1.5px solid var(--line); display:flex; gap:6px; overflow-x:auto; padding:10px}
+  .admin__nav button{width:auto; white-space:nowrap; padding:8px 13px}
+  .admin__nav .grp{display:none}
+  .row2{grid-template-columns:1fr}
+  .rentband,.colayout,.visitgrid,.pmodal,.visitcard{grid-template-columns:1fr !important}
+  .brand__sub{display:none}
+}
+@media (max-width:560px){
+  .g-auto{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .g-3,.g-4{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .foot__cols{grid-template-columns:1fr}
+  .step{grid-template-columns:1fr; gap:6px}
+  .adm-row{grid-template-columns:auto 44px 1fr; row-gap:8px}
+  .adm-row .adm-actions{grid-column:1/-1}
+  .hero__stats{gap:12px 20px}
+  .brand__name{font-size:1rem; letter-spacing:.26em; text-indent:.26em}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important}
+}
+@media print{.site-head,.foot,.drawer,.scrim{display:none}}
+</style>
+</head>
+<body>
+
+<header class="site-head">
+  <div class="wrap site-head__in">
+    <a class="brand" href="#/" data-nav>
+      <svg viewBox="0 0 32 32" aria-hidden="true">
+        <rect x="1" y="1" width="9" height="9" rx="2.6" fill="none" stroke="currentColor" stroke-width="1.6"/>
+        <rect x="11.5" y="1" width="9" height="9" rx="2.6" fill="var(--coral)"/>
+        <rect x="22" y="1" width="9" height="9" rx="2.6" fill="none" stroke="currentColor" stroke-width="1.6"/>
+        <rect x="1" y="11.5" width="9" height="9" rx="2.6" fill="none" stroke="currentColor" stroke-width="1.6"/>
+        <rect x="11.5" y="11.5" width="9" height="9" rx="2.6" fill="var(--sage)"/>
+        <rect x="22" y="11.5" width="9" height="9" rx="2.6" fill="none" stroke="currentColor" stroke-width="1.6"/>
+        <rect x="1" y="22" width="9" height="9" rx="2.6" fill="var(--sun)"/>
+        <rect x="11.5" y="22" width="9" height="9" rx="2.6" fill="none" stroke="currentColor" stroke-width="1.6"/>
+        <rect x="22" y="22" width="9" height="9" rx="2.6" fill="var(--sky)"/>
+      </svg>
+      <span>
+        <span class="brand__name" id="brandName">HATIK</span>
+        <span class="brand__sub" id="brandSub">shelf-sharing makers market</span>
+      </span>
+    </a>
+
+    <nav class="nav" id="nav" aria-label="Main"></nav>
+
+    <div class="head-tools">
+      <div class="lang" id="langSwitch" role="group" aria-label="Language"></div>
+      <button class="cart-btn" id="cartBtn" aria-label="Open basket">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M4 7h16l-1.3 11.2a2 2 0 0 1-2 1.8H7.3a2 2 0 0 1-2-1.8Z"/><path d="M9 7V5.5a3 3 0 0 1 6 0V7"/>
+        </svg>
+        <span class="cart-btn__n" id="cartCount" hidden>0</span>
+      </button>
+      <button class="burger" id="burger" aria-label="Menu" aria-expanded="false">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="app"></main>
+
+<footer class="foot" id="foot"></footer>
+
+<!-- basket -->
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="cartDrawer" aria-hidden="true" aria-label="Basket">
+  <div class="drawer__head">
+    <h3 id="cartTitle">Basket</h3>
+    <button class="iconbtn" id="cartClose" aria-label="Close">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="drawer__body" id="cartBody"></div>
+  <div class="drawer__foot" id="cartFoot"></div>
+</aside>
+
+<!-- product / generic modal -->
+<div class="modal" id="modal" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="modal__panel" id="modalPanel"></div>
+</div>
+
+<!-- admin -->
+<section class="admin" id="admin" aria-hidden="true">
+  <div class="admin__top">
+    <div class="admin__title">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2" fill="var(--paper)"/><circle cx="15" cy="12" r="2" fill="var(--paper)"/><circle cx="8" cy="18" r="2" fill="var(--paper)"/></svg>
+      Site manager
+    </div>
+    <span class="tiny muted" id="adminSaved"></span>
+    <button class="btn btn--line btn--sm" id="adminPreview">View site</button>
+    <button class="btn btn--sm" id="adminClose">Close manager</button>
+  </div>
+  <div class="admin__body">
+    <nav class="admin__nav" id="adminNav" aria-label="Manager sections"></nav>
+    <div class="admin__main" id="adminMain"></div>
+  </div>
+</section>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script>
+"use strict";
+/* ============================================================================
+   HATIK — single-file site
+   Everything the site shows lives in one editable object (DB). The Site
+   manager writes to that object; the pages read from it. No build step.
+   ============================================================================ */
+
+/* ---------------------------------------------------------------- storage --
+   Works in three places, in this order of preference:
+   1. the Claude artifact sandbox (window.storage)
+   2. a normal browser / real hosting (localStorage)
+   3. anywhere else (memory only, lost on refresh)
+--------------------------------------------------------------------------- */
+const KEY = "hatik:site:v1";
+const Store = (() => {
+  const mem = {};
+  const hasWin = typeof window !== "undefined" && window.storage && typeof window.storage.get === "function";
+  let hasLS = false;
+  try { const k = "__t"; localStorage.setItem(k, "1"); localStorage.removeItem(k); hasLS = true; } catch (e) { hasLS = false; }
+  return {
+    mode: hasWin ? "cloud" : hasLS ? "browser" : "memory",
+    async get(k) {
+      try {
+        if (hasWin) { const r = await window.storage.get(k); return r ? JSON.parse(r.value) : null; }
+        if (hasLS) { const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; }
+        return mem[k] || null;
+      } catch (e) { return null; }
+    },
+    async set(k, v) {
+      const s = JSON.stringify(v);
+      try {
+        if (hasWin) { await window.storage.set(k, s); return true; }
+        if (hasLS) { localStorage.setItem(k, s); return true; }
+        mem[k] = v; return true;
+      } catch (e) { mem[k] = v; return false; }
+    }
+  };
+})();
+
+/* ------------------------------------------------------------------ utils */
+const $ = (s, r) => (r || document).querySelector(s);
+const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+const uid = (p) => (p || "id") + "_" + Math.random().toString(36).slice(2, 9);
+const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const clone = (o) => JSON.parse(JSON.stringify(o));
+const amd = (n) => new Intl.NumberFormat("en-US").format(Math.round(Number(n) || 0)) + " AMD";
+
+function toast(msg) {
+  const box = $("#toasts");
+  const el = document.createElement("div");
+  el.className = "toast";
+  el.textContent = msg;
+  box.appendChild(el);
+  setTimeout(() => { el.style.transition = "opacity .3s"; el.style.opacity = "0"; setTimeout(() => el.remove(), 320); }, 2600);
+}
+
+/* placeholder artwork — a flat drawing per category so nothing looks broken
+   before real photos are uploaded */
+const ART = {
+  ceramics: '<rect x="34" y="46" width="32" height="8" rx="4" fill="%COL2%"/><path d="M38 54h24l-3 30a6 6 0 0 1-6 5h-6a6 6 0 0 1-6-5Z" fill="%COL%"/><circle cx="50" cy="70" r="6" fill="%COL2%" opacity=".55"/>',
+  jewellery: '<circle cx="50" cy="58" r="17" fill="none" stroke="%COL%" stroke-width="6"/><path d="M50 30l6 10H44Z" fill="%COL2%"/><circle cx="50" cy="41" r="3.4" fill="%COL2%"/>',
+  candles: '<rect x="38" y="44" width="24" height="42" rx="5" fill="%COL%"/><path d="M50 44c0-8-6-9-3-16 5 4 9 7 9 12a6 6 0 0 1-6 4Z" fill="%COL2%"/>',
+  print: '<rect x="28" y="30" width="44" height="54" rx="4" fill="%COL%"/><rect x="35" y="40" width="30" height="18" rx="2" fill="%COL2%" opacity=".8"/><rect x="35" y="64" width="22" height="4" rx="2" fill="%COL2%"/><rect x="35" y="72" width="16" height="4" rx="2" fill="%COL2%"/>',
+  stickers: '<circle cx="40" cy="44" r="13" fill="%COL%"/><rect x="48" y="52" width="26" height="26" rx="7" fill="%COL2%"/><path d="M30 74l10-10 8 14Z" fill="%COL%" opacity=".7"/>',
+  textile: '<path d="M32 34h36l-4 12-3 40H39l-3-40Z" fill="%COL%"/><path d="M32 34l9-6 9 6 9-6 9 6" fill="none" stroke="%COL2%" stroke-width="3.4" stroke-linejoin="round"/>',
+  vinyl: '<circle cx="50" cy="58" r="27" fill="%COL%"/><circle cx="50" cy="58" r="15" fill="none" stroke="%COL2%" stroke-width="2" opacity=".6"/><circle cx="50" cy="58" r="7" fill="%COL2%"/><circle cx="50" cy="58" r="2" fill="%COL%"/>',
+  vintage: '<rect x="26" y="42" width="48" height="34" rx="6" fill="%COL%"/><circle cx="50" cy="59" r="11" fill="%COL2%"/><circle cx="50" cy="59" r="5" fill="%COL%"/><rect x="38" y="34" width="16" height="8" rx="3" fill="%COL%"/>',
+  leather: '<path d="M30 46h40v34a6 6 0 0 1-6 6H36a6 6 0 0 1-6-6Z" fill="%COL%"/><path d="M40 46V38a10 10 0 0 1 20 0v8" fill="none" stroke="%COL2%" stroke-width="4"/>',
+  home: '<path d="M26 54 50 32l24 22v30a4 4 0 0 1-4 4H30a4 4 0 0 1-4-4Z" fill="%COL%"/><rect x="43" y="66" width="14" height="20" rx="2" fill="%COL2%"/>',
+  default: '<rect x="30" y="30" width="18" height="18" rx="4" fill="%COL%"/><rect x="52" y="30" width="18" height="18" rx="4" fill="%COL2%"/><rect x="30" y="52" width="18" height="18" rx="4" fill="%COL2%"/><rect x="52" y="52" width="18" height="18" rx="4" fill="%COL%"/>'
+};
+const ART_BG = ["#F7F1E3", "#FBEFE9", "#EFF3EA", "#FDF6E4", "#EDF2F8"];
+function placeholderArt(seed, shape) {
+  const s = String(seed || "x");
+  let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+  const pal = ["#E08D82", "#9CB584", "#F3C761", "#A6C3DF", "#C9A9CB"];
+  const c1 = pal[h % pal.length], c2 = pal[(h >>> 3) % pal.length], bg = ART_BG[(h >>> 5) % ART_BG.length];
+  const body = (ART[shape] || ART.default).replaceAll("%COL%", c1).replaceAll("%COL2%", c2 === c1 ? pal[(h + 2) % pal.length] : c2);
+  const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="' + bg + '"/>' + body + "</svg>";
+  return "data:image/svg+xml;utf8," + encodeURIComponent(svg);
+}
+function productImage(p) {
+  if (p && p.img) return p.img;
+  const cat = (DB.categories.find((c) => c.id === (p && p.cat)) || {});
+  return placeholderArt((p && p.id) || "x", cat.shape || "default");
+}
+
+/* resize uploads so the saved file stays small */
+function readImage(file, max) {
+  max = max || 1000;
+  return new Promise((res, rej) => {
+    const fr = new FileReader();
+    fr.onerror = () => rej(new Error("read failed"));
+    fr.onload = () => {
+      const img = new Image();
+      img.onerror = () => res(fr.result);
+      img.onload = () => {
+        const scale = Math.min(1, max / Math.max(img.width, img.height));
+        if (scale === 1 && fr.result.length < 260000) return res(fr.result);
+        const cv = document.createElement("canvas");
+        cv.width = Math.round(img.width * scale); cv.height = Math.round(img.height * scale);
+        cv.getContext("2d").drawImage(img, 0, 0, cv.width, cv.height);
+        res(cv.toDataURL("image/jpeg", 0.82));
+      };
+      img.src = fr.result;
+    };
+    fr.readAsDataURL(file);
+  });
+}
+
+/* ============================================================================
+   DEFAULT CONTENT
+   Every string, price and product below can be edited in the Site manager.
+   ============================================================================ */
+const LANGS = [{ id: "en", label: "EN", name: "English" }, { id: "hy", label: "ՀԱՅ", name: "Հայերեն" }, { id: "ru", label: "РУС", name: "Русский" }];
+
+const T = (en, hy, ru) => ({ en, hy, ru });
+
+const DEFAULTS = {
+  settings: {
+    brandName: "HATIK",
+    brandSub: T("shelf-sharing makers market", "հեղինակների դարակների շուկա", "маркет авторских полок"),
+    city: T("Yerevan", "Երևան", "Ереван"),
+    address: T("Kentron, Yerevan — exact address coming soon", "Կենտրոն, Երևան — ճշգրիտ հասցեն շուտով", "Кентрон, Ереван — точный адрес скоро"),
+    hours: T("Every day, 11:00 – 21:00", "Ամեն օր՝ 11:00 – 21:00", "Ежедневно, 11:00 – 21:00"),
+    phone: "+374 00 000 000",
+    email: "hello@hatik.am",
+    instagram: "hatik.yerevan",
+    telegram: "hatik_yerevan",
+    totalCells: 140,
+    takenCells: 96,
+    commission: 15,
+    minTerm: 4,
+    deliveryYerevan: 1500,
+    deliveryArmenia: 3000,
+    freeOver: 25000,
+    adminPass: "hatik",
+    formEndpoint: "",
+    colors: { paper: "#F7F1E3", card: "#FFFCF5", ink: "#26241F", line: "#E2D8C2", coral: "#E08D82", sage: "#9CB584", sun: "#F3C761", sky: "#A6C3DF" },
+    sections: [
+      { id: "hero", label: "Hero + shelf wall", on: true },
+      { id: "strip", label: "Scrolling strip", on: true },
+      { id: "intro", label: "What HATIK is", on: true },
+      { id: "categories", label: "Categories", on: true },
+      { id: "featured", label: "Fresh on the shelves", on: true },
+      { id: "makers", label: "Meet some makers", on: true },
+      { id: "rentcta", label: "Rent a shelf band", on: true },
+      { id: "events", label: "What else happens here", on: true },
+      { id: "visit", label: "Visit us", on: true }
+    ]
+  },
+
+  ui: {
+    nav_home: T("Home", "Գլխավոր", "Главная"),
+    nav_shop: T("Shop", "Խանութ", "Магазин"),
+    nav_rent: T("Rent a shelf", "Վարձել դարակ", "Аренда полки"),
+    nav_about: T("About", "Մեր մասին", "О нас"),
+    nav_faq: T("FAQ", "Հարցեր", "Вопросы"),
+    nav_visit: T("Visit", "Այցելել", "Как найти"),
+    basket: T("Basket", "Զամբյուղ", "Корзина"),
+    add: T("Add to basket", "Ավելացնել", "В корзину"),
+    added: T("Added to basket", "Ավելացվեց զամբյուղում", "Добавлено в корзину"),
+    checkout: T("Checkout", "Պատվիրել", "Оформить заказ"),
+    empty_cart: T("Your basket is empty.", "Զամբյուղը դատարկ է։", "Корзина пуста."),
+    empty_cart_cta: T("Browse the shelves", "Դիտել դարակները", "Смотреть полки"),
+    subtotal: T("Subtotal", "Ենթագումար", "Сумма"),
+    delivery: T("Delivery", "Առաքում", "Доставка"),
+    total: T("Total", "Ընդամենը", "Итого"),
+    free: T("Free", "Անվճար", "Бесплатно"),
+    sold: T("Sold", "Վաճառված", "Продано"),
+    by: T("by", "հեղինակ՝", "автор:"),
+    cell: T("Cell", "Բջիջ", "Ячейка"),
+    all: T("Everything", "Բոլորը", "Все"),
+    search: T("Search the shelves…", "Որոնել…", "Поиск по полкам…"),
+    sort_new: T("Newest first", "Նորերը սկզբում", "Сначала новые"),
+    sort_low: T("Price: low to high", "Գին՝ աճող", "Цена: по возрастанию"),
+    sort_high: T("Price: high to low", "Գին՝ նվազող", "Цена: по убыванию"),
+    no_results: T("Nothing on that shelf yet", "Այս դարակին դեռ ոչինչ չկա", "На этой полке пока пусто"),
+    no_results_sub: T("Try another category, or clear the search.", "Փորձեք այլ կատեգորիա կամ մաքրեք որոնումը։", "Попробуйте другую категорию или очистите поиск."),
+    clear: T("Clear filters", "Մաքրել", "Сбросить"),
+    continue: T("Continue", "Շարունակել", "Продолжить"),
+    back: T("Back", "Հետ", "Назад"),
+    close: T("Close", "Փակել", "Закрыть"),
+    req: T("Required", "Պարտադիր", "Обязательно"),
+    from: T("from", "-ից", "от"),
+    per_month: T("/ month", "/ ամիս", "/ месяц"),
+    apply: T("Send application", "Ուղարկել հայտը", "Отправить заявку"),
+    products_n: T("items", "ապրանք", "товаров")
+  },
+
+  content: {
+    hero_kicker: T("Yerevan · Kentron", "Երևան · Կենտրոն", "Ереван · Кентрон"),
+    hero_h1a: T("A hundred Yerevan makers,", "Հարյուր երևանցի հեղինակ՝", "Сто ереванских авторов —"),
+    hero_h1b: T("one wall of shelves.", "մեկ դարակապատ պատ։", "одна стена полок."),
+    hero_p: T(
+      "HATIK rents shelf space to local ceramicists, jewellers, zine makers and vintage hunters — then sells their work for them, seven days a week, in the middle of town.",
+      "HATIK-ը դարակներ է վարձակալում տեղական խեցեգործներին, ոսկերիչներին, զին-հեղինակներին և վինտաժ հավաքողներին, ու վաճառում է նրանց գործերը՝ շաբաթը յոթ օր, քաղաքի կենտրոնում։",
+      "HATIK сдаёт полки местным керамистам, ювелирам, авторам зинов и охотникам за винтажом — и продаёт их работы за них, семь дней в неделю, в центре города."
+    ),
+    hero_cta1: T("Shop the shelves", "Դիտել դարակները", "Смотреть полки"),
+    hero_cta2: T("Rent a shelf", "Վարձել դարակ", "Арендовать полку"),
+    stat1_l: T("cells in the room", "բջիջ սրահում", "ячеек в зале"),
+    stat2_l: T("shelves taken", "զբաղված դարակ", "занято полок"),
+    stat3_l: T("languages at the counter", "լեզու վաճառասեղանին", "языка на кассе"),
+    stat4_l: T("open daily until", "բաց ամեն օր մինչև", "открыто ежедневно до"),
+    stat3_n: T("3", "3", "3"),
+    wall_tag: T("Live shelf map — hover a cell", "Դարակների քարտեզ՝ սահեցրեք բջիջի վրա", "Карта полок — наведите на ячейку"),
+
+    strip: T(
+      "ceramics · jewellery · zines · candles · vinyl · stickers · vintage · leather · postcards · local merch",
+      "խեցեղեն · զարդեր · զիններ · մոմեր · վինիլ · ստիկերներ · վինտաժ · կաշի · բացիկներ · տեղական մերչ",
+      "керамика · украшения · зины · свечи · винил · стикеры · винтаж · кожа · открытки · локальный мерч"
+    ),
+
+    intro_eyebrow: T("What this place is", "Ի՞նչ է սա", "Что это за место"),
+    intro_h: T("Not a souvenir shop. A shelf you can rent.", "Ոչ թե հուշանվերների խանութ, այլ դարակ, որը կարող ես վարձել։", "Не сувенирная лавка. Полка, которую можно арендовать."),
+    intro_p: T(
+      "Most people who make things in Yerevan sell them at a weekend market or through Instagram DMs. HATIK gives them a permanent address instead: a lit, labelled cell in a shop in the centre, staffed and open every day. You rent the cell. We do the rest — the counter, the card machine, the wrapping, the photos, the crowd.",
+      "Երևանում ստեղծագործողների մեծ մասը վաճառում է հանգստյան օրերի շուկաներում կամ Instagram-ի հաղորդագրություններով։ HATIK-ը նրանց տալիս է մշտական հասցե՝ լուսավորված, պիտակավորված բջիջ քաղաքի կենտրոնի խանութում, որն ամեն օր բաց է։ Դուք վարձում եք բջիջը, մնացածը մերն է՝ վաճառասեղանը, տերմինալը, փաթեթավորումը, լուսանկարները, մարդկանց հոսքը։",
+      "Большинство тех, кто что-то делает руками в Ереване, продают на маркете выходного дня или в директе. HATIK даёт им постоянный адрес: подсвеченную подписанную ячейку в магазине в центре, с продавцом и открытую каждый день. Вы арендуете ячейку — остальное на нас: касса, эквайринг, упаковка, фото, поток людей."
+    ),
+    intro_c1_h: T("For makers", "Հեղինակների համար", "Для авторов"),
+    intro_c1_p: T("Rent from 7,000 AMD a month, minimum four weeks. We take a small cut of what sells, and pay you on fixed dates.", "Վարձը՝ 7 000 դրամից ամսական, նվազագույնը չորս շաբաթ։ Վաճառքից վերցնում ենք փոքր տոկոս և վճարում ֆիքսված օրերին։", "Аренда от 7 000 драм в месяц, минимум четыре недели. Берём небольшой процент с продаж и платим в фиксированные даты."),
+    intro_c2_h: T("For shoppers", "Գնորդների համար", "Для покупателей"),
+    intro_c2_p: T("One room, a hundred different hands. Everything here is made or found by someone who lives in this city.", "Մեկ սրահ, հարյուր տարբեր ձեռք։ Ամեն ինչ ստեղծել կամ գտել է այս քաղաքում ապրող մարդը։", "Один зал, сто разных рук. Всё здесь сделано или найдено человеком, который живёт в этом городе."),
+    intro_c3_h: T("For the city", "Քաղաքի համար", "Для города"),
+    intro_c3_p: T("Open evenings, open in winter, open when it rains. A soft landing spot if you're new in Yerevan.", "Բաց է երեկոյան, ձմռանը և անձրևին։ Հարմար վայր, եթե նոր եք Երևանում։", "Открыто вечером, зимой и в дождь. Мягкая точка входа, если вы недавно в Ереване."),
+
+    cat_eyebrow: T("Browse", "Դիտել", "Каталог"),
+    cat_h: T("Pick a shelf", "Ընտրեք դարակ", "Выберите полку"),
+    cat_p: T("Categories are capped on purpose — no more than a handful of makers per shelf, so the room stays worth walking through.", "Կատեգորիաները դիտավորյալ սահմանափակ են՝ մեկ դարակին մի քանի հեղինակ, որպեսզի սրահը մնա հետաքրքիր։", "Категории намеренно ограничены: несколько авторов на полку, чтобы по залу было интересно ходить."),
+
+    feat_eyebrow: T("Just arrived", "Նոր է եկել", "Только привезли"),
+    feat_h: T("Fresh on the shelves", "Նոր դարակներին", "Свежее на полках"),
+    feat_cta: T("See everything", "Տեսնել բոլորը", "Смотреть всё"),
+
+    mak_eyebrow: T("Who is behind it", "Ովքե՞ր են նրանք", "Кто за этим стоит"),
+    mak_h: T("Meet some makers", "Ծանոթացեք հեղինակների հետ", "Познакомьтесь с авторами"),
+    mak_p: T("Every cell has a name card. These are a few of the people who fill them.", "Ամեն բջիջ ունի անվանաքարտ։ Ահա նրանցից մի քանիսը։", "У каждой ячейки есть именная карточка. Вот некоторые из тех, кто их наполняет."),
+
+    rent_eyebrow: T("For makers", "Հեղինակների համար", "Для авторов"),
+    rent_h: T("Your work deserves better than a folding table.", "Ձեր գործերն ավելի լավ տեղ են արժանի, քան ծալովի սեղանը։", "Ваши работы заслуживают большего, чем складной стол."),
+    rent_p: T("Take a cell for a month and see what happens. No stock is bought from you, no exclusivity, no long contract — if it doesn't work, you take your things home after four weeks.", "Վերցրեք բջիջ մեկ ամսով և տեսեք արդյունքը։ Մենք ձեր ապրանքը չենք գնում, բացառիկություն չենք պահանջում, երկարաժամկետ պայմանագիր չկա։ Չստացվե՞ց՝ չորս շաբաթից տանում եք ձեր իրերը։", "Возьмите ячейку на месяц и посмотрите, что выйдет. Мы не выкупаем товар, не требуем эксклюзива, не связываем длинным договором: не сработало — через четыре недели забираете вещи."),
+    rent_cta: T("See prices and apply", "Տեսնել գները և դիմել", "Цены и заявка"),
+
+    ev_eyebrow: T("Beyond the shelves", "Դարակներից բացի", "Кроме полок"),
+    ev_h: T("What else happens here", "Էլ ի՞նչ է կատարվում այստեղ", "Что здесь ещё происходит"),
+    ev_1_h: T("Sunday makers market", "Կիրակնօրյա շուկա", "Воскресный маркет"),
+    ev_1_p: T("Once a month the middle of the room clears and makers sell in person.", "Ամիսը մեկ սրահի կենտրոնն ազատվում է, և հեղինակներն անձամբ են վաճառում։", "Раз в месяц центр зала освобождается, и авторы продают лично."),
+    ev_2_h: T("Zine day & vinyl swap", "Զին-օր և վինիլի փոխանակում", "Zine day и обмен винилом"),
+    ev_2_p: T("Bring something printed or something spinning, trade it for something else.", "Բերեք տպագիր կամ պտտվող մի բան և փոխանակեք։", "Приносите что-то печатное или крутящееся и меняйтесь."),
+    ev_3_h: T("New in Yerevan? Start here", "Նո՞ր եք Երևանում։ Սկսեք այստեղից", "Недавно в Ереване? Начните отсюда"),
+    ev_3_p: T("A corner with a city map, a postcard wall, and staff who speak three languages.", "Անկյուն՝ քաղաքի քարտեզով, բացիկների պատով և երեք լեզվով խոսող անձնակազմով։", "Уголок с картой города, стеной открыток и персоналом на трёх языках."),
+
+    visit_eyebrow: T("Come by", "Այցելեք", "Заходите"),
+    visit_h: T("Find us", "Գտեք մեզ", "Как нас найти"),
+    visit_p: T("Ground floor, big window, you'll see the shelves from the street.", "Առաջին հարկ, մեծ լուսամուտ. դարակները երևում են փողոցից։", "Первый этаж, большая витрина — полки видно с улицы."),
+
+    shop_h: T("The shelves", "Դարակները", "Полки"),
+    shop_p: T("Everything below is made or curated by someone in Yerevan. Order online, or come pick it up from the shelf it lives on.", "Ամեն ինչ ստեղծված կամ ընտրված է երևանցիների կողմից։ Պատվիրեք առցանց կամ վերցրեք հենց դարակից։", "Всё ниже сделано или отобрано людьми из Еревана. Закажите онлайн или заберите прямо с полки."),
+
+    rentpage_h: T("Rent a shelf at HATIK", "Վարձեք դարակ HATIK-ում", "Арендуйте полку в HATIK"),
+    rentpage_p: T("Pick a size, send us photos of your work, and if it fits the room we'll hold a cell for you.", "Ընտրեք չափը, ուղարկեք ձեր գործերի լուսանկարները, և եթե դրանք սազում են սրահին՝ բջիջը ձերն է։", "Выберите размер, пришлите фото работ — и если они подходят залу, мы придержим ячейку."),
+    rent_how_h: T("How it works", "Ինչպես է աշխատում", "Как это работает"),
+    rent_s1_h: T("Send an application", "Ուղարկեք հայտ", "Отправьте заявку"),
+    rent_s1_p: T("Photos, prices, a couple of lines about what you make. Ten minutes, no fee.", "Լուսանկարներ, գներ, մի քանի տող ձեր գործի մասին։ Տասը րոպե, անվճար։", "Фото, цены, пара строк о том, что вы делаете. Десять минут, бесплатно."),
+    rent_s2_h: T("We answer within three days", "Պատասխանում ենք երեք օրում", "Отвечаем в течение трёх дней"),
+    rent_s2_p: T("We keep the mix balanced, so we don't take everyone. If it's a no, we say why.", "Մենք հավասարակշռում ենք տեսականին, ուստի բոլորին չենք վերցնում։ Մերժման դեպքում բացատրում ենք պատճառը։", "Мы держим баланс ассортимента, поэтому берём не всех. Если отказ — объясняем причину."),
+    rent_s3_h: T("Sign, pay, fill your cell", "Ստորագրեք, վճարեք, լցրեք բջիջը", "Договор, оплата, наполняете ячейку"),
+    rent_s3_p: T("A commission agreement, one month up front, and we barcode and shelve everything with you.", "Կոմիսիոն պայմանագիր, մեկ ամսվա կանխավճար, և մենք միասին պիտակավորում ու դասավորում ենք ամեն ինչ։", "Комиссионный договор, месяц предоплаты — и мы вместе маркируем и раскладываем товар."),
+    rent_s4_h: T("Watch it sell", "Հետևեք վաճառքին", "Следите за продажами"),
+    rent_s4_p: T("Every sale pings you in Telegram. Payouts twice a month on fixed dates.", "Ամեն վաճառքից հետո ծանուցում կստանաք Telegram-ում։ Վճարումները՝ ամիսը երկու անգամ ֆիքսված օրերին։", "Каждая продажа приходит уведомлением в Telegram. Выплаты дважды в месяц в фиксированные даты."),
+    rent_prices_h: T("Shelf prices", "Դարակների գները", "Цены на полки"),
+    rent_prices_p: T("Prices are per month. Minimum term four weeks. Commission is charged only on what actually sells.", "Գները ամսական են։ Նվազագույն ժամկետը՝ չորս շաբաթ։ Կոմիսիան գանձվում է միայն վաճառվածից։", "Цены за месяц. Минимальный срок — четыре недели. Комиссия — только с того, что реально продалось."),
+    rent_inc_h: T("What the rent includes", "Ինչ է ներառված վարձի մեջ", "Что входит в аренду"),
+    rent_form_h: T("Apply for a shelf", "Դիմել դարակի համար", "Подать заявку на полку"),
+    rent_form_p: T("The more we see, the faster we can answer.", "Որքան շատ տեսնենք, այնքան արագ կպատասխանենք։", "Чем больше увидим, тем быстрее ответим."),
+
+    about_h: T("About HATIK", "HATIK-ի մասին", "О HATIK"),
+    about_p1: T(
+      "Hatik (հատիկ) is an Armenian word for a grain, a single little thing — one seed out of a pomegranate. That is the whole idea: one maker, one cell, and a wall of them together.",
+      "Հատիկ՝ հայերեն բառ է՝ մեկ հատ, փոքրիկ բան, նռան մեկ հատիկ։ Ամբողջ գաղափարն էլ դա է՝ մեկ հեղինակ, մեկ բջիջ, և դրանցից մի ամբողջ պատ։",
+      "Հատիկ (хатик) по-армянски — зёрнышко, одна маленькая штучка, зерно граната. В этом вся идея: один автор, одна ячейка, и целая стена из них."
+    ),
+    about_p2: T(
+      "We are not trying to be another shop full of the same magnets. Everything on these shelves is chosen: we cap how many people can sell the same kind of thing, we ask for proper packaging and honest pricing, and we say no to resold factory goods. The makers set their own prices — we never mark anything up.",
+      "Մենք չենք ուզում լինել ևս մեկ խանութ նույն մագնիսներով։ Այս դարակների ամեն ինչն ընտրված է. սահմանափակում ենք միանման ապրանք վաճառողների թիվը, պահանջում ենք կոկիկ փաթեթավորում և ազնիվ գներ, և մերժում ենք վերավաճառվող գործարանային ապրանքը։ Գները սահմանում է հեղինակը, մենք երբեք չենք ավելացնում։",
+      "Мы не хотим быть ещё одним магазином с одинаковыми магнитами. Всё на этих полках отобрано: мы ограничиваем число авторов с похожим товаром, просим нормальную упаковку и честные цены и отказываем перекупщикам фабричного. Цену назначает автор — мы никогда не делаем наценку."
+    ),
+    about_p3: T(
+      "The room is also a place to be, not only to buy: a table for workshops, a postcard wall, a shelf of things worth knowing about the city, and evenings when the makers themselves stand behind their own shelves.",
+      "Սրահը նաև վայր է լինելու, ոչ միայն գնելու համար՝ սեղան արվեստանոցների համար, բացիկների պատ, քաղաքի մասին օգտակար բաների դարակ և երեկոներ, երբ հեղինակներն իրենք են կանգնում իրենց դարակի հետևում։",
+      "Зал — это ещё и место, где можно просто быть: стол для воркшопов, стена открыток, полка с полезным о городе и вечера, когда авторы сами стоят за своими полками."
+    ),
+    about_v1_h: T("Curated, not crowded", "Ընտրված, ոչ խճողված", "Отобрано, а не свалено"),
+    about_v1_p: T("A limit on similar makers per category keeps the room interesting.", "Նմանատիպ հեղինակների սահմանափակումը սրահը հետաքրքիր է պահում։", "Лимит на похожих авторов в категории держит зал интересным."),
+    about_v2_h: T("The maker sets the price", "Գինը սահմանում է հեղինակը", "Цену ставит автор"),
+    about_v2_p: T("We add nothing on top. What is on the tag is what the maker asked for.", "Մենք ոչինչ չենք ավելացնում։ Պիտակի գինը հեղինակի գինն է։", "Мы ничего не добавляем. На ценнике — то, что попросил автор."),
+    about_v3_h: T("Everything is logged", "Ամեն ինչ գրանցված է", "Всё под учётом"),
+    about_v3_p: T("Photo, barcode and signed hand-over sheet for every item that comes in.", "Յուրաքանչյուր ապրանքի համար՝ լուսանկար, շտրիխկոդ և ստորագրված ընդունման ակտ։", "На каждый товар — фото, штрихкод и подписанный акт приёма."),
+    about_v4_h: T("Three languages, always", "Միշտ երեք լեզու", "Всегда три языка"),
+    about_v4_p: T("Armenian, Russian and English at the counter and on every label.", "Հայերեն, ռուսերեն և անգլերեն՝ վաճառասեղանին և ամեն պիտակի վրա։", "Армянский, русский и английский на кассе и на каждом ярлыке."),
+
+    faq_h: T("Questions", "Հարցեր", "Вопросы"),
+    faq_p: T("If something is missing here, write to us — we add the good questions to this page.", "Եթե ինչ-որ բան պակասում է, գրեք մեզ. լավ հարցերն ավելացնում ենք այս էջում։", "Если чего-то не хватает — напишите нам, хорошие вопросы мы добавляем на эту страницу."),
+    faq_tab_buy: T("Buying", "Գնում", "Покупателям"),
+    faq_tab_sell: T("Renting a shelf", "Դարակի վարձույթ", "Аренда полки"),
+
+    visitpage_h: T("Visit the shop", "Այցելեք խանութ", "Прийти в магазин"),
+    visitpage_p: T("Ground floor with a street window in the centre of Yerevan. Card and cash both work, and we wrap gifts for free.", "Առաջին հարկ, փողոցային լուսամուտով, Երևանի կենտրոնում։ Ընդունում ենք քարտ և կանխիկ, նվերները փաթեթավորում ենք անվճար։", "Первый этаж с витриной в центре Еревана. Принимаем карту и наличные, подарки упаковываем бесплатно."),
+    contact_h: T("Write to us", "Գրեք մեզ", "Напишите нам"),
+
+    co_h: T("Checkout", "Պատվերի ձևակերպում", "Оформление заказа"),
+    co_step1: T("Basket", "Զամբյուղ", "Корзина"),
+    co_step2: T("Delivery", "Առաքում", "Доставка"),
+    co_step3: T("Payment", "Վճարում", "Оплата"),
+    co_step4: T("Done", "Պատրաստ է", "Готово"),
+    co_done_h: T("Order placed", "Պատվերն ընդունված է", "Заказ принят"),
+    co_done_p: T("We'll message you to confirm and agree a time. This is a demo shop — nothing has been charged.", "Մենք կկապվենք ձեզ հետ՝ հաստատելու և ժամը պայմանավորվելու համար։ Սա ցուցադրական խանութ է, գումար չի գանձվել։", "Мы напишем вам, чтобы подтвердить и договориться о времени. Это демо-магазин, деньги не списаны."),
+    co_order_no: T("Order number", "Պատվերի համար", "Номер заказа")
+  },
+
+  categories: [
+    { id: "ceramics", shape: "ceramics", color: "#E08D82", name: T("Ceramics", "Խեցեղեն", "Керамика") },
+    { id: "jewellery", shape: "jewellery", color: "#F3C761", name: T("Jewellery", "Զարդեր", "Украшения") },
+    { id: "print", shape: "print", color: "#9CB584", name: T("Prints & zines", "Տպագիր և զիններ", "Печать и зины") },
+    { id: "candles", shape: "candles", color: "#A6C3DF", name: T("Candles & scent", "Մոմեր և բույրեր", "Свечи и ароматы") },
+    { id: "stickers", shape: "stickers", color: "#C9A9CB", name: T("Stickers & pins", "Ստիկերներ և կրծքանշաններ", "Стикеры и значки") },
+    { id: "textile", shape: "textile", color: "#E08D82", name: T("Textile & bags", "Տեքստիլ և պայուսակներ", "Текстиль и сумки") },
+    { id: "vinyl", shape: "vinyl", color: "#9CB584", name: T("Vinyl & music", "Վինիլ և երաժշտություն", "Винил и музыка") },
+    { id: "vintage", shape: "vintage", color: "#F3C761", name: T("Vintage", "Վինտաժ", "Винтаж") },
+    { id: "home", shape: "home", color: "#A6C3DF", name: T("Home", "Տան իրեր", "Для дома") },
+    { id: "leather", shape: "leather", color: "#C9A9CB", name: T("Leather", "Կաշի", "Кожа") }
+  ]
+};
+
+DEFAULTS.products = [
+  { id: "p01", cat: "ceramics", maker: "Nuri Ceramics", price: 14000, cell: "A-04", stock: 3, img: "",
+    name: T("Speckled breakfast cup", "Բծավոր նախաճաշի բաժակ", "Крапчатая чашка для завтрака"),
+    desc: T("Hand-thrown stoneware, matte glaze, holds about 250 ml. Dishwasher safe.", "Ձեռքով պատրաստված քարակավ, մատ ջնարակ, մոտ 250 մլ։ Կարելի է լվանալ սպասք լվացող մեքենայում։", "Керамика ручной работы, матовая глазурь, около 250 мл. Можно мыть в посудомойке.") },
+  { id: "p02", cat: "jewellery", maker: "Kar Studio", price: 26000, cell: "V-02", stock: 1, img: "",
+    name: T("Brass pomegranate earrings", "Արույրե նռան ականջօղեր", "Латунные серьги-гранаты"),
+    desc: T("Cast brass, silver hooks, light enough to forget you're wearing them.", "Ձուլած արույր, արծաթե կեռիկներ, այնքան թեթև, որ մոռանում ես դրանց մասին։", "Литая латунь, серебряные швензы, лёгкие настолько, что забываешь про них.") },
+  { id: "p03", cat: "print", maker: "Papik Press", price: 4500, cell: "B-11", stock: 12, img: "",
+    name: T("Yerevan balconies zine", "Երևանյան պատշգամբների զին", "Зин про ереванские балконы"),
+    desc: T("24 pages of risograph drawings of the balconies on Saryan and Pushkin.", "24 էջ ռիզոգրաֆ գծանկարներ Սարյան և Պուշկին փողոցների պատշգամբների մասին։", "24 страницы рисографии с балконами Сарьяна и Пушкина.") },
+  { id: "p04", cat: "candles", maker: "Mor & Moon", price: 9000, cell: "C-07", stock: 6, img: "",
+    name: T("Fig and tonka candle", "Թզի և տոնկայի մոմ", "Свеча инжир и тонка"),
+    desc: T("Soy wax in a reusable ceramic cup, burns for about 35 hours.", "Սոյայի մոմ՝ բազմակի օգտագործման խեցեղեն բաժակի մեջ, այրվում է մոտ 35 ժամ։", "Соевый воск в керамическом стакане, который можно оставить себе. Горит около 35 часов.") },
+  { id: "p05", cat: "stickers", maker: "Zoomer Dept.", price: 1200, cell: "D-19", stock: 40, img: "",
+    name: T("Marshrutka sticker pack", "Մարշրուտկայի ստիկերների հավաքածու", "Набор стикеров «маршрутка»"),
+    desc: T("Eight vinyl stickers about surviving Yerevan public transport.", "Ութ վինիլե ստիկեր՝ Երևանի հանրային տրանսպորտում գոյատևելու մասին։", "Восемь виниловых стикеров о выживании в ереванском транспорте.") },
+  { id: "p06", cat: "textile", maker: "Karmir Thread", price: 18000, cell: "R-01", stock: 2, img: "",
+    name: T("Hand-loomed tote", "Ձեռագործ պայուսակ", "Тканая сумка-шоппер"),
+    desc: T("Cotton warp, wool weft, woven on a floor loom in Kond. Every one is slightly different.", "Բամբակե հենք, բրդե թել, հյուսված Կոնդի ջուլհակի հաստոցի վրա։ Յուրաքանչյուրը փոքր-ինչ տարբեր է։", "Хлопковая основа, шерстяной уток, ткань с напольного станка в Конде. Каждая чуть разная.") },
+  { id: "p07", cat: "vinyl", maker: "Rotor Records", price: 22000, cell: "M-05", stock: 1, img: "",
+    name: T("Yerevan jazz 1978 — reissue", "Երևանյան ջազ 1978 — վերահրատարակում", "Ереванский джаз 1978 — переиздание"),
+    desc: T("180 g pressing with new sleeve notes in three languages.", "180 գ ձայնասկավառակ՝ երեք լեզվով նոր ծանոթագրություններով։", "Пластинка 180 г с новыми заметками на трёх языках.") },
+  { id: "p08", cat: "vintage", maker: "Depo 84", price: 32000, cell: "N-03", stock: 1, img: "",
+    name: T("Zenit camera, working", "Զենիտ ֆոտոխցիկ, աշխատող", "Фотоаппарат «Зенит», рабочий"),
+    desc: T("Serviced, light seals replaced, comes with a roll of film to get you started.", "Սպասարկված, լուսամեկուսիչները փոխարինված, կցվում է մեկ ժապավեն։", "Обслужен, светозащита заменена, в комплекте плёнка на первый раз.") },
+  { id: "p09", cat: "ceramics", maker: "Nuri Ceramics", price: 21000, cell: "A-06", stock: 2, img: "",
+    name: T("Small vase, sand glaze", "Փոքր ծաղկաման, ավազագույն ջնարակ", "Маленькая ваза, песочная глазурь"),
+    desc: T("About 16 cm tall. Fits three stems and one long afternoon.", "Մոտ 16 սմ բարձրություն։ Տեղավորում է երեք ցողուն և մեկ երկար ցերեկ։", "Высота около 16 см. Помещается три стебля и один долгий день.") },
+  { id: "p10", cat: "home", maker: "Studio Tsov", price: 40000, cell: "H-02", stock: 1, img: "",
+    name: T("Embroidered cushion", "Ասեղնագործ բարձ", "Вышитая подушка"),
+    desc: T("Linen front, hand embroidery, about 45 x 45 cm. Takes two weeks to make one.", "Կտավատե երես, ձեռքի ասեղնագործություն, մոտ 45 x 45 սմ։ Մեկը պատրաստվում է երկու շաբաթում։", "Льняной перед, ручная вышивка, примерно 45 x 45 см. Одна делается две недели.") },
+  { id: "p11", cat: "jewellery", maker: "Ored", price: 48000, cell: "V-05", stock: 1, img: "",
+    name: T("Silver signet ring", "Արծաթե կնիք-մատանի", "Серебряная печатка"),
+    desc: T("925 silver, hand-carved face, made to order in any size.", "925 արծաթ, ձեռքով փորագրված երես, պատրաստվում է ցանկացած չափսի։", "Серебро 925, гравировка вручную, делается под любой размер.") },
+  { id: "p12", cat: "print", maker: "Papik Press", price: 2500, cell: "B-14", stock: 25, img: "",
+    name: T("Postcard set — six views", "Բացիկների հավաքածու՝ վեց տեսարան", "Набор открыток — шесть видов"),
+    desc: T("Six risograph postcards, blank inside, with envelopes.", "Վեց ռիզոգրաֆ բացիկ՝ ներսից դատարկ, ծրարներով։", "Шесть рисографных открыток, внутри пусто, с конвертами.") },
+  { id: "p13", cat: "candles", maker: "Mor & Moon", price: 6500, cell: "C-09", stock: 8, img: "",
+    name: T("Travel candle tin", "Ճամփորդական մոմ տուփի մեջ", "Свеча в жестянке"),
+    desc: T("Small enough for hand luggage. Smells like cardamom and dust after rain.", "Բավական փոքր՝ ձեռքի ուղեբեռի համար։ Հոտը՝ հիլ և անձրևից հետո փոշի։", "Помещается в ручную кладь. Пахнет кардамоном и пылью после дождя.") },
+  { id: "p14", cat: "leather", maker: "Verk Atelier", price: 29000, cell: "L-01", stock: 3, img: "",
+    name: T("Card holder, four slots", "Քարտապանակ՝ չորս բաժնով", "Картхолдер на четыре карты"),
+    desc: T("Vegetable-tanned leather, hand-stitched, softens with use.", "Բուսական դաբաղմամբ կաշի, ձեռքի կար, ժամանակի հետ փափկում է։", "Кожа растительного дубления, ручной шов, со временем становится мягче.") },
+  { id: "p15", cat: "stickers", maker: "Zoomer Dept.", price: 900, cell: "D-22", stock: 60, img: "",
+    name: T("Enamel pin — apricot", "Էմալե կրծքանշան՝ ծիրան", "Значок «абрикос»"),
+    desc: T("Hard enamel, 25 mm, two rubber backs so you don't lose it.", "Կոշտ էմալ, 25 մմ, երկու ռետինե ամրակ՝ չկորցնելու համար։", "Твёрдая эмаль, 25 мм, две резиновые заглушки, чтобы не потерять.") },
+  { id: "p16", cat: "textile", maker: "Karmir Thread", price: 12000, cell: "R-04", stock: 5, img: "",
+    name: T("Linen tea towel, striped", "Կտավատե սրբիչ՝ գծավոր", "Льняное полотенце в полоску"),
+    desc: T("Washed linen with a hanging loop. Gets softer every wash.", "Լվացված կտավատ՝ կախելու օղակով։ Ամեն լվացումից հետո ավելի փափուկ է դառնում։", "Стираный лён с петелькой. С каждой стиркой мягче.") },
+  { id: "p17", cat: "vintage", maker: "Depo 84", price: 7000, cell: "N-08", stock: 14, img: "",
+    name: T("Soviet enamel badges, set of five", "Խորհրդային էմալե կրծքանշաններ՝ հինգ հատ", "Советские значки, набор из пяти"),
+    desc: T("Sorted by colour, not by history. Pinned onto a printed card.", "Դասավորված ըստ գույնի, ոչ ըստ պատմության։ Ամրացված տպագիր քարտին։", "Отобраны по цвету, а не по истории. Приколоты на печатную карточку.") },
+  { id: "p18", cat: "home", maker: "Studio Tsov", price: 16000, cell: "H-05", stock: 4, img: "",
+    name: T("Block-printed napkins, pair", "Կնիքով տպագրված անձեռոցիկներ՝ զույգ", "Салфетки ручной печати, пара"),
+    desc: T("Cotton, printed with a carved wooden block, two per pack.", "Բամբակ, տպագրված փորագրված փայտե կնիքով, փաթեթում՝ երկուսը։", "Хлопок, печать резным деревянным штампом, две штуки в наборе.") },
+  { id: "p19", cat: "vinyl", maker: "Rotor Records", price: 3500, cell: "M-09", stock: 9, img: "",
+    name: T("Gig poster — Kond sessions", "Համերգի պաստառ՝ Կոնդի սեսիաներ", "Постер концерта — Kond sessions"),
+    desc: T("A3 screen print, numbered edition of 60.", "A3 մետաքսատպություն, համարակալված 60 օրինակ։", "Шелкография A3, нумерованный тираж 60.") },
+  { id: "p20", cat: "ceramics", maker: "Hoghi", price: 11000, cell: "A-12", stock: 0, img: "",
+    name: T("Incense holder, ripple", "Խնկաման՝ ալիքավոր", "Подставка для благовоний «волна»"),
+    desc: T("Press-moulded clay with a raw foot. Currently sold out — more on the shelf next week.", "Կաղապարված կավ՝ չջնարակված հատակով։ Այս պահին վաճառված է, նորերը կլինեն հաջորդ շաբաթ։", "Формованная глина с необожжённым основанием. Сейчас распродано, новые будут на следующей неделе.") }
+];
+
+DEFAULTS.makers = [
+  { id: "m1", name: "Nuri Ceramics", cell: "A-04 · A-06", shape: "ceramics", handle: "@nuri.ceramics",
+    bio: T("Throws in a basement studio near Komitas. Matte glazes, thick walls, nothing perfectly round.", "Աշխատում է Կոմիտասի մոտ գտնվող նկուղային արվեստանոցում։ Մատ ջնարակներ, հաստ պատեր, ոչ մի կատարյալ կլորություն։", "Работает в подвальной мастерской у Комитаса. Матовые глазури, толстые стенки, ничего идеально круглого.") },
+  { id: "m2", name: "Papik Press", cell: "B-11 · B-14", shape: "print", handle: "@papik.press",
+    bio: T("Two people and one risograph. Zines about the city, printed in editions of fifty.", "Երկու մարդ և մեկ ռիզոգրաֆ։ Զիններ քաղաքի մասին՝ հիսուն օրինակ տպաքանակով։", "Два человека и один рисограф. Зины о городе тиражом по пятьдесят.") },
+  { id: "m3", name: "Kar Studio", cell: "V-02", shape: "jewellery", handle: "@kar.studio",
+    bio: T("Casts brass and silver at home, sells at every market in town. This is the first permanent shelf.", "Ձուլում է արույր և արծաթ տանը, վաճառում է քաղաքի բոլոր շուկաներում։ Սա առաջին մշտական դարակն է։", "Льёт латунь и серебро дома и продаёт на всех маркетах города. Это первая постоянная полка.") },
+  { id: "m4", name: "Depo 84", cell: "N-03 · N-08", shape: "vintage", handle: "@depo84",
+    bio: T("Digs through flea markets across the country and only keeps the things that still work.", "Փորփրում է երկրի ամբողջ բոլոր բարախոլկաները և պահում է միայն այն, ինչ դեռ աշխատում է։", "Роется по барахолкам по всей стране и оставляет только то, что ещё работает.") },
+  { id: "m5", name: "Mor & Moon", cell: "C-07 · C-09", shape: "candles", handle: "@mor.and.moon",
+    bio: T("Small-batch soy candles poured in a kitchen in Arabkir, mostly at night.", "Փոքր խմբաքանակի սոյայի մոմեր՝ պատրաստված Արաբկիրի խոհանոցում, հիմնականում գիշերը։", "Соевые свечи малыми партиями, разливаются на кухне в Арабкире, чаще ночью.") },
+  { id: "m6", name: "Verk Atelier", cell: "L-01", shape: "leather", handle: "@verk.atelier",
+    bio: T("One saddler, hand stitch only, no glue. Repairs what he sells, for free, forever.", "Մեկ կաշեգործ, միայն ձեռքի կար, առանց սոսինձի։ Իր վաճառածն անվճար նորոգում է ընդմիշտ։", "Один шорник, только ручной шов, без клея. Чинит проданное бесплатно и навсегда.") }
+];
+
+DEFAULTS.tiers = [
+  { id: "t1", price: 7000, popular: false,
+    name: T("Small cell", "Փոքր բջիջ", "Малая ячейка"),
+    size: T("25 × 25 × 20 cm", "25 × 25 × 20 սմ", "25 × 25 × 20 см"),
+    best: T("Pins, stickers, small jewellery, incense", "Կրծքանշաններ, ստիկերներ, փոքր զարդեր, խունկ", "Значки, стикеры, мелкие украшения, благовония") },
+  { id: "t2", price: 13500, popular: true,
+    name: T("Standard shelf", "Ստանդարտ դարակ", "Стандартная полка"),
+    size: T("40 × 30 × 30 cm", "40 × 30 × 30 սմ", "40 × 30 × 30 см"),
+    best: T("Ceramics, candles, zines, small textile", "Խեցեղեն, մոմեր, զիններ, փոքր տեքստիլ", "Керамика, свечи, зины, мелкий текстиль") },
+  { id: "t3", price: 20000, popular: false,
+    name: T("Premium shelf", "Պրեմիում դարակ", "Премиум-полка"),
+    size: T("40 × 30 × 30 cm, at eye level or in the window", "40 × 30 × 30 սմ՝ աչքի մակարդակին կամ ցուցափեղկում", "40 × 30 × 30 см, на уровне глаз или в витрине"),
+    best: T("Anything you want people to see first", "Այն, ինչ ուզում եք առաջինը տեսնեն", "То, что должны увидеть первым") },
+  { id: "t4", price: 28000, popular: false,
+    name: T("Rail or large item", "Ձող կամ մեծ իր", "Рейл или крупный предмет"),
+    size: T("60 cm of rail, or one floor / wall piece", "60 սմ ձող կամ մեկ հատակի / պատի իր", "60 см рейла или один напольный / настенный предмет"),
+    best: T("Clothing, bags, framed work, large ceramics", "Հագուստ, պայուսակներ, շրջանակված գործեր, մեծ խեցեղեն", "Одежда, сумки, работы в раме, крупная керамика") },
+  { id: "t5", price: 4000, popular: false,
+    name: T("Stock box", "Պահեստի արկղ", "Складская коробка"),
+    size: T("Under-shelf storage, restock without coming in", "Դարակի տակ պահեստ՝ առանց գալու համալրելու համար", "Хранение под полкой, докладываем без вашего визита"),
+    best: T("Add-on for anyone who sells fast", "Հավելում արագ վաճառողների համար", "Дополнение для тех, кто быстро продаёт") },
+  { id: "t6", price: 3000, popular: false,
+    name: T("One-object spot", "Մեկ իրի տեղ", "Место под один предмет"),
+    size: T("A single labelled stand", "Մեկ պիտակավորված պատվանդան", "Одна подписанная подставка"),
+    best: T("Testing the water with one piece", "Փորձարկում մեկ գործով", "Попробовать с одной работой") }
+];
+
+DEFAULTS.included = [
+  T("A lit, labelled cell with your name card on it", "Լուսավորված, պիտակավորված բջիջ՝ ձեր անվանաքարտով", "Подсвеченная подписанная ячейка с вашей именной карточкой"),
+  T("Selling, wrapping and card payments handled by our staff", "Վաճառքը, փաթեթավորումը և քարտով վճարումները՝ մեր անձնակազմի վրա", "Продажу, упаковку и оплату картой берёт на себя наш персонал"),
+  T("Barcodes and a photo record of everything you hand over", "Շտրիխկոդեր և ձեր հանձնած ամեն ապրանքի լուսանկարային գրանցում", "Штрихкоды и фотоучёт всего, что вы передаёте"),
+  T("A sale notification in Telegram every time something goes", "Telegram-ում ծանուցում ամեն վաճառքից հետո", "Уведомление в Telegram при каждой продаже"),
+  T("Payouts twice a month on fixed dates, with documents", "Վճարումներ ամիսը երկու անգամ՝ ֆիքսված օրերին, փաստաթղթերով", "Выплаты дважды в месяц в фиксированные даты, с документами"),
+  T("Your work in our Instagram, and in the shop window rotation", "Ձեր գործերը մեր Instagram-ում և ցուցափեղկի ռոտացիայում", "Ваши работы в нашем Instagram и в ротации витрины"),
+  T("A spot at the Sunday makers market, free for shelf holders", "Տեղ կիրակնօրյա շուկայում՝ անվճար դարակ վարձողների համար", "Место на воскресном маркете — бесплатно для арендаторов полок"),
+  T("Cameras on the room and a stated liability limit in the contract", "Տեսախցիկներ սրահում և պայմանագրում նշված պատասխանատվության սահման", "Камеры в зале и прописанный в договоре лимит ответственности")
+];
+
+DEFAULTS.faq = [
+  { id: "f1", side: "buy",
+    q: T("Can I order online and pick up in the shop?", "Կարո՞ղ եմ պատվիրել առցանց և վերցնել խանութից", "Можно заказать онлайн и забрать в магазине?"),
+    a: T("Yes. Choose pickup at checkout and we'll hold it for three days. There's no charge for pickup.", "Այո։ Պատվերի ձևակերպման ժամանակ ընտրեք «վերցնել խանութից», և մենք կպահենք երեք օր։ Անվճար է։", "Да. Выберите самовывоз при оформлении — придержим три дня. Самовывоз бесплатный.") },
+  { id: "f2", side: "buy",
+    q: T("Do you deliver outside Yerevan?", "Առաքո՞ւմ եք Երևանից դուրս", "Доставляете за пределы Еревана?"),
+    a: T("We deliver across Armenia by courier. Yerevan is next-day; the regions take two to four days.", "Առաքում ենք ամբողջ Հայաստանում սուրհանդակով։ Երևանում՝ հաջորդ օրը, մարզերում՝ երկուսից չորս օր։", "Доставляем по всей Армении курьером. По Еревану — на следующий день, по регионам — два-четыре дня.") },
+  { id: "f3", side: "buy",
+    q: T("Can I return something?", "Կարո՞ղ եմ վերադարձնել", "Можно вернуть покупку?"),
+    a: T("Unused items in their packaging can come back within 14 days. Made-to-order pieces can't, because they were made for you.", "Չօգտագործված, փաթեթավորման մեջ գտնվող ապրանքները կարելի է վերադարձնել 14 օրվա ընթացքում։ Պատվերով պատրաստվածները՝ ոչ, քանի որ պատրաստվել են հատուկ ձեզ համար։", "Неиспользованные вещи в упаковке можно вернуть в течение 14 дней. Сделанное на заказ вернуть нельзя — его делали под вас.") },
+  { id: "f4", side: "buy",
+    q: T("Do you wrap gifts?", "Նվերները փաթեթավորո՞ւմ եք", "Упаковываете подарки?"),
+    a: T("Free, in the shop and on delivery. Tell us at checkout if you want the price tag left off.", "Անվճար՝ խանութում և առաքման դեպքում։ Պատվերի ձևակերպման ժամանակ նշեք, եթե ցանկանում եք հանել գնապիտակը։", "Бесплатно, в магазине и при доставке. Скажите при оформлении, если убрать ценник.") },
+  { id: "f5", side: "buy",
+    q: T("Is everything really made in Armenia?", "Իսկապե՞ս ամեն ինչ պատրաստված է Հայաստանում", "Всё правда сделано в Армении?"),
+    a: T("Made or restored here, by people who live here. Vintage is found locally rather than made. We don't take resold factory goods.", "Պատրաստված կամ վերականգնված է այստեղ՝ այստեղ ապրող մարդկանց կողմից։ Վինտաժը գտնված է, ոչ պատրաստված։ Վերավաճառվող գործարանային ապրանք չենք ընդունում։", "Сделано или восстановлено здесь людьми, которые здесь живут. Винтаж найден, а не изготовлен. Перекупленное фабричное не берём.") },
+  { id: "f6", side: "sell",
+    q: T("What does it cost in total?", "Ընդհանուր ինչքա՞ն է արժենում", "Сколько это стоит в сумме?"),
+    a: T("Shelf rent from 7,000 AMD a month, plus commission on what actually sells. Nothing else — no listing fee, no photo fee, no deposit beyond the first month.", "Դարակի վարձը՝ 7 000 դրամից ամսական, գումարած կոմիսիա միայն վաճառվածից։ Ուրիշ ոչինչ՝ ոչ տեղադրման, ոչ լուսանկարի վճար, ոչ ավանդ բացի առաջին ամսից։", "Аренда полки от 7 000 драм в месяц плюс комиссия с того, что продалось. Больше ничего: ни платы за размещение, ни за фото, ни депозита сверх первого месяца.") },
+  { id: "f7", side: "sell",
+    q: T("Who decides the price of my work?", "Ո՞վ է որոշում իմ գործի գինը", "Кто назначает цену на мои работы?"),
+    a: T("You do, and we never mark it up. We'll tell you honestly if we think something is priced away from the room, but the final number is yours.", "Դուք, և մենք երբեք չենք ավելացնում։ Ազնվորեն կասենք, եթե կարծենք, որ գինը սրահին չի սազում, բայց վերջնական թիվը ձերն է։", "Вы, и мы никогда не делаем наценку. Честно скажем, если цена не для этого зала, но финальное число — ваше.") },
+  { id: "f8", side: "sell",
+    q: T("What if my things get stolen or broken?", "Իսկ եթե իմ իրերը գողանա՞ն կամ կոտրվեն", "А если мои вещи украдут или разобьют?"),
+    a: T("The room is under camera, expensive pieces go in closed cases, and the contract states exactly what we cover and up to what value. We photograph everything on hand-over so there's no argument later.", "Սրահը տեսախցիկների տակ է, թանկարժեք իրերը՝ փակ ցուցափեղկերում, իսկ պայմանագրում հստակ նշված է, թե ինչ ենք ծածկում և ինչ արժեքի սահմաններում։ Ընդունման պահին ամեն ինչ լուսանկարում ենք, որ հետո վեճ չլինի։", "Зал под камерами, дорогое — в закрытых витринах, а в договоре прямо прописано, что и на какую сумму мы покрываем. При приёме всё фотографируем, чтобы потом не спорить.") },
+  { id: "f9", side: "sell",
+    q: T("Do you take everyone?", "Բոլորի՞ն եք ընդունում", "Берёте всех?"),
+    a: T("No, and that's the point. We cap how many people sell similar things so the room stays worth walking through. If we say no, we tell you why and what would change it.", "Ոչ, և հենց դա է իմաստը։ Սահմանափակում ենք նմանատիպ ապրանք վաճառողների թիվը, որպեսզի սրահը մնա հետաքրքիր։ Մերժման դեպքում բացատրում ենք պատճառը և ինչը կփոխեր որոշումը։", "Нет, и в этом смысл. Мы ограничиваем число авторов с похожим товаром, чтобы по залу было интересно ходить. Если отказ — скажем почему и что изменило бы решение.") },
+  { id: "f10", side: "sell",
+    q: T("How and when do I get paid?", "Ինչպե՞ս և ե՞րբ եմ ստանում գումարը", "Как и когда я получаю деньги?"),
+    a: T("Twice a month, on the same dates every month, by bank transfer or cash against a signed document. You can see every sale in your Telegram feed as it happens.", "Ամիսը երկու անգամ՝ ամեն ամիս նույն օրերին, բանկային փոխանցումով կամ կանխիկ՝ ստորագրված փաստաթղթի դիմաց։ Ամեն վաճառք տեսնում եք Telegram-ում իրական ժամանակում։", "Дважды в месяц, в одни и те же даты, переводом или наличными под подпись. Каждую продажу видно в Telegram в момент, когда она произошла.") },
+  { id: "f11", side: "sell",
+    q: T("What can't go on the shelves?", "Ի՞նչը չի կարող դարակին լինել", "Что нельзя выставить на полку?"),
+    a: T("Resold marketplace goods, copies of known brands, anything without packaging or a price tag, and too much of the same thing.", "Վերավաճառվող ապրանք, հայտնի բրենդների կրկնօրինակներ, առանց փաթեթավորման կամ գնապիտակի ապրանք և չափազանց շատ միանման իրեր։", "Перекупленный товар с маркетплейсов, копии известных брендов, вещи без упаковки и ценника и слишком много одинакового.") },
+  { id: "f12", side: "sell",
+    q: T("I only have a few pieces. Is that enough?", "Ես ընդամենը մի քանի գործ ունեմ։ Բավակա՞ն է", "У меня всего пара работ. Этого хватит?"),
+    a: T("Take the one-object spot at 3,000 AMD and see how it goes for a month. Plenty of people start there and move up to a shelf.", "Վերցրեք մեկ իրի տեղը՝ 3 000 դրամով, և տեսեք արդյունքը մեկ ամսում։ Շատերն այդպես են սկսում, հետո անցնում դարակի։", "Возьмите место под один предмет за 3 000 драм и посмотрите месяц. Многие так начинают и потом переходят на полку.") }
+];
+
+DEFAULTS.orders = [];
+DEFAULTS.applications = [];
+DEFAULTS.messages = [];
+
+/* ============================================================================
+   STATE
+   ============================================================================ */
+let DB = clone(DEFAULTS);
+let LANG = "en";
+let CART = [];
+let saveTimer = null;
+
+function tr(node) {
+  if (node == null) return "";
+  if (typeof node === "string") return node;
+  return node[LANG] || node.en || Object.values(node)[0] || "";
+}
+const ui = (k) => tr(DB.ui[k]);
+const cx = (k) => tr(DB.content[k]);
+
+function save(quiet) {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async () => {
+    const ok = await Store.set(KEY, { db: DB, lang: LANG, cart: CART });
+    const el = $("#adminSaved");
+    if (el) el.textContent = ok ? "Saved · " + new Date().toLocaleTimeString() : "Could not save";
+    if (!quiet && !ok) toast("Changes are not being saved — see Backup in the manager.");
+  }, 240);
+}
+
+async function load() {
+  const d = await Store.get(KEY);
+  if (d && d.db) {
+    DB = mergeDefaults(clone(DEFAULTS), d.db);
+    LANG = d.lang || "en";
+    CART = Array.isArray(d.cart) ? d.cart : [];
+  }
+}
+/* keep newly-added default keys when loading an older saved copy */
+function mergeDefaults(base, saved) {
+  Object.keys(saved).forEach((k) => {
+    if (Array.isArray(saved[k])) base[k] = saved[k];
+    else if (saved[k] && typeof saved[k] === "object" && base[k] && !Array.isArray(base[k])) base[k] = mergeDefaults(base[k], saved[k]);
+    else base[k] = saved[k];
+  });
+  return base;
+}
+
+function applyTheme() {
+  const c = DB.settings.colors, r = document.documentElement.style;
+  r.setProperty("--paper", c.paper); r.setProperty("--card", c.card); r.setProperty("--ink", c.ink);
+  r.setProperty("--line", c.line); r.setProperty("--coral", c.coral); r.setProperty("--sage", c.sage);
+  r.setProperty("--sun", c.sun); r.setProperty("--sky", c.sky);
+  document.documentElement.lang = LANG;
+}
+
+/* ============================================================================
+   HEADER / NAV / FOOTER
+   ============================================================================ */
+const ROUTES = [
+  { path: "/", key: "nav_home" },
+  { path: "/shop", key: "nav_shop" },
+  { path: "/rent", key: "nav_rent" },
+  { path: "/about", key: "nav_about" },
+  { path: "/faq", key: "nav_faq" },
+  { path: "/visit", key: "nav_visit" }
+];
+
+function renderChrome() {
+  const path = location.hash.replace(/^#/, "") || "/";
+  $("#brandName").textContent = DB.settings.brandName;
+  $("#brandSub").textContent = tr(DB.settings.brandSub);
+
+  $("#nav").innerHTML = ROUTES.map((r) =>
+    '<a href="#' + r.path + '"' + (path === r.path ? ' aria-current="page"' : "") + ">" + esc(ui(r.key)) + "</a>"
+  ).join("");
+
+  $("#langSwitch").innerHTML = LANGS.map((l) =>
+    '<button type="button" data-lang="' + l.id + '" aria-pressed="' + (LANG === l.id) + '" title="' + esc(l.name) + '">' + l.label + "</button>"
+  ).join("");
+
+  const s = DB.settings;
+  $("#foot").innerHTML =
+    '<div class="wrap">' +
+      '<div class="foot__cols">' +
+        "<div>" +
+          '<div class="brand__name" style="margin-bottom:10px">' + esc(s.brandName) + "</div>" +
+          '<p style="max-width:32ch; color:rgba(247,241,227,.7); font-size:.93rem">' + esc(tr(s.brandSub)) + " · " + esc(tr(s.city)) + "</p>" +
+          '<p class="tiny" style="color:rgba(247,241,227,.5)">' + esc(tr(s.address)) + "<br>" + esc(tr(s.hours)) + "</p>" +
+        "</div>" +
+        "<div><h4>" + esc(ui("nav_shop")) + "</h4><ul>" +
+          DB.categories.slice(0, 6).map((c) => '<li><a href="#/shop?cat=' + c.id + '">' + esc(tr(c.name)) + "</a></li>").join("") +
+        "</ul></div>" +
+        "<div><h4>" + esc(ui("nav_about")) + '</h4><ul><li><a href="#/about">' + esc(ui("nav_about")) + '</a></li><li><a href="#/rent">' + esc(ui("nav_rent")) + '</a></li><li><a href="#/faq">' + esc(ui("nav_faq")) + '</a></li><li><a href="#/visit">' + esc(ui("nav_visit")) + "</a></li></ul></div>" +
+        "<div><h4>Contact</h4><ul>" +
+          '<li><a href="mailto:' + esc(s.email) + '">' + esc(s.email) + "</a></li>" +
+          '<li><a href="tel:' + esc(String(s.phone).replace(/\s/g, "")) + '">' + esc(s.phone) + "</a></li>" +
+          '<li><a href="https://instagram.com/' + esc(s.instagram) + '" target="_blank" rel="noopener">Instagram</a></li>' +
+          '<li><a href="https://t.me/' + esc(s.telegram) + '" target="_blank" rel="noopener">Telegram</a></li>' +
+        "</ul></div>" +
+      "</div>" +
+      '<div class="foot__bar">' +
+        "<span>© " + new Date().getFullYear() + " " + esc(s.brandName) + " · " + esc(tr(s.city)) + ' · <span class="mono">demo site</span></span>' +
+        '<span class="flexrow"><span class="tiny">Site manager</span> <button class="dot-admin" id="adminDot" title="Open site manager" aria-label="Open site manager"></button></span>' +
+      "</div>" +
+    "</div>";
+
+  updateCartCount();
+}
+
+function updateCartCount() {
+  const n = CART.reduce((a, i) => a + i.qty, 0);
+  const el = $("#cartCount");
+  el.textContent = n; el.hidden = n === 0;
+}
+
+/* ============================================================================
+   SHELF WALL — the signature element
+   ============================================================================ */
+function shelfWall(cols, rows, taken) {
+  const total = cols * rows;
+  const cats = DB.categories;
+  let html = '<div class="shelfwall" style="--cols:' + cols + '" aria-hidden="true">';
+  for (let i = 0; i < total; i++) {
+    const full = i < taken;
+    const col = full ? cats[i % cats.length].color : "";
+    const delay = (i % cols) * 22 + Math.floor(i / cols) * 34;
+    html += '<div class="cell' + (full ? " cell--full" : "") + '" style="animation-delay:' + delay + "ms" + (full ? ";background:" + col : "") + '"></div>';
+  }
+  return html + "</div>";
+}
+
+/* ============================================================================
+   PAGE: HOME
+   ============================================================================ */
+function pageHome() {
+  const s = DB.settings;
+  const on = (id) => (s.sections.find((x) => x.id === id) || {}).on;
+  const order = s.sections.map((x) => x.id);
+  const parts = {};
+
+  const takenPct = Math.round((s.takenCells / s.totalCells) * 100);
+
+  parts.hero =
+    '<section class="hero"><div class="wrap hero__grid">' +
+      "<div>" +
+        '<div class="eyebrow">' + esc(cx("hero_kicker")) + "</div>" +
+        "<h1>" + esc(cx("hero_h1a")) + " <em>" + esc(cx("hero_h1b")) + "</em></h1>" +
+        '<p class="lede" style="margin-top:22px">' + esc(cx("hero_p")) + "</p>" +
+        '<div class="hero__cta">' +
+          '<a class="btn" href="#/shop">' + esc(cx("hero_cta1")) + "</a>" +
+          '<a class="btn btn--ghost" href="#/rent">' + esc(cx("hero_cta2")) + "</a>" +
+        "</div>" +
+        '<div class="hero__stats">' +
+          '<div><div class="stat__n">' + s.totalCells + '</div><div class="stat__l">' + esc(cx("stat1_l")) + "</div></div>" +
+          '<div><div class="stat__n">' + takenPct + '%</div><div class="stat__l">' + esc(cx("stat2_l")) + "</div></div>" +
+          '<div><div class="stat__n">' + esc(cx("stat3_n")) + '</div><div class="stat__l">' + esc(cx("stat3_l")) + "</div></div>" +
+          '<div><div class="stat__n">21:00</div><div class="stat__l">' + esc(cx("stat4_l")) + "</div></div>" +
+        "</div>" +
+      "</div>" +
+      '<div class="hero__wall">' + shelfWall(12, 9, Math.round(108 * (s.takenCells / s.totalCells))) +
+        '<span class="wall-tag">' + esc(cx("wall_tag")) + "</span>" +
+      "</div>" +
+    "</div></section>";
+
+  const stripText = cx("strip");
+  parts.strip = '<div class="strip"><div class="strip__row">' +
+    ("<span>" + esc(stripText).split(" · ").join("</span><span>") + "</span>").repeat(2) + "</div></div>";
+
+  parts.intro =
+    '<section class="section"><div class="wrap">' +
+      '<div class="section-head"><div style="max-width:60ch">' +
+        '<div class="eyebrow">' + esc(cx("intro_eyebrow")) + "</div>" +
+        "<h2>" + esc(cx("intro_h")) + "</h2>" +
+        '<p class="lede" style="margin-top:16px">' + esc(cx("intro_p")) + "</p>" +
+      "</div></div>" +
+      '<div class="grid g-3">' +
+        [1, 2, 3].map((i) =>
+          '<div class="card"><h3>' + esc(cx("intro_c" + i + "_h")) + '</h3><p class="muted" style="margin:10px 0 0">' + esc(cx("intro_c" + i + "_p")) + "</p></div>"
+        ).join("") +
+      "</div>" +
+    "</div></section>";
+
+  parts.categories =
+    '<section class="section section--tight"><div class="wrap">' +
+      '<div class="section-head"><div style="max-width:52ch">' +
+        '<div class="eyebrow">' + esc(cx("cat_eyebrow")) + "</div><h2>" + esc(cx("cat_h")) + "</h2>" +
+        '<p class="muted">' + esc(cx("cat_p")) + "</p></div>" +
+      "</div>" +
+      '<div class="grid g-auto">' + DB.categories.map((c) => {
+        const n = DB.products.filter((p) => p.cat === c.id).length;
+        return '<a class="tile" href="#/shop?cat=' + c.id + '">' +
+          '<div class="tile__img"><img src="' + placeholderArt(c.id, c.shape) + '" alt=""></div>' +
+          '<div class="tile__body"><div class="tile__name">' + esc(tr(c.name)) + "</div>" +
+          '<div class="tile__maker">' + n + " " + esc(ui("products_n")) + "</div></div></a>";
+      }).join("") + "</div>" +
+    "</div></section>";
+
+  const featured = DB.products.slice(0, 8);
+  parts.featured =
+    '<section class="section"><div class="wrap">' +
+      '<div class="section-head"><div><div class="eyebrow">' + esc(cx("feat_eyebrow")) + "</div><h2>" + esc(cx("feat_h")) + "</h2></div>" +
+      '<a class="btn btn--line" href="#/shop">' + esc(cx("feat_cta")) + "</a></div>" +
+      '<div class="grid g-4">' + featured.map(productCard).join("") + "</div>" +
+    "</div></section>";
+
+  parts.makers =
+    '<section class="section section--tight"><div class="wrap">' +
+      '<div class="section-head"><div style="max-width:52ch"><div class="eyebrow">' + esc(cx("mak_eyebrow")) + "</div><h2>" + esc(cx("mak_h")) + '</h2><p class="muted">' + esc(cx("mak_p")) + "</p></div></div>" +
+      '<div class="grid g-3">' + DB.makers.map((m) =>
+        '<div class="card" style="display:flex; gap:16px; align-items:flex-start">' +
+          '<img src="' + placeholderArt(m.id, m.shape) + '" alt="" style="width:64px;height:64px;border-radius:10px;border:1.5px solid var(--line);flex:none">' +
+          "<div><h3 style=\"font-size:1.05rem\">" + esc(m.name) + "</h3>" +
+          '<div class="tile__maker" style="margin:4px 0 8px">' + esc(ui("cell")) + " " + esc(m.cell) + " · " + esc(m.handle) + "</div>" +
+          '<p class="tiny muted mb-0">' + esc(tr(m.bio)) + "</p></div>" +
+        "</div>").join("") + "</div>" +
+    "</div></section>";
+
+  parts.rentcta =
+    '<section class="section band"><div class="wrap">' +
+      '<div style="display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr); gap:clamp(28px,5vw,60px); align-items:center" class="rentband">' +
+        "<div>" +
+          '<div class="eyebrow">' + esc(cx("rent_eyebrow")) + "</div>" +
+          "<h2>" + esc(cx("rent_h")) + "</h2>" +
+          '<p class="lede" style="margin-top:16px">' + esc(cx("rent_p")) + "</p>" +
+          '<div class="hero__cta"><a class="btn btn--accent" href="#/rent">' + esc(cx("rent_cta")) + "</a>" +
+          '<a class="btn btn--ghost" href="#/faq">' + esc(ui("nav_faq")) + "</a></div>" +
+        "</div>" +
+        '<div class="grid" style="gap:10px">' +
+          DB.tiers.slice(0, 4).map((t) =>
+            '<div class="card" style="display:flex; justify-content:space-between; gap:14px; align-items:center; padding:15px 18px">' +
+              "<div><div style=\"font-family:var(--f-display); font-weight:600\">" + esc(tr(t.name)) + '</div><div class="tiny" style="opacity:.65">' + esc(tr(t.size)) + "</div></div>" +
+              '<div class="price" style="white-space:nowrap">' + amd(t.price) + "</div>" +
+            "</div>").join("") +
+        "</div>" +
+      "</div>" +
+    "</div></section>";
+
+  parts.events =
+    '<section class="section"><div class="wrap">' +
+      '<div class="section-head"><div><div class="eyebrow">' + esc(cx("ev_eyebrow")) + "</div><h2>" + esc(cx("ev_h")) + "</h2></div></div>" +
+      '<div class="grid g-3">' + [1, 2, 3].map((i) =>
+        '<div class="card"><div style="width:38px;height:38px;border-radius:10px;background:var(--' + ["coral", "sage", "sky"][i - 1] + ');margin-bottom:14px"></div>' +
+        "<h3>" + esc(cx("ev_" + i + "_h")) + '</h3><p class="muted mb-0" style="margin-top:8px">' + esc(cx("ev_" + i + "_p")) + "</p></div>"
+      ).join("") + "</div>" +
+    "</div></section>";
+
+  parts.visit =
+    '<section class="section section--tight"><div class="wrap"><div class="card" style="display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:clamp(22px,4vw,44px); align-items:center; padding:clamp(22px,3.5vw,40px)" class="visitcard">' +
+      "<div>" +
+        '<div class="eyebrow">' + esc(cx("visit_eyebrow")) + "</div><h2>" + esc(cx("visit_h")) + "</h2>" +
+        '<p class="muted" style="margin-top:12px">' + esc(cx("visit_p")) + "</p>" +
+        '<dl class="kv" style="margin:20px 0 22px"><dt>' + esc(ui("nav_visit")) + "</dt><dd>" + esc(tr(s.address)) + "</dd>" +
+        "<dt>Hours</dt><dd>" + esc(tr(s.hours)) + "</dd><dt>Phone</dt><dd>" + esc(s.phone) + "</dd></dl>" +
+        '<a class="btn btn--line" href="#/visit">' + esc(ui("nav_visit")) + "</a>" +
+      "</div>" + shelfWall(9, 6, 34) +
+    "</div></div></section>";
+
+  return order.filter(on).map((id) => parts[id] || "").join("");
+}
+
+function productCard(p) {
+  const cat = DB.categories.find((c) => c.id === p.cat);
+  const out = Number(p.stock) <= 0;
+  return '<button class="tile" data-product="' + p.id + '">' +
+    '<div class="tile__img"><img src="' + productImage(p) + '" alt="' + esc(tr(p.name)) + '" loading="lazy">' +
+    '<span class="cellid">' + esc(p.cell || "—") + "</span></div>" +
+    '<div class="tile__body">' +
+      '<div class="tile__maker">' + esc(p.maker) + (cat ? " · " + esc(tr(cat.name)) : "") + "</div>" +
+      '<div class="tile__name">' + esc(tr(p.name)) + "</div>" +
+      '<div class="tile__foot"><span class="price">' + amd(p.price) + "</span>" +
+      (out ? '<span class="badge badge--sold">' + esc(ui("sold")) + "</span>" : '<span class="badge">' + esc(ui("add")) + "</span>") +
+      "</div>" +
+    "</div></button>";
+}
+
+/* ============================================================================
+   PAGE: SHOP
+   ============================================================================ */
+let SHOP = { cat: "all", q: "", sort: "new" };
+
+function pageShop(params) {
+  if (params && params.cat) SHOP.cat = params.cat;
+  return '<section class="pagehead"><div class="wrap">' +
+      '<div class="eyebrow">' + esc(ui("nav_shop")) + "</div>" +
+      "<h1>" + esc(cx("shop_h")) + '</h1><p class="lede" style="margin-top:14px">' + esc(cx("shop_p")) + "</p>" +
+    "</div></section>" +
+    '<section class="section"><div class="wrap">' +
+      '<div class="stack" style="margin-bottom:26px">' +
+        '<div class="flexrow" style="gap:12px">' +
+          '<input class="inp" id="shopQ" type="search" placeholder="' + esc(ui("search")) + '" value="' + esc(SHOP.q) + '" style="flex:1; min-width:210px; max-width:340px">' +
+          '<select class="sel" id="shopSort" style="width:auto; min-width:180px">' +
+            '<option value="new"' + (SHOP.sort === "new" ? " selected" : "") + ">" + esc(ui("sort_new")) + "</option>" +
+            '<option value="low"' + (SHOP.sort === "low" ? " selected" : "") + ">" + esc(ui("sort_low")) + "</option>" +
+            '<option value="high"' + (SHOP.sort === "high" ? " selected" : "") + ">" + esc(ui("sort_high")) + "</option>" +
+          "</select>" +
+        "</div>" +
+        '<div class="chips" id="shopChips">' + shopChips() + "</div>" +
+      "</div>" +
+      '<div id="shopGrid">' + shopGrid() + "</div>" +
+    "</div></section>";
+}
+
+function shopChips() {
+  const total = DB.products.length;
+  let h = '<button class="chip" data-cat="all" aria-pressed="' + (SHOP.cat === "all") + '">' + esc(ui("all")) + ' <span class="chip__n">' + total + "</span></button>";
+  DB.categories.forEach((c) => {
+    const n = DB.products.filter((p) => p.cat === c.id).length;
+    if (!n) return;
+    h += '<button class="chip" data-cat="' + c.id + '" aria-pressed="' + (SHOP.cat === c.id) + '">' +
+      '<span class="chip__dot" style="background:' + c.color + '"></span>' + esc(tr(c.name)) + ' <span class="chip__n">' + n + "</span></button>";
+  });
+  return h;
+}
+
+function shopFiltered() {
+  const q = SHOP.q.trim().toLowerCase();
+  let list = DB.products.filter((p) => {
+    if (SHOP.cat !== "all" && p.cat !== SHOP.cat) return false;
+    if (!q) return true;
+    return (tr(p.name) + " " + p.maker + " " + tr(p.desc)).toLowerCase().includes(q);
+  });
+  if (SHOP.sort === "low") list = list.slice().sort((a, b) => a.price - b.price);
+  if (SHOP.sort === "high") list = list.slice().sort((a, b) => b.price - a.price);
+  return list;
+}
+
+function shopGrid() {
+  const list = shopFiltered();
+  if (!list.length) {
+    return '<div class="empty"><h3>' + esc(ui("no_results")) + "</h3><p>" + esc(ui("no_results_sub")) + "</p>" +
+      '<button class="btn btn--line" id="shopClear">' + esc(ui("clear")) + "</button></div>";
+  }
+  return '<div class="grid g-4">' + list.map(productCard).join("") + "</div>";
+}
+
+/* ------------------------------------------------------------ product view */
+function openProduct(id) {
+  const p = DB.products.find((x) => x.id === id);
+  if (!p) return;
+  const cat = DB.categories.find((c) => c.id === p.cat);
+  const maker = DB.makers.find((m) => m.name === p.maker);
+  const out = Number(p.stock) <= 0;
+  $("#modalPanel").innerHTML =
+    '<div style="display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr)" class="pmodal">' +
+      '<div style="background:var(--card); border-right:1.5px solid var(--line)"><img src="' + productImage(p) + '" alt="' + esc(tr(p.name)) + '" style="width:100%; aspect-ratio:1; object-fit:cover"></div>' +
+      '<div style="padding:clamp(22px,3vw,34px); display:flex; flex-direction:column">' +
+        '<div class="spread" style="margin-bottom:18px">' +
+          '<span class="badge">' + esc(ui("cell")) + " " + esc(p.cell || "—") + "</span>" +
+          '<button class="iconbtn" data-close-modal aria-label="' + esc(ui("close")) + '"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>' +
+        "</div>" +
+        '<div class="tile__maker">' + esc(ui("by")) + " " + esc(p.maker) + (cat ? " · " + esc(tr(cat.name)) : "") + "</div>" +
+        '<h2 style="font-size:clamp(1.4rem,2.6vw,1.9rem); margin:8px 0 14px">' + esc(tr(p.name)) + "</h2>" +
+        '<p class="muted">' + esc(tr(p.desc)) + "</p>" +
+        (maker ? '<div class="card" style="padding:14px; margin:6px 0 18px"><div class="tile__maker" style="margin-bottom:6px">' + esc(ui("by")) + " " + esc(maker.name) + '</div><p class="tiny muted mb-0">' + esc(tr(maker.bio)) + "</p></div>" : "") +
+        '<div style="margin-top:auto; padding-top:18px; border-top:1.5px solid var(--line)">' +
+          '<div class="spread" style="margin-bottom:14px"><span class="price" style="font-size:1.4rem">' + amd(p.price) + "</span>" +
+          (out ? '<span class="badge badge--sold">' + esc(ui("sold")) + "</span>" : '<span class="tiny muted">' + p.stock + " on the shelf</span>") + "</div>" +
+          (out ? '<button class="btn btn--wide" disabled>' + esc(ui("sold")) + "</button>"
+               : '<button class="btn btn--wide" data-add="' + p.id + '">' + esc(ui("add")) + "</button>") +
+        "</div>" +
+      "</div>" +
+    "</div>";
+  openModal();
+}
+
+/* ============================================================================
+   BASKET
+   ============================================================================ */
+function addToCart(id) {
+  const p = DB.products.find((x) => x.id === id);
+  if (!p || Number(p.stock) <= 0) return;
+  const line = CART.find((l) => l.id === id);
+  if (line) line.qty = Math.min(line.qty + 1, Number(p.stock));
+  else CART.push({ id: id, qty: 1 });
+  save(true); updateCartCount(); renderCart(); toast(ui("added"));
+}
+function setQty(id, delta) {
+  const line = CART.find((l) => l.id === id);
+  if (!line) return;
+  const p = DB.products.find((x) => x.id === id);
+  line.qty += delta;
+  if (line.qty <= 0) CART = CART.filter((l) => l.id !== id);
+  else if (p) line.qty = Math.min(line.qty, Number(p.stock) || 1);
+  save(true); updateCartCount(); renderCart();
+  if ((location.hash || "").indexOf("/checkout") > -1) route();
+}
+const cartLines = () => CART.map((l) => ({ line: l, p: DB.products.find((x) => x.id === l.id) })).filter((x) => x.p);
+const cartSubtotal = () => cartLines().reduce((a, x) => a + x.p.price * x.line.qty, 0);
+
+function renderCart() {
+  $("#cartTitle").textContent = ui("basket");
+  const items = cartLines();
+  if (!items.length) {
+    $("#cartBody").innerHTML = '<div class="empty" style="padding:44px 8px"><h3>' + esc(ui("empty_cart")) + "</h3></div>";
+    $("#cartFoot").innerHTML = '<a class="btn btn--wide btn--line" href="#/shop" data-close-cart>' + esc(ui("empty_cart_cta")) + "</a>";
+    return;
+  }
+  $("#cartBody").innerHTML = items.map((x) =>
+    '<div class="cartline">' +
+      '<div class="cartline__img"><img src="' + productImage(x.p) + '" alt=""></div>' +
+      '<div><div style="font-family:var(--f-display); font-weight:600; font-size:.95rem; line-height:1.3">' + esc(tr(x.p.name)) + "</div>" +
+      '<div class="tile__maker" style="margin:4px 0 9px">' + esc(x.p.maker) + "</div>" +
+      '<div class="qty"><button data-q="' + x.p.id + '" data-d="-1" aria-label="Remove one">−</button><span>' + x.line.qty + '</span><button data-q="' + x.p.id + '" data-d="1" aria-label="Add one">+</button></div></div>' +
+      '<div class="price">' + amd(x.p.price * x.line.qty) + "</div>" +
+    "</div>").join("");
+  $("#cartFoot").innerHTML =
+    '<div class="sumline"><span>' + esc(ui("subtotal")) + '</span><span class="price">' + amd(cartSubtotal()) + "</span></div>" +
+    '<a class="btn btn--wide" href="#/checkout" data-close-cart style="margin-top:10px">' + esc(ui("checkout")) + "</a>";
+}
+
+/* ============================================================================
+   PAGE: CHECKOUT
+   ============================================================================ */
+let CO = { step: 1, data: {}, orderNo: "" };
+
+function deliveryCost() {
+  const m = CO.data.method || "pickup";
+  const sub = cartSubtotal();
+  if (m === "pickup") return 0;
+  if (sub >= DB.settings.freeOver && m === "yerevan") return 0;
+  return m === "yerevan" ? DB.settings.deliveryYerevan : DB.settings.deliveryArmenia;
+}
+
+function pageCheckout() {
+  const items = cartLines();
+  if (!items.length && CO.step !== 4) {
+    return '<section class="section"><div class="wrap"><div class="empty"><h3>' + esc(ui("empty_cart")) + '</h3><a class="btn" href="#/shop">' + esc(ui("empty_cart_cta")) + "</a></div></div></section>";
+  }
+  const steps = ["co_step1", "co_step2", "co_step3", "co_step4"];
+  const prog = '<div class="progress">' + steps.map((k, i) =>
+    '<div class="progress__i ' + (CO.step === i + 1 ? "is-on" : CO.step > i + 1 ? "is-done" : "") + '">' + esc(cx(k)) + "</div>").join("") + "</div>";
+
+  let body = "";
+  if (CO.step === 1) body = coBasket(items);
+  if (CO.step === 2) body = coDelivery();
+  if (CO.step === 3) body = coPayment();
+  if (CO.step === 4) body = coDone();
+
+  return '<section class="pagehead"><div class="wrap"><h1>' + esc(cx("co_h")) + "</h1></div></section>" +
+    '<section class="section"><div class="wrap" style="max-width:940px">' + prog + body + "</div></section>";
+}
+
+function coSummary() {
+  const items = cartLines();
+  const del = deliveryCost();
+  return '<div class="card" style="position:sticky; top:92px">' +
+    items.map((x) =>
+      '<div class="sumline"><span>' + esc(tr(x.p.name)) + ' <span class="mono tiny muted">×' + x.line.qty + "</span></span><span>" + amd(x.p.price * x.line.qty) + "</span></div>").join("") +
+    '<hr class="hr" style="margin:10px 0">' +
+    '<div class="sumline"><span>' + esc(ui("subtotal")) + "</span><span>" + amd(cartSubtotal()) + "</span></div>" +
+    '<div class="sumline"><span>' + esc(ui("delivery")) + "</span><span>" + (del === 0 ? esc(ui("free")) : amd(del)) + "</span></div>" +
+    '<div class="sumline sumline--total"><span>' + esc(ui("total")) + "</span><span>" + amd(cartSubtotal() + del) + "</span></div>" +
+    "</div>";
+}
+
+function coBasket(items) {
+  return '<div style="display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); gap:26px" class="colayout">' +
+    "<div>" + items.map((x) =>
+      '<div class="cartline">' +
+        '<div class="cartline__img"><img src="' + productImage(x.p) + '" alt=""></div>' +
+        '<div><div style="font-family:var(--f-display); font-weight:600">' + esc(tr(x.p.name)) + "</div>" +
+        '<div class="tile__maker" style="margin:4px 0 9px">' + esc(x.p.maker) + " · " + esc(ui("cell")) + " " + esc(x.p.cell) + "</div>" +
+        '<div class="qty"><button data-q="' + x.p.id + '" data-d="-1">−</button><span>' + x.line.qty + '</span><button data-q="' + x.p.id + '" data-d="1">+</button></div></div>' +
+        '<div class="price">' + amd(x.p.price * x.line.qty) + "</div></div>").join("") +
+      '<button class="btn" id="coNext" style="margin-top:22px">' + esc(ui("continue")) + "</button>" +
+    "</div>" + coSummary() + "</div>";
+}
+
+function coDelivery() {
+  const d = CO.data;
+  const ship = (d.method || "pickup") !== "pickup";
+  const opt = (id, title, sub, price) =>
+    '<label class="radio-card"><input type="radio" name="method" value="' + id + '"' + ((d.method || "pickup") === id ? " checked" : "") + ">" +
+    '<span style="flex:1"><span class="radio-card__t">' + esc(title) + '</span><br><span class="tiny muted">' + esc(sub) + "</span></span>" +
+    '<span class="price">' + (price === 0 ? esc(ui("free")) : amd(price)) + "</span></label>";
+
+  return '<div style="display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); gap:26px" class="colayout"><div>' +
+    '<h3 style="margin-bottom:14px">' + esc(cx("co_step2")) + "</h3>" +
+    '<div class="radio-cards" style="margin-bottom:26px" id="coMethods">' +
+      opt("pickup", tr(T("Pick up at the shop", "Վերցնել խանութից", "Забрать в магазине")), tr(T("Held for 3 days · " + tr(DB.settings.address), "Պահվում է 3 օր · " + tr(DB.settings.address), "Держим 3 дня · " + tr(DB.settings.address))), 0) +
+      opt("yerevan", tr(T("Courier in Yerevan", "Սուրհանդակ Երևանում", "Курьер по Еревану")), tr(T("Next day · free over " + amd(DB.settings.freeOver), "Հաջորդ օրը · անվճար " + amd(DB.settings.freeOver) + "-ից", "На следующий день · бесплатно от " + amd(DB.settings.freeOver))), DB.settings.deliveryYerevan) +
+      opt("armenia", tr(T("Anywhere in Armenia", "Հայաստանի ցանկացած կետ", "По Армении")), tr(T("2–4 days by courier", "2–4 օր սուրհանդակով", "2–4 дня курьером")), DB.settings.deliveryArmenia) +
+    "</div>" +
+    '<h3 style="margin-bottom:14px">' + esc(tr(T("Your details", "Ձեր տվյալները", "Ваши данные"))) + "</h3>" +
+    '<form id="coForm" novalidate>' +
+      '<div class="row2">' +
+        field("name", tr(T("Name", "Անուն", "Имя")), d.name, "text", true) +
+        field("phone", tr(T("Phone", "Հեռախոս", "Телефон")), d.phone, "tel", true) +
+      "</div>" +
+      field("email", "Email", d.email, "email", true) +
+      '<div id="coAddr" ' + (ship ? "" : 'style="display:none"') + ">" +
+        '<div class="row2">' +
+          field("city", tr(T("City / town", "Քաղաք", "Город")), d.city || "Yerevan", "text", ship) +
+          field("zip", tr(T("Postal code", "Փոստային ինդեքս", "Индекс")), d.zip, "text", false) +
+        "</div>" +
+        field("street", tr(T("Street and building", "Փողոց և շենք", "Улица и дом")), d.street, "text", ship) +
+        '<div class="row2">' +
+          field("flat", tr(T("Flat / floor / entrance", "Բնակարան / հարկ / մուտք", "Квартира / этаж / подъезд")), d.flat, "text", false) +
+          field("when", tr(T("Best time to deliver", "Առաքման հարմար ժամ", "Удобное время")), d.when, "text", false) +
+        "</div>" +
+      "</div>" +
+      '<div class="field"><label for="f_note">' + esc(tr(T("Note for us", "Նշում մեզ համար", "Комментарий"))) + '</label><textarea class="ta" id="f_note" style="min-height:80px">' + esc(d.note || "") + "</textarea></div>" +
+      '<label class="check" style="margin-bottom:20px"><input type="checkbox" id="f_gift"' + (d.gift ? " checked" : "") + "><span>" + esc(tr(T("Wrap it as a gift and leave the price tag off (free)", "Փաթեթավորել որպես նվեր և հանել գնապիտակը (անվճար)", "Упаковать как подарок и убрать ценник (бесплатно)"))) + "</span></label>" +
+      '<div class="flexrow"><button type="button" class="btn btn--line" id="coBack">' + esc(ui("back")) + '</button><button type="submit" class="btn">' + esc(ui("continue")) + "</button></div>" +
+    "</form></div>" + coSummary() + "</div>";
+}
+
+/* keep whatever is already typed in the delivery form before re-rendering */
+function captureCoForm() {
+  ["name", "phone", "email", "city", "zip", "street", "flat", "when", "note"].forEach((k) => {
+    const el = $("#f_" + k); if (el) CO.data[k] = el.value;
+  });
+  const g = $("#f_gift"); if (g) CO.data.gift = g.checked;
+}
+
+function field(id, label, val, type, req) {
+  return '<div class="field"><label for="f_' + id + '">' + esc(label) + (req ? ' <span class="mono tiny muted">· ' + esc(ui("req")) + "</span>" : "") + "</label>" +
+    '<input class="inp" id="f_' + id + '" type="' + type + '" value="' + esc(val || "") + '"' + (req ? " data-req" : "") + '><span class="err" id="e_' + id + '" hidden></span></div>';
+}
+
+function coPayment() {
+  const d = CO.data;
+  return '<div style="display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); gap:26px" class="colayout"><div>' +
+    '<h3 style="margin-bottom:14px">' + esc(cx("co_step3")) + "</h3>" +
+    '<div class="radio-cards" style="margin-bottom:22px">' +
+      ["card", "cash", "transfer"].map((id, i) => {
+        const t = [tr(T("Card online", "Քարտով առցանց", "Картой онлайн")), tr(T("Cash on delivery / at the shop", "Կանխիկ առաքման կամ խանութում", "Наличными при получении")), tr(T("Bank transfer", "Բանկային փոխանցում", "Банковский перевод"))][i];
+        const s = [tr(T("Visa, Mastercard, ArCa", "Visa, Mastercard, ArCa", "Visa, Mastercard, ArCa")), tr(T("Pay when you get it", "Վճարեք ստանալիս", "Платите при получении")), tr(T("We send the details by email", "Տվյալները կուղարկենք էլ. փոստով", "Реквизиты пришлём на почту"))][i];
+        return '<label class="radio-card"><input type="radio" name="pay" value="' + id + '"' + ((d.pay || "card") === id ? " checked" : "") + '><span><span class="radio-card__t">' + esc(t) + '</span><br><span class="tiny muted">' + esc(s) + "</span></span></label>";
+      }).join("") +
+    "</div>" +
+    '<div class="card" id="cardBox"' + ((d.pay || "card") !== "card" ? ' style="display:none"' : "") + ">" +
+      '<p class="tiny muted">' + esc(tr(T("Demo only — this form is not connected to a payment provider and nothing is charged.", "Միայն ցուցադրական. այս ձևը միացված չէ վճարային համակարգին և գումար չի գանձվում։", "Только демо — форма не подключена к платёжной системе, деньги не списываются."))) + "</p>" +
+      field("card", tr(T("Card number", "Քարտի համար", "Номер карты")), "4111 1111 1111 1111", "text", false) +
+      '<div class="row2">' + field("exp", tr(T("Expiry", "Ժամկետը", "Срок")), "12/28", "text", false) + field("cvc", "CVC", "123", "text", false) + "</div>" +
+    "</div>" +
+    '<div class="flexrow" style="margin-top:22px"><button class="btn btn--line" id="coBack">' + esc(ui("back")) + '</button><button class="btn" id="coPlace">' + esc(tr(T("Place order", "Հաստատել պատվերը", "Подтвердить заказ"))) + "</button></div>" +
+    "</div>" + coSummary() + "</div>";
+}
+
+function coDone() {
+  const d = CO.data;
+  return '<div class="card center" style="padding:clamp(28px,5vw,52px)">' +
+    '<div style="width:58px;height:58px;border-radius:16px;background:var(--sage);margin:0 auto 20px;display:grid;place-items:center">' +
+      '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"/></svg></div>' +
+    "<h2>" + esc(cx("co_done_h")) + "</h2>" +
+    '<p class="mono" style="margin:14px 0 6px; font-size:1.1rem">' + esc(CO.orderNo) + "</p>" +
+    '<p class="tiny muted">' + esc(cx("co_order_no")) + "</p>" +
+    '<p class="lede" style="margin:18px auto 26px">' + esc(cx("co_done_p")) + "</p>" +
+    '<div class="flexrow" style="justify-content:center"><a class="btn" href="#/shop">' + esc(ui("empty_cart_cta")) + '</a><a class="btn btn--line" href="#/">' + esc(ui("nav_home")) + "</a></div>" +
+    (d.email ? '<p class="tiny muted" style="margin-top:22px">' + esc(tr(T("A confirmation would be sent to", "Հաստատումը կուղարկվեր՝", "Подтверждение ушло бы на"))) + " " + esc(d.email) + "</p>" : "") +
+    "</div>";
+}
+
+/* ============================================================================
+   PAGE: RENT A SHELF
+   ============================================================================ */
+let APP = { photos: [] };
+
+function pageRent() {
+  const s = DB.settings;
+  return '<section class="pagehead"><div class="wrap" style="max-width:820px">' +
+      '<div class="eyebrow">' + esc(cx("rent_eyebrow")) + "</div>" +
+      "<h1>" + esc(cx("rentpage_h")) + '</h1><p class="lede" style="margin-top:14px">' + esc(cx("rentpage_p")) + "</p>" +
+      '<div class="flexrow" style="margin-top:24px">' +
+        '<span class="badge">' + esc(tr(T("Commission", "Կոմիսիա", "Комиссия"))) + " " + s.commission + "%</span>" +
+        '<span class="badge">' + esc(tr(T("Minimum", "Նվազագույնը", "Минимум"))) + " " + s.minTerm + " " + esc(tr(T("weeks", "շաբաթ", "недели"))) + "</span>" +
+        '<span class="badge">' + (s.totalCells - s.takenCells) + " " + esc(tr(T("cells free now", "ազատ բջիջ հիմա", "свободных ячеек сейчас"))) + "</span>" +
+      "</div>" +
+    "</div></section>" +
+
+    '<section class="section"><div class="wrap">' +
+      '<div class="section-head"><div><h2>' + esc(cx("rent_how_h")) + "</h2></div></div>" +
+      '<div class="steps">' + [1, 2, 3, 4].map((i) =>
+        '<div class="step"><div class="step__n"></div><div><h3>' + esc(cx("rent_s" + i + "_h")) + '</h3><p class="muted mb-0">' + esc(cx("rent_s" + i + "_p")) + "</p></div></div>").join("") +
+      "</div>" +
+    "</div></section>" +
+
+    '<section class="section section--tight"><div class="wrap">' +
+      '<div class="section-head"><div style="max-width:56ch"><h2>' + esc(cx("rent_prices_h")) + '</h2><p class="muted">' + esc(cx("rent_prices_p")) + "</p></div></div>" +
+      '<div class="grid g-3">' + DB.tiers.map((t) =>
+        '<div class="card" style="display:flex; flex-direction:column; gap:10px' + (t.popular ? "; border-color:var(--ink); border-width:2px" : "") + '">' +
+          (t.popular ? '<span class="badge" style="align-self:flex-start; background:var(--sun); border-color:var(--sun)">' + esc(tr(T("Most taken", "Ամենապահանջվածը", "Берут чаще всего"))) + "</span>" : "") +
+          "<h3>" + esc(tr(t.name)) + "</h3>" +
+          '<div class="price" style="font-size:1.5rem">' + amd(t.price) + ' <span class="tiny muted" style="font-weight:400">' + esc(ui("per_month")) + "</span></div>" +
+          '<p class="tiny muted mb-0"><strong>' + esc(tr(t.size)) + "</strong></p>" +
+          '<p class="tiny muted mb-0">' + esc(tr(t.best)) + "</p>" +
+        "</div>").join("") + "</div>" +
+      '<p class="tiny muted" style="margin-top:18px; max-width:66ch">' +
+        esc(tr(T("Plus " + s.commission + "% commission on what sells. Prices are held for the length of your contract.",
+                 "Գումարած " + s.commission + "% կոմիսիա վաճառվածից։ Գները չեն փոխվում պայմանագրի ընթացքում։",
+                 "Плюс " + s.commission + "% комиссии с проданного. Цены не меняются в течение договора."))) + "</p>" +
+    "</div></section>" +
+
+    '<section class="section band"><div class="wrap">' +
+      '<div class="section-head"><div><h2>' + esc(cx("rent_inc_h")) + "</h2></div></div>" +
+      '<div class="grid g-2" style="gap:2px 34px">' + DB.included.map((x) =>
+        '<div style="display:flex; gap:12px; padding:13px 0; border-bottom:1px solid rgba(247,241,227,.14)">' +
+          '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--sun)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="flex:none; margin-top:3px"><path d="m5 13 4 4L19 7"/></svg>' +
+          "<span>" + esc(tr(x)) + "</span></div>").join("") + "</div>" +
+    "</div></section>" +
+
+    '<section class="section"><div class="wrap" style="max-width:760px">' +
+      '<div class="eyebrow">' + esc(tr(T("Application", "Հայտ", "Заявка"))) + "</div>" +
+      "<h2>" + esc(cx("rent_form_h")) + '</h2><p class="muted" style="margin-top:10px">' + esc(cx("rent_form_p")) + "</p>" +
+      applicationForm() +
+    "</div></section>";
+}
+
+function applicationForm() {
+  const opts = DB.categories.map((c) => '<option value="' + c.id + '">' + esc(tr(c.name)) + "</option>").join("");
+  const tierOpts = DB.tiers.map((t) => '<option value="' + t.id + '">' + esc(tr(t.name)) + " — " + amd(t.price) + "</option>").join("");
+  return '<form id="appForm" class="card" style="margin-top:24px; padding:clamp(20px,3vw,32px)" novalidate>' +
+    '<div class="row2">' +
+      field("a_name", tr(T("Your name", "Ձեր անունը", "Ваше имя")), "", "text", true) +
+      field("a_brand", tr(T("Brand or studio name", "Բրենդի կամ արվեստանոցի անունը", "Название бренда или студии")), "", "text", false) +
+    "</div>" +
+    '<div class="row2">' +
+      field("a_phone", tr(T("Phone / WhatsApp", "Հեռախոս / WhatsApp", "Телефон / WhatsApp")), "", "tel", true) +
+      field("a_email", "Email", "", "email", true) +
+    "</div>" +
+    '<div class="row2">' +
+      field("a_insta", tr(T("Instagram or portfolio link", "Instagram կամ պորտֆոլիոյի հղում", "Instagram или ссылка на портфолио")), "", "text", false) +
+      '<div class="field"><label for="f_a_cat">' + esc(tr(T("What do you make?", "Ի՞նչ եք պատրաստում", "Что вы делаете?"))) + '</label><select class="sel" id="f_a_cat">' + opts + "</select></div>" +
+    "</div>" +
+    '<div class="row2">' +
+      '<div class="field"><label for="f_a_tier">' + esc(tr(T("Shelf you want", "Ցանկալի դարակը", "Какая полка нужна"))) + '</label><select class="sel" id="f_a_tier">' + tierOpts + "</select></div>" +
+      field("a_range", tr(T("Your price range, AMD", "Ձեր գների միջակայքը, դրամ", "Ваш диапазон цен, драм")), "", "text", false) +
+    "</div>" +
+    '<div class="field"><label for="f_a_about">' + esc(tr(T("Tell us about your work", "Պատմեք ձեր գործի մասին", "Расскажите о своих работах"))) +
+      ' <span class="mono tiny muted">· ' + esc(ui("req")) + '</span></label>' +
+      '<textarea class="ta" id="f_a_about" data-req placeholder="' + esc(tr(T("What you make, how, roughly how many pieces you could put out, and anything we should know.", "Ի՞նչ եք պատրաստում, ինչպե՞ս, մոտավորապես քանի՞ իր կարող եք դնել, և ի՞նչ պետք է իմանանք։", "Что вы делаете, как, сколько примерно предметов сможете выставить и что нам стоит знать."))) + '"></textarea><span class="err" id="e_a_about" hidden></span></div>' +
+    '<div class="field"><label>' + esc(tr(T("Item list with prices", "Ապրանքների ցանկ գներով", "Список товаров с ценами"))) + "</label>" +
+      '<span class="hint">' + esc(tr(T("One per line, for example: Speckled cup — 14000", "Մեկ տողում մեկը, օրինակ՝ Բծավոր բաժակ — 14000", "По одному в строке, например: Крапчатая чашка — 14000"))) + "</span>" +
+      '<textarea class="ta" id="f_a_items" style="min-height:92px; font-family:var(--f-mono); font-size:.88rem"></textarea></div>' +
+    '<div class="field"><label>' + esc(tr(T("Photos of your work", "Ձեր գործերի լուսանկարները", "Фото ваших работ"))) + "</label>" +
+      '<span class="hint">' + esc(tr(T("Up to 6 photos. Daylight, plain background, no filters — that is all we need.", "Մինչև 6 լուսանկար։ Ցերեկային լույս, պարզ ֆոն, առանց ֆիլտրերի։", "До 6 фото. Дневной свет, простой фон, без фильтров."))) + "</span>" +
+      '<div class="drop" id="appDrop" tabindex="0" role="button">' +
+        '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--ink-faint)" stroke-width="1.7" stroke-linecap="round" style="margin:0 auto 8px"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>' +
+        '<div style="font-family:var(--f-display); font-weight:600">' + esc(tr(T("Drop photos here or tap to choose", "Գցեք լուսանկարներն այստեղ կամ սեղմեք", "Перетащите фото сюда или нажмите"))) + "</div>" +
+        '<div class="tiny muted">JPG or PNG</div>' +
+        '<input type="file" id="appFiles" accept="image/*" multiple hidden></div>' +
+      '<div class="thumbs" id="appThumbs"></div></div>' +
+    '<label class="check" style="margin:6px 0 20px"><input type="checkbox" id="f_a_terms" data-req><span>' +
+      esc(tr(T("I have read how the shelf works and I understand there is a curated selection.", "Ես կարդացել եմ, թե ինչպես է աշխատում դարակը, և հասկանում եմ, որ կա կուրատորական ընտրություն։", "Я прочитал(а), как работает полка, и понимаю, что есть кураторский отбор."))) + '</span></label>' +
+    '<span class="err" id="e_a_terms" hidden style="display:block; margin:-14px 0 14px"></span>' +
+    '<button class="btn btn--wide" type="submit">' + esc(ui("apply")) + "</button>" +
+    '<p class="tiny muted center" style="margin:14px 0 0">' + esc(tr(T("Applications land in the shop\u2019s inbox. We answer within three working days.", "Հայտերը հասնում են խանութի փոստարկղ։ Պատասխանում ենք երեք աշխատանքային օրում։", "Заявки попадают во входящие магазина. Отвечаем в течение трёх рабочих дней."))) + "</p>" +
+  "</form>";
+}
+
+function renderAppThumbs() {
+  $("#appThumbs").innerHTML = APP.photos.map((src, i) =>
+    '<div class="thumb"><img src="' + src + '" alt=""><button type="button" data-rmphoto="' + i + '" aria-label="Remove">×</button></div>').join("");
+}
+
+/* ============================================================================
+   PAGES: ABOUT / FAQ / VISIT
+   ============================================================================ */
+function pageAbout() {
+  return '<section class="pagehead"><div class="wrap" style="max-width:780px">' +
+      '<div class="eyebrow">' + esc(ui("nav_about")) + "</div><h1>" + esc(cx("about_h")) + "</h1>" +
+    "</div></section>" +
+    '<section class="section"><div class="wrap" style="max-width:780px">' +
+      '<p class="lede">' + esc(cx("about_p1")) + "</p><p>" + esc(cx("about_p2")) + "</p><p>" + esc(cx("about_p3")) + "</p>" +
+    "</div></section>" +
+    '<section class="section section--tight"><div class="wrap"><div class="grid g-4">' +
+      [1, 2, 3, 4].map((i) => '<div class="card"><h3 style="font-size:1.05rem">' + esc(cx("about_v" + i + "_h")) + '</h3><p class="tiny muted mb-0" style="margin-top:8px">' + esc(cx("about_v" + i + "_p")) + "</p></div>").join("") +
+    "</div></div></section>" +
+    '<section class="section"><div class="wrap">' +
+      '<div class="section-head"><div><div class="eyebrow">' + esc(cx("mak_eyebrow")) + "</div><h2>" + esc(cx("mak_h")) + "</h2></div></div>" +
+      '<div class="grid g-3">' + DB.makers.map((m) =>
+        '<div class="card" style="display:flex; gap:16px"><img src="' + placeholderArt(m.id, m.shape) + '" alt="" style="width:60px;height:60px;border-radius:10px;border:1.5px solid var(--line);flex:none">' +
+        "<div><h3 style=\"font-size:1.02rem\">" + esc(m.name) + '</h3><div class="tile__maker" style="margin:4px 0 8px">' + esc(m.handle) + '</div><p class="tiny muted mb-0">' + esc(tr(m.bio)) + "</p></div></div>").join("") + "</div>" +
+    "</div></section>" +
+    '<section class="section band"><div class="wrap center" style="max-width:640px">' +
+      "<h2>" + esc(cx("rent_h")) + '</h2><p class="lede" style="margin:16px auto 26px">' + esc(cx("rent_p")) + "</p>" +
+      '<a class="btn btn--accent" href="#/rent">' + esc(cx("rent_cta")) + "</a>" +
+    "</div></section>";
+}
+
+let FAQTAB = "buy";
+function pageFaq() {
+  return '<section class="pagehead"><div class="wrap" style="max-width:760px">' +
+      '<div class="eyebrow">' + esc(ui("nav_faq")) + "</div><h1>" + esc(cx("faq_h")) + '</h1><p class="lede" style="margin-top:12px">' + esc(cx("faq_p")) + "</p>" +
+    "</div></section>" +
+    '<section class="section"><div class="wrap" style="max-width:760px">' +
+      '<div class="chips" style="margin-bottom:22px" id="faqTabs">' +
+        '<button class="chip" data-faq="buy" aria-pressed="' + (FAQTAB === "buy") + '">' + esc(cx("faq_tab_buy")) + "</button>" +
+        '<button class="chip" data-faq="sell" aria-pressed="' + (FAQTAB === "sell") + '">' + esc(cx("faq_tab_sell")) + "</button>" +
+      "</div>" +
+      '<div id="faqList">' + faqList() + "</div>" +
+      '<div class="card center" style="margin-top:34px"><h3>' + esc(cx("contact_h")) + '</h3><p class="muted" style="margin:10px 0 18px">' + esc(DB.settings.email) + " · " + esc(DB.settings.phone) + "</p>" +
+      '<a class="btn btn--line" href="#/visit">' + esc(ui("nav_visit")) + "</a></div>" +
+    "</div></section>";
+}
+function faqList() {
+  const list = DB.faq.filter((f) => f.side === FAQTAB);
+  if (!list.length) return '<div class="empty"><h3>' + esc(ui("no_results")) + "</h3></div>";
+  return list.map((f) => '<details class="acc"><summary class="acc__q">' + esc(tr(f.q)) + '</summary><div class="acc__a"><p>' + esc(tr(f.a)) + "</p></div></details>").join("");
+}
+
+function pageVisit() {
+  const s = DB.settings;
+  return '<section class="pagehead"><div class="wrap" style="max-width:760px">' +
+      '<div class="eyebrow">' + esc(cx("visit_eyebrow")) + "</div><h1>" + esc(cx("visitpage_h")) + '</h1><p class="lede" style="margin-top:12px">' + esc(cx("visitpage_p")) + "</p>" +
+    "</div></section>" +
+    '<section class="section"><div class="wrap">' +
+      '<div style="display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:26px" class="visitgrid">' +
+        '<div class="card">' +
+          '<dl class="kv" style="gap:14px 18px">' +
+            "<dt>" + esc(tr(T("Address", "Հասցե", "Адрес"))) + "</dt><dd>" + esc(tr(s.address)) + "</dd>" +
+            "<dt>" + esc(tr(T("Opening hours", "Աշխատանքային ժամեր", "Часы работы"))) + "</dt><dd>" + esc(tr(s.hours)) + "</dd>" +
+            "<dt>" + esc(tr(T("Phone", "Հեռախոս", "Телефон"))) + '</dt><dd><a href="tel:' + esc(String(s.phone).replace(/\s/g, "")) + '">' + esc(s.phone) + "</a></dd>" +
+            '<dt>Email</dt><dd><a href="mailto:' + esc(s.email) + '">' + esc(s.email) + "</a></dd>" +
+            '<dt>Instagram</dt><dd><a href="https://instagram.com/' + esc(s.instagram) + '" target="_blank" rel="noopener">@' + esc(s.instagram) + "</a></dd>" +
+            '<dt>Telegram</dt><dd><a href="https://t.me/' + esc(s.telegram) + '" target="_blank" rel="noopener">@' + esc(s.telegram) + "</a></dd>" +
+          "</dl>" +
+          '<hr class="hr" style="margin:20px 0">' +
+          '<p class="tiny muted mb-0">' + esc(tr(T("Card and cash both work. Gift wrapping is free. Ask at the counter if you want to meet a specific maker — most of them come in during the week.", "Ընդունում ենք քարտ և կանխիկ։ Նվերի փաթեթավորումն անվճար է։ Վաճառասեղանին հարցրեք, եթե ուզում եք հանդիպել կոնկրետ հեղինակի. նրանց մեծ մասը գալիս է շաբաթվա ընթացքում։", "Принимаем карту и наличные. Подарочная упаковка бесплатно. Спросите на кассе, если хотите встретить конкретного автора — большинство заходят в течение недели."))) + "</p>" +
+        "</div>" +
+        '<div class="card" style="padding:0; overflow:hidden; display:flex; flex-direction:column">' +
+          '<div style="flex:1; min-height:260px; background:var(--paper); display:grid; place-items:center; position:relative; background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px); background-size:34px 34px">' +
+            '<div style="text-align:center; background:var(--card); border:1.5px solid var(--line); border-radius:var(--r); padding:18px 22px; box-shadow:var(--shadow-1)">' +
+              '<div style="width:30px;height:30px;border-radius:9px;background:var(--coral);margin:0 auto 10px"></div>' +
+              '<div style="font-family:var(--f-display); font-weight:600">' + esc(s.brandName) + "</div>" +
+              '<div class="tiny muted">' + esc(tr(s.city)) + "</div></div>" +
+          "</div>" +
+          '<div style="padding:16px 18px; border-top:1.5px solid var(--line)"><p class="tiny muted mb-0">' + esc(tr(T("Map placeholder — paste a Google Maps embed in the Site manager once the address is fixed.", "Քարտեզի տեղը՝ հասցեն ճշտելուց հետո տեղադրեք Google Maps-ի ներդրումը կառավարման վահանակում։", "Место под карту — вставьте embed Google Maps в панели управления, когда адрес будет известен."))) + "</p></div>" +
+        "</div>" +
+      "</div>" +
+      '<div class="card" style="margin-top:26px"><h3>' + esc(cx("contact_h")) + "</h3>" +
+        '<form id="msgForm" style="margin-top:16px" novalidate><div class="row2">' +
+          field("m_name", tr(T("Name", "Անուն", "Имя")), "", "text", true) +
+          field("m_email", "Email", "", "email", true) +
+        "</div>" +
+        '<div class="field"><label for="f_m_text">' + esc(tr(T("Message", "Հաղորդագրություն", "Сообщение"))) + '</label><textarea class="ta" id="f_m_text" data-req></textarea><span class="err" id="e_m_text" hidden></span></div>' +
+        '<button class="btn" type="submit">' + esc(tr(T("Send message", "Ուղարկել", "Отправить"))) + "</button></form></div>" +
+    "</div></section>";
+}
+
+/* ============================================================================
+   ROUTER + EVENTS
+   ============================================================================ */
+function parseHash() {
+  const raw = (location.hash || "#/").slice(1);
+  const [path, qs] = raw.split("?");
+  const params = {};
+  if (qs) qs.split("&").forEach((kv) => { const [k, v] = kv.split("="); params[decodeURIComponent(k)] = decodeURIComponent(v || ""); });
+  return { path: path || "/", params: params };
+}
+
+function route() {
+  const { path, params } = parseHash();
+  let html = "";
+  if (path === "/") html = pageHome();
+  else if (path === "/shop") html = pageShop(params);
+  else if (path === "/rent") html = pageRent();
+  else if (path === "/about") html = pageAbout();
+  else if (path === "/faq") html = pageFaq();
+  else if (path === "/visit") html = pageVisit();
+  else if (path === "/checkout") html = pageCheckout();
+  else html = '<section class="section"><div class="wrap"><div class="empty"><h3>Page not found</h3><a class="btn" href="#/">' + esc(ui("nav_home")) + "</a></div></div></section>";
+  $("#app").innerHTML = html;
+  renderChrome();
+  if (path === "/rent") renderAppThumbs();
+  window.scrollTo(0, 0);
+  $("#nav").classList.remove("is-open");
+  $("#burger").setAttribute("aria-expanded", "false");
+}
+
+function openModal() { $("#modal").classList.add("is-open"); $("#modal").setAttribute("aria-hidden", "false"); $("#scrim").classList.add("is-open"); document.body.classList.add("is-locked"); }
+function closeModal() { $("#modal").classList.remove("is-open"); $("#modal").setAttribute("aria-hidden", "true"); if (!$("#cartDrawer").classList.contains("is-open")) { $("#scrim").classList.remove("is-open"); document.body.classList.remove("is-locked"); } }
+function openCart() { renderCart(); $("#cartDrawer").classList.add("is-open"); $("#cartDrawer").setAttribute("aria-hidden", "false"); $("#scrim").classList.add("is-open"); document.body.classList.add("is-locked"); }
+function closeCart() { $("#cartDrawer").classList.remove("is-open"); $("#cartDrawer").setAttribute("aria-hidden", "true"); if (!$("#modal").classList.contains("is-open")) { $("#scrim").classList.remove("is-open"); document.body.classList.remove("is-locked"); } }
+
+/* validation helper */
+function validate(scope) {
+  let ok = true;
+  $$("[data-req]", scope).forEach((el) => {
+    const err = $("#e_" + el.id.replace(/^f_/, ""));
+    let bad = el.type === "checkbox" ? !el.checked : !el.value.trim();
+    if (!bad && el.type === "email" && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(el.value)) bad = true;
+    el.setAttribute("aria-invalid", bad ? "true" : "false");
+    if (err) { err.hidden = !bad; err.textContent = bad ? (el.type === "email" ? "Check this email address" : ui("req")) : ""; }
+    if (bad && ok) { el.focus(); ok = false; }
+    if (bad) ok = false;
+  });
+  return ok;
+}
+
+/* delegated clicks ---------------------------------------------------------- */
+document.addEventListener("click", (e) => {
+  const t = e.target;
+
+  const langBtn = t.closest("[data-lang]");
+  if (langBtn) { LANG = langBtn.dataset.lang; save(true); applyTheme(); route(); return; }
+
+  const prod = t.closest("[data-product]");
+  if (prod) { openProduct(prod.dataset.product); return; }
+
+  const add = t.closest("[data-add]");
+  if (add) { addToCart(add.dataset.add); closeModal(); openCart(); return; }
+
+  const q = t.closest("[data-q]");
+  if (q) { setQty(q.dataset.q, Number(q.dataset.d)); return; }
+
+  if (t.closest("#cartBtn")) { openCart(); return; }
+  if (t.closest("#cartClose") || t.closest("[data-close-cart]")) { closeCart(); return; }
+  if (t.closest("[data-close-modal]")) { closeModal(); return; }
+  if (t.id === "scrim") { closeCart(); closeModal(); return; }
+  if (t.id === "modal") { closeModal(); return; }
+
+  if (t.closest("#burger")) {
+    const nav = $("#nav"), b = $("#burger");
+    nav.classList.toggle("is-open");
+    b.setAttribute("aria-expanded", nav.classList.contains("is-open"));
+    return;
+  }
+
+  const chip = t.closest("[data-cat]");
+  if (chip) {
+    SHOP.cat = chip.dataset.cat;
+    $("#shopChips").innerHTML = shopChips();
+    $("#shopGrid").innerHTML = shopGrid();
+    return;
+  }
+  if (t.id === "shopClear") { SHOP = { cat: "all", q: "", sort: "new" }; route(); return; }
+
+  const ftab = t.closest("[data-faq]");
+  if (ftab) { FAQTAB = ftab.dataset.faq; $$("#faqTabs .chip").forEach((b) => b.setAttribute("aria-pressed", b.dataset.faq === FAQTAB)); $("#faqList").innerHTML = faqList(); return; }
+
+  if (t.id === "coNext") { CO.step = 2; route(); return; }
+  if (t.id === "coBack") { CO.step = Math.max(1, CO.step - 1); route(); return; }
+  if (t.id === "coPlace") { placeOrder(); return; }
+
+  const rm = t.closest("[data-rmphoto]");
+  if (rm) { APP.photos.splice(Number(rm.dataset.rmphoto), 1); renderAppThumbs(); return; }
+
+  if (t.closest("#appDrop") && !t.closest("input")) { $("#appFiles").click(); return; }
+  if (t.closest("#adminDot")) { askAdmin(); return; }
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") { closeModal(); closeCart(); }
+  if (e.key.toLowerCase() === "e" && (e.ctrlKey || e.metaKey) && e.shiftKey) { e.preventDefault(); askAdmin(); }
+});
+
+document.addEventListener("input", (e) => {
+  if (e.target.id === "shopQ") { SHOP.q = e.target.value; $("#shopGrid").innerHTML = shopGrid(); }
+});
+document.addEventListener("change", (e) => {
+  if (e.target.id === "shopSort") { SHOP.sort = e.target.value; $("#shopGrid").innerHTML = shopGrid(); }
+  if (e.target.name === "method") {
+    captureCoForm();
+    CO.data.method = e.target.value;
+    route();
+  }
+  if (e.target.name === "pay") { CO.data.pay = e.target.value; const b = $("#cardBox"); if (b) b.style.display = e.target.value === "card" ? "" : "none"; }
+  if (e.target.id === "appFiles") handleAppFiles(Array.from(e.target.files || []));
+});
+
+/* drag & drop for the application photos */
+document.addEventListener("dragover", (e) => { if (e.target.closest("#appDrop")) { e.preventDefault(); e.target.closest("#appDrop").classList.add("is-over"); } });
+document.addEventListener("dragleave", (e) => { const d = e.target.closest("#appDrop"); if (d) d.classList.remove("is-over"); });
+document.addEventListener("drop", (e) => {
+  const d = e.target.closest("#appDrop");
+  if (!d) return;
+  e.preventDefault(); d.classList.remove("is-over");
+  handleAppFiles(Array.from(e.dataTransfer.files || []).filter((f) => f.type.startsWith("image/")));
+});
+async function handleAppFiles(files) {
+  for (const f of files.slice(0, 6 - APP.photos.length)) {
+    try { APP.photos.push(await readImage(f, 700)); } catch (err) { toast("Could not read " + f.name); }
+  }
+  renderAppThumbs();
+}
+
+/* forms --------------------------------------------------------------------- */
+document.addEventListener("submit", async (e) => {
+  const f = e.target;
+
+  if (f.id === "coForm") {
+    e.preventDefault();
+    if (!validate(f)) return;
+    ["name", "phone", "email", "city", "zip", "street", "flat", "when", "note"].forEach((k) => { const el = $("#f_" + k); if (el) CO.data[k] = el.value.trim(); });
+    CO.data.gift = $("#f_gift").checked;
+    CO.step = 3; route(); return;
+  }
+
+  if (f.id === "appForm") {
+    e.preventDefault();
+    if (!validate(f)) return;
+    const get = (id) => { const el = $("#f_" + id); return el ? el.value.trim() : ""; };
+    const rec = {
+      id: uid("app"), at: new Date().toISOString(), read: false,
+      name: get("a_name"), brand: get("a_brand"), phone: get("a_phone"), email: get("a_email"),
+      insta: get("a_insta"), cat: get("a_cat"), tier: get("a_tier"), range: get("a_range"),
+      about: get("a_about"), items: get("a_items"), photos: APP.photos.slice(), lang: LANG
+    };
+    DB.applications.unshift(rec);
+    save();
+    await postExternal("application", rec);
+    APP.photos = [];
+    $("#modalPanel").innerHTML = thanksPanel(
+      tr(T("Application sent", "Հայտն ուղարկված է", "Заявка отправлена")),
+      tr(T("We read every one. Expect an answer within three working days — check your spam folder too.", "Մենք կարդում ենք բոլորը։ Պատասխանը՝ երեք աշխատանքային օրում։ Ստուգեք նաև սպամի պանակը։", "Мы читаем каждую. Ответ в течение трёх рабочих дней — проверьте и папку «Спам»."))
+    );
+    openModal(); f.reset(); renderAppThumbs(); return;
+  }
+
+  if (f.id === "msgForm") {
+    e.preventDefault();
+    if (!validate(f)) return;
+    const rec = { id: uid("msg"), at: new Date().toISOString(), read: false, name: $("#f_m_name").value.trim(), email: $("#f_m_email").value.trim(), text: $("#f_m_text").value.trim() };
+    DB.messages.unshift(rec); save();
+    await postExternal("message", rec);
+    $("#modalPanel").innerHTML = thanksPanel(tr(T("Message sent", "Հաղորդագրությունն ուղարկված է", "Сообщение отправлено")), tr(T("We usually reply the same day.", "Սովորաբար պատասխանում ենք նույն օրը։", "Обычно отвечаем в тот же день.")));
+    openModal(); f.reset(); return;
+  }
+});
+
+function thanksPanel(title, text) {
+  return '<div class="center" style="padding:clamp(30px,5vw,52px)">' +
+    '<div style="width:56px;height:56px;border-radius:16px;background:var(--sage);margin:0 auto 18px;display:grid;place-items:center">' +
+    '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--ink)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"/></svg></div>' +
+    "<h2>" + esc(title) + '</h2><p class="lede" style="margin:14px auto 24px">' + esc(text) + "</p>" +
+    '<button class="btn" data-close-modal>' + esc(ui("close")) + "</button></div>";
+}
+
+function placeOrder() {
+  const el = $('input[name="pay"]:checked');
+  CO.data.pay = el ? el.value : "card";
+  CO.orderNo = "HTK-" + new Date().toISOString().slice(2, 10).replace(/-/g, "") + "-" + String(DB.orders.length + 1).padStart(3, "0");
+  const rec = {
+    id: uid("ord"), no: CO.orderNo, at: new Date().toISOString(), read: false,
+    customer: Object.assign({}, CO.data),
+    items: cartLines().map((x) => ({ id: x.p.id, name: tr(x.p.name), maker: x.p.maker, cell: x.p.cell, price: x.p.price, qty: x.line.qty })),
+    subtotal: cartSubtotal(), delivery: deliveryCost(), total: cartSubtotal() + deliveryCost(), lang: LANG
+  };
+  DB.orders.unshift(rec);
+  CART = []; save(); updateCartCount(); renderCart();
+  postExternal("order", rec);
+  CO.step = 4; route();
+}
+
+/* optional: forward submissions to a real endpoint (Formspree, Google Apps
+   Script, your own server) — set it in the manager under Settings */
+async function postExternal(kind, payload) {
+  const url = (DB.settings.formEndpoint || "").trim();
+  if (!url) return;
+  try {
+    await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ kind: kind, site: DB.settings.brandName, payload: payload }) });
+  } catch (err) { /* the copy in the manager inbox is the fallback */ }
+}
+
+/* ============================================================================
+   SITE MANAGER
+   ============================================================================ */
+let ADMTAB = "home";
+let ADMLANG = "en";
+
+function getPath(o, p) { return p.split(".").reduce((a, k) => (a == null ? a : a[k]), o); }
+function setPath(o, p, v) {
+  const keys = p.split(".");
+  const last = keys.pop();
+  const target = keys.reduce((a, k) => (a[k] = a[k] == null ? {} : a[k]), o);
+  target[last] = v;
+}
+
+function askAdmin() {
+  try { if (sessionStorage.getItem("hatik_admin") === "1") return openAdmin(); } catch (e) {}
+  const pass = prompt("Site manager password:", "");
+  if (pass === null) return;
+  if (pass === DB.settings.adminPass) {
+    try { sessionStorage.setItem("hatik_admin", "1"); } catch (e) {}
+    openAdmin();
+  } else toast("Wrong password");
+}
+function openAdmin() { $("#admin").classList.add("is-open"); $("#admin").setAttribute("aria-hidden", "false"); document.body.classList.add("is-locked"); renderAdmin(); }
+function closeAdmin() { $("#admin").classList.remove("is-open"); $("#admin").setAttribute("aria-hidden", "true"); document.body.classList.remove("is-locked"); route(); }
+
+const ADM_TABS = [
+  { g: "The site" },
+  { id: "home", label: "Home page layout" },
+  { id: "text", label: "All text" },
+  { id: "look", label: "Colours" },
+  { g: "The shop" },
+  { id: "products", label: "Products" },
+  { id: "categories", label: "Categories" },
+  { id: "makers", label: "Makers" },
+  { g: "Shelves" },
+  { id: "tiers", label: "Shelf prices" },
+  { id: "included", label: "What's included" },
+  { id: "faq", label: "FAQ" },
+  { g: "Coming in" },
+  { id: "orders", label: "Orders" },
+  { id: "apps", label: "Shelf applications" },
+  { id: "messages", label: "Messages" },
+  { g: "Setup" },
+  { id: "settings", label: "Shop details" },
+  { id: "backup", label: "Backup & reset" }
+];
+
+function renderAdmin() {
+  $("#adminNav").innerHTML = ADM_TABS.map((t) => {
+    if (t.g) return '<div class="grp">' + t.g + "</div>";
+    let n = "";
+    if (t.id === "orders") n = countNew(DB.orders);
+    if (t.id === "apps") n = countNew(DB.applications);
+    if (t.id === "messages") n = countNew(DB.messages);
+    return '<button data-adm="' + t.id + '" aria-current="' + (ADMTAB === t.id) + '">' + t.label + (n ? ' <span class="mono tiny" style="margin-left:auto; background:var(--coral); color:var(--ink); border-radius:99px; padding:1px 7px">' + n + "</span>" : "") + "</button>";
+  }).join("");
+  $("#adminMain").innerHTML = admBody();
+  $("#adminMain").scrollTop = 0;
+}
+const countNew = (a) => (a || []).filter((x) => !x.read).length;
+
+function admHead(title, sub) { return "<h2>" + title + '</h2><p class="muted" style="max-width:70ch">' + sub + "</p>"; }
+
+/* three-language input group */
+function mlInput(path, label, kind) {
+  const val = getPath(DB, path) || {};
+  return '<div class="field"><label>' + esc(label) + "</label>" +
+    LANGS.map((l) => {
+      const v = esc(val[l.id] || "");
+      const inner = kind === "area"
+        ? '<textarea class="ta" style="min-height:78px" data-path="' + path + "." + l.id + '">' + v + "</textarea>"
+        : '<input class="inp" data-path="' + path + "." + l.id + '" value="' + v + '">';
+      return '<div style="display:grid; grid-template-columns:52px 1fr; gap:8px; align-items:start; margin-bottom:6px">' +
+        '<span class="mono tiny muted" style="padding-top:12px">' + l.label + "</span>" + inner + "</div>";
+    }).join("") + "</div>";
+}
+function plainInput(path, label, type, hint) {
+  const v = getPath(DB, path);
+  return '<div class="field"><label>' + esc(label) + "</label>" +
+    (hint ? '<span class="hint">' + esc(hint) + "</span>" : "") +
+    '<input class="inp" type="' + (type || "text") + '" data-path="' + path + '" value="' + esc(v == null ? "" : v) + '"></div>';
+}
+
+/* -------------------------------------------------------------- tab bodies */
+function admBody() {
+  if (ADMTAB === "home") return admHome();
+  if (ADMTAB === "text") return admText();
+  if (ADMTAB === "look") return admLook();
+  if (ADMTAB === "products") return admProducts();
+  if (ADMTAB === "categories") return admCategories();
+  if (ADMTAB === "makers") return admMakers();
+  if (ADMTAB === "tiers") return admTiers();
+  if (ADMTAB === "included") return admIncluded();
+  if (ADMTAB === "faq") return admFaq();
+  if (ADMTAB === "orders") return admOrders();
+  if (ADMTAB === "apps") return admApps();
+  if (ADMTAB === "messages") return admMessages();
+  if (ADMTAB === "settings") return admSettings();
+  if (ADMTAB === "backup") return admBackup();
+  return "";
+}
+
+function admHome() {
+  return '<div class="adm-sec">' + admHead("Home page layout", "Turn blocks off, or drag them into a different order. The home page updates the moment you change something.") +
+    '<div style="margin-top:20px" id="secList">' + DB.settings.sections.map((s, i) =>
+      '<div class="adm-row" draggable="true" data-move="settings.sections" data-i="' + i + '" style="grid-template-columns:auto 1fr auto">' +
+        '<span class="adm-row__handle">⠿</span>' +
+        '<div><div class="adm-row__t">' + esc(s.label) + '</div><div class="adm-row__s">block ' + (i + 1) + " of " + DB.settings.sections.length + "</div></div>" +
+        '<div class="adm-actions">' +
+          '<button class="btn btn--line btn--sm" data-up="settings.sections" data-i="' + i + '">↑</button>' +
+          '<button class="btn btn--line btn--sm" data-down="settings.sections" data-i="' + i + '">↓</button>' +
+          '<button class="btn btn--sm ' + (s.on ? "" : "btn--line") + '" data-toggle="settings.sections.' + i + '.on">' + (s.on ? "Shown" : "Hidden") + "</button>" +
+        "</div>" +
+      "</div>").join("") + "</div>" +
+  "</div>";
+}
+
+const TEXT_GROUPS = [
+  { t: "Hero (top of home page)", keys: ["hero_kicker", "hero_h1a", "hero_h1b", "hero_p", "hero_cta1", "hero_cta2", "wall_tag", "stat1_l", "stat2_l", "stat3_n", "stat3_l", "stat4_l", "strip"] },
+  { t: "What HATIK is", keys: ["intro_eyebrow", "intro_h", "intro_p", "intro_c1_h", "intro_c1_p", "intro_c2_h", "intro_c2_p", "intro_c3_h", "intro_c3_p"] },
+  { t: "Categories & featured", keys: ["cat_eyebrow", "cat_h", "cat_p", "feat_eyebrow", "feat_h", "feat_cta"] },
+  { t: "Makers block", keys: ["mak_eyebrow", "mak_h", "mak_p"] },
+  { t: "Rent a shelf band", keys: ["rent_eyebrow", "rent_h", "rent_p", "rent_cta"] },
+  { t: "Events block", keys: ["ev_eyebrow", "ev_h", "ev_1_h", "ev_1_p", "ev_2_h", "ev_2_p", "ev_3_h", "ev_3_p"] },
+  { t: "Visit block", keys: ["visit_eyebrow", "visit_h", "visit_p"] },
+  { t: "Shop page", keys: ["shop_h", "shop_p"] },
+  { t: "Rent a shelf page", keys: ["rentpage_h", "rentpage_p", "rent_how_h", "rent_s1_h", "rent_s1_p", "rent_s2_h", "rent_s2_p", "rent_s3_h", "rent_s3_p", "rent_s4_h", "rent_s4_p", "rent_prices_h", "rent_prices_p", "rent_inc_h", "rent_form_h", "rent_form_p"] },
+  { t: "About page", keys: ["about_h", "about_p1", "about_p2", "about_p3", "about_v1_h", "about_v1_p", "about_v2_h", "about_v2_p", "about_v3_h", "about_v3_p", "about_v4_h", "about_v4_p"] },
+  { t: "FAQ page", keys: ["faq_h", "faq_p", "faq_tab_buy", "faq_tab_sell"] },
+  { t: "Visit page", keys: ["visitpage_h", "visitpage_p", "contact_h"] },
+  { t: "Checkout", keys: ["co_h", "co_step1", "co_step2", "co_step3", "co_step4", "co_done_h", "co_done_p", "co_order_no"] }
+];
+const LONG = ["hero_p", "intro_p", "intro_c1_p", "intro_c2_p", "intro_c3_p", "cat_p", "mak_p", "rent_p", "about_p1", "about_p2", "about_p3", "shop_p", "rentpage_p", "rent_prices_p", "faq_p", "visitpage_p", "co_done_p", "strip", "ev_1_p", "ev_2_p", "ev_3_p", "rent_s1_p", "rent_s2_p", "rent_s3_p", "rent_s4_p", "about_v1_p", "about_v2_p", "about_v3_p", "about_v4_p", "rent_form_p"];
+
+function admText() {
+  return '<div class="adm-sec">' + admHead("All text", "Everything written on the site, in all three languages. Open a block, type, and it saves as you go. Leave a language empty and it falls back to English.") +
+    '<details class="adm-block" style="margin-top:20px"><summary>Buttons and labels used everywhere</summary>' +
+      Object.keys(DB.ui).map((k) => mlInput("ui." + k, k.replace(/_/g, " "))).join("") + "</details>" +
+    TEXT_GROUPS.map((g) =>
+      '<details class="adm-block"><summary>' + g.t + "</summary>" +
+        g.keys.filter((k) => DB.content[k]).map((k) => mlInput("content." + k, k.replace(/_/g, " "), LONG.indexOf(k) > -1 ? "area" : "")).join("") +
+      "</details>").join("") +
+  "</div>";
+}
+
+function admLook() {
+  const c = DB.settings.colors;
+  const names = { paper: "Page background", card: "Cards", ink: "Text & dark blocks", line: "Borders", coral: "Accent 1", sage: "Accent 2", sun: "Accent 3", sky: "Accent 4" };
+  return '<div class="adm-sec">' + admHead("Colours", "The four accents come from the logo squares. They are used for category dots, the shelf wall and highlights.") +
+    '<div class="adm-block" style="margin-top:20px"><div class="swatch-row">' +
+      Object.keys(names).map((k) =>
+        '<label class="swatch"><input type="color" data-color="' + k + '" value="' + c[k] + '"><span>' + names[k] + '</span><span class="mono tiny muted">' + c[k] + "</span></label>").join("") +
+    "</div>" +
+    '<div class="flexrow" style="margin-top:20px"><button class="btn btn--line btn--sm" id="resetColors">Back to logo colours</button></div></div>' +
+    '<div class="adm-block"><h3 style="font-size:1.05rem; margin-bottom:14px">Name in the header</h3>' + plainInput("settings.brandName", "Shop name") + mlInput("settings.brandSub", "Line underneath") + "</div>" +
+  "</div>";
+}
+
+/* ---------------------------------------------------------------- products */
+function admProducts() {
+  return '<div class="adm-sec">' + admHead("Products", "Drag to reorder — the first eight show on the home page. Set stock to 0 to mark something sold out.") +
+    '<div class="flexrow" style="margin:18px 0"><button class="btn btn--sm" data-new="product">Add a product</button>' +
+    '<span class="tiny muted">' + DB.products.length + " on the shelves</span></div>" +
+    '<div id="prodList">' + DB.products.map((p, i) => {
+      const cat = DB.categories.find((c) => c.id === p.cat);
+      return '<div class="adm-row" draggable="true" data-move="products" data-i="' + i + '">' +
+        '<span class="adm-row__handle">⠿</span>' +
+        '<div class="adm-row__img"><img src="' + productImage(p) + '" alt="" style="width:100%;height:100%;object-fit:cover"></div>' +
+        '<div><div class="adm-row__t">' + esc(tr(p.name)) + "</div>" +
+        '<div class="adm-row__s">' + esc(p.maker) + " · " + amd(p.price) + " · " + (cat ? esc(tr(cat.name)) : "?") + " · " + (Number(p.stock) > 0 ? p.stock + " in stock" : "sold out") + "</div></div>" +
+        '<div class="adm-actions"><button class="btn btn--line btn--sm" data-edit="product" data-i="' + i + '">Edit</button>' +
+        '<button class="btn btn--line btn--sm btn--danger" data-del="products" data-i="' + i + '">Delete</button></div>' +
+      "</div>";
+    }).join("") + "</div></div>";
+}
+
+function editProduct(i) {
+  const p = DB.products[i];
+  $("#modalPanel").innerHTML = '<div style="padding:clamp(20px,3vw,30px)">' +
+    '<div class="spread" style="margin-bottom:18px"><h3>Edit product</h3><button class="iconbtn" data-close-modal>✕</button></div>' +
+    '<div class="flexrow" style="gap:16px; align-items:flex-start; margin-bottom:18px">' +
+      '<div style="width:104px;height:104px;border-radius:var(--r-sm);overflow:hidden;border:1.5px solid var(--line);flex:none"><img id="pImg" src="' + productImage(p) + '" style="width:100%;height:100%;object-fit:cover"></div>' +
+      '<div style="flex:1; min-width:190px"><label class="lbl">Photo</label>' +
+        '<p class="hint" style="margin:4px 0 8px">Square photos look best. Big files are shrunk automatically.</p>' +
+        '<div class="flexrow"><button class="btn btn--line btn--sm" id="pPick">Choose a photo</button>' +
+        (p.img ? '<button class="btn btn--line btn--sm" id="pClear">Use the drawn placeholder</button>' : "") +
+        '</div><input type="file" id="pFile" accept="image/*" hidden></div>' +
+    "</div>" +
+    mlInput("products." + i + ".name", "Name") +
+    mlInput("products." + i + ".desc", "Description", "area") +
+    '<div class="row2">' + plainInput("products." + i + ".maker", "Maker") + plainInput("products." + i + ".price", "Price, AMD", "number") + "</div>" +
+    '<div class="row2">' + plainInput("products." + i + ".cell", "Shelf cell", "text", "For example A-04") + plainInput("products." + i + ".stock", "How many on the shelf", "number") + "</div>" +
+    '<div class="field"><label>Category</label><select class="sel" data-path="products.' + i + '.cat">' +
+      DB.categories.map((c) => '<option value="' + c.id + '"' + (p.cat === c.id ? " selected" : "") + ">" + esc(tr(c.name)) + "</option>").join("") + "</select></div>" +
+    '<div class="flexrow" style="margin-top:8px"><button class="btn" data-close-modal data-refresh>Done</button></div>' +
+  "</div>";
+  openModal();
+  $("#pPick").onclick = () => $("#pFile").click();
+  $("#pFile").onchange = async (e) => {
+    const f = e.target.files[0]; if (!f) return;
+    try { DB.products[i].img = await readImage(f, 900); $("#pImg").src = DB.products[i].img; save(); toast("Photo updated"); } catch (err) { toast("Could not read that file"); }
+  };
+  if ($("#pClear")) $("#pClear").onclick = () => { DB.products[i].img = ""; $("#pImg").src = productImage(DB.products[i]); save(); renderAdmin(); };
+}
+
+/* -------------------------------------------------------------- categories */
+function admCategories() {
+  const shapes = Object.keys(ART);
+  return '<div class="adm-sec">' + admHead("Categories", "These become the filter chips in the shop and the tiles on the home page. The drawing is used as a placeholder wherever there is no photo.") +
+    '<div class="flexrow" style="margin:18px 0"><button class="btn btn--sm" data-new="category">Add a category</button></div>' +
+    '<div id="catList">' + DB.categories.map((c, i) =>
+      '<div class="adm-row" draggable="true" data-move="categories" data-i="' + i + '" style="grid-template-columns:auto 44px 1fr auto">' +
+        '<span class="adm-row__handle">⠿</span>' +
+        '<div class="adm-row__img" style="width:44px;height:44px"><img src="' + placeholderArt(c.id, c.shape) + '" style="width:100%;height:100%"></div>' +
+        "<div>" + mlInput("categories." + i + ".name", "").replace('<div class="field">', '<div class="field" style="margin:0">') +
+          '<div class="flexrow" style="margin-top:6px">' +
+            '<label class="tiny muted">Drawing <select class="sel" style="width:auto; padding:5px 26px 5px 9px; font-size:.8rem" data-path="categories.' + i + '.shape">' +
+              shapes.map((s) => '<option value="' + s + '"' + (c.shape === s ? " selected" : "") + ">" + s + "</option>").join("") + "</select></label>" +
+            '<label class="tiny muted">Dot colour <input type="color" data-path="categories.' + i + '.color" value="' + c.color + '" style="width:38px;height:28px;vertical-align:middle;border:1.5px solid var(--line);border-radius:6px;padding:2px"></label>' +
+            '<span class="tiny muted mono">' + DB.products.filter((p) => p.cat === c.id).length + " products</span>" +
+          "</div></div>" +
+        '<div class="adm-actions"><button class="btn btn--line btn--sm btn--danger" data-del="categories" data-i="' + i + '">Delete</button></div>' +
+      "</div>").join("") + "</div></div>";
+}
+
+function admMakers() {
+  return '<div class="adm-sec">' + admHead("Makers", "The people behind the shelves. The name here should match the maker name on their products so the two link up.") +
+    '<div class="flexrow" style="margin:18px 0"><button class="btn btn--sm" data-new="maker">Add a maker</button></div>' +
+    DB.makers.map((m, i) =>
+      '<details class="adm-block"><summary>' + esc(m.name) + ' <span class="tiny muted" style="margin-left:auto">' + esc(m.cell) + "</span></summary>" +
+        '<div class="row2">' + plainInput("makers." + i + ".name", "Name") + plainInput("makers." + i + ".handle", "Instagram handle") + "</div>" +
+        '<div class="row2">' + plainInput("makers." + i + ".cell", "Cells they hold") +
+        '<div class="field"><label>Drawing</label><select class="sel" data-path="makers.' + i + '.shape">' +
+          Object.keys(ART).map((s) => '<option value="' + s + '"' + (m.shape === s ? " selected" : "") + ">" + s + "</option>").join("") + "</select></div></div>" +
+        mlInput("makers." + i + ".bio", "Short bio", "area") +
+        '<button class="btn btn--line btn--sm btn--danger" data-del="makers" data-i="' + i + '">Delete this maker</button>' +
+      "</details>").join("") + "</div>";
+}
+
+function admTiers() {
+  return '<div class="adm-sec">' + admHead("Shelf prices", "Shown on the rent page and in the band on the home page. Mark one as the most popular to give it a border and a label.") +
+    '<div class="flexrow" style="margin:18px 0"><button class="btn btn--sm" data-new="tier">Add a shelf type</button></div>' +
+    DB.tiers.map((t, i) =>
+      '<details class="adm-block"><summary>' + esc(tr(t.name)) + ' <span class="mono tiny muted" style="margin-left:auto">' + amd(t.price) + "</span></summary>" +
+        mlInput("tiers." + i + ".name", "Name") +
+        '<div class="row2">' + plainInput("tiers." + i + ".price", "Price per month, AMD", "number") +
+        '<div class="field"><label>Highlight</label><button class="btn btn--sm ' + (t.popular ? "" : "btn--line") + '" data-toggle="tiers.' + i + '.popular">' + (t.popular ? "Marked as most popular" : "Not highlighted") + "</button></div></div>" +
+        mlInput("tiers." + i + ".size", "Size / where it is") +
+        mlInput("tiers." + i + ".best", "Good for") +
+        '<button class="btn btn--line btn--sm btn--danger" data-del="tiers" data-i="' + i + '">Delete</button>' +
+      "</details>").join("") + "</div>";
+}
+
+function admIncluded() {
+  return '<div class="adm-sec">' + admHead("What the rent includes", "The checklist on the dark band of the rent page.") +
+    '<div class="flexrow" style="margin:18px 0"><button class="btn btn--sm" data-new="included">Add a line</button></div>' +
+    DB.included.map((x, i) =>
+      '<div class="adm-block">' + mlInput("included." + i, "Line " + (i + 1)) +
+      '<button class="btn btn--line btn--sm btn--danger" data-del="included" data-i="' + i + '">Delete</button></div>').join("") + "</div>";
+}
+
+function admFaq() {
+  return '<div class="adm-sec">' + admHead("FAQ", "Two tabs on the FAQ page: questions from shoppers, and questions from makers who want a shelf.") +
+    '<div class="flexrow" style="margin:18px 0"><button class="btn btn--sm" data-new="faq">Add a question</button></div>' +
+    DB.faq.map((f, i) =>
+      '<details class="adm-block"><summary>' + esc(tr(f.q).slice(0, 70)) + ' <span class="tiny muted mono" style="margin-left:auto">' + f.side + "</span></summary>" +
+        '<div class="field"><label>Which tab</label><select class="sel" data-path="faq.' + i + '.side">' +
+          '<option value="buy"' + (f.side === "buy" ? " selected" : "") + ">Buying</option>" +
+          '<option value="sell"' + (f.side === "sell" ? " selected" : "") + ">Renting a shelf</option></select></div>" +
+        mlInput("faq." + i + ".q", "Question") + mlInput("faq." + i + ".a", "Answer", "area") +
+        '<button class="btn btn--line btn--sm btn--danger" data-del="faq" data-i="' + i + '">Delete</button>' +
+      "</details>").join("") + "</div>";
+}
+
+/* ------------------------------------------------------------------ inbox */
+const when = (iso) => new Date(iso).toLocaleString();
+
+function admOrders() {
+  if (!DB.orders.length) return '<div class="adm-sec">' + admHead("Orders", "Orders placed on the site land here.") + '<div class="empty"><h3>No orders yet</h3><p>Place a test order on the shop page and it will appear here.</p></div></div>';
+  return '<div class="adm-sec">' + admHead("Orders", "Everything ordered through the site. Also forwarded to your endpoint if you set one under Shop details.") +
+    '<div class="flexrow" style="margin:18px 0"><button class="btn btn--line btn--sm" data-readall="orders">Mark all as read</button><button class="btn btn--line btn--sm" data-csv="orders">Download as CSV</button></div>' +
+    DB.orders.map((o, i) =>
+      '<div class="inbox-item"' + (o.read ? "" : ' style="border-color:var(--ink); border-width:2px"') + ">" +
+        '<div class="inbox-item__h"><div><strong class="mono">' + esc(o.no) + "</strong> " + (o.read ? "" : '<span class="badge" style="background:var(--sun); border-color:var(--sun)">new</span>') +
+        '<div class="tiny muted">' + when(o.at) + " · " + esc(o.customer.name || "") + " · " + esc(o.customer.phone || "") + "</div></div>" +
+        '<div class="price">' + amd(o.total) + "</div></div>" +
+        '<dl class="kv">' +
+          "<dt>Items</dt><dd>" + o.items.map((it) => esc(it.name) + " ×" + it.qty + ' <span class="mono tiny muted">' + esc(it.cell) + " · " + esc(it.maker) + "</span>").join("<br>") + "</dd>" +
+          "<dt>Delivery</dt><dd>" + esc(o.customer.method || "pickup") + (o.customer.street ? " — " + esc([o.customer.street, o.customer.flat, o.customer.city, o.customer.zip].filter(Boolean).join(", ")) : "") + "</dd>" +
+          "<dt>Payment</dt><dd>" + esc(o.customer.pay || "") + "</dd>" +
+          "<dt>Email</dt><dd>" + esc(o.customer.email || "") + "</dd>" +
+          (o.customer.note ? "<dt>Note</dt><dd>" + esc(o.customer.note) + "</dd>" : "") +
+          (o.customer.gift ? "<dt>Gift wrap</dt><dd>yes, no price tag</dd>" : "") +
+        "</dl>" +
+        '<div class="flexrow" style="margin-top:12px">' +
+          (o.read ? "" : '<button class="btn btn--line btn--sm" data-read="orders" data-i="' + i + '">Mark as read</button>') +
+          '<button class="btn btn--line btn--sm btn--danger" data-del="orders" data-i="' + i + '">Delete</button></div>' +
+      "</div>").join("") + "</div>";
+}
+
+function admApps() {
+  if (!DB.applications.length) return '<div class="adm-sec">' + admHead("Shelf applications", "Makers who applied through the rent page land here, with their photos.") + '<div class="empty"><h3>No applications yet</h3><p>Send one from the rent page to see how it arrives.</p></div></div>';
+  return '<div class="adm-sec">' + admHead("Shelf applications", "Everything sent through the form on the rent page, photos included.") +
+    '<div class="flexrow" style="margin:18px 0"><button class="btn btn--line btn--sm" data-readall="applications">Mark all as read</button><button class="btn btn--line btn--sm" data-csv="applications">Download as CSV</button></div>' +
+    DB.applications.map((a, i) => {
+      const cat = DB.categories.find((c) => c.id === a.cat);
+      const tier = DB.tiers.find((t) => t.id === a.tier);
+      return '<div class="inbox-item"' + (a.read ? "" : ' style="border-color:var(--ink); border-width:2px"') + ">" +
+        '<div class="inbox-item__h"><div><strong>' + esc(a.name) + (a.brand ? " — " + esc(a.brand) : "") + "</strong> " + (a.read ? "" : '<span class="badge" style="background:var(--sun); border-color:var(--sun)">new</span>') +
+        '<div class="tiny muted">' + when(a.at) + " · sent in " + esc(a.lang || "en") + "</div></div>" +
+        '<div class="flexrow"><a class="btn btn--line btn--sm" href="mailto:' + esc(a.email) + '">Reply</a></div></div>' +
+        '<dl class="kv">' +
+          "<dt>Contact</dt><dd>" + esc(a.email) + " · " + esc(a.phone) + (a.insta ? " · " + esc(a.insta) : "") + "</dd>" +
+          "<dt>Makes</dt><dd>" + esc(cat ? tr(cat.name) : a.cat) + "</dd>" +
+          "<dt>Wants</dt><dd>" + esc(tier ? tr(tier.name) + " — " + amd(tier.price) : a.tier) + "</dd>" +
+          (a.range ? "<dt>Price range</dt><dd>" + esc(a.range) + "</dd>" : "") +
+          "<dt>About</dt><dd>" + esc(a.about).replace(/\n/g, "<br>") + "</dd>" +
+          (a.items ? "<dt>Item list</dt><dd class=\"mono tiny\">" + esc(a.items).replace(/\n/g, "<br>") + "</dd>" : "") +
+        "</dl>" +
+        (a.photos && a.photos.length ? '<div class="thumbs" style="margin-top:12px">' + a.photos.map((src) => '<a class="thumb" href="' + src + '" target="_blank" rel="noopener" style="display:block"><img src="' + src + '" alt=""></a>').join("") + "</div>" : "") +
+        '<div class="flexrow" style="margin-top:12px">' +
+          (a.read ? "" : '<button class="btn btn--line btn--sm" data-read="applications" data-i="' + i + '">Mark as read</button>') +
+          '<button class="btn btn--line btn--sm btn--danger" data-del="applications" data-i="' + i + '">Delete</button></div>' +
+      "</div>";
+    }).join("") + "</div>";
+}
+
+function admMessages() {
+  if (!DB.messages.length) return '<div class="adm-sec">' + admHead("Messages", "The contact form on the visit page writes here.") + '<div class="empty"><h3>No messages yet</h3></div></div>';
+  return '<div class="adm-sec">' + admHead("Messages", "Sent from the contact form on the visit page.") +
+    '<div class="flexrow" style="margin:18px 0"><button class="btn btn--line btn--sm" data-readall="messages">Mark all as read</button></div>' +
+    DB.messages.map((m, i) =>
+      '<div class="inbox-item"' + (m.read ? "" : ' style="border-color:var(--ink); border-width:2px"') + ">" +
+        '<div class="inbox-item__h"><div><strong>' + esc(m.name) + '</strong><div class="tiny muted">' + when(m.at) + " · " + esc(m.email) + "</div></div>" +
+        '<a class="btn btn--line btn--sm" href="mailto:' + esc(m.email) + '">Reply</a></div>' +
+        "<p class=\"mb-0\">" + esc(m.text).replace(/\n/g, "<br>") + "</p>" +
+        '<div class="flexrow" style="margin-top:12px">' +
+          (m.read ? "" : '<button class="btn btn--line btn--sm" data-read="messages" data-i="' + i + '">Mark as read</button>') +
+          '<button class="btn btn--line btn--sm btn--danger" data-del="messages" data-i="' + i + '">Delete</button></div>' +
+      "</div>").join("") + "</div>";
+}
+
+/* --------------------------------------------------------------- settings */
+function admSettings() {
+  return '<div class="adm-sec">' + admHead("Shop details", "Address, hours, prices and the numbers shown on the home page.") +
+    '<details class="adm-block" open><summary>Address and contact</summary>' +
+      mlInput("settings.city", "City") + mlInput("settings.address", "Address") + mlInput("settings.hours", "Opening hours") +
+      '<div class="row2">' + plainInput("settings.phone", "Phone") + plainInput("settings.email", "Email") + "</div>" +
+      '<div class="row2">' + plainInput("settings.instagram", "Instagram handle", "text", "without the @") + plainInput("settings.telegram", "Telegram handle", "text", "without the @") + "</div>" +
+    "</details>" +
+    '<details class="adm-block"><summary>Shelf numbers</summary>' +
+      '<div class="row2">' + plainInput("settings.totalCells", "Cells in the shop", "number") + plainInput("settings.takenCells", "Cells taken right now", "number") + "</div>" +
+      '<div class="row2">' + plainInput("settings.commission", "Commission, %", "number") + plainInput("settings.minTerm", "Minimum term, weeks", "number") + "</div>" +
+      '<p class="hint">These drive the counters in the hero and the badges on the rent page.</p>' +
+    "</details>" +
+    '<details class="adm-block"><summary>Delivery and payment</summary>' +
+      '<div class="row2">' + plainInput("settings.deliveryYerevan", "Courier in Yerevan, AMD", "number") + plainInput("settings.deliveryArmenia", "Rest of Armenia, AMD", "number") + "</div>" +
+      plainInput("settings.freeOver", "Free Yerevan delivery over, AMD", "number") +
+    "</details>" +
+    '<details class="adm-block"><summary>Where form submissions go</summary>' +
+      '<p class="hint" style="margin-bottom:12px">Every order, application and message is kept in this manager. If you also paste a form endpoint here — Formspree, a Google Apps Script web app, or your own server — each one is posted there as JSON the moment it is sent, so it reaches your email too. Leave it empty until you have one.</p>' +
+      plainInput("settings.formEndpoint", "Endpoint URL", "url", "for example https://formspree.io/f/xxxxxxx") +
+    "</details>" +
+    '<details class="adm-block"><summary>Manager password</summary>' +
+      plainInput("settings.adminPass", "Password", "text", "Asked for when you open the manager. Change this before the site goes live.") +
+      '<p class="hint">This only hides the manager from casual visitors. Anyone who can read the page source can find it, so do not reuse a password you care about.</p>' +
+    "</details>" +
+  "</div>";
+}
+
+function admBackup() {
+  return '<div class="adm-sec">' + admHead("Backup & reset", "Your content lives in this browser (" + Store.mode + " storage). Download a copy before you make big changes, or to move the site to another computer.") +
+    '<div class="adm-block"><h3 style="font-size:1.05rem; margin-bottom:8px">Download a copy</h3>' +
+      '<p class="hint" style="margin-bottom:14px">Saves one file with all your text, products, photos, orders and applications.</p>' +
+      '<div class="flexrow"><button class="btn" id="expJson">Download backup</button>' +
+      '<button class="btn btn--line" id="expHtml">Download the whole site as HTML</button></div>' +
+      '<p class="hint" style="margin-top:12px">The HTML file is the one to upload to hosting or drop into WordPress. It carries your current content inside it.</p></div>' +
+    '<div class="adm-block"><h3 style="font-size:1.05rem; margin-bottom:8px">Restore from a backup</h3>' +
+      '<p class="hint" style="margin-bottom:14px">Replaces everything currently on the site with the contents of the file.</p>' +
+      '<button class="btn btn--line" id="impBtn">Choose a backup file</button><input type="file" id="impFile" accept="application/json,.json" hidden></div>' +
+    '<div class="adm-block"><h3 style="font-size:1.05rem; margin-bottom:8px">Start over</h3>' +
+      '<p class="hint" style="margin-bottom:14px">Puts back the original demo content. Your orders and applications go too.</p>' +
+      '<button class="btn btn--danger" id="resetAll">Reset the whole site</button></div>' +
+  "</div>";
+}
+
+/* ------------------------------------------------------- manager plumbing */
+$("#adminClose").onclick = closeAdmin;
+$("#adminPreview").onclick = () => { closeAdmin(); };
+
+document.addEventListener("click", (e) => {
+  const t = e.target;
+
+  const tab = t.closest("[data-adm]");
+  if (tab) { ADMTAB = tab.dataset.adm; renderAdmin(); return; }
+
+  const tog = t.closest("[data-toggle]");
+  if (tog) { const p = tog.dataset.toggle; setPath(DB, p, !getPath(DB, p)); save(); renderAdmin(); return; }
+
+  const up = t.closest("[data-up]"), dn = t.closest("[data-down]");
+  if (up || dn) {
+    const el = up || dn, arr = getPath(DB, el.dataset.up || el.dataset.down), i = Number(el.dataset.i);
+    const j = up ? i - 1 : i + 1;
+    if (j >= 0 && j < arr.length) { const tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp; save(); renderAdmin(); }
+    return;
+  }
+
+  const del = t.closest("[data-del]");
+  if (del) {
+    const key = del.dataset.del, i = Number(del.dataset.i);
+    if (!confirm("Delete this? It cannot be undone.")) return;
+    getPath(DB, key).splice(i, 1); save(); renderAdmin(); return;
+  }
+
+  const ed = t.closest("[data-edit]");
+  if (ed && ed.dataset.edit === "product") { editProduct(Number(ed.dataset.i)); return; }
+
+  const nw = t.closest("[data-new]");
+  if (nw) { addNew(nw.dataset.new); return; }
+
+  const rd = t.closest("[data-read]");
+  if (rd) { getPath(DB, rd.dataset.read)[Number(rd.dataset.i)].read = true; save(); renderAdmin(); return; }
+  const rda = t.closest("[data-readall]");
+  if (rda) { getPath(DB, rda.dataset.readall).forEach((x) => (x.read = true)); save(); renderAdmin(); return; }
+  const csv = t.closest("[data-csv]");
+  if (csv) { downloadCsv(csv.dataset.csv); return; }
+
+  if (t.closest("[data-refresh]")) { setTimeout(renderAdmin, 30); return; }
+  if (t.id === "resetColors") { DB.settings.colors = clone(DEFAULTS.settings.colors); applyTheme(); save(); renderAdmin(); return; }
+  if (t.id === "expJson") { downloadFile("hatik-backup-" + new Date().toISOString().slice(0, 10) + ".json", JSON.stringify(DB, null, 2), "application/json"); return; }
+  if (t.id === "expHtml") { exportHtml(); return; }
+  if (t.id === "impBtn") { $("#impFile").click(); return; }
+  if (t.id === "resetAll") {
+    if (!confirm("Reset everything back to the demo content?")) return;
+    DB = clone(DEFAULTS); save(); applyTheme(); renderAdmin(); toast("Site reset");
+    return;
+  }
+});
+
+function addNew(kind) {
+  if (kind === "product") {
+    DB.products.unshift({ id: uid("p"), cat: DB.categories[0].id, maker: "New maker", price: 10000, cell: "A-00", stock: 1, img: "",
+      name: T("New product", "Նոր ապրանք", "Новый товар"), desc: T("", "", "") });
+    save(); renderAdmin(); editProduct(0); return;
+  }
+  if (kind === "category") { DB.categories.push({ id: uid("c"), shape: "default", color: "#E08D82", name: T("New category", "Նոր կատեգորիա", "Новая категория") }); }
+  if (kind === "maker") { DB.makers.push({ id: uid("m"), name: "New maker", cell: "A-00", shape: "default", handle: "@", bio: T("", "", "") }); }
+  if (kind === "tier") { DB.tiers.push({ id: uid("t"), price: 10000, popular: false, name: T("New shelf type", "Նոր տեսակ", "Новый тип"), size: T("", "", ""), best: T("", "", "") }); }
+  if (kind === "included") { DB.included.push(T("", "", "")); }
+  if (kind === "faq") { DB.faq.unshift({ id: uid("f"), side: "buy", q: T("New question", "Նոր հարց", "Новый вопрос"), a: T("", "", "") }); }
+  save(); renderAdmin();
+}
+
+/* live binding for every manager input */
+document.addEventListener("input", (e) => {
+  const el = e.target;
+  if (el.dataset && el.dataset.path) {
+    let v = el.value;
+    if (el.type === "number") v = Number(v);
+    setPath(DB, el.dataset.path, v);
+    save();
+  }
+  if (el.dataset && el.dataset.color) {
+    DB.settings.colors[el.dataset.color] = el.value;
+    applyTheme(); save();
+    const lbl = el.parentElement.querySelector(".mono"); if (lbl) lbl.textContent = el.value;
+  }
+});
+document.addEventListener("change", (e) => {
+  const el = e.target;
+  if (el.dataset && el.dataset.path && (el.tagName === "SELECT" || el.type === "color")) {
+    setPath(DB, el.dataset.path, el.value); save();
+  }
+  if (el.id === "impFile" && el.files[0]) {
+    const fr = new FileReader();
+    fr.onload = () => {
+      try {
+        const data = JSON.parse(fr.result);
+        DB = mergeDefaults(clone(DEFAULTS), data);
+        save(); applyTheme(); renderAdmin(); toast("Backup restored");
+      } catch (err) { toast("That file could not be read"); }
+    };
+    fr.readAsText(el.files[0]);
+  }
+});
+
+/* drag to reorder inside the manager */
+let dragFrom = null, dragKey = null;
+document.addEventListener("dragstart", (e) => {
+  const row = e.target.closest("[data-move]");
+  if (!row) return;
+  dragFrom = Number(row.dataset.i); dragKey = row.dataset.move;
+  row.classList.add("is-drag");
+  e.dataTransfer.effectAllowed = "move";
+  try { e.dataTransfer.setData("text/plain", String(dragFrom)); } catch (err) {}
+});
+document.addEventListener("dragend", (e) => { const r = e.target.closest("[data-move]"); if (r) r.classList.remove("is-drag"); });
+document.addEventListener("dragover", (e) => { if (e.target.closest("[data-move]")) e.preventDefault(); });
+document.addEventListener("drop", (e) => {
+  const row = e.target.closest("[data-move]");
+  if (!row || dragFrom === null || row.dataset.move !== dragKey) return;
+  e.preventDefault();
+  const to = Number(row.dataset.i), arr = getPath(DB, dragKey);
+  if (to === dragFrom) return;
+  arr.splice(to, 0, arr.splice(dragFrom, 1)[0]);
+  dragFrom = null; dragKey = null;
+  save(); renderAdmin();
+});
+
+/* export helpers */
+function downloadFile(name, text, type) {
+  const blob = new Blob([text], { type: type || "text/plain" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 400);
+}
+function downloadCsv(key) {
+  const rows = getPath(DB, key) || [];
+  if (!rows.length) return toast("Nothing to export");
+  const flat = rows.map((r) => {
+    const o = {};
+    Object.keys(r).forEach((k) => {
+      if (k === "photos") o.photos = (r.photos || []).length + " attached";
+      else if (typeof r[k] === "object" && r[k]) o[k] = JSON.stringify(r[k]).replace(/"/g, "'");
+      else o[k] = r[k];
+    });
+    return o;
+  });
+  const cols = Object.keys(flat.reduce((a, r) => Object.assign(a, r), {}));
+  const csv = [cols.join(",")].concat(flat.map((r) => cols.map((c) => '"' + String(r[c] == null ? "" : r[c]).replace(/"/g, '""') + '"').join(","))).join("\n");
+  downloadFile("hatik-" + key + ".csv", "\uFEFF" + csv, "text/csv");
+}
+function exportHtml() {
+  const doc = document.documentElement.cloneNode(true);
+  ["#app", "#foot", "#nav", "#adminMain", "#adminNav", "#cartBody", "#cartFoot", "#modalPanel", "#toasts", "#langSwitch"]
+    .forEach((sel) => { const n = doc.querySelector(sel); if (n) n.innerHTML = ""; });
+  const adm = doc.querySelector("#admin"); if (adm) adm.classList.remove("is-open");
+  const slot = "/* __SEED" + "_SLOT__ */";
+  const json = JSON.stringify(DB).split("<\/").join("<\\/").split("<script").join("<\\u0073cript");
+  const seed = "try{ DB = mergeDefaults(clone(DEFAULTS), JSON.parse(" + JSON.stringify(json) + ")); }catch(e){}";
+  const out = doc.outerHTML.replace(slot, seed);
+  downloadFile("hatik-site.html", "<!DOCTYPE html>\n" + out, "text/html");
+  toast("Downloaded — upload this file to your hosting");
+}
+
+/* ============================================================================
+   START
+   ============================================================================ */
+(async function init() {
+  await load();
+  /* __SEED_SLOT__ */
+  applyTheme();
+  if (!location.hash) location.hash = "#/";
+  route();
+  window.addEventListener("hashchange", () => {
+    const p = parseHash().path;
+    if (p !== "/checkout") CO.step = 1;
+    route();
+  });
+  if (Store.mode === "memory") {
+    setTimeout(() => toast("Heads up: this browser is not saving changes between visits."), 1200);
+  }
+})();
+</script>
+</body>
+</html>
