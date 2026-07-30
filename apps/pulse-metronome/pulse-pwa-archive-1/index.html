@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>PULSE — метроном</title>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#141519">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PULSE">
+<link rel="apple-touch-icon" href="icon-180.png">
+
+<style>
+:root{
+  --bg:#141519; --panel:#1D1F24; --line:#2A2D34;
+  --ink:#E9E2D2; --dim:#837E70;
+  --led:#FFAE42; --led-glow:rgba(255,174,66,.45);
+  --mute:#3A3D45;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+html,body{height:100%;}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  display:flex; flex-direction:column;
+  padding:calc(env(safe-area-inset-top) + 12px) calc(env(safe-area-inset-right) + 18px) calc(env(safe-area-inset-bottom) + 14px) calc(env(safe-area-inset-left) + 18px);
+  user-select:none; -webkit-user-select:none;
+  overflow:hidden;
+}
+.label{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--dim);}
+
+/* header */
+header{display:flex;justify-content:space-between;align-items:center;padding-bottom:6px;}
+.wordmark{font-size:13px;letter-spacing:.38em;font-weight:600;}
+.wordmark span{color:var(--led);}
+#wakeState{display:flex;align-items:center;gap:6px;}
+#wakeDot{width:6px;height:6px;border-radius:50%;background:var(--mute);transition:background .3s;}
+#wakeDot.on{background:var(--led);box-shadow:0 0 8px var(--led-glow);}
+
+/* tempo block */
+.tempo{text-align:center;margin:6px 0 2px;}
+#bpm{
+  font-family:ui-monospace,"SF Mono",SFMono-Regular,Menlo,monospace;
+  font-size:clamp(88px,26vw,124px); line-height:1; font-weight:300;
+  letter-spacing:-.02em; font-variant-numeric:tabular-nums;
+}
+#tempoName{margin-top:2px;}
+
+/* slider row */
+input[type=range]{
+  -webkit-appearance:none; appearance:none; width:100%; height:34px; background:transparent;
+}
+input[type=range]::-webkit-slider-runnable-track{height:3px;background:var(--line);border-radius:2px;}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none; width:26px;height:26px;border-radius:50%;
+  background:var(--ink); margin-top:-11.5px; border:none;
+}
+.bpmBtns{display:flex;gap:8px;margin-top:4px;}
+.bpmBtns button{
+  flex:1;height:44px;border:1px solid var(--line);border-radius:10px;
+  background:var(--panel);color:var(--ink);font-size:16px;font-weight:500;
+}
+.bpmBtns button:active{background:var(--line);}
+
+/* beat LEDs */
+.ledsWrap{margin-top:16px;}
+#leds{display:flex;justify-content:center;gap:10px;margin-top:8px;flex-wrap:wrap;}
+.led{
+  width:30px;height:30px;border-radius:50%;
+  border:2px solid var(--dim); background:transparent;
+  transition:transform .05s, background .08s, box-shadow .08s, border-color .2s;
+}
+.led.accent{border-color:var(--led);}
+.led.accent::after{content:"";}
+.led.mute{border-color:var(--mute);border-style:dashed;}
+.led.lit{background:var(--led);border-color:var(--led);box-shadow:0 0 16px var(--led-glow);transform:scale(1.15);}
+.led.lit.mute{background:var(--mute);box-shadow:none;}
+
+/* controls grid */
+.row{display:flex;gap:10px;margin-top:14px;}
+.card{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;}
+.stepper{display:flex;align-items:center;justify-content:space-between;margin-top:6px;}
+.stepper button{width:40px;height:36px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font-size:18px;}
+.stepper span{font-family:ui-monospace,monospace;font-size:20px;}
+.seg{display:flex;gap:6px;margin-top:6px;}
+.seg button{
+  flex:1;padding:8px 2px;border:1px solid var(--line);border-radius:8px;
+  background:var(--bg);color:var(--dim);font-size:10px;letter-spacing:.05em;line-height:1.25;
+}
+.seg button.on{color:var(--bg);background:var(--led);border-color:var(--led);font-weight:600;}
+
+/* bottom */
+.bottom{display:flex;gap:10px;margin-top:14px;}
+#tap,#toggle{
+  flex:1;height:76px;border-radius:14px;font-size:15px;letter-spacing:.18em;font-weight:600;
+  border:1px solid var(--line);
+}
+#tap{background:var(--panel);color:var(--ink);}
+#tap:active{background:var(--line);}
+#toggle{background:var(--led);color:var(--bg);border-color:var(--led);}
+#toggle.running{background:var(--panel);color:var(--led);}
+.volRow{display:flex;align-items:center;gap:12px;margin-top:10px;}
+.volRow input{flex:1;}
+
+@media (prefers-reduced-motion: reduce){ .led{transition:none;} }
+@media (min-width:700px){ body{max-width:520px;margin:0 auto;} }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wordmark">PUL<span>S</span>E</div>
+  <div id="wakeState"><div id="wakeDot"></div><div class="label" id="wakeLabel">экран</div></div>
+</header>
+
+<div class="tempo">
+  <div id="bpm">120</div>
+  <div class="label" id="tempoName">Allegro</div>
+</div>
+
+<input type="range" id="bpmSlider" min="30" max="300" value="120">
+<div class="bpmBtns">
+  <button data-d="-5">−5</button>
+  <button data-d="-1">−1</button>
+  <button data-d="1">+1</button>
+  <button data-d="5">+5</button>
+</div>
+
+<div class="ledsWrap">
+  <div class="label" style="text-align:center">доли · тап по доле: акцент / обычная / пауза</div>
+  <div id="leds"></div>
+</div>
+
+<div class="row">
+  <div class="card">
+    <div class="label">размер</div>
+    <div class="stepper">
+      <button id="beatsMinus">−</button>
+      <span id="beatsVal">4</span>
+      <button id="beatsPlus">+</button>
+    </div>
+  </div>
+  <div class="card" style="flex:2">
+    <div class="label">дробление · коннакол</div>
+    <div class="seg" id="subSeg">
+      <button data-s="1">TA</button>
+      <button data-s="2">TA·KA</button>
+      <button data-s="3">TA·KI·TA</button>
+      <button data-s="4">TA·KA·DI·MI</button>
+    </div>
+  </div>
+</div>
+
+<div class="bottom">
+  <button id="tap">TAP</button>
+  <button id="toggle">СТАРТ</button>
+</div>
+
+<div class="volRow">
+  <div class="label">громкость</div>
+  <input type="range" id="vol" min="0" max="100" value="80">
+</div>
+
+<script>
+"use strict";
+
+/* ---------- state ---------- */
+const S = {
+  bpm: 120,
+  beats: 4,
+  states: [2,1,1,1],   // 2 accent, 1 normal, 0 mute
+  sub: 1,
+  vol: 0.8,
+};
+try {
+  const saved = JSON.parse(localStorage.getItem("pulse-v1") || "null");
+  if (saved) Object.assign(S, saved);
+} catch(e){}
+
+function persist(){
+  try { localStorage.setItem("pulse-v1", JSON.stringify(S)); } catch(e){}
+}
+
+/* ---------- audio ---------- */
+let ctx = null, master = null;
+function ensureAudio(){
+  if (!ctx){
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+    master = ctx.createGain();
+    master.gain.value = S.vol;
+    master.connect(ctx.destination);
+  }
+  if (ctx.state === "suspended") ctx.resume();
+}
+function click(time, kind){
+  // kind: "accent" | "beat" | "sub"
+  const freq = kind === "accent" ? 1760 : kind === "beat" ? 1245 : 830;
+  const peak = kind === "accent" ? 1.0  : kind === "beat" ? 0.7  : 0.32;
+  const osc = ctx.createOscillator();
+  const g = ctx.createGain();
+  osc.frequency.value = freq;
+  g.gain.setValueAtTime(0.0001, time);
+  g.gain.exponentialRampToValueAtTime(peak, time + 0.002);
+  g.gain.exponentialRampToValueAtTime(0.0001, time + 0.055);
+  osc.connect(g); g.connect(master);
+  osc.start(time); osc.stop(time + 0.07);
+}
+
+/* ---------- scheduler (lookahead) ---------- */
+let running = false, timerId = null;
+let nextNoteTime = 0, currentBeat = 0, currentSub = 0;
+const LOOKAHEAD = 0.12, TICK = 25;
+let drawQueue = [];
+
+function scheduler(){
+  while (nextNoteTime < ctx.currentTime + LOOKAHEAD){
+    const st = S.states[currentBeat];
+    if (currentSub === 0){
+      if (st === 2) click(nextNoteTime, "accent");
+      else if (st === 1) click(nextNoteTime, "beat");
+      drawQueue.push({ time: nextNoteTime, beat: currentBeat });
+    } else if (st !== 0){
+      click(nextNoteTime, "sub");
+    }
+    const secPerBeat = 60 / S.bpm;
+    nextNoteTime += secPerBeat / S.sub;
+    currentSub++;
+    if (currentSub >= S.sub){ currentSub = 0; currentBeat = (currentBeat + 1) % S.beats; }
+  }
+}
+
+function draw(){
+  if (!running) return;
+  const now = ctx.currentTime;
+  while (drawQueue.length && drawQueue[0].time <= now){
+    const ev = drawQueue.shift();
+    const els = document.querySelectorAll(".led");
+    els.forEach(el => el.classList.remove("lit"));
+    const el = els[ev.beat];
+    if (el){
+      el.classList.add("lit");
+      setTimeout(() => el.classList.remove("lit"), Math.min(120, 60000 / S.bpm * 0.5));
+    }
+  }
+  requestAnimationFrame(draw);
+}
+
+async function start(){
+  ensureAudio();
+  running = true;
+  currentBeat = 0; currentSub = 0;
+  nextNoteTime = ctx.currentTime + 0.06;
+  drawQueue = [];
+  timerId = setInterval(scheduler, TICK);
+  requestAnimationFrame(draw);
+  toggleBtn.textContent = "СТОП";
+  toggleBtn.classList.add("running");
+  requestWake();
+}
+function stop(){
+  running = false;
+  clearInterval(timerId);
+  document.querySelectorAll(".led").forEach(el => el.classList.remove("lit"));
+  toggleBtn.textContent = "СТАРТ";
+  toggleBtn.classList.remove("running");
+  releaseWake();
+}
+
+/* ---------- wake lock ---------- */
+let wakeLock = null;
+const wakeDot = document.getElementById("wakeDot");
+const wakeLabel = document.getElementById("wakeLabel");
+async function requestWake(){
+  if (!("wakeLock" in navigator)){ wakeLabel.textContent = "нет wake lock"; return; }
+  try {
+    wakeLock = await navigator.wakeLock.request("screen");
+    wakeDot.classList.add("on");
+    wakeLabel.textContent = "экран активен";
+    wakeLock.addEventListener("release", () => wakeDot.classList.remove("on"));
+  } catch(e){ wakeLabel.textContent = "экран"; }
+}
+function releaseWake(){
+  if (wakeLock){ wakeLock.release().catch(()=>{}); wakeLock = null; }
+  wakeDot.classList.remove("on");
+  wakeLabel.textContent = "экран";
+}
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible" && running){
+    requestWake();
+    if (ctx && ctx.state === "suspended") ctx.resume();
+  }
+});
+
+/* ---------- UI ---------- */
+const bpmEl = document.getElementById("bpm");
+const bpmSlider = document.getElementById("bpmSlider");
+const tempoName = document.getElementById("tempoName");
+const toggleBtn = document.getElementById("toggle");
+const beatsVal = document.getElementById("beatsVal");
+const ledsEl = document.getElementById("leds");
+
+const NAMES = [[40,"Grave"],[60,"Largo"],[66,"Adagio"],[76,"Andante"],[108,"Moderato"],[120,"Allegro"],[168,"Vivace"],[200,"Presto"],[301,"Prestissimo"]];
+function nameFor(b){ for (const [lim,n] of NAMES) if (b < lim) return n; return "Prestissimo"; }
+
+function setBpm(v){
+  S.bpm = Math.min(300, Math.max(30, Math.round(v)));
+  bpmEl.textContent = S.bpm;
+  bpmSlider.value = S.bpm;
+  tempoName.textContent = nameFor(S.bpm);
+  persist();
+}
+bpmSlider.addEventListener("input", e => setBpm(+e.target.value));
+document.querySelectorAll(".bpmBtns button").forEach(b =>
+  b.addEventListener("click", () => setBpm(S.bpm + +b.dataset.d)));
+
+function renderLeds(){
+  ledsEl.innerHTML = "";
+  S.states.forEach((st, i) => {
+    const d = document.createElement("button");
+    d.className = "led" + (st === 2 ? " accent" : st === 0 ? " mute" : "");
+    d.addEventListener("click", () => {
+      S.states[i] = st === 1 ? 2 : st === 2 ? 0 : 1;
+      persist(); renderLeds();
+    });
+    ledsEl.appendChild(d);
+  });
+  beatsVal.textContent = S.beats;
+}
+function setBeats(n){
+  S.beats = Math.min(12, Math.max(1, n));
+  while (S.states.length < S.beats) S.states.push(1);
+  S.states.length = S.beats;
+  if (currentBeat >= S.beats) currentBeat = 0;
+  persist(); renderLeds();
+}
+document.getElementById("beatsMinus").addEventListener("click", () => setBeats(S.beats - 1));
+document.getElementById("beatsPlus").addEventListener("click", () => setBeats(S.beats + 1));
+
+const subSeg = document.getElementById("subSeg");
+function renderSub(){
+  subSeg.querySelectorAll("button").forEach(b =>
+    b.classList.toggle("on", +b.dataset.s === S.sub));
+}
+subSeg.addEventListener("click", e => {
+  const b = e.target.closest("button");
+  if (!b) return;
+  S.sub = +b.dataset.s;
+  currentSub = 0;
+  persist(); renderSub();
+});
+
+document.getElementById("vol").addEventListener("input", e => {
+  S.vol = e.target.value / 100;
+  if (master) master.gain.value = S.vol;
+  persist();
+});
+
+/* tap tempo */
+let taps = [];
+document.getElementById("tap").addEventListener("click", () => {
+  ensureAudio();
+  const now = performance.now();
+  if (taps.length && now - taps[taps.length - 1] > 2000) taps = [];
+  taps.push(now);
+  if (taps.length > 5) taps.shift();
+  if (taps.length >= 2){
+    const iv = [];
+    for (let i = 1; i < taps.length; i++) iv.push(taps[i] - taps[i-1]);
+    const avg = iv.reduce((a,b)=>a+b,0) / iv.length;
+    setBpm(60000 / avg);
+  }
+  click(ctx.currentTime, "beat");
+});
+
+toggleBtn.addEventListener("click", () => running ? stop() : start());
+
+/* init */
+setBpm(S.bpm);
+renderLeds();
+renderSub();
+document.getElementById("vol").value = S.vol * 100;
+
+/* service worker */
+if ("serviceWorker" in navigator){
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>PULSE — метроном</title>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0B0D14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PULSE">
+<link rel="apple-touch-icon" href="icon-180.png">
+
+<style>
+:root{
+  --gold:#F5C15C;
+  --gold-hot:#FFD98A;
+  --gold-glow:rgba(245,193,92,.55);
+  --cool:#6FB7C9;
+  --ink:#F2EFE8;
+  --dim:rgba(242,239,232,.45);
+  --faint:rgba(242,239,232,.22);
+  --glass:rgba(255,255,255,.05);
+  --glass-line:rgba(255,255,255,.09);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+html,body{height:100%;}
+body{
+  background:radial-gradient(ellipse 120% 90% at 50% 30%, #1A2130 0%, #10131D 55%, #08090F 100%) fixed #08090F;
+  color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  display:flex;flex-direction:column;align-items:center;
+  padding:calc(env(safe-area-inset-top) + 10px) calc(env(safe-area-inset-right) + 16px) calc(env(safe-area-inset-bottom) + 12px) calc(env(safe-area-inset-left) + 16px);
+  user-select:none;-webkit-user-select:none;overflow:hidden;
+}
+.app{width:100%;max-width:440px;display:flex;flex-direction:column;align-items:center;flex:1;}
+.label{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--dim);}
+
+/* ---------- header ---------- */
+header{width:100%;display:flex;justify-content:space-between;align-items:center;}
+.wordmark{font-size:13px;letter-spacing:.42em;font-weight:600;color:var(--ink);}
+.wordmark b{color:var(--gold);font-weight:600;}
+#wakeState{display:flex;align-items:center;gap:6px;}
+#wakeDot{width:6px;height:6px;border-radius:50%;background:var(--faint);transition:background .3s, box-shadow .3s;}
+#wakeDot.on{background:var(--gold);box-shadow:0 0 10px var(--gold-glow);}
+
+/* ---------- orb + ring ---------- */
+.stage{
+  position:relative;
+  width:min(76vw,330px);height:min(76vw,330px);
+  margin:8px 0 2px;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+#orb{
+  position:relative;z-index:2;
+  width:66%;height:66%;border-radius:50%;
+  background:
+    radial-gradient(circle at 34% 28%, rgba(255,255,255,.14), rgba(255,255,255,0) 42%),
+    radial-gradient(circle at 50% 115%, rgba(111,183,201,.10), rgba(0,0,0,0) 55%),
+    radial-gradient(circle at 50% 45%, #2A3040 0%, #1A1E2A 55%, #12141D 100%);
+  box-shadow:
+    inset 0 -14px 30px rgba(0,0,0,.55),
+    inset 0 10px 22px rgba(255,255,255,.05),
+    0 18px 44px rgba(0,0,0,.6),
+    0 0 0 rgba(245,193,92,0);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  cursor:grab;
+  transition:box-shadow .12s ease-out;
+}
+#orb.beat{
+  box-shadow:
+    inset 0 -14px 30px rgba(0,0,0,.55),
+    inset 0 0 34px rgba(245,193,92,.30),
+    0 18px 44px rgba(0,0,0,.6),
+    0 0 52px var(--gold-glow);
+}
+#orb.beat.hard{
+  box-shadow:
+    inset 0 -14px 30px rgba(0,0,0,.55),
+    inset 0 0 44px rgba(255,217,138,.45),
+    0 18px 44px rgba(0,0,0,.6),
+    0 0 78px rgba(255,217,138,.7);
+}
+#bpm{
+  font-family:ui-monospace,"SF Mono",SFMono-Regular,Menlo,monospace;
+  font-size:clamp(56px,17vw,78px);line-height:1;font-weight:300;
+  font-variant-numeric:tabular-nums;letter-spacing:-.02em;
+  pointer-events:none;
+}
+#tempoName{margin-top:4px;pointer-events:none;}
+#orbHint{margin-top:8px;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--faint);pointer-events:none;transition:opacity .5s;}
+
+/* beat ring dots */
+.bdot{
+  position:absolute;z-index:3;
+  width:22px;height:22px;border-radius:50%;
+  transform:translate(-50%,-50%);
+  border:2px solid var(--faint);background:transparent;
+  transition:background .1s, box-shadow .1s, border-color .25s, transform .1s;
+}
+.bdot.accent{border-color:var(--gold);}
+.bdot.quiet{width:15px;height:15px;border-color:var(--dim);}
+.bdot.pause{border-style:dashed;border-color:var(--faint);opacity:.55;}
+.bdot.lit{background:var(--gold);border-color:var(--gold-hot);box-shadow:0 0 18px var(--gold-glow);transform:translate(-50%,-50%) scale(1.25);}
+.bdot.lit.pause{background:transparent;box-shadow:none;border-color:var(--cool);}
+
+/* bpm nudge */
+.nudge{display:flex;gap:8px;margin:2px 0 10px;}
+.nudge button{
+  width:52px;height:36px;border-radius:10px;
+  background:var(--glass);border:1px solid var(--glass-line);
+  color:var(--dim);font-size:14px;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+}
+.nudge button:active{color:var(--ink);background:rgba(255,255,255,.1);}
+
+/* ---------- glass panels ---------- */
+.panel{
+  width:100%;
+  background:var(--glass);border:1px solid var(--glass-line);border-radius:16px;
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  padding:10px 14px;margin-top:8px;
+  opacity:.82;transition:opacity .25s;
+}
+.panel:active,.panel:focus-within{opacity:1;}
+.prow{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.prow + .prow{margin-top:10px;}
+.stepper{display:flex;align-items:center;gap:12px;}
+.stepper button{
+  width:38px;height:34px;border-radius:9px;border:1px solid var(--glass-line);
+  background:transparent;color:var(--ink);font-size:17px;
+}
+.stepper span{font-family:ui-monospace,monospace;font-size:19px;min-width:26px;text-align:center;}
+.seg{display:flex;gap:6px;flex:1;justify-content:flex-end;}
+.seg button{
+  padding:7px 8px;border-radius:9px;border:1px solid var(--glass-line);
+  background:transparent;color:var(--dim);font-size:9.5px;letter-spacing:.04em;line-height:1.2;
+}
+.seg button.on{color:#0B0D14;background:var(--gold);border-color:var(--gold);font-weight:600;}
+
+/* memory dots */
+.mem{display:flex;gap:10px;flex:1;justify-content:flex-end;}
+.mdot{
+  min-width:52px;padding:5px 6px;border-radius:10px;
+  border:1px solid var(--glass-line);background:transparent;color:var(--dim);
+  font-family:ui-monospace,monospace;font-size:11px;line-height:1.3;text-align:center;
+}
+.mdot small{display:block;font-size:8px;letter-spacing:.06em;color:var(--faint);}
+.mdot.set{border-color:rgba(245,193,92,.5);color:var(--ink);}
+.mdot.flash{background:rgba(245,193,92,.22);}
+
+/* ---------- transport ---------- */
+.bottom{width:100%;display:flex;gap:10px;margin-top:10px;}
+#tap,#toggle{
+  flex:1;height:72px;border-radius:16px;
+  font-size:14px;letter-spacing:.2em;font-weight:600;
+  border:1px solid var(--glass-line);
+}
+#tap{background:var(--glass);color:var(--ink);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);}
+#tap:active{background:rgba(255,255,255,.12);}
+#toggle{
+  background:radial-gradient(circle at 50% 20%, var(--gold-hot), var(--gold) 70%);
+  color:#0B0D14;border-color:var(--gold);
+  box-shadow:0 6px 24px rgba(245,193,92,.28);
+}
+#toggle.running{background:var(--glass);color:var(--gold);box-shadow:none;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);}
+.volRow{width:100%;display:flex;align-items:center;gap:12px;margin-top:10px;}
+input[type=range]{-webkit-appearance:none;appearance:none;flex:1;height:30px;background:transparent;}
+input[type=range]::-webkit-slider-runnable-track{height:2px;background:var(--glass-line);border-radius:1px;}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:22px;height:22px;border-radius:50%;
+  background:var(--ink);margin-top:-10px;border:none;
+}
+
+@media (prefers-reduced-motion: reduce){
+  .bdot,#orb{transition:none;}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<header>
+  <div class="wordmark">PUL<b>S</b>E</div>
+  <div id="wakeState"><div id="wakeDot"></div><div class="label" id="wakeLabel">экран</div></div>
+</header>
+
+<div class="stage" id="stage">
+  <div id="orb">
+    <div id="bpm">120</div>
+    <div class="label" id="tempoName">Allegro</div>
+    <div id="orbHint">тяни ↑↓ · тап = старт</div>
+  </div>
+</div>
+
+<div class="nudge">
+  <button data-d="-5">−5</button>
+  <button data-d="-1">−1</button>
+  <button data-d="1">+1</button>
+  <button data-d="5">+5</button>
+</div>
+
+<div class="panel">
+  <div class="prow">
+    <div class="label">размер</div>
+    <div class="stepper">
+      <button id="beatsMinus">−</button>
+      <span id="beatsVal">4</span>
+      <button id="beatsPlus">+</button>
+    </div>
+    <div class="label" style="text-align:right;line-height:1.5">тап по точке кольца:<br>акцент·норма·тихо·пауза</div>
+  </div>
+  <div class="prow">
+    <div class="label">дробление</div>
+    <div class="seg" id="subSeg">
+      <button data-s="1">TA</button>
+      <button data-s="2">TA·KA</button>
+      <button data-s="3">TA·KI·TA</button>
+      <button data-s="4">TA·KA·DI·MI</button>
+    </div>
+  </div>
+  <div class="prow">
+    <div class="label">тембр</div>
+    <div class="seg" id="sndSeg">
+      <button data-t="wood">ДЕРЕВО</button>
+      <button data-t="ping">ПИНГ</button>
+      <button data-t="stick">СТИК</button>
+    </div>
+  </div>
+  <div class="prow">
+    <div class="label">память<br><span style="letter-spacing:.06em;font-size:8px">долгий тап — записать</span></div>
+    <div class="mem" id="mem"></div>
+  </div>
+</div>
+
+<div class="bottom">
+  <button id="tap">TAP</button>
+  <button id="toggle">СТАРТ</button>
+</div>
+
+<div class="volRow">
+  <div class="label">громкость</div>
+  <input type="range" id="vol" min="0" max="100" value="80">
+</div>
+
+</div>
+<script>
+"use strict";
+
+/* ================= state ================= */
+const S = {
+  bpm:120, beats:4,
+  states:[3,2,2,2],        // 3 accent · 2 normal · 1 quiet · 0 pause
+  sub:1, vol:.8, snd:"wood",
+  mem:[null,null,null,null],
+};
+try{ const sv=JSON.parse(localStorage.getItem("pulse-v2")||"null"); if(sv) Object.assign(S,sv); }catch(e){}
+function persist(){ try{ localStorage.setItem("pulse-v2",JSON.stringify(S)); }catch(e){} }
+
+/* ================= audio ================= */
+let ctx=null, master=null, noiseBuf=null;
+function ensureAudio(){
+  if(!ctx){
+    ctx=new (window.AudioContext||window.webkitAudioContext)();
+    master=ctx.createGain(); master.gain.value=S.vol; master.connect(ctx.destination);
+    const len=ctx.sampleRate*0.1;
+    noiseBuf=ctx.createBuffer(1,len,ctx.sampleRate);
+    const d=noiseBuf.getChannelData(0);
+    for(let i=0;i<len;i++) d[i]=Math.random()*2-1;
+  }
+  if(ctx.state==="suspended") ctx.resume();
+}
+
+/* three synthesized timbres, each with accent / normal / quiet / sub levels */
+function click(time, level){ // level: "accent"|"beat"|"quiet"|"sub"
+  const amp = level==="accent"?1.0 : level==="beat"?0.66 : level==="quiet"?0.28 : 0.22;
+  if(S.snd==="ping"){
+    const f = level==="accent"?1760 : level==="sub"?880 : 1245;
+    tone(time,f,amp,0.055,"sine");
+  } else if(S.snd==="wood"){
+    // woodblock: bandpassed noise burst + sine body
+    const f = level==="accent"?1750 : level==="sub"?900 : 1150;
+    noiseBurst(time, f, 8, amp*0.9, 0.03);
+    tone(time, f*0.72, amp*0.55, 0.045, "sine");
+  } else { // stick / rimshot
+    const f = level==="accent"?3200 : level==="sub"?1800 : 2400;
+    noiseBurst(time, f, 1.2, amp, 0.018);
+    tone(time, level==="accent"?520:430, amp*0.3, 0.03, "triangle");
+  }
+}
+function tone(time,freq,peak,dur,type){
+  const o=ctx.createOscillator(), g=ctx.createGain();
+  o.type=type; o.frequency.value=freq;
+  g.gain.setValueAtTime(0.0001,time);
+  g.gain.exponentialRampToValueAtTime(Math.max(peak,0.001),time+0.002);
+  g.gain.exponentialRampToValueAtTime(0.0001,time+dur);
+  o.connect(g); g.connect(master);
+  o.start(time); o.stop(time+dur+0.02);
+}
+function noiseBurst(time,freq,q,peak,dur){
+  const src=ctx.createBufferSource(); src.buffer=noiseBuf;
+  const bp=ctx.createBiquadFilter(); bp.type="bandpass"; bp.frequency.value=freq; bp.Q.value=q;
+  const g=ctx.createGain();
+  g.gain.setValueAtTime(0.0001,time);
+  g.gain.exponentialRampToValueAtTime(Math.max(peak,0.001),time+0.001);
+  g.gain.exponentialRampToValueAtTime(0.0001,time+dur);
+  src.connect(bp); bp.connect(g); g.connect(master);
+  src.start(time); src.stop(time+dur+0.02);
+}
+
+/* ================= lookahead scheduler ================= */
+let running=false, timerId=null, nextNoteTime=0, curBeat=0, curSub=0;
+const LOOKAHEAD=0.12, TICK=25;
+let drawQueue=[];
+
+function scheduler(){
+  while(nextNoteTime < ctx.currentTime + LOOKAHEAD){
+    const st=S.states[curBeat];
+    if(curSub===0){
+      if(st===3) click(nextNoteTime,"accent");
+      else if(st===2) click(nextNoteTime,"beat");
+      else if(st===1) click(nextNoteTime,"quiet");
+      drawQueue.push({time:nextNoteTime,beat:curBeat,accent:st===3,pause:st===0});
+    } else if(st!==0){
+      click(nextNoteTime,"sub");
+    }
+    nextNoteTime += (60/S.bpm)/S.sub;
+    curSub++;
+    if(curSub>=S.sub){ curSub=0; curBeat=(curBeat+1)%S.beats; }
+  }
+}
+
+const orb=document.getElementById("orb");
+function draw(){
+  if(!running) return;
+  const now=ctx.currentTime;
+  while(drawQueue.length && drawQueue[0].time<=now){
+    const ev=drawQueue.shift();
+    const dots=document.querySelectorAll(".bdot");
+    dots.forEach(d=>d.classList.remove("lit"));
+    if(dots[ev.beat]) dots[ev.beat].classList.add("lit");
+    if(!ev.pause){
+      orb.classList.add("beat"); if(ev.accent) orb.classList.add("hard");
+      clearTimeout(orb._t);
+      orb._t=setTimeout(()=>orb.classList.remove("beat","hard"),120);
+    }
+  }
+  requestAnimationFrame(draw);
+}
+
+function start(){
+  ensureAudio();
+  running=true; curBeat=0; curSub=0; drawQueue=[];
+  nextNoteTime=ctx.currentTime+0.06;
+  timerId=setInterval(scheduler,TICK);
+  requestAnimationFrame(draw);
+  toggleBtn.textContent="СТОП"; toggleBtn.classList.add("running");
+  hint.style.opacity="0";
+  requestWake();
+}
+function stop(){
+  running=false; clearInterval(timerId);
+  document.querySelectorAll(".bdot").forEach(d=>d.classList.remove("lit"));
+  orb.classList.remove("beat","hard");
+  toggleBtn.textContent="СТАРТ"; toggleBtn.classList.remove("running");
+  releaseWake();
+}
+
+/* ================= wake lock ================= */
+let wakeLock=null;
+const wakeDot=document.getElementById("wakeDot"), wakeLabel=document.getElementById("wakeLabel");
+async function requestWake(){
+  if(!("wakeLock" in navigator)){ wakeLabel.textContent="нет wake lock"; return; }
+  try{
+    wakeLock=await navigator.wakeLock.request("screen");
+    wakeDot.classList.add("on"); wakeLabel.textContent="экран активен";
+    wakeLock.addEventListener("release",()=>wakeDot.classList.remove("on"));
+  }catch(e){ wakeLabel.textContent="экран"; }
+}
+function releaseWake(){
+  if(wakeLock){ wakeLock.release().catch(()=>{}); wakeLock=null; }
+  wakeDot.classList.remove("on"); wakeLabel.textContent="экран";
+}
+document.addEventListener("visibilitychange",()=>{
+  if(document.visibilityState==="visible" && running){
+    requestWake();
+    if(ctx && ctx.state==="suspended") ctx.resume();
+  }
+});
+
+/* ================= UI ================= */
+const bpmEl=document.getElementById("bpm"), tempoName=document.getElementById("tempoName");
+const toggleBtn=document.getElementById("toggle"), beatsVal=document.getElementById("beatsVal");
+const stage=document.getElementById("stage"), hint=document.getElementById("orbHint");
+
+const NAMES=[[40,"Grave"],[60,"Largo"],[66,"Adagio"],[76,"Andante"],[108,"Moderato"],[120,"Allegro"],[168,"Vivace"],[200,"Presto"],[301,"Prestissimo"]];
+const nameFor=b=>{ for(const [lim,n] of NAMES) if(b<lim) return n; return "Prestissimo"; };
+
+function setBpm(v){
+  S.bpm=Math.min(300,Math.max(30,Math.round(v)));
+  bpmEl.textContent=S.bpm; tempoName.textContent=nameFor(S.bpm);
+  persist();
+}
+
+/* drag on orb = BPM; short tap = start/stop */
+let drag=null;
+orb.addEventListener("pointerdown",e=>{
+  orb.setPointerCapture(e.pointerId);
+  drag={y:e.clientY,bpm:S.bpm,moved:false};
+});
+orb.addEventListener("pointermove",e=>{
+  if(!drag) return;
+  const dy=drag.y-e.clientY;
+  if(Math.abs(dy)>6) drag.moved=true;
+  if(drag.moved) setBpm(drag.bpm+dy*0.25);
+});
+orb.addEventListener("pointerup",()=>{
+  if(drag && !drag.moved){ running?stop():start(); }
+  drag=null;
+});
+orb.addEventListener("pointercancel",()=>drag=null);
+
+document.querySelectorAll(".nudge button").forEach(b=>
+  b.addEventListener("click",()=>setBpm(S.bpm + +b.dataset.d)));
+
+/* beat ring around the orb */
+function renderRing(){
+  stage.querySelectorAll(".bdot").forEach(d=>d.remove());
+  const R=stage.clientWidth/2, r=R*0.86;
+  for(let i=0;i<S.beats;i++){
+    const a=(i/S.beats)*Math.PI*2 - Math.PI/2;
+    const d=document.createElement("button");
+    const st=S.states[i];
+    d.className="bdot"+(st===3?" accent":st===1?" quiet":st===0?" pause":"");
+    d.style.left=(R + r*Math.cos(a))+"px";
+    d.style.top =(R + r*Math.sin(a))+"px";
+    d.addEventListener("click",()=>{
+      S.states[i]= st===2?3 : st===3?1 : st===1?0 : 2;  // норма→акцент→тихо→пауза→норма
+      persist(); renderRing();
+    });
+    stage.appendChild(d);
+  }
+  beatsVal.textContent=S.beats;
+}
+function setBeats(n){
+  S.beats=Math.min(12,Math.max(1,n));
+  while(S.states.length<S.beats) S.states.push(2);
+  S.states.length=S.beats;
+  if(curBeat>=S.beats) curBeat=0;
+  persist(); renderRing();
+}
+document.getElementById("beatsMinus").addEventListener("click",()=>setBeats(S.beats-1));
+document.getElementById("beatsPlus").addEventListener("click",()=>setBeats(S.beats+1));
+window.addEventListener("resize",renderRing);
+
+/* subdivision + timbre segments */
+const subSeg=document.getElementById("subSeg"), sndSeg=document.getElementById("sndSeg");
+function renderSegs(){
+  subSeg.querySelectorAll("button").forEach(b=>b.classList.toggle("on",+b.dataset.s===S.sub));
+  sndSeg.querySelectorAll("button").forEach(b=>b.classList.toggle("on",b.dataset.t===S.snd));
+}
+subSeg.addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b) return;
+  S.sub=+b.dataset.s; curSub=0; persist(); renderSegs();
+});
+sndSeg.addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b) return;
+  S.snd=b.dataset.t; persist(); renderSegs();
+  ensureAudio(); click(ctx.currentTime,"beat"); // preview
+});
+
+/* memory dots: long press = save, tap = recall */
+const memEl=document.getElementById("mem");
+function renderMem(){
+  memEl.innerHTML="";
+  S.mem.forEach((m,i)=>{
+    const d=document.createElement("button");
+    d.className="mdot"+(m?" set":"");
+    d.innerHTML=m?`${m.bpm}<small>${m.beats}/4 ×${m.sub}</small>`:`·<small>пусто</small>`;
+    let t=null,long=false;
+    const down=()=>{ long=false; t=setTimeout(()=>{ long=true; save(i,d); },550); };
+    const up=()=>{ clearTimeout(t); if(!long && m) recall(m); };
+    d.addEventListener("pointerdown",down);
+    d.addEventListener("pointerup",up);
+    d.addEventListener("pointercancel",()=>clearTimeout(t));
+    memEl.appendChild(d);
+  });
+}
+function save(i,el){
+  S.mem[i]={bpm:S.bpm,beats:S.beats,states:[...S.states],sub:S.sub,snd:S.snd};
+  persist(); renderMem();
+  const nd=memEl.children[i]; nd.classList.add("flash");
+  setTimeout(()=>nd.classList.remove("flash"),300);
+}
+function recall(m){
+  Object.assign(S,{bpm:m.bpm,beats:m.beats,states:[...m.states],sub:m.sub,snd:m.snd});
+  if(curBeat>=S.beats) curBeat=0;
+  curSub=0;
+  setBpm(S.bpm); renderRing(); renderSegs(); persist();
+}
+
+/* tap tempo */
+let taps=[];
+document.getElementById("tap").addEventListener("click",()=>{
+  ensureAudio();
+  const now=performance.now();
+  if(taps.length && now-taps[taps.length-1]>2000) taps=[];
+  taps.push(now); if(taps.length>5) taps.shift();
+  if(taps.length>=2){
+    const iv=[]; for(let i=1;i<taps.length;i++) iv.push(taps[i]-taps[i-1]);
+    setBpm(60000/(iv.reduce((a,b)=>a+b,0)/iv.length));
+  }
+  click(ctx.currentTime,"beat");
+});
+
+document.getElementById("vol").addEventListener("input",e=>{
+  S.vol=e.target.value/100;
+  if(master) master.gain.value=S.vol;
+  persist();
+});
+toggleBtn.addEventListener("click",()=>running?stop():start());
+
+/* init */
+setBpm(S.bpm);
+renderRing(); renderSegs(); renderMem();
+document.getElementById("vol").value=S.vol*100;
+
+if("serviceWorker" in navigator){
+  window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+}
+</script>
+</body>
+</html>
