@@ -1,62 +1,35 @@
-# Reel Practice — Mac v2
+# Reel Practice 2.7 — Source Notation + Content Backfill
 
-A local full-stack Mac application for turning saved guitar Reels/videos into a usable lesson library.
+This build keeps the existing local library and re-analyzes already downloaded videos in place. Existing Reels are **not downloaded again**.
 
-## What works now
+## What changed in 2.7
+- Re-analyzes every existing local lesson on first launch.
+- Distinguishes four source types: **TAB**, **standard notation**, **fretboard/chord diagram**, and **video only**.
+- Fixes the old binary TAB / No TAB logic: a fretboard diagram is no longer treated as "no notation" or as TAB.
+- Scans the whole video, keeps changed source-notation fragments in chronological order, and removes near-duplicates.
+- Builds one consolidated **Source TAB / Source Notation / Source Diagram sheet** from the material actually shown by the author. It does not invent notes.
+- Keeps the original extracted fragments underneath the consolidated sheet so every result can be checked against the source frame and timestamp.
+- OCR backfill reads text visibly present in the video and combines it with saved source metadata to create conservative Auto Tags and, when reliable, a more meaningful lesson title.
+- Auto Tags, My Tags, Collections, Favorites, Practice A–B loops, Notes, deletion/restore, Instagram import and local storage remain available.
+- Library filters are now **TAB / Diagrams / Notation / Video only** rather than the misleading TAB / Without TAB split.
 
-- Real FastAPI backend and SQLite database.
-- Import local video files.
-- Import an Instagram/TikTok/YouTube URL using `yt-dlp`.
-- Optional use of your Chrome/Safari/Firefox login session for Instagram URLs.
-- If a URL cannot be downloaded, the source is still saved and you can attach the video manually.
-- Automatic scan of the **entire video** for frames that visually resemble guitar TAB.
-- The TAB scanner only captures source frames; it does **not** invent or transcribe missing notes.
-- Manual source-TAB frame capture at the current playhead position.
-- A–B loop without speed changes.
-- Search and filters.
-- Delete → Recently Deleted → Restore / Delete forever.
-- Notes per lesson.
-- All data stays in the `data` folder on your Mac.
+## Important source-faithfulness rule
+Reel Practice only extracts notation that is actually present in the original Reel. If there is no source TAB, it does not generate one. A chord/fretboard diagram remains a diagram.
 
-## First launch
+The consolidated Source TAB is assembled from the author's actual notation fragments; the app does not guess missing fret numbers. Source fragments and timestamps remain available for verification.
 
-1. Unzip the folder somewhere permanent, for example `Applications/Reel Practice` or your Documents folder.
-2. Double-click **install.command** once.
-3. If macOS blocks it: Control-click → Open.
-4. When installation is finished, double-click **start.command**.
-5. Chrome/Safari opens `http://127.0.0.1:8787`.
+## Install / update
+1. Do **not** delete `~/Library/Application Support/Reel Practice/data` — that is your library.
+2. Quit the previous Reel Practice app/backend.
+3. Double-click **Install Reel Practice.command**.
+4. The installer updates the backend/app code and installs Tesseract through Homebrew if it is missing.
+5. Launch **Reel Practice.app**.
+6. The browser should open `http://127.0.0.1:8797/?v=270`.
 
-Do **not** open `static/index.html` directly. The backend is required.
+On first launch, existing downloaded videos are analyzed locally. This may use CPU for several minutes. Nothing is re-downloaded from Instagram.
 
-## Importing a Reel
+## Re-analyze manually
+Settings → **Re-analyze existing videos** reruns both content analysis and source-notation analysis for the existing library.
 
-Paste a full Reel URL into the large field at the top of Library and click **Import**.
-
-If Instagram allows access, the video is downloaded, indexed, thumbnailed, and automatically scanned for source TAB.
-
-If it does not, the item appears in **Pending imports**. Click **Attach video** and select the corresponding video file.
-
-## Instagram login
-
-Open **Settings** and choose the browser in which you are already logged into Instagram. Chrome is the default. Reel Practice asks `yt-dlp` to reuse that local browser session. Instagram can still block particular content; manual attach remains the safe fallback.
-
-## Source TAB
-
-After a video is ready, Reel Practice scans the full timeline for likely TAB frames. Detected source frames appear inside the lesson. Clicking one jumps the video to that time.
-
-Because false positives are possible, every capture can be deleted. Use **Analyze entire video** to rescan. Use **Capture current frame** if the detector missed a real TAB frame.
-
-## Data and backup
-
-All personal data is inside:
-
-`data/reel_practice.sqlite3`
-`data/videos/`
-`data/thumbs/`
-`data/tabs/`
-
-Back up the entire `data` folder to preserve your library.
-
-## Stop the app
-
-Return to the Terminal window opened by `start.command` and press **Control+C**.
+## Daily use
+After installation, use **Reel Practice.app**. Terminal is not required for normal use.
