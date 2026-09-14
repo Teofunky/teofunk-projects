@@ -1,0 +1,9 @@
+{
+  "name": "Reel Practice",
+  "short_name": "Reel Practice",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0b0d",
+  "theme_color": "#0a0b0d",
+  "description": "Turn saved guitar reels into a usable practice library."
+}
