@@ -107,9 +107,10 @@ def test_database_rejects_an_inferred_series_claiming_to_be_a_fact(synced_sessio
 
 
 def test_database_rejects_a_derived_series_claiming_to_be_a_fact(synced_session):
-    snapshot = _snapshot(synced_session, "open_meteo", "c" * 64)
+    """Median posted price is computed from observations; it is not itself one."""
+    snapshot = _snapshot(synced_session, "venue_public_pages", "c" * 64)
     with pytest.raises(DBAPIError, match="may not claim"):
-        _insert_observation(synced_session, "weather.friction_index.msk.daily", "fact", snapshot)
+        _insert_observation(synced_session, "venue.median_price.msk.daily", "fact", snapshot)
 
 
 def test_an_inferred_series_may_be_stored_as_an_estimate(synced_session):

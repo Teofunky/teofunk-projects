@@ -125,10 +125,16 @@ components:
     name_ru: Погодное трение
     description_ru: Насколько погода мешает выйти вечером из дома.
     inputs:
-      - series: weather.friction_index.msk.daily
+      - series: weather.temp_evening.msk.daily
+        transform: deviation_from_seasonal_norm
+      - series: weather.precip_evening.msk.daily
+        transform: log1p
+      - series: weather.wind_evening.msk.daily
         transform: raw
-    direction: negative
-    min_sources_for_publication: 1
+    direction: mixed
+    min_sources_for_publication: 2
+    caveats_ru:
+      - "Сводный индекс погодного трения не публикуется и в индекс не входит. В модель подаются три сырых компонента, а их влияние оценивается на истории, а не задаётся порогами (ADR 0010)."
 
 # ---------------------------------------------------------------------------
 # HOW COMPONENTS BECOME ONE NUMBER

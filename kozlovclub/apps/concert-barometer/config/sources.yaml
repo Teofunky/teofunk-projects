@@ -107,7 +107,7 @@ sources:
     kind: official_stat
     publisher: Банк России
     homepage_url: https://www.cbr.ru/hd_base/KeyRate/
-    endpoint_url: https://www.cbr.ru/dataservice/
+    endpoint_url: https://www.cbr.ru/DailyInfoWebServ/DailyInfo.asmx/KeyRate
     geography: RU
     access_policy: official_api
     requires_credentials: false
@@ -323,6 +323,12 @@ sources:
       /v1/forecast (model output, assertion_class=forecast) and
       /v1/archive (ERA5 reanalysis, assertion_class=fact, ~5 day lag).
       Backtests use archive values only, aligned to the vintage rule.
+      Hourly readings are aggregated over the evening window 18:00-23:59
+      Moscow time. A day missing any evening hour is recorded as absent with
+      missing_reason='partial_period', never averaged over a partial evening.
+      No composite "friction index" is published: the three raw components are
+      given to the model, which estimates their effect from history rather than
+      inheriting thresholds somebody picked by hand (ADR 0010).
     series:
       - code: weather.temp_evening.msk.daily
         name_ru: Температура в вечерние часы (18:00, 23:00, Москва)
@@ -346,14 +352,6 @@ sources:
         frequency: daily
         measures: direct
         assertion_class: fact
-        segment: weather
-        aggregation: mean
-      - code: weather.friction_index.msk.daily
-        name_ru: Индекс погодного трения
-        unit: index
-        frequency: daily
-        measures: derived
-        assertion_class: derived_metric
         segment: weather
         aggregation: mean
 

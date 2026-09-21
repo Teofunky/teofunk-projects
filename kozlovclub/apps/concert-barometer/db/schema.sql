@@ -13,7 +13,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict ZcYc77pECu4fH2dARv1X0NiGMNVw1h8Dnvem9qT7VIA2EkNxXM0e81Fh9WmMP5B
+\restrict cRZPMVqMbdU66Nfyb3JvSHSZxbj5hbjTlVUdqjMdNRDNfpiqKd7aIAQVkX8wPAX
 
 -- Dumped from database version 16.13 (Ubuntu 16.13-0ubuntu0.24.04.1)
 -- Dumped by pg_dump version 16.13 (Ubuntu 16.13-0ubuntu0.24.04.1)
@@ -377,11 +377,19 @@ CREATE TABLE norm.observation (
     methodology_notes text,
     transform character varying(80),
     created_at timestamp with time zone DEFAULT now() NOT NULL,
+    observed_date date NOT NULL,
     CONSTRAINT ck_observation_absent_value_has_a_reason CHECK (((value IS NOT NULL) OR (missing_reason IS NOT NULL))),
     CONSTRAINT ck_observation_period_is_known CHECK (((period)::text = ANY ((ARRAY['hour'::character varying, 'day'::character varying, 'week'::character varying, 'month'::character varying, 'quarter'::character varying, 'year'::character varying, 'point'::character varying])::text[]))),
     CONSTRAINT ck_observation_period_is_positive_length CHECK ((period_end > observed_at)),
     CONSTRAINT ck_observation_vintage_is_not_before_retrieval CHECK ((retrieved_at <= vintage_at))
 );
+
+
+--
+-- Name: COLUMN observation.observed_date; Type: COMMENT; Schema: norm; Owner: -
+--
+
+COMMENT ON COLUMN norm.observation.observed_date IS 'Moscow calendar date of observed_at. Set by trigger; the join key for daily data.';
 
 
 --
@@ -404,6 +412,27 @@ $$;
 --
 
 COMMENT ON FUNCTION norm.observation_as_of(p_as_of timestamp with time zone) IS 'Point-in-time panel. Backtests read through this function only (principle 8).';
+
+
+--
+-- Name: set_observed_date(); Type: FUNCTION; Schema: norm; Owner: -
+--
+
+CREATE FUNCTION norm.set_observed_date() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  NEW.observed_date := (NEW.observed_at AT TIME ZONE 'Europe/Moscow')::date;
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: FUNCTION set_observed_date(); Type: COMMENT; Schema: norm; Owner: -
+--
+
+COMMENT ON FUNCTION norm.set_observed_date() IS 'Derives the Moscow calendar date so no caller can supply a wrong one.';
 
 
 --
@@ -702,9 +731,17 @@ CREATE TABLE norm.event_observation (
     categories_listed bigint,
     raw_fields jsonb DEFAULT '{}'::jsonb NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
+    observed_date date NOT NULL,
     CONSTRAINT ck_event_observation_price_non_negative CHECK (((price_min IS NULL) OR (price_min >= (0)::numeric))),
     CONSTRAINT ck_event_observation_price_range_ordered CHECK (((price_min IS NULL) OR (price_max IS NULL) OR (price_max >= price_min)))
 );
+
+
+--
+-- Name: COLUMN event_observation.observed_date; Type: COMMENT; Schema: norm; Owner: -
+--
+
+COMMENT ON COLUMN norm.event_observation.observed_date IS 'Moscow calendar date of observed_at. Set by trigger.';
 
 
 --
@@ -767,7 +804,8 @@ CREATE VIEW norm.observation_current AS
     quality_flags,
     methodology_notes,
     transform,
-    created_at
+    created_at,
+    observed_date
    FROM norm.observation
   ORDER BY series_id, observed_at, vintage_at DESC;
 
@@ -886,6 +924,7 @@ CREATE VIEW norm.observation_provenance AS
     s.unit,
     s.measures,
     o.observed_at,
+    o.observed_date,
     o.period,
     o.period_end,
     o.value,
@@ -1568,10 +1607,24 @@ CREATE INDEX ix_event_obs_snapshot ON norm.event_observation USING btree (snapsh
 
 
 --
+-- Name: ix_event_obs_venue_date; Type: INDEX; Schema: norm; Owner: -
+--
+
+CREATE INDEX ix_event_obs_venue_date ON norm.event_observation USING btree (venue_id, observed_date);
+
+
+--
 -- Name: ix_event_obs_venue_starts; Type: INDEX; Schema: norm; Owner: -
 --
 
 CREATE INDEX ix_event_obs_venue_starts ON norm.event_observation USING btree (venue_id, starts_at);
+
+
+--
+-- Name: ix_observation_series_date; Type: INDEX; Schema: norm; Owner: -
+--
+
+CREATE INDEX ix_observation_series_date ON norm.observation USING btree (series_id, observed_date);
 
 
 --
@@ -1708,6 +1761,13 @@ CREATE TRIGGER trg_event_observation_append_only BEFORE DELETE OR UPDATE ON norm
 
 
 --
+-- Name: event_observation trg_event_observation_observed_date; Type: TRIGGER; Schema: norm; Owner: -
+--
+
+CREATE TRIGGER trg_event_observation_observed_date BEFORE INSERT ON norm.event_observation FOR EACH ROW EXECUTE FUNCTION norm.set_observed_date();
+
+
+--
 -- Name: information_attention trg_information_attention_append_only; Type: TRIGGER; Schema: norm; Owner: -
 --
 
@@ -1726,6 +1786,13 @@ CREATE TRIGGER trg_observation_append_only BEFORE DELETE OR UPDATE ON norm.obser
 --
 
 CREATE TRIGGER trg_observation_assertion_class BEFORE INSERT ON norm.observation FOR EACH ROW EXECUTE FUNCTION norm.enforce_assertion_class();
+
+
+--
+-- Name: observation trg_observation_observed_date; Type: TRIGGER; Schema: norm; Owner: -
+--
+
+CREATE TRIGGER trg_observation_observed_date BEFORE INSERT ON norm.observation FOR EACH ROW EXECUTE FUNCTION norm.set_observed_date();
 
 
 --
@@ -1906,5 +1973,5 @@ ALTER TABLE ONLY registry.series
 -- PostgreSQL database dump complete
 --
 
-\unrestrict ZcYc77pECu4fH2dARv1X0NiGMNVw1h8Dnvem9qT7VIA2EkNxXM0e81Fh9WmMP5B
+\unrestrict cRZPMVqMbdU66Nfyb3JvSHSZxbj5hbjTlVUdqjMdNRDNfpiqKd7aIAQVkX8wPAX
 

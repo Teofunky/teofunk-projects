@@ -45,6 +45,52 @@ def engine(database_url: str):
     return eng
 
 
+#: Data tables emptied before the suite runs. Registry tables are left alone:
+#: they are rebuilt from config by the synced_session fixture.
+DATA_TABLES = (
+    "model.forecast_evaluation",
+    "model.backtest",
+    "model.forecast",
+    "model.index_value",
+    "model.model_run",
+    "feature.feature_value",
+    "feature.feature_definition",
+    "norm.event_diff",
+    "norm.event_observation",
+    "norm.information_attention",
+    "norm.observation",
+    "raw.snapshot_parse_error",
+    "raw.snapshot",
+    "ops.agent_invocation",
+    "ops.data_quality_check",
+    "ops.source_health",
+    "ops.pipeline_run",
+)
+
+
+@pytest.fixture(scope="session", autouse=True)
+def clean_database(engine):
+    """Start the suite from an empty data set.
+
+    Without this, anything previously written (a demo run, a manual ingest)
+    leaks into assertions about row counts, and the suite passes or fails
+    depending on what happened to be in the database. Append-only triggers
+    block DELETE, so this truncates.
+
+    It refuses to touch a production database. A test suite that can empty
+    production is a worse problem than a flaky test.
+    """
+    settings = Settings(database_url=str(engine.url))
+    if settings.environment == "production":
+        pytest.exit("refusing to run the test suite against a production database")
+
+    with engine.begin() as conn:
+        db_name = conn.execute(text("SELECT current_database()")).scalar_one()
+        conn.execute(text(f"TRUNCATE {', '.join(DATA_TABLES)} CASCADE"))
+    assert db_name  # documents which database was cleared if the assertion fires
+    return None
+
+
 @pytest.fixture
 def session(engine) -> Session:
     """A session rolled back at the end, so tests never persist anything."""

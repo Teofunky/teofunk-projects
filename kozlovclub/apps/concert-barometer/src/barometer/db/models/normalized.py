@@ -73,12 +73,24 @@ class Observation(Base):
         ),
         CheckConstraint("retrieved_at <= vintage_at", name="vintage_is_not_before_retrieval"),
         Index("ix_observation_series_observed", "series_id", "observed_at"),
+        Index("ix_observation_series_date", "series_id", "observed_date"),
         Index("ix_observation_snapshot", "snapshot_id"),
         Index("ix_observation_vintage", "vintage_at"),
         {"schema": SCHEMA_NORM},
     )
 
     observed_at: Mapped[dt.datetime] = mapped_column(TZDateTime, nullable=False)
+    #: Moscow calendar date of observed_at, set by a BEFORE INSERT trigger
+    #: (migration 0002). This is the join key for daily data: casting observed_at
+    #: to a date in a UTC session lands on the previous day, because a Moscow
+    #: midnight is 21:00 UTC. Never supplied by the application.
+    observed_date: Mapped[dt.date] = mapped_column(
+        Date,
+        nullable=False,
+        comment=(
+            "Moscow calendar date of observed_at. Set by trigger; the join key for daily data."
+        ),
+    )
     series_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey(f"{SCHEMA_REGISTRY}.series.id", ondelete="RESTRICT"), nullable=False
     )
@@ -138,10 +150,15 @@ class EventObservation(Base):
         Index("ix_event_obs_venue_starts", "venue_id", "starts_at"),
         Index("ix_event_obs_snapshot", "snapshot_id"),
         Index("ix_event_obs_key", "venue_id", "event_key", "observed_at"),
+        Index("ix_event_obs_venue_date", "venue_id", "observed_date"),
         {"schema": SCHEMA_NORM},
     )
 
     observed_at: Mapped[dt.datetime] = mapped_column(TZDateTime, nullable=False)
+    #: Set by trigger, as on norm.observation. See migration 0002.
+    observed_date: Mapped[dt.date] = mapped_column(
+        Date, nullable=False, comment="Moscow calendar date of observed_at. Set by trigger."
+    )
     id: Mapped[int] = mapped_column(BigInteger, autoincrement=True, nullable=False)
 
     venue_id: Mapped[uuid.UUID] = mapped_column(

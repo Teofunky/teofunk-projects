@@ -41,6 +41,14 @@ sync:  ## Project config/*.yaml into registry.* tables
 bootstrap: install up migrate sync  ## One command from nothing to a working stack
 	$(PY) -m barometer.cli db status
 
+.PHONY: ingest
+ingest:  ## Collect every cleared, implemented source (needs network)
+	$(PY) -m barometer.cli ingest all --days 14
+
+.PHONY: demo
+demo:  ## Run the pipeline on stored fixtures, no network needed
+	$(PY) scripts/demo_offline.py --reset
+
 .PHONY: validate
 validate:  ## Validate every registry file
 	$(PY) -m barometer.cli config validate
