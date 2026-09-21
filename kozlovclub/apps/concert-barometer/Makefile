@@ -15,6 +15,14 @@ help:  ## Show this help
 
 .PHONY: install
 install: .venv  ## Install the project and dev dependencies
+	# Only what the current code actually imports. The quant and storage extras
+	# belong to phases that have not been written yet, and lightgbm in
+	# particular is a large dependency that can fail a first install on macOS
+	# for no benefit today. Add them with `make install-quant` when Phase 5 lands.
+	$(PIP) install -q -e '.[dev]'
+
+.PHONY: install-quant
+install-quant: .venv  ## Add the modelling dependencies (needed from Phase 5)
 	$(PIP) install -q -e '.[dev,quant,storage]'
 
 .PHONY: up
@@ -38,8 +46,21 @@ sync:  ## Project config/*.yaml into registry.* tables
 	$(PY) -m barometer.cli db sync-registry
 
 .PHONY: bootstrap
-bootstrap: install up migrate sync  ## One command from nothing to a working stack
+bootstrap: doctor install up migrate sync  ## One command from nothing to a working stack
 	$(PY) -m barometer.cli db status
+	@echo
+	@echo "Ready. Next:"
+	@echo "  make demo     run the pipeline on fixtures, no network needed"
+	@echo "  make ingest   collect the four cleared sources (needs network)"
+	@echo "  make test     run the test suite"
+
+.PHONY: bootstrap-no-docker
+bootstrap-no-docker: install migrate sync  ## Same, against a PostgreSQL you already run
+	$(PY) -m barometer.cli db status
+
+.PHONY: doctor
+doctor:  ## Check the prerequisites before anything else fails confusingly
+	@./scripts/doctor.sh
 
 .PHONY: ingest
 ingest:  ## Collect every cleared, implemented source (needs network)
