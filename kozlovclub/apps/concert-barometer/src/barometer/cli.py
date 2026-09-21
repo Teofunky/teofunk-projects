@@ -295,7 +295,9 @@ def cmd_observations_show(args: argparse.Namespace) -> int:
                        assertion_class, quality_flags, source_code, content_hash,
                        request_url, available_at
                 FROM norm.observation_provenance
-                WHERE (:series IS NULL OR series_code = :series)
+                -- The cast is required: without it PostgreSQL cannot infer a
+                -- type for a bare parameter used only in `IS NULL`.
+                WHERE (CAST(:series AS text) IS NULL OR series_code = :series)
                 ORDER BY observed_date DESC, series_code
                 LIMIT :limit
                 """

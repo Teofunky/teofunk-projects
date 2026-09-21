@@ -10,38 +10,69 @@
 
 **Состояние:** Phase 0, Phase 1 и первая половина Phase 2 выполнены. Схема БД,
 реестры, провенанс, конвейер сбора и четыре адаптера реальных источников
-работают и покрыты тестами (126). Индекс и прогноз это Phase 5-7.
+работают и покрыты тестами (137). Индекс и прогноз это Phase 5-7.
 Подробности: [`docs/STATE.md`](docs/STATE.md).
 
 ---
 
-## Быстрый старт
+## Как запустить
+
+Нужны **Python 3.11+** и **Docker** (только чтобы поднять PostgreSQL).
+Проверить, чего не хватает: `make doctor`.
 
 ```bash
-cp .env.example .env        # заполнить BAROMETER_HTTP_CONTACT
-make bootstrap              # venv, зависимости, БД, миграции, реестры
+tar -xzf concert-barometer.tar.gz
+cd concert-barometer
+make bootstrap
 ```
 
-`make bootstrap` поднимает PostgreSQL с TimescaleDB и MinIO, применяет
-миграции, проецирует `config/*.yaml` в таблицы и печатает состояние.
+`make bootstrap` создаст виртуальное окружение, поставит зависимости, поднимет
+PostgreSQL с TimescaleDB и MinIO, применит миграции и зальёт реестры. Файл
+`.env` не обязателен: значения по умолчанию совпадают с `docker-compose.yml`.
+
+Дальше:
 
 ```bash
-make validate    # проверить все реестры
-make test        # 126 тестов
-make check       # то же, что делает CI
-
-make ingest      # собрать четыре разрешённых источника (нужна сеть)
-make demo        # тот же конвейер на фикстурах, без сети
+make demo      # весь конвейер на фикстурах, сеть не нужна
+make ingest    # собрать четыре разрешённых источника (нужна сеть)
+make test      # 137 тестов
 ```
 
-`make demo` прогоняет весь боевой путь (проверка разрешений, runner, запись
+`make demo` прогоняет боевой путь целиком (проверка разрешений, runner, запись
 провенанса, триггеры БД, представления) и подменяет только сетевой вызов. Это
 способ увидеть систему работающей, не дожидаясь доступа к источникам.
 
-Без Docker система работает на обычном PostgreSQL 14+: TimescaleDB
-опционален (см. [ADR 0008](docs/adr/0008-timescaledb-is-optional.md)).
+### Без Docker
 
----
+Если PostgreSQL 14+ уже где-то есть:
+
+```bash
+createdb barometer
+export BAROMETER_DATABASE_URL='postgresql+psycopg://user:pass@localhost:5432/barometer'
+make bootstrap-no-docker
+```
+
+TimescaleDB опционален: без него схема использует BRIN-индексы
+([ADR 0008](docs/adr/0008-timescaledb-is-optional.md)).
+
+### Команда barometer
+
+После установки она лежит в `.venv/bin`. Либо активируйте окружение
+(`source .venv/bin/activate`), либо вызывайте напрямую:
+
+```bash
+./.venv/bin/barometer config validate
+```
+
+### Если что-то пошло не так
+
+| симптом | причина |
+|---------|---------|
+| `docker: command not found` | поставить Docker Desktop или идти путём без Docker |
+| `Cannot connect to the Docker daemon` | Docker установлен, но не запущен |
+| `connection refused` на 5432 | БД не поднялась: `docker compose ps` |
+| `barometer: command not found` | окружение не активировано, см. выше |
+| `ingest` падает с ошибками сети | источники недоступны из вашей сети, проверьте `make demo` |
 
 ## Что отличает эту систему
 
