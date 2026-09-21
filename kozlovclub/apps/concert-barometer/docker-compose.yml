@@ -1,0 +1,46 @@
+# One command to a working local stack:  make up
+#
+# TimescaleDB is used here because production wants it. The schema also runs on
+# plain PostgreSQL 14+ (see docs/adr/0008-timescaledb-is-optional.md), which is
+# what CI uses.
+
+services:
+  db:
+    image: timescale/timescaledb-ha:pg16
+    environment:
+      POSTGRES_USER: barometer
+      POSTGRES_PASSWORD: barometer
+      POSTGRES_DB: barometer
+      TZ: UTC
+    ports:
+      - "5432:5432"
+    volumes:
+      - barometer_db:/home/postgres/pgdata/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U barometer -d barometer"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  minio:
+    # Stands in for S3 so the storage path is exercised locally exactly as in
+    # production, rather than only being tested on the filesystem backend.
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: barometer
+      MINIO_ROOT_PASSWORD: barometer123
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - barometer_minio:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  barometer_db:
+  barometer_minio:

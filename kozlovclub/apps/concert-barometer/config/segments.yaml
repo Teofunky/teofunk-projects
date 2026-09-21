@@ -1,0 +1,251 @@
+# Концертный барометр: слои сегментов для дашборда
+#
+# Every checkbox layer in the UI is declared here. A layer is publishable only when
+# `min_series` distinct series with data exist for the requested date; otherwise the
+# UI shows the layer greyed out with the reason, never an interpolated line.
+#
+# `unit_class` is what stops the chart from lying: series of different unit_class may
+# never share a value axis. Compare mode forces index_100 normalisation across classes.
+
+schema_version: 1
+
+unit_classes:
+  - code: index
+    name_ru: Индекс
+    axis_label_ru: "Индекс (100 = база)"
+  - code: money_nominal
+    name_ru: Деньги (номинал)
+    axis_label_ru: "₽"
+    never_share_axis_with: [index, count, percent]
+  - code: count
+    name_ru: Количество
+    axis_label_ru: "шт."
+    never_share_axis_with: [index, money_nominal, percent]
+  - code: percent
+    name_ru: Проценты
+    axis_label_ru: "%"
+    never_share_axis_with: [money_nominal, count]
+  - code: physical
+    name_ru: Физическая величина
+    axis_label_ru: ""
+    never_share_axis_with: [index, money_nominal, count, percent]
+
+segments:
+  - code: market_total
+    name_ru: Общая тенденция рынка
+    kind: composite
+    parent: null
+    display_order: 10
+    unit_class: index
+    min_series: 3
+    source_of_value: model.index_value
+    index_code: barometer_now
+
+  - code: demand_forecast
+    name_ru: Прогноз внешнего спроса / продаж
+    kind: composite
+    parent: market_total
+    display_order: 20
+    unit_class: index
+    min_series: 3
+    source_of_value: model.forecast
+    label_gate: calibration          # label controlled by index_definition.calibration
+    requires_interval: true
+
+  - code: concert_industry
+    name_ru: Концертная индустрия
+    kind: category
+    parent: market_total
+    display_order: 30
+    unit_class: index
+    min_series: 2
+
+  - code: jazz_clubs
+    name_ru: Джазовые клубы
+    kind: category
+    parent: concert_industry
+    display_order: 40
+    unit_class: index
+    min_series: 1
+    venue_category: jazz_club
+
+  - code: theatres
+    name_ru: Театры
+    kind: category
+    parent: concert_industry
+    display_order: 50
+    unit_class: index
+    min_series: 1
+    venue_category: theatre
+
+  - code: concert_halls
+    name_ru: Концертные залы
+    kind: category
+    parent: concert_industry
+    display_order: 60
+    unit_class: index
+    min_series: 1
+    venue_category: concert_hall
+
+  - code: music_clubs
+    name_ru: Музыкальные клубы
+    kind: category
+    parent: concert_industry
+    display_order: 70
+    unit_class: index
+    min_series: 1
+    venue_category: music_club
+
+  - code: standup
+    name_ru: Stand-up / comedy
+    kind: category
+    parent: concert_industry
+    display_order: 80
+    unit_class: index
+    min_series: 1
+    venue_category: standup
+
+  - code: festivals
+    name_ru: Фестивали и крупные события
+    kind: category
+    parent: concert_industry
+    display_order: 90
+    unit_class: index
+    min_series: 1
+    venue_category: festival
+
+  - code: catering
+    name_ru: Общепит
+    kind: category
+    parent: market_total
+    display_order: 100
+    unit_class: index
+    min_series: 1
+
+  - code: restaurants
+    name_ru: Рестораны
+    kind: category
+    parent: catering
+    display_order: 110
+    unit_class: index
+    min_series: 1
+
+  - code: bars
+    name_ru: Бары
+    kind: category
+    parent: catering
+    display_order: 120
+    unit_class: index
+    min_series: 1
+
+  - code: cafes
+    name_ru: Кафе
+    kind: category
+    parent: catering
+    display_order: 130
+    unit_class: index
+    min_series: 1
+
+  - code: retail
+    name_ru: Магазины / ритейл
+    kind: category
+    parent: market_total
+    display_order: 140
+    unit_class: index
+    min_series: 1
+
+  - code: mobility
+    name_ru: Транспорт / мобильность
+    kind: driver
+    parent: null
+    display_order: 150
+    unit_class: index
+    min_series: 1
+
+  - code: search_intent
+    name_ru: Поисковый спрос
+    kind: driver
+    parent: null
+    display_order: 160
+    unit_class: index
+    min_series: 2
+
+  - code: economy
+    name_ru: Экономика
+    kind: driver
+    parent: null
+    display_order: 170
+    unit_class: index
+    min_series: 2
+
+  - code: consumer
+    name_ru: Потребление
+    kind: driver
+    parent: null
+    display_order: 175
+    unit_class: index
+    min_series: 1
+
+  - code: competition_pressure
+    name_ru: Конкурентное давление
+    kind: driver
+    parent: null
+    display_order: 178
+    unit_class: index
+    min_series: 1
+    proxy_badge_ru: "прокси"
+
+  - code: event_stress
+    name_ru: Event Stress
+    kind: driver
+    parent: null
+    display_order: 180
+    unit_class: index
+    min_series: 1
+
+  - code: weather
+    name_ru: Погода
+    kind: driver
+    parent: null
+    display_order: 190
+    unit_class: physical
+    min_series: 1
+
+  - code: calibration
+    name_ru: Калибровочный якорь (внутренний)
+    kind: internal
+    parent: null
+    display_order: 999
+    unit_class: count
+    min_series: 1
+    visible_in_ui: false
+
+view_modes:
+  - code: single
+    name_ru: Один ряд
+    max_layers: 1
+  - code: compare
+    name_ru: Сравнение
+    min_layers: 2
+    max_layers: 5
+    forces_index_100: true
+  - code: contribution
+    name_ru: Вклад в общий индекс
+    requires: model.index_value.contributions
+    note_ru: "Вклады считаются из загрузок динамической факторной модели, а не назначаются."
+  - code: lag_correlation
+    name_ru: Лаговая корреляция
+    lags_days: [0, 7, 14, 30]
+    requires_deseasonalised: true
+    note_ru: >
+      Показывается как сырая, так и десезонализованная корреляция. Корреляция не
+      является причинностью (принцип 6); интерфейс обязан выводить это предупреждение
+      рядом с любым значением коэффициента.
+  - code: forecast
+    name_ru: Прогноз
+    horizons_days: [7, 14, 30, 90]
+    requires_interval: true
+
+presets:
+  storage: user_preset table
+  shareable: false

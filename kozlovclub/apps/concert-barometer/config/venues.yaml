@@ -1,0 +1,397 @@
+# Концертный барометр: реестр площадок (competitor panel)
+#
+# SEED CATEGORIES, NOT CONCLUSIONS. This file declares WHO is observed and under
+# WHAT access policy. It does not declare that any of them is a competitor in any
+# economic sense; that is a finding, not a configuration value.
+#
+# INVARIANTS ENFORCED BY THE LOADER AND BY THE DB (migration 0001):
+#   * capacity may be non-null ONLY together with capacity_source_url.  (prompt: "capacity only if sourced")
+#   * enabled: true requires robots_allows_crawl: true AND access_reviewed_at set.
+#   * url_verified: false means nobody has confirmed the URL resolves; the fetcher
+#     refuses to call it. These are seeds for a human to verify, not verified facts.
+#
+# Nothing here is fetched until a human runs `barometer venues review` and records
+# the robots.txt and ToS outcome.
+
+schema_version: 1
+city: Москва
+default_geography: RU-MOW
+
+categories:
+  - code: jazz_club
+    letter: A
+    name_ru: Джазовые клубы
+  - code: music_club
+    letter: B
+    name_ru: Музыкальные клубы
+  - code: concert_hall
+    letter: C
+    name_ru: Концертные залы
+  - code: theatre
+    letter: D
+    name_ru: Театры и мюзиклы
+  - code: standup
+    letter: E
+    name_ru: Stand-up / comedy
+  - code: festival
+    letter: F
+    name_ru: Фестивали и крупные события
+  - code: restaurant_bar
+    letter: G
+    name_ru: Рестораны и бары с живой музыкой
+
+venues:
+
+  # --- A. JAZZ CLUBS ---------------------------------------------------------
+  - code: kozlov_club
+    canonical_name: Alexey Kozlov Club
+    canonical_name_ru: Клуб Алексея Козлова
+    category: jazz_club
+    website_url: https://kozlovclub.ru/
+    url_verified: true
+    ticket_providers: [ticketscloud]
+    relationship: first_party          # own venue, authorised data, not a proxy
+    source_access_policy: authorised
+    robots_allows_crawl: null
+    access_reviewed_at: null
+    capacity: null
+    capacity_source_url: null
+    enabled: false
+    notes_ru: >
+      Собственная площадка. Данные берутся из авторизованного API TicketsCloud,
+      а не парсингом. Используется как калибровочный якорь, не как элемент панели
+      конкурентов: включение собственных продаж в рыночный индекс создаёт циклическую
+      зависимость (см. ADR 0006).
+
+  - code: esse_jazz
+    canonical_name: Esse Jazz Club
+    canonical_name_ru: Джаз-клуб «Эссе»
+    category: jazz_club
+    website_url: https://esse-jazz.ru/
+    url_verified: false
+    ticket_providers: []
+    relationship: panel
+    source_access_policy: pending_review
+    robots_allows_crawl: null
+    access_reviewed_at: null
+    capacity: null
+    capacity_source_url: null
+    enabled: false
+
+  - code: butman_club
+    canonical_name: Igor Butman Jazz Club
+    canonical_name_ru: Джаз-клуб Игоря Бутмана
+    category: jazz_club
+    website_url: https://butmanclub.ru/
+    url_verified: false
+    ticket_providers: []
+    relationship: panel
+    source_access_policy: pending_review
+    robots_allows_crawl: null
+    access_reviewed_at: null
+    capacity: null
+    capacity_source_url: null
+    enabled: false
+
+  - code: jazz_club_sc
+    canonical_name: Jazz Club of the Composers Union
+    canonical_name_ru: Джаз-клуб Союза композиторов
+    category: jazz_club
+    website_url: null
+    url_verified: false
+    ticket_providers: []
+    relationship: panel
+    source_access_policy: pending_review
+    robots_allows_crawl: null
+    access_reviewed_at: null
+    capacity: null
+    capacity_source_url: null
+    enabled: false
+
+  - code: jam_club
+    canonical_name: JAM Club
+    canonical_name_ru: JAM Club
+    category: jazz_club
+    website_url: null
+    url_verified: false
+    ticket_providers: []
+    relationship: panel
+    source_access_policy: pending_review
+    robots_allows_crawl: null
+    access_reviewed_at: null
+    capacity: null
+    capacity_source_url: null
+    enabled: false
+
+  # --- B. MUSIC CLUBS --------------------------------------------------------
+  - code: sixteen_tons
+    canonical_name: 16 Tons
+    canonical_name_ru: 16 Тонн
+    category: music_club
+    website_url: https://16tons.ru/
+    url_verified: false
+    ticket_providers: []
+    relationship: panel
+    source_access_policy: pending_review
+    robots_allows_crawl: null
+    access_reviewed_at: null
+    capacity: null
+    capacity_source_url: null
+    enabled: false
+
+  - code: aglomerat
+    canonical_name: Aglomerat
+    canonical_name_ru: Агломерат
+    category: music_club
+    website_url: null
+    url_verified: false
+    ticket_providers: []
+    relationship: panel
+    source_access_policy: pending_review
+    robots_allows_crawl: null
+    access_reviewed_at: null
+    capacity: null
+    capacity_source_url: null
+    enabled: false
+
+  - code: mumiy_troll_bar
+    canonical_name: Mumiy Troll Music Bar
+    canonical_name_ru: Mumiy Troll Music Bar
+    category: music_club
+    website_url: null
+    url_verified: false
+    ticket_providers: []
+    relationship: panel
+    source_access_policy: pending_review
+    robots_allows_crawl: null
+    access_reviewed_at: null
+    capacity: null
+    capacity_source_url: null
+    enabled: false
+
+  - code: powerhouse
+    canonical_name: Powerhouse Moscow
+    canonical_name_ru: Powerhouse
+    category: music_club
+    website_url: null
+    url_verified: false
+    ticket_providers: []
+    relationship: panel
+    source_access_policy: pending_review
+    robots_allows_crawl: null
+    access_reviewed_at: null
+    capacity: null
+    capacity_source_url: null
+    enabled: false
+
+  # --- C. CONCERT HALLS ------------------------------------------------------
+  - code: zaryadye_hall
+    canonical_name: Zaryadye Concert Hall
+    canonical_name_ru: Концертный зал «Зарядье»
+    category: concert_hall
+    website_url: https://zaryadyehall.com/
+    url_verified: false
+    ticket_providers: []
+    relationship: panel
+    source_access_policy: pending_review
+    robots_allows_crawl: null
+    access_reviewed_at: null
+    capacity: null
+    capacity_source_url: null
+    enabled: false
+
+  - code: mmdm
+    canonical_name: Moscow International House of Music
+    canonical_name_ru: Московский международный Дом музыки
+    category: concert_hall
+    website_url: https://mmdm.ru/
+    url_verified: false
+    ticket_providers: []
+    relationship: panel
+    source_access_policy: pending_review
+    robots_allows_crawl: null
+    access_reviewed_at: null
+    capacity: null
+    capacity_source_url: null
+    enabled: false
+
+  - code: crocus_city_hall
+    canonical_name: Crocus City Hall
+    canonical_name_ru: Крокус Сити Холл
+    category: concert_hall
+    website_url: null
+    url_verified: false
+    ticket_providers: []
+    relationship: panel
+    source_access_policy: pending_review
+    robots_allows_crawl: null
+    access_reviewed_at: null
+    capacity: null
+    capacity_source_url: null
+    enabled: false
+
+  - code: mts_live_hall
+    canonical_name: MTS Live Hall
+    canonical_name_ru: МТС Live Холл
+    category: concert_hall
+    website_url: null
+    url_verified: false
+    ticket_providers: []
+    relationship: panel
+    source_access_policy: pending_review
+    robots_allows_crawl: null
+    access_reviewed_at: null
+    capacity: null
+    capacity_source_url: null
+    enabled: false
+
+  # --- D. THEATRES / MUSICALS ------------------------------------------------
+  - code: mdm_theatre
+    canonical_name: MDM Musical Theatre
+    canonical_name_ru: Музыкальный театр МДМ
+    category: theatre
+    website_url: null
+    url_verified: false
+    ticket_providers: []
+    relationship: panel
+    source_access_policy: pending_review
+    robots_allows_crawl: null
+    access_reviewed_at: null
+    capacity: null
+    capacity_source_url: null
+    enabled: false
+
+  - code: operetta_theatre
+    canonical_name: Moscow Operetta Theatre
+    canonical_name_ru: Московский театр оперетты
+    category: theatre
+    website_url: null
+    url_verified: false
+    ticket_providers: []
+    relationship: panel
+    source_access_policy: pending_review
+    robots_allows_crawl: null
+    access_reviewed_at: null
+    capacity: null
+    capacity_source_url: null
+    enabled: false
+
+  - code: theatre_of_nations
+    canonical_name: Theatre of Nations
+    canonical_name_ru: Театр Наций
+    category: theatre
+    website_url: null
+    url_verified: false
+    ticket_providers: []
+    relationship: panel
+    source_access_policy: pending_review
+    robots_allows_crawl: null
+    access_reviewed_at: null
+    capacity: null
+    capacity_source_url: null
+    enabled: false
+
+  # --- E. STAND-UP / COMEDY --------------------------------------------------
+  - code: standup_club_1
+    canonical_name: Stand Up Club #1
+    canonical_name_ru: Stand Up Club #1
+    category: standup
+    website_url: null
+    url_verified: false
+    ticket_providers: []
+    relationship: panel
+    source_access_policy: pending_review
+    robots_allows_crawl: null
+    access_reviewed_at: null
+    capacity: null
+    capacity_source_url: null
+    enabled: false
+
+  - code: standup_store
+    canonical_name: Standup Store Moscow
+    canonical_name_ru: Standup Store Moscow
+    category: standup
+    website_url: null
+    url_verified: false
+    ticket_providers: []
+    relationship: panel
+    source_access_policy: pending_review
+    robots_allows_crawl: null
+    access_reviewed_at: null
+    capacity: null
+    capacity_source_url: null
+    enabled: false
+
+  # --- F. FESTIVALS ----------------------------------------------------------
+  - code: usadba_jazz
+    canonical_name: Usadba Jazz Festival
+    canonical_name_ru: Фестиваль «Усадьба Jazz»
+    category: festival
+    website_url: null
+    url_verified: false
+    ticket_providers: []
+    relationship: panel
+    source_access_policy: pending_review
+    robots_allows_crawl: null
+    access_reviewed_at: null
+    capacity: null
+    capacity_source_url: null
+    enabled: false
+    notes_ru: >
+      Сезонное событие. В индексе учитывается как импульс конкурентного давления
+      в конкретные даты, а не как постоянный ряд.
+
+  - code: moscow_jazz_festival
+    canonical_name: Moscow Jazz Festival
+    canonical_name_ru: Московский джазовый фестиваль
+    category: festival
+    website_url: null
+    url_verified: false
+    ticket_providers: []
+    relationship: panel
+    source_access_policy: pending_review
+    robots_allows_crawl: null
+    access_reviewed_at: null
+    capacity: null
+    capacity_source_url: null
+    enabled: false
+
+  # --- G. RESTAURANTS / BARS WITH LIVE MUSIC ---------------------------------
+  - code: kitaysky_lyotchik
+    canonical_name: Chinese Pilot Jao Da
+    canonical_name_ru: Китайский лётчик Джао Да
+    category: restaurant_bar
+    website_url: null
+    url_verified: false
+    ticket_providers: []
+    relationship: panel
+    source_access_policy: pending_review
+    robots_allows_crawl: null
+    access_reviewed_at: null
+    capacity: null
+    capacity_source_url: null
+    enabled: false
+
+  - code: mezzo_forte
+    canonical_name: Mezzo Forte
+    canonical_name_ru: Меццо Форте
+    category: restaurant_bar
+    website_url: null
+    url_verified: false
+    ticket_providers: []
+    relationship: panel
+    source_access_policy: pending_review
+    robots_allows_crawl: null
+    access_reviewed_at: null
+    capacity: null
+    capacity_source_url: null
+    enabled: false
+
+review_workflow:
+  steps:
+    - "Verify the venue exists and the URL resolves; set url_verified."
+    - "Fetch and record robots.txt; set robots_allows_crawl and robots_checked_at."
+    - "Read the site's terms of use; record source_access_policy."
+    - "Only then may enabled be set to true."
+  recorded_in: registry.venue
+  command: barometer venues review

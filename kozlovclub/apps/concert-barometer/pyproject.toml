@@ -1,0 +1,90 @@
+[project]
+name = "concert-barometer"
+version = "0.1.0"
+description = "Концертный барометр: external market-intelligence and forecasting system for Moscow paid offline leisure demand"
+requires-python = ">=3.11"
+license = { text = "Proprietary" }
+
+dependencies = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.32",
+    "pydantic>=2.9",
+    "pydantic-settings>=2.6",
+    "sqlalchemy>=2.0.36",
+    "alembic>=1.14",
+    "psycopg[binary]>=3.2",
+    "pyyaml>=6.0",
+    "httpx>=0.27",
+    "tenacity>=9.0",
+    "structlog>=24.4",
+    "python-dateutil>=2.9",
+    "polars>=1.12",
+    "pandas>=2.2",
+    "numpy>=1.26",
+]
+
+[project.optional-dependencies]
+quant = [
+    "statsmodels>=0.14",
+    "scikit-learn>=1.5",
+    "lightgbm>=4.5",
+]
+orchestration = [
+    "prefect>=3.1",
+]
+storage = [
+    "boto3>=1.35",
+]
+dev = [
+    "pytest>=8.3",
+    "pytest-cov>=6.0",
+    "ruff>=0.7",
+    "mypy>=1.13",
+    "types-PyYAML",
+    "types-python-dateutil",
+]
+
+[project.scripts]
+barometer = "barometer.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/barometer"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-q --strict-markers"
+markers = [
+    "db: requires a live PostgreSQL database (set BAROMETER_DATABASE_URL)",
+    "network: requires outbound network access to a live external source",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+ignore = ["B008"]
+# Cyrillic text is expected throughout: this is a Russian-language product.
+allowed-confusables = ["\u0430", "\u0435", "\u043e", "\u0440", "\u0441", "\u0445", "\u0443", "\u00ab", "\u00bb"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["barometer", "tests"]
+
+[tool.ruff.lint.per-file-ignores]
+# Alembic writes these; reformatting them makes migration diffs unreadable.
+"migrations/versions/*.py" = ["E501", "I001"]
+
+[tool.mypy]
+python_version = "3.11"
+packages = ["barometer"]
+mypy_path = "src"
+strict_optional = true
+warn_unused_ignores = true
+disallow_untyped_defs = false

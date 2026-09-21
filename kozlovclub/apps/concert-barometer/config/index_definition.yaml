@@ -1,0 +1,225 @@
+# Концертный барометр: определение индекса
+#
+# This file defines WHAT is measured and HOW it is combined. It does NOT contain
+# hand-picked weights. Component weights are ESTIMATED from history by the quant
+# layer (see `weighting:` below) and written to model.model_run.params.
+#
+# Principle 1 & 2 (non-negotiable): no LLM assigns a number here. Any numeric
+# literal in this file is either a definition (a window length, a normalisation
+# base) or a bound (a clip range), never a judgement about how much a driver matters.
+
+schema_version: 1
+
+index:
+  code: barometer_now
+  name_ru: Концертный барометр (NOW)
+  description_ru: >
+    Сводный индекс наблюдаемого внешнего спроса на платный вечерний досуг в Москве.
+    Индекс отражает внешнюю среду, а не продажи конкретной площадки.
+  normalisation:
+    method: seasonal_adjusted_index
+    base_value: 100
+    # The base period is a fixed historical window, re-estimated only on an explicit
+    # schedule so the index does not silently rebase under the user.
+    base_window:
+      start: "2024-01-01"
+      end: "2024-12-31"
+    rebase_policy: manual_with_adr
+  clip:
+    # Guards against a single broken source dragging the headline number to nonsense.
+    # Clipping is logged as a data_quality event, never silently applied.
+    min: 20
+    max: 250
+
+components:
+  - code: concert_market
+    name_ru: Концертная индустрия
+    description_ru: Наблюдаемое предложение и цены на концертном рынке Москвы.
+    inputs:
+      - series: venue.events_listed.msk.daily
+        transform: log_then_stl_deseasonalise
+      - series: venue.median_price.msk.daily
+        transform: real_terms_then_deseasonalise
+        deflator: cbr.inflation_expectations.monthly
+      - series: rosstat.paid_services_culture.msk.monthly
+        transform: yoy_then_interpolate_to_daily
+        interpolation_flag: derived_metric
+    direction: positive
+    min_sources_for_publication: 2
+
+  - code: search_intent
+    name_ru: Поисковый спрос
+    description_ru: Намерение аудитории искать вечерние события.
+    inputs:
+      - series: wordstat.concert_basket.msk.weekly
+        transform: log_then_stl_deseasonalise
+      - series: wordstat.jazz_basket.msk.weekly
+        transform: log_then_stl_deseasonalise
+      - series: wordstat.theatre_basket.msk.weekly
+        transform: log_then_stl_deseasonalise
+      - series: wordstat.standup_basket.msk.weekly
+        transform: log_then_stl_deseasonalise
+    direction: positive
+    min_sources_for_publication: 2
+    caveats_ru:
+      - "Поиск не равен покупке. Сезонность поиска и продаж совпадает, поэтому сырая корреляция завышена; используется только десезонализованный ряд."
+
+  - code: hospitality_consumer
+    name_ru: Потребление и общепит
+    description_ru: Готовность тратить на вечерний выход из дома.
+    inputs:
+      - series: sberindex.spend_catering.msk.weekly
+        transform: deseasonalise
+      - series: sberindex.spend_culture.msk.weekly
+        transform: deseasonalise
+      - series: rosstat.catering_turnover.msk.monthly
+        transform: real_terms_yoy_then_interpolate_to_daily
+        interpolation_flag: derived_metric
+    direction: positive
+    min_sources_for_publication: 1
+
+  - code: economic_conditions
+    name_ru: Экономические условия
+    description_ru: Макросреда, влияющая на дискреционные расходы.
+    inputs:
+      - series: cbr.key_rate.daily
+        transform: level_change_90d
+      - series: cbr.inflation_expectations.monthly
+        transform: level_then_interpolate_to_daily
+        interpolation_flag: derived_metric
+      - series: rosstat.real_income.msk.monthly
+        transform: yoy_then_interpolate_to_daily
+        interpolation_flag: derived_metric
+      - series: cbr.usd_rub.daily
+        transform: log_change_30d
+    direction: mixed
+    min_sources_for_publication: 2
+    caveats_ru:
+      - "Знак влияния каждого макрофактора оценивается на истории, а не назначается. Курс валюты включён как индикатор настроений, а не как причинный фактор."
+
+  - code: competition_pressure
+    name_ru: Конкурентное давление
+    description_ru: Сколько альтернатив борется за тот же вечер зрителя.
+    inputs:
+      - series: venue.inventory_pressure.msk.daily
+        transform: deseasonalise
+    direction: negative
+    min_sources_for_publication: 1
+    caveats_ru:
+      - "Прокси-показатель: наблюдается предложение и доступность, а не продажи конкурентов."
+
+  - code: event_stress
+    name_ru: Событийный стресс
+    description_ru: Городские события, ограничения и календарные аномалии, меняющие вечернюю мобильность.
+    inputs:
+      - series: calendar.is_holiday.ru.daily
+        transform: raw
+      - series: mosdata.public_events.msk.daily
+        transform: log1p_then_deseasonalise
+    direction: mixed
+    min_sources_for_publication: 1
+    caveats_ru:
+      - "Слухи и неподтверждённые сообщения не являются событиями. Измеренное внимание к слуху хранится как признак информационного внимания (information-attention), а не как факт события (принцип 9)."
+
+  - code: weather_friction
+    name_ru: Погодное трение
+    description_ru: Насколько погода мешает выйти вечером из дома.
+    inputs:
+      - series: weather.friction_index.msk.daily
+        transform: raw
+    direction: negative
+    min_sources_for_publication: 1
+
+# ---------------------------------------------------------------------------
+# HOW COMPONENTS BECOME ONE NUMBER
+# ---------------------------------------------------------------------------
+weighting:
+  method: dynamic_factor_model
+  # The latent common factor across deseasonalised component indices IS the barometer.
+  # Loadings are estimated by EM on the historical panel. There are no manual weights.
+  fallback_method: equal_weight_standardised
+  fallback_condition: "fewer than 24 months of overlapping history"
+  reestimation:
+    schedule: quarterly
+    requires_backtest_improvement: true
+    # A new estimation is promoted only if rolling-origin backtest MAE does not worsen.
+    promotion_rule: "new_mae <= incumbent_mae * 1.02"
+  persistence:
+    store_in: model.model_run.params
+    include_loadings: true
+    include_estimation_window: true
+
+seasonality:
+  method: stl
+  period_days: 7
+  secondary_period_days: 365
+  holiday_regressors_from: calendar.is_holiday.ru.daily
+  robust: true
+
+momentum:
+  wow:
+    window_days: 7
+    comparison: previous_7_days
+  deviation_from_seasonal_norm:
+    baseline: stl_seasonal_plus_trend
+    baseline_window_years: 3
+
+confidence:
+  # Data-quality score published next to every number. Range 0..1.
+  factors:
+    - code: source_freshness
+      weight_method: fixed_definition
+      description_ru: Доля источников компонента, обновившихся в ожидаемый срок.
+    - code: source_coverage
+      description_ru: Доля объявленных входных рядов, реально присутствующих на дату.
+    - code: revision_volatility
+      description_ru: Насколько сильно прошлые винтажи пересматривались.
+    - code: interval_coverage
+      description_ru: Фактическое покрытие прогнозных интервалов на бэктесте.
+  publication_gate:
+    min_confidence_to_show_headline: 0.35
+    below_gate_behaviour: "показать индекс как «недостаточно данных», раскрыть причины"
+
+# ---------------------------------------------------------------------------
+# CALIBRATION GATE: controls what the UI is allowed to call things
+# ---------------------------------------------------------------------------
+calibration:
+  status: uncalibrated
+  # While uncalibrated, YoY in PERCENT of sales is forbidden. Only index movement.
+  required_for_sales_language:
+    - "A market-level transaction or ticket series (not one venue, not inventory)."
+    - "At least 24 months of overlap with the index."
+    - "Out-of-sample R2 >= 0.5 on rolling-origin backtest against that series."
+    - "Documented coverage and methodology of the calibration source."
+  labels:
+    uncalibrated:
+      ru: "Оценка внешнего спроса"
+      forbidden_ru: "Прогноз продаж рынка"
+    calibrated:
+      ru: "Прогноз продаж рынка"
+      requires_interval: true
+
+forecast:
+  horizons_days: [7, 14, 30, 90]
+  interval_levels: [0.80, 0.95]
+  ensemble:
+    - code: seasonal_naive
+      role: benchmark
+      must_always_run: true
+    - code: structural_state_space
+      role: candidate
+    - code: gradient_boosting_lagged_exog
+      role: candidate
+  combination:
+    method: inverse_mae_weights_from_rolling_origin
+    estimated_on: backtest_only
+  backtest:
+    scheme: rolling_origin
+    initial_train_days: 365
+    step_days: 7
+    min_folds: 26
+  integrity:
+    feature_publication_lag_enforced: true
+    calendar_features_exempt: true
+    store_every_vintage: true
+    overwrite_allowed: false
