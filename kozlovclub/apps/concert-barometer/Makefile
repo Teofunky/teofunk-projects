@@ -4,26 +4,53 @@ PY := .venv/bin/python
 PIP := .venv/bin/pip
 export PYTHONPATH := src
 
+# Pick an interpreter the dependency stack is actually verified against.
+# Python 3.14 changed typing internals in a way pydantic 2.13 does not handle,
+# so a machine whose default python3 is 3.14 fails at import time with
+# "_eval_type() got an unexpected keyword argument 'prefer_fwd_module'".
+# Newest verified version first; an unverified one is used only when nothing
+# else is installed, and `make doctor` says so rather than failing obscurely.
+PYTHON_BIN ?= $(shell for p in python3.13 python3.12 python3.11 python3; do \
+	command -v $$p >/dev/null 2>&1 && echo $$p && break; done)
+
+# uv, when it is installed, creates the environment and installs faster, and
+# copes with interpreters that ship without ensurepip (some standalone builds),
+# where `python -m venv` produces an environment with no pip in it.
+HAVE_UV := $(shell command -v uv >/dev/null 2>&1 && echo yes)
+
 .PHONY: help
 help:  ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
 		| awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-18s\033[0m %s\n", $$1, $$2}'
 
 .venv:
-	python3 -m venv .venv
+	@echo "Creating .venv with $(PYTHON_BIN) ($$($(PYTHON_BIN) --version 2>&1))"
+ifeq ($(HAVE_UV),yes)
+	uv venv --python $(PYTHON_BIN) .venv
+else
+	$(PYTHON_BIN) -m venv .venv
 	$(PIP) install -q --upgrade pip
+endif
 
 .PHONY: install
 install: .venv  ## Install the project and dev dependencies
-	# Only what the current code actually imports. The quant and storage extras
-	# belong to phases that have not been written yet, and lightgbm in
-	# particular is a large dependency that can fail a first install on macOS
-	# for no benefit today. Add them with `make install-quant` when Phase 5 lands.
+	# Only what the current code actually imports. The quant, api and storage
+	# extras belong to phases that have not been written yet, and installing
+	# them now can fail somebody's setup for no benefit today. Add them with
+	# `make install-quant` when Phase 5 lands.
+ifeq ($(HAVE_UV),yes)
+	uv pip install -q --python .venv/bin/python -e '.[dev]'
+else
 	$(PIP) install -q -e '.[dev]'
+endif
 
 .PHONY: install-quant
 install-quant: .venv  ## Add the modelling dependencies (needed from Phase 5)
-	$(PIP) install -q -e '.[dev,quant,storage]'
+ifeq ($(HAVE_UV),yes)
+	uv pip install -q --python .venv/bin/python -e '.[dev,quant,api,storage]'
+else
+	$(PIP) install -q -e '.[dev,quant,api,storage]'
+endif
 
 .PHONY: up
 up:  ## Start PostgreSQL and MinIO

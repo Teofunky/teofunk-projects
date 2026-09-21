@@ -17,8 +17,19 @@
 
 ## Как запустить
 
-Нужны **Python 3.11+** и **Docker** (только чтобы поднять PostgreSQL).
+Нужны **Python 3.11, 3.12 или 3.13** и **PostgreSQL 14+**.
 Проверить, чего не хватает: `make doctor`.
+
+На Python 3.14 сборка сейчас падает: pydantic 2.13 не работает с изменённым
+в 3.14 механизмом аннотаций. Makefile сам выберет `python3.13`, `python3.12`
+или `python3.11`, если они есть в системе. Если есть только 3.14:
+
+```bash
+brew install python@3.13
+make bootstrap PYTHON_BIN=python3.13
+```
+
+PostgreSQL проще всего поднять через Docker, но он не обязателен.
 
 ```bash
 tar -xzf concert-barometer.tar.gz
@@ -44,11 +55,15 @@ make test      # 137 тестов
 
 ### Без Docker
 
-Если PostgreSQL 14+ уже где-то есть:
+На macOS проще всего [Postgres.app](https://postgresapp.com/): скачать,
+перетащить в Applications, открыть, нажать Initialize. Через Homebrew:
+`brew install postgresql@16 && brew services start postgresql@16`.
+
+Затем:
 
 ```bash
 createdb barometer
-export BAROMETER_DATABASE_URL='postgresql+psycopg://user:pass@localhost:5432/barometer'
+export BAROMETER_DATABASE_URL="postgresql+psycopg://$(whoami)@localhost:5432/barometer"
 make bootstrap-no-docker
 ```
 
@@ -72,6 +87,8 @@ TimescaleDB опционален: без него схема используе�
 | `Cannot connect to the Docker daemon` | Docker установлен, но не запущен |
 | `connection refused` на 5432 | БД не поднялась: `docker compose ps` |
 | `barometer: command not found` | окружение не активировано, см. выше |
+| `_eval_type() got an unexpected keyword argument` | сборка идёт на Python 3.14, нужен 3.13 или ниже |
+| `createdb: command not found` | PostgreSQL не установлен либо его CLI не в PATH |
 | `ingest` падает с ошибками сети | источники недоступны из вашей сети, проверьте `make demo` |
 
 ## Что отличает эту систему
