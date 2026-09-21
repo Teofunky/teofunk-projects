@@ -1,0 +1,266 @@
+# Концертный барометр: реестр агентов
+#
+# HARD BOUNDARY (principle 1): agents collect, classify, verify and explain.
+# No agent writes to model.index_value or model.forecast. Those tables are writable
+# only by the quant pipeline, enforced at the DB role level (see migration 0001:
+# role barometer_agent has no INSERT on schema `model`).
+#
+# Agent-to-agent messages are transient. The canonical record is the database.
+# Every agent output that asserts something about the world MUST carry provenance
+# and an assertion_class, or the orchestrator rejects it (principle 3, 4).
+
+schema_version: 1
+
+providers:
+  default: anthropic
+  anthropic:
+    adapter: barometer.agents.providers.anthropic:AnthropicProvider
+    model_env_var: BAROMETER_ANTHROPIC_MODEL
+    api_key_env_var: ANTHROPIC_API_KEY
+    supports: [tools, structured_output, subagents, streaming]
+  openai:
+    adapter: barometer.agents.providers.openai:OpenAIProvider
+    model_env_var: BAROMETER_OPENAI_MODEL
+    api_key_env_var: OPENAI_API_KEY
+    supports: [tools, structured_output, handoffs, guardrails, tracing]
+
+defaults:
+  retry:
+    max_attempts: 3
+    backoff: exponential
+    initial_delay_seconds: 2
+    max_delay_seconds: 30
+    retry_on: [rate_limit, timeout, transient_provider_error, schema_validation_failure]
+    no_retry_on: [auth_error, permission_denied, robots_disallowed, legal_block]
+    on_final_failure: record_and_degrade     # write ops.pipeline_run failure, continue without this agent
+  timeouts:
+    soft_seconds: 120
+    hard_seconds: 300
+  output_contract:
+    require_assertion_class: true
+    require_provenance: true
+    reject_unsourced_claims: true
+    max_output_tokens: 8000
+  guardrails:
+    - no_numeric_index_output          # agent may not emit a barometer value
+    - no_causal_language_without_test  # "because/caused by" requires a referenced test id
+    - rumour_must_be_typed             # unverified reports -> information_attention, not event
+
+agents:
+
+  - code: chief_analyst
+    name_ru: Главный аналитик / Оркестратор
+    prompt: prompts/chief_analyst.md
+    role: orchestrator
+    allowed_tools: [db.read, agent.invoke, pipeline.status, brief.assemble]
+    forbidden_tools: [http.fetch, db.write_model]
+    input_schema: schemas/agent/chief_analyst.input.json
+    output_schema: schemas/agent/chief_analyst.output.json
+    provenance_requirements: inherits_from_children
+    evals:
+      - evals/chief_analyst/refuses_to_invent_index.yaml
+      - evals/chief_analyst/degrades_on_missing_source.yaml
+
+  - code: market_scanner
+    name_ru: Сканер рынка
+    prompt: prompts/market_scanner.md
+    role: collector
+    allowed_tools: [http.fetch, db.read, db.write_raw, db.write_normalized]
+    sources: [venue_public_pages, market_research_manual, rosstat_emiss]
+    input_schema: schemas/agent/collector.input.json
+    output_schema: schemas/agent/collector.output.json
+    provenance_requirements:
+      required_fields: [source_code, request_url, retrieved_at, observation_period, geography, unit, snapshot_hash]
+    evals:
+      - evals/market_scanner/rejects_payload_without_period.yaml
+
+  - code: competitor_intelligence
+    name_ru: Конкурентная разведка
+    prompt: prompts/competitor_intelligence.md
+    role: collector
+    allowed_tools: [http.fetch, db.read, db.write_raw, db.write_normalized, venue.diff]
+    sources: [venue_public_pages]
+    input_schema: schemas/agent/collector.input.json
+    output_schema: schemas/agent/competitor.output.json
+    provenance_requirements:
+      required_fields: [source_code, venue_id, request_url, retrieved_at, observation_period, snapshot_hash]
+      forced_assertion_class_max: estimate
+    guardrails:
+      - never_label_availability_as_sales      # principle 5
+      - respect_robots_and_rate_limit
+    evals:
+      - evals/competitor_intelligence/availability_is_not_sales.yaml
+      - evals/competitor_intelligence/honours_robots_disallow.yaml
+
+  - code: search_intent
+    name_ru: Поисковый спрос
+    prompt: prompts/search_intent.md
+    role: collector
+    allowed_tools: [http.fetch, db.read, db.write_raw, db.write_normalized]
+    sources: [yandex_wordstat]
+    input_schema: schemas/agent/collector.input.json
+    output_schema: schemas/agent/collector.output.json
+    provenance_requirements:
+      required_fields: [source_code, request_params, retrieved_at, observation_period, geography, unit, snapshot_hash]
+    evals:
+      - evals/search_intent/phrase_basket_is_frozen.yaml
+
+  - code: consumer_hospitality
+    name_ru: Потребление и общепит
+    prompt: prompts/consumer_hospitality.md
+    role: collector
+    allowed_tools: [http.fetch, db.read, db.write_raw, db.write_normalized]
+    sources: [sberindex, rosstat_emiss]
+    input_schema: schemas/agent/collector.input.json
+    output_schema: schemas/agent/collector.output.json
+    provenance_requirements:
+      required_fields: [source_code, request_url, retrieved_at, observation_period, geography, unit, coverage_note, snapshot_hash]
+    evals:
+      - evals/consumer_hospitality/panel_coverage_recorded.yaml
+
+  - code: macro_economy
+    name_ru: Макроэкономика
+    prompt: prompts/macro_economy.md
+    role: collector
+    allowed_tools: [http.fetch, db.read, db.write_raw, db.write_normalized]
+    sources: [cbr_key_rate, cbr_fx, cbr_inflation, rosstat_emiss]
+    input_schema: schemas/agent/collector.input.json
+    output_schema: schemas/agent/collector.output.json
+    provenance_requirements:
+      required_fields: [source_code, request_url, retrieved_at, observation_period, geography, unit, vintage_at, snapshot_hash]
+    evals:
+      - evals/macro_economy/revision_creates_new_vintage.yaml
+
+  - code: moscow_event_risk
+    name_ru: Событийные риски Москвы
+    prompt: prompts/moscow_event_risk.md
+    role: collector_classifier
+    allowed_tools: [http.fetch, db.read, db.write_raw, db.write_normalized]
+    sources: [mos_data, moscow_transport_restrictions, production_calendar]
+    input_schema: schemas/agent/collector.input.json
+    output_schema: schemas/agent/event_risk.output.json
+    provenance_requirements:
+      required_fields: [source_code, request_url, retrieved_at, observation_period, geography, snapshot_hash]
+    guardrails:
+      - neutral_factual_register                 # principle 9
+      - rumour_must_be_typed
+      - no_political_evaluation
+    evals:
+      - evals/moscow_event_risk/rumour_typed_as_attention.yaml
+      - evals/moscow_event_risk/register_is_neutral.yaml
+
+  - code: weather
+    name_ru: Погода
+    prompt: prompts/weather.md
+    role: collector
+    allowed_tools: [http.fetch, db.read, db.write_raw, db.write_normalized]
+    sources: [open_meteo]
+    input_schema: schemas/agent/collector.input.json
+    output_schema: schemas/agent/collector.output.json
+    provenance_requirements:
+      required_fields: [source_code, request_url, retrieved_at, observation_period, geography, unit, snapshot_hash]
+    guardrails:
+      - never_mix_forecast_and_reanalysis_in_one_series
+    evals:
+      - evals/weather/forecast_and_archive_separated.yaml
+
+  - code: fact_checker
+    name_ru: Фактчекер
+    prompt: prompts/fact_checker.md
+    role: verifier
+    allowed_tools: [db.read, http.fetch, db.write_quality]
+    input_schema: schemas/agent/fact_checker.input.json
+    output_schema: schemas/agent/fact_checker.output.json
+    provenance_requirements:
+      required_fields: [target_observation_id, verdict, evidence_urls, checked_at]
+    blocking: true      # a failed check blocks publication of the affected series
+    evals:
+      - evals/fact_checker/catches_unit_mismatch.yaml
+      - evals/fact_checker/catches_period_shift.yaml
+
+  - code: quant_analyst
+    name_ru: Квант-аналитик
+    prompt: prompts/quant_analyst.md
+    role: explainer          # NOT a calculator: it reads model output and describes it
+    allowed_tools: [db.read, quant.read_run, quant.read_backtest]
+    forbidden_tools: [db.write_model, http.fetch]
+    input_schema: schemas/agent/quant_analyst.input.json
+    output_schema: schemas/agent/quant_analyst.output.json
+    guardrails:
+      - no_numeric_index_output
+      - no_causal_language_without_test
+    evals:
+      - evals/quant_analyst/does_not_restate_numbers_it_invented.yaml
+
+  - code: forecast_analyst
+    name_ru: Прогнозный аналитик
+    prompt: prompts/forecast_analyst.md
+    role: explainer
+    allowed_tools: [db.read, quant.read_forecast, quant.read_backtest]
+    forbidden_tools: [db.write_model, http.fetch]
+    input_schema: schemas/agent/forecast_analyst.input.json
+    output_schema: schemas/agent/forecast_analyst.output.json
+    guardrails:
+      - must_state_interval_with_point
+      - must_state_benchmark_comparison
+    evals:
+      - evals/forecast_analyst/always_reports_interval.yaml
+      - evals/forecast_analyst/compares_to_seasonal_naive.yaml
+
+  - code: skeptic_red_team
+    name_ru: Скептик / Red Team
+    prompt: prompts/skeptic_red_team.md
+    role: adversary
+    allowed_tools: [db.read, quant.read_run, quant.read_backtest, db.write_quality]
+    input_schema: schemas/agent/skeptic.input.json
+    output_schema: schemas/agent/skeptic.output.json
+    blocking: true
+    checklist:
+      - "Is any movement explained by a source outage rather than the world?"
+      - "Is any correlation being read as causation?"
+      - "Did a revision of a past vintage create fake momentum?"
+      - "Is competitor inventory being narrated as competitor sales?"
+      - "Is the confidence score high while coverage is low?"
+      - "Would this conclusion survive if the single largest contributor were dropped?"
+    evals:
+      - evals/skeptic/flags_outage_driven_move.yaml
+      - evals/skeptic/flags_leaked_future_feature.yaml
+
+  - code: daily_brief_editor
+    name_ru: Редактор ежедневной сводки
+    prompt: prompts/daily_brief_editor.md
+    role: writer
+    language: ru
+    allowed_tools: [db.read, brief.render]
+    forbidden_tools: [http.fetch, db.write_model]
+    input_schema: schemas/agent/brief.input.json
+    output_schema: schemas/agent/brief.output.json
+    guardrails:
+      - every_number_must_link_to_observation
+      - no_decorative_precision          # round to the precision the data supports
+      - label_estimates_explicitly
+    evals:
+      - evals/daily_brief_editor/no_orphan_numbers.yaml
+      - evals/daily_brief_editor/uses_uncalibrated_label.yaml
+
+orchestration:
+  pipeline: daily
+  stages:
+    - name: collect
+      parallel: [market_scanner, competitor_intelligence, search_intent, consumer_hospitality, macro_economy, moscow_event_risk, weather]
+      failure_policy: continue_and_degrade
+    - name: verify
+      serial: [fact_checker]
+      failure_policy: block_affected_series
+    - name: compute
+      runner: quant_pipeline           # code, not an agent
+      failure_policy: abort
+    - name: challenge
+      serial: [skeptic_red_team]
+      failure_policy: block_publication_on_critical
+    - name: explain
+      parallel: [quant_analyst, forecast_analyst]
+      failure_policy: continue_and_degrade
+    - name: publish
+      serial: [daily_brief_editor]
+      failure_policy: continue_and_degrade

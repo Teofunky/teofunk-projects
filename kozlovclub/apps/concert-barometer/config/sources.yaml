@@ -1,0 +1,592 @@
+# Концертный барометр: реестр источников (source registry)
+#
+# This file is the single declarative registry of every external source the system
+# is allowed to touch. It is loaded and validated by barometer.config.loader and
+# synchronised into registry.source on `barometer db sync-registry`.
+#
+# RULES ENCODED HERE (see docs/adr/0003-provenance-is-mandatory.md):
+#   * `enabled: false` is the default for anything whose legal/robots status has
+#     not been verified by a human. The ingest runner refuses disabled sources.
+#   * `access_policy` records HOW we are permitted to read the source.
+#   * `is_proxy: true` marks a source that does NOT observe transactions. It must
+#     state proxy_for and methodology_notes. What bounds a claim is `measures`:
+#       direct   - the source published this number  -> may be a fact
+#       derived  - deterministic function of direct observations -> derived_metric
+#       inferred - an inference about the proxied concept -> estimate at best
+#     An inferred series is never a fact, on any source. See ADR 0006.
+#   * `robots_policy: unknown` blocks automated fetching until checked; the check is
+#     recorded in ops.source_health and the value is updated here.
+#   * Never put credentials in this file. Only the NAME of the env var.
+
+schema_version: 1
+default_geography: RU-MOW          # Moscow, ISO 3166-2:RU
+default_timezone: Europe/Moscow
+
+sources:
+
+  # ----------------------------------------------------------------------------
+  # SEARCH INTENT
+  # ----------------------------------------------------------------------------
+  - code: yandex_wordstat
+    name: Yandex Wordstat API
+    name_ru: Яндекс Вордстат (API)
+    kind: api
+    publisher: Яндекс
+    homepage_url: https://yandex.ru/dev/wordstat/
+    endpoint_url: https://api.wordstat.yandex.net/v1/
+    geography: RU-MOW
+    access_policy: official_api
+    requires_credentials: true
+    credential_env_var: BAROMETER_YANDEX_WORDSTAT_TOKEN
+    robots_policy: not_applicable
+    rate_limit_per_min: 10
+    update_cadence: weekly
+    typical_lag_days: 7
+    license: Yandex API terms of use
+    terms_url: https://yandex.ru/legal/wordstat_api/
+    is_proxy: true
+    proxy_for: "consumer intent to attend paid leisure events"
+    enabled: false
+    verification_required:
+      - "Confirm current API host and auth flow (Direct OAuth vs standalone Wordstat token)."
+      - "Confirm regional filter id for Москва and Московская область."
+    methodology_notes: >
+      Wordstat reports impressions of search phrases, not people and not purchases.
+      Absolute numbers are not comparable across phrase groups; the system uses
+      week-over-week and year-over-year dynamics of a fixed phrase basket only.
+      Yandex periodically revises historical Wordstat values, therefore every pull
+      is stored as a new vintage and old vintages are never overwritten.
+    series:
+      - code: wordstat.concert_basket.msk.weekly
+        name_ru: Поисковый спрос, концертная корзина фраз (Москва)
+        unit: impressions_per_week
+        frequency: weekly
+        measures: direct
+        assertion_class: fact
+        segment: search_intent
+        aggregation: sum
+      - code: wordstat.jazz_basket.msk.weekly
+        name_ru: Поисковый спрос, джазовая корзина фраз (Москва)
+        unit: impressions_per_week
+        frequency: weekly
+        measures: direct
+        assertion_class: fact
+        segment: jazz_clubs
+        aggregation: sum
+      - code: wordstat.theatre_basket.msk.weekly
+        name_ru: Поисковый спрос, театральная корзина фраз (Москва)
+        unit: impressions_per_week
+        frequency: weekly
+        measures: direct
+        assertion_class: fact
+        segment: theatres
+        aggregation: sum
+      - code: wordstat.standup_basket.msk.weekly
+        name_ru: Поисковый спрос, стендап-корзина фраз (Москва)
+        unit: impressions_per_week
+        frequency: weekly
+        measures: direct
+        assertion_class: fact
+        segment: standup
+        aggregation: sum
+      - code: wordstat.restaurant_basket.msk.weekly
+        name_ru: Поисковый спрос, рестораны и бары (Москва)
+        unit: impressions_per_week
+        frequency: weekly
+        measures: direct
+        assertion_class: fact
+        segment: restaurants
+        aggregation: sum
+
+  # ----------------------------------------------------------------------------
+  # MACRO ECONOMY
+  # ----------------------------------------------------------------------------
+  - code: cbr_key_rate
+    name: Bank of Russia key rate
+    name_ru: Банк России, ключевая ставка
+    kind: official_stat
+    publisher: Банк России
+    homepage_url: https://www.cbr.ru/hd_base/KeyRate/
+    endpoint_url: https://www.cbr.ru/DailyInfoWebServ/DailyInfo.asmx/KeyRate
+    geography: RU
+    access_policy: official_api
+    requires_credentials: false
+    robots_policy: allowed
+    rate_limit_per_min: 20
+    update_cadence: irregular
+    typical_lag_days: 0
+    license: "Открытые данные Банка России"
+    terms_url: https://www.cbr.ru/about_br/copyright/
+    is_proxy: false
+    enabled: true
+    methodology_notes: >
+      Step series. Forward-filled to daily frequency in the normalisation layer;
+      the forward fill is recorded as a derived_metric, the decision points stay facts.
+    series:
+      - code: cbr.key_rate.daily
+        name_ru: Ключевая ставка ЦБ РФ
+        unit: percent_per_annum
+        frequency: daily
+        measures: direct
+        assertion_class: fact
+        segment: economy
+        aggregation: last
+
+  - code: cbr_fx
+    name: Bank of Russia official FX rates
+    name_ru: Банк России, официальные курсы валют
+    kind: official_stat
+    publisher: Банк России
+    homepage_url: https://www.cbr.ru/development/SXML/
+    endpoint_url: https://www.cbr.ru/scripts/XML_daily.asp
+    geography: RU
+    access_policy: official_api
+    requires_credentials: false
+    robots_policy: allowed
+    rate_limit_per_min: 20
+    update_cadence: daily
+    typical_lag_days: 0
+    license: "Открытые данные Банка России"
+    terms_url: https://www.cbr.ru/about_br/copyright/
+    is_proxy: false
+    enabled: true
+    methodology_notes: >
+      Published on business days only. Non-business days are gap-filled with the last
+      published value and flagged with quality_flag 'forward_filled'.
+    series:
+      - code: cbr.usd_rub.daily
+        name_ru: Курс USD/RUB (ЦБ РФ)
+        unit: rub_per_unit
+        frequency: daily
+        measures: direct
+        assertion_class: fact
+        segment: economy
+        aggregation: last
+      - code: cbr.eur_rub.daily
+        name_ru: Курс EUR/RUB (ЦБ РФ)
+        unit: rub_per_unit
+        frequency: daily
+        measures: direct
+        assertion_class: fact
+        segment: economy
+        aggregation: last
+
+  - code: cbr_inflation
+    name: Bank of Russia inflation and inflation expectations
+    name_ru: Банк России, инфляция и инфляционные ожидания
+    kind: official_stat
+    publisher: Банк России
+    homepage_url: https://www.cbr.ru/statistics/ddkp/
+    endpoint_url: https://www.cbr.ru/dataservice/
+    geography: RU
+    access_policy: official_api
+    requires_credentials: false
+    robots_policy: allowed
+    rate_limit_per_min: 20
+    update_cadence: monthly
+    typical_lag_days: 20
+    license: "Открытые данные Банка России"
+    terms_url: https://www.cbr.ru/about_br/copyright/
+    is_proxy: false
+    enabled: false
+    verification_required:
+      - "Pin exact dataservice dataset ids for CPI and inflation expectations."
+    series:
+      - code: cbr.inflation_expectations.monthly
+        name_ru: Инфляционные ожидания населения
+        unit: percent
+        frequency: monthly
+        measures: direct
+        assertion_class: fact
+        segment: economy
+        aggregation: last
+
+  - code: rosstat_emiss
+    name: EMISS / Rosstat unified statistics
+    name_ru: ЕМИСС / Росстат
+    kind: official_stat
+    publisher: Росстат
+    homepage_url: https://www.fedstat.ru/
+    endpoint_url: https://www.fedstat.ru/indicator/dataset/
+    geography: RU-MOW
+    access_policy: official_api
+    requires_credentials: false
+    robots_policy: unknown
+    rate_limit_per_min: 6
+    update_cadence: monthly
+    typical_lag_days: 45
+    license: "Открытые данные Росстата"
+    terms_url: https://rosstat.gov.ru/opendata
+    is_proxy: false
+    enabled: false
+    verification_required:
+      - "Check fedstat.ru/robots.txt and SDMX endpoint availability."
+      - "Pin indicator ids: real disposable income, retail turnover, paid services to population (Москва)."
+    methodology_notes: >
+      Rosstat revises published values. Every pull is a new vintage; backtests must use
+      the vintage that was available at the simulated decision date, never the latest.
+    series:
+      - code: rosstat.real_income.msk.monthly
+        name_ru: Реальные располагаемые денежные доходы (Москва)
+        unit: index_yoy_percent
+        frequency: monthly
+        measures: direct
+        assertion_class: fact
+        segment: economy
+        aggregation: last
+      - code: rosstat.paid_services_culture.msk.monthly
+        name_ru: Платные услуги населению, культура (Москва)
+        unit: rub_million
+        frequency: monthly
+        measures: direct
+        assertion_class: fact
+        segment: concert_industry
+        aggregation: sum
+      - code: rosstat.catering_turnover.msk.monthly
+        name_ru: Оборот общественного питания (Москва)
+        unit: rub_million
+        frequency: monthly
+        measures: direct
+        assertion_class: fact
+        segment: catering
+        aggregation: sum
+
+  # ----------------------------------------------------------------------------
+  # CONSUMER / HOSPITALITY
+  # ----------------------------------------------------------------------------
+  - code: sberindex
+    name: SberIndex consumer spending
+    name_ru: СберИндекс, потребительские расходы
+    kind: official_stat
+    publisher: СберИндекс
+    homepage_url: https://sberindex.ru/
+    endpoint_url: https://sberindex.ru/ru/dashboards
+    geography: RU-MOW
+    access_policy: public_page
+    requires_credentials: false
+    robots_policy: unknown
+    rate_limit_per_min: 2
+    update_cadence: weekly
+    typical_lag_days: 10
+    license: "Публикуется правообладателем; условия требуют проверки"
+    terms_url: https://sberindex.ru/
+    is_proxy: true
+    proxy_for: "household spending on leisure and catering in Moscow"
+    enabled: false
+    verification_required:
+      - "Check robots.txt and terms; prefer a licensed data agreement over scraping."
+      - "Record published methodology and coverage (share of card transactions)."
+    methodology_notes: >
+      Card-transaction panel of one bank. Coverage is a share of the market, not the
+      market. Series are usable as dynamics only, never as market totals.
+    series:
+      - code: sberindex.spend_culture.msk.weekly
+        name_ru: Расходы на культуру и развлечения (Москва)
+        unit: index_yoy_percent
+        frequency: weekly
+        measures: direct
+        assertion_class: estimate
+        segment: consumer
+        aggregation: mean
+      - code: sberindex.spend_catering.msk.weekly
+        name_ru: Расходы на кафе и рестораны (Москва)
+        unit: index_yoy_percent
+        frequency: weekly
+        measures: direct
+        assertion_class: estimate
+        segment: catering
+        aggregation: mean
+
+  # ----------------------------------------------------------------------------
+  # WEATHER
+  # ----------------------------------------------------------------------------
+  - code: open_meteo
+    name: Open-Meteo forecast and historical reanalysis
+    name_ru: Open-Meteo, прогноз и исторические наблюдения
+    kind: api
+    publisher: Open-Meteo
+    homepage_url: https://open-meteo.com/
+    endpoint_url: https://api.open-meteo.com/v1/forecast
+    geography: RU-MOW
+    access_policy: official_api
+    requires_credentials: false
+    robots_policy: not_applicable
+    rate_limit_per_min: 30
+    update_cadence: hourly
+    typical_lag_days: 0
+    license: CC-BY-4.0
+    terms_url: https://open-meteo.com/en/terms
+    is_proxy: false
+    enabled: true
+    methodology_notes: >
+      Two distinct endpoints are used and MUST NOT be mixed in one series:
+      /v1/forecast (model output, assertion_class=forecast) and
+      /v1/archive (ERA5 reanalysis, assertion_class=fact, ~5 day lag).
+      Backtests use archive values only, aligned to the vintage rule.
+      Hourly readings are aggregated over the evening window 18:00-23:59
+      Moscow time. A day missing any evening hour is recorded as absent with
+      missing_reason='partial_period', never averaged over a partial evening.
+      No composite "friction index" is published: the three raw components are
+      given to the model, which estimates their effect from history rather than
+      inheriting thresholds somebody picked by hand (ADR 0010).
+    series:
+      - code: weather.temp_evening.msk.daily
+        name_ru: Температура в вечерние часы (18:00, 23:00, Москва)
+        unit: celsius
+        frequency: daily
+        measures: direct
+        assertion_class: fact
+        segment: weather
+        aggregation: mean
+      - code: weather.precip_evening.msk.daily
+        name_ru: Осадки в вечерние часы (Москва)
+        unit: mm
+        frequency: daily
+        measures: direct
+        assertion_class: fact
+        segment: weather
+        aggregation: sum
+      - code: weather.wind_evening.msk.daily
+        name_ru: Ветер в вечерние часы (Москва)
+        unit: m_per_s
+        frequency: daily
+        measures: direct
+        assertion_class: fact
+        segment: weather
+        aggregation: mean
+
+  # ----------------------------------------------------------------------------
+  # CALENDAR / EVENT STRESS
+  # ----------------------------------------------------------------------------
+  - code: production_calendar
+    name: Russian production calendar (holidays and working days)
+    name_ru: Производственный календарь РФ
+    kind: api
+    publisher: xmlcalendar.ru
+    homepage_url: https://xmlcalendar.ru/
+    endpoint_url: https://xmlcalendar.ru/data/ru/{year}/calendar.json
+    geography: RU
+    access_policy: official_api
+    requires_credentials: false
+    robots_policy: allowed
+    rate_limit_per_min: 10
+    update_cadence: yearly
+    typical_lag_days: 0
+    license: "Свободное использование с указанием источника"
+    terms_url: https://xmlcalendar.ru/
+    is_proxy: false
+    enabled: true
+    methodology_notes: >
+      Source of truth for holidays, pre-holiday short days and transferred working days.
+      Calendar features are deterministic and known in advance, therefore they are the
+      only feature family exempt from the publication-lag rule.
+    series:
+      - code: calendar.is_holiday.ru.daily
+        name_ru: Признак праздничного дня
+        unit: boolean
+        frequency: daily
+        measures: direct
+        assertion_class: fact
+        segment: event_stress
+        aggregation: last
+
+  - code: mos_data
+    name: Moscow open data portal
+    name_ru: Портал открытых данных Москвы
+    kind: api
+    publisher: Правительство Москвы
+    homepage_url: https://data.mos.ru/
+    endpoint_url: https://apidata.mos.ru/v1/
+    geography: RU-MOW
+    access_policy: official_api
+    requires_credentials: true
+    credential_env_var: BAROMETER_MOSDATA_API_KEY
+    robots_policy: allowed
+    rate_limit_per_min: 10
+    update_cadence: irregular
+    typical_lag_days: 1
+    license: "Открытые данные города Москвы"
+    terms_url: https://data.mos.ru/about/termsofuse
+    is_proxy: false
+    enabled: false
+    verification_required:
+      - "Register for an API key."
+      - "Pin dataset ids for cultural institutions and public events."
+    series:
+      - code: mosdata.public_events.msk.daily
+        name_ru: Публичные городские мероприятия (Москва)
+        unit: count
+        frequency: daily
+        measures: direct
+        assertion_class: fact
+        segment: event_stress
+        aggregation: sum
+
+  - code: moscow_transport_restrictions
+    name: Moscow traffic and transport restrictions
+    name_ru: Ограничения движения и работы транспорта (Москва)
+    kind: web_page
+    publisher: Департамент транспорта Москвы
+    homepage_url: https://transport.mos.ru/
+    endpoint_url: https://transport.mos.ru/mostrans/all_news
+    geography: RU-MOW
+    access_policy: public_page
+    requires_credentials: false
+    robots_policy: unknown
+    rate_limit_per_min: 2
+    update_cadence: daily
+    typical_lag_days: 0
+    license: "Требует проверки"
+    terms_url: https://transport.mos.ru/
+    is_proxy: true
+    proxy_for: "physical friction on getting to an evening venue"
+    enabled: false
+    verification_required:
+      - "Check robots.txt before enabling."
+      - "Prefer an official RSS/API feed if one exists."
+    methodology_notes: >
+      Classified by the Moscow Event Risk agent into: road closure, metro closure,
+      mass public event, security perimeter. The classification is a derived_metric.
+      Rumoured or unconfirmed restrictions are stored as information-attention features
+      only, never as verified events (principle 9).
+
+  # ----------------------------------------------------------------------------
+  # COMPETITOR INVENTORY (PROXY ONLY)
+  # ----------------------------------------------------------------------------
+  - code: venue_public_pages
+    name: Public event pages of panel venues
+    name_ru: Публичные афиши площадок панели
+    kind: web_page
+    publisher: various
+    homepage_url: null
+    endpoint_url: null
+    geography: RU-MOW
+    access_policy: public_page
+    requires_credentials: false
+    robots_policy: unknown
+    rate_limit_per_min: 1
+    update_cadence: daily
+    typical_lag_days: 0
+    license: "Per-venue; see config/venues.yaml"
+    terms_url: null
+    is_proxy: true
+    proxy_for: "observable ticket inventory and posted prices, NOT sales"
+    enabled: false
+    verification_required:
+      - "Per-venue robots.txt check, recorded in registry.venue.robots_allows_crawl."
+      - "Legal review of ToS for each venue before first fetch."
+    methodology_notes: >
+      CRITICAL (principle 5). What is observable on a public page is inventory and
+      posted price, not sales. Disappearance of a ticket category is not a sale: it can
+      be a hold, a removal, a technical error, or a price-tier change. Every series from
+      this source carries assertion_class 'estimate' at best and the UI must label it
+      «прокси-показатель». See ADR 0006.
+    series:
+      - code: venue.events_listed.msk.daily
+        name_ru: Число анонсированных событий панели
+        unit: count
+        frequency: daily
+        measures: direct
+        assertion_class: fact
+        segment: concert_industry
+        aggregation: sum
+      - code: venue.inventory_pressure.msk.daily
+        name_ru: Давление предложения (прокси)
+        unit: index
+        frequency: daily
+        measures: inferred
+        assertion_class: estimate
+        segment: competition_pressure
+        aggregation: mean
+      - code: venue.median_price.msk.daily
+        name_ru: Медианная объявленная цена билета (прокси)
+        unit: rub
+        frequency: daily
+        measures: derived
+        assertion_class: estimate
+        segment: concert_industry
+        aggregation: mean
+
+  # ----------------------------------------------------------------------------
+  # AUTHORISED FIRST-PARTY DATA (calibration anchor)
+  # ----------------------------------------------------------------------------
+  - code: ticketscloud_owned
+    name: TicketsCloud, own venue sales (authorised)
+    name_ru: TicketsCloud, собственные продажи (авторизованный доступ)
+    kind: licensed_feed
+    publisher: TicketsCloud
+    homepage_url: https://ticketscloud.com/
+    endpoint_url: https://ticketscloud.com/api/
+    geography: RU-MOW
+    access_policy: licensed
+    requires_credentials: true
+    credential_env_var: BAROMETER_TICKETSCLOUD_TOKEN
+    robots_policy: not_applicable
+    rate_limit_per_min: 30
+    update_cadence: daily
+    typical_lag_days: 0
+    license: "Contractual, own account only"
+    terms_url: https://ticketscloud.com/
+    is_proxy: false
+    enabled: false
+    verification_required:
+      - "Confirm API access for the account and the permitted retention of raw payloads."
+    methodology_notes: >
+      The ONLY series in the system that observes real transactions. It is one venue,
+      therefore it is not the market. Its role is strictly calibration: it anchors the
+      index to observed demand and it is the ground truth for backtests. Until a genuine
+      market-level transaction series exists, the UI says «Оценка внешнего спроса» and
+      never «Прогноз продаж рынка» (see config/index_definition.yaml: calibration).
+    series:
+      - code: own.tickets_sold.daily
+        name_ru: Продано билетов (собственная площадка)
+        unit: count
+        frequency: daily
+        measures: direct
+        assertion_class: fact
+        segment: calibration
+        aggregation: sum
+      - code: own.gross_revenue.daily
+        name_ru: Валовая выручка по билетам (собственная площадка)
+        unit: rub
+        frequency: daily
+        measures: direct
+        assertion_class: fact
+        segment: calibration
+        aggregation: sum
+
+  # ----------------------------------------------------------------------------
+  # MARKET RESEARCH (manual, methodology-bearing)
+  # ----------------------------------------------------------------------------
+  - code: market_research_manual
+    name: Published ticket-market research (manual entry)
+    name_ru: Публичные исследования билетного рынка (ручной ввод)
+    kind: manual
+    publisher: various
+    homepage_url: null
+    endpoint_url: null
+    geography: RU
+    access_policy: manual_export
+    requires_credentials: false
+    robots_policy: not_applicable
+    rate_limit_per_min: null
+    update_cadence: irregular
+    typical_lag_days: 90
+    license: "Per publication"
+    terms_url: null
+    is_proxy: false
+    enabled: true
+    methodology_notes: >
+      Low-frequency anchors (annual/quarterly market size, average ticket price) entered
+      by hand. Every record REQUIRES publisher, publication date, coverage definition and
+      a methodology note, enforced by the loader. Used to sanity-check index levels, never
+      to drive daily dynamics.
+    series:
+      - code: research.market_size.ru.yearly
+        name_ru: Оценка объёма билетного рынка РФ
+        unit: rub_billion
+        frequency: yearly
+        measures: direct
+        assertion_class: estimate
+        segment: concert_industry
+        aggregation: last

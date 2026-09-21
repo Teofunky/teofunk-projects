@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="windows-1251"?>
+<!-- SYNTHETIC FIXTURE. Format faithful, values invented. Never treat as observed data. -->
+<ValCurs Date="18.09.2026" name="Foreign Currency Market">
+<Valute ID="R01235">
+<NumCode>840</NumCode>
+<CharCode>USD</CharCode>
+<Nominal>10</Nominal>
+<Name>Доллар США</Name>
+<Value>814,5230</Value>
+<VunitRate>81,4523</VunitRate>
+</Valute>
+<Valute ID="R01239">
+<NumCode>978</NumCode>
+<CharCode>EUR</CharCode>
+<Nominal>1</Nominal>
+<Name>Евро</Name>
+<Value>95,2017</Value>
+<VunitRate>95,2017</VunitRate>
+</Valute>
+<Valute ID="R01375">
+<NumCode>156</NumCode>
+<CharCode>CNY</CharCode>
+<Nominal>10</Nominal>
+<Name>Китайских юаней</Name>
+<Value>114,3300</Value>
+<VunitRate>11,433</VunitRate>
+</Valute>
+</ValCurs>
