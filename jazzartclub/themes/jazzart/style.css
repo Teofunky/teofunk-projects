@@ -1,0 +1,585 @@
+/*
+Theme Name: Джаз Арт Клуб
+Description: Простая тема для сайта со статьями: крупный шрифт, высокий контраст, меню всегда на виду, переключатель размера текста. Рассчитана на читателей старшего возраста и просмотр с компьютера.
+Version: 1.0.0
+Requires at least: 6.3
+Requires PHP: 7.4
+License: GNU General Public License v2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: jazzart
+*/
+
+/* Шрифты лежат в папке темы и не загружаются со сторонних серверов.
+   PT Serif (ParaType) и Old Standard TT распространяются по лицензии SIL Open Font License 1.1. */
+@font-face { font-family: 'PT Serif'; font-style: normal; font-display: swap; font-weight: 400; src: url(assets/fonts/pt-serif-cyrillic-ext-400-normal.woff2) format('woff2'); unicode-range: U+0460-052F,U+1C80-1C8A,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F; }
+@font-face { font-family: 'PT Serif'; font-style: normal; font-display: swap; font-weight: 400; src: url(assets/fonts/pt-serif-cyrillic-400-normal.woff2) format('woff2'); unicode-range: U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116; }
+@font-face { font-family: 'PT Serif'; font-style: normal; font-display: swap; font-weight: 400; src: url(assets/fonts/pt-serif-latin-ext-400-normal.woff2) format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: 'PT Serif'; font-style: normal; font-display: swap; font-weight: 400; src: url(assets/fonts/pt-serif-latin-400-normal.woff2) format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: 'PT Serif'; font-style: italic; font-display: swap; font-weight: 400; src: url(assets/fonts/pt-serif-cyrillic-ext-400-italic.woff2) format('woff2'); unicode-range: U+0460-052F,U+1C80-1C8A,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F; }
+@font-face { font-family: 'PT Serif'; font-style: italic; font-display: swap; font-weight: 400; src: url(assets/fonts/pt-serif-cyrillic-400-italic.woff2) format('woff2'); unicode-range: U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116; }
+@font-face { font-family: 'PT Serif'; font-style: italic; font-display: swap; font-weight: 400; src: url(assets/fonts/pt-serif-latin-ext-400-italic.woff2) format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: 'PT Serif'; font-style: italic; font-display: swap; font-weight: 400; src: url(assets/fonts/pt-serif-latin-400-italic.woff2) format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: 'PT Serif'; font-style: normal; font-display: swap; font-weight: 700; src: url(assets/fonts/pt-serif-cyrillic-ext-700-normal.woff2) format('woff2'); unicode-range: U+0460-052F,U+1C80-1C8A,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F; }
+@font-face { font-family: 'PT Serif'; font-style: normal; font-display: swap; font-weight: 700; src: url(assets/fonts/pt-serif-cyrillic-700-normal.woff2) format('woff2'); unicode-range: U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116; }
+@font-face { font-family: 'PT Serif'; font-style: normal; font-display: swap; font-weight: 700; src: url(assets/fonts/pt-serif-latin-ext-700-normal.woff2) format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: 'PT Serif'; font-style: normal; font-display: swap; font-weight: 700; src: url(assets/fonts/pt-serif-latin-700-normal.woff2) format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: 'PT Serif'; font-style: italic; font-display: swap; font-weight: 700; src: url(assets/fonts/pt-serif-cyrillic-ext-700-italic.woff2) format('woff2'); unicode-range: U+0460-052F,U+1C80-1C8A,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F; }
+@font-face { font-family: 'PT Serif'; font-style: italic; font-display: swap; font-weight: 700; src: url(assets/fonts/pt-serif-cyrillic-700-italic.woff2) format('woff2'); unicode-range: U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116; }
+@font-face { font-family: 'PT Serif'; font-style: italic; font-display: swap; font-weight: 700; src: url(assets/fonts/pt-serif-latin-ext-700-italic.woff2) format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: 'PT Serif'; font-style: italic; font-display: swap; font-weight: 700; src: url(assets/fonts/pt-serif-latin-700-italic.woff2) format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: 'Old Standard TT'; font-style: normal; font-display: swap; font-weight: 400; src: url(assets/fonts/old-standard-tt-cyrillic-ext-400-normal.woff2) format('woff2'); unicode-range: U+0460-052F,U+1C80-1C8A,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F; }
+@font-face { font-family: 'Old Standard TT'; font-style: normal; font-display: swap; font-weight: 400; src: url(assets/fonts/old-standard-tt-cyrillic-400-normal.woff2) format('woff2'); unicode-range: U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116; }
+@font-face { font-family: 'Old Standard TT'; font-style: normal; font-display: swap; font-weight: 400; src: url(assets/fonts/old-standard-tt-latin-ext-400-normal.woff2) format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: 'Old Standard TT'; font-style: normal; font-display: swap; font-weight: 400; src: url(assets/fonts/old-standard-tt-latin-400-normal.woff2) format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: 'Old Standard TT'; font-style: italic; font-display: swap; font-weight: 400; src: url(assets/fonts/old-standard-tt-cyrillic-ext-400-italic.woff2) format('woff2'); unicode-range: U+0460-052F,U+1C80-1C8A,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F; }
+@font-face { font-family: 'Old Standard TT'; font-style: italic; font-display: swap; font-weight: 400; src: url(assets/fonts/old-standard-tt-cyrillic-400-italic.woff2) format('woff2'); unicode-range: U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116; }
+@font-face { font-family: 'Old Standard TT'; font-style: italic; font-display: swap; font-weight: 400; src: url(assets/fonts/old-standard-tt-latin-ext-400-italic.woff2) format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: 'Old Standard TT'; font-style: italic; font-display: swap; font-weight: 400; src: url(assets/fonts/old-standard-tt-latin-400-italic.woff2) format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: 'Old Standard TT'; font-style: normal; font-display: swap; font-weight: 700; src: url(assets/fonts/old-standard-tt-cyrillic-ext-700-normal.woff2) format('woff2'); unicode-range: U+0460-052F,U+1C80-1C8A,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F; }
+@font-face { font-family: 'Old Standard TT'; font-style: normal; font-display: swap; font-weight: 700; src: url(assets/fonts/old-standard-tt-cyrillic-700-normal.woff2) format('woff2'); unicode-range: U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116; }
+@font-face { font-family: 'Old Standard TT'; font-style: normal; font-display: swap; font-weight: 700; src: url(assets/fonts/old-standard-tt-latin-ext-700-normal.woff2) format('woff2'); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: 'Old Standard TT'; font-style: normal; font-display: swap; font-weight: 700; src: url(assets/fonts/old-standard-tt-latin-700-normal.woff2) format('woff2'); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+
+/* ------------------------------------------------------------
+   1. Переменные
+   ------------------------------------------------------------ */
+:root {
+	/* Цвета взяты со старого сайта и логотипа клуба. */
+	--paper: #ffffff;
+	--ink: #2a171b;
+	--muted: #5d4a4e;
+	--note: #7a0f1e;        /* бордовый: ссылки и кнопки */
+	--note-deep: #5b050e;   /* бордовый логотипа: шапка и подвал */
+	--cream: #fdf0d6;       /* кремовый логотипа: полоса меню, текст на бордовом */
+	--visited: #5b2a86;
+	--brass: #b89ebb;       /* сиреневый со старой шапки: отметки и акценты */
+	--mist: #fdf6e8;
+	--line: #dccfba;
+	--alert: #7a0f1e;
+
+	/* Газетная типографика без рубленых шрифтов: PT Serif для текста, меню и подписей,
+	   Old Standard («обыкновенная» гарнитура старых газет и книг) для заголовков. */
+	--serif: 'PT Serif', Georgia, 'Times New Roman', serif;
+	--display: 'Old Standard TT', 'PT Serif', Georgia, 'Times New Roman', serif;
+	--sans: var(--serif);
+
+	--caps: 0.06em;         /* разрядка прописных в меню и рубриках */
+	--gutter: clamp(1rem, 4vw, 2.5rem);
+	--page: 62rem;
+	--radius: 6px;
+}
+
+/* Размер текста: базовый 20px, далее 23px и 26px. Переключатель в шапке. */
+html { font-size: 125%; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; scroll-padding-top: 1rem; }
+html[data-size="l"] { font-size: 143.75%; }
+html[data-size="xl"] { font-size: 162.5%; }
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+	margin: 0;
+	background: var(--paper);
+	color: var(--ink);
+	font-family: var(--serif);
+	font-size: 1rem;
+	line-height: 1.6;
+	text-rendering: optimizeLegibility;
+}
+
+img, video, iframe, embed, object { max-width: 100%; }
+img { height: auto; }
+
+a { color: var(--note); text-decoration-thickness: 0.08em; text-underline-offset: 0.18em; }
+a:hover { color: var(--note-deep); text-decoration-thickness: 0.16em; }
+
+:focus-visible {
+	outline: 3px solid var(--ink);
+	outline-offset: 2px;
+	box-shadow: 0 0 0 7px var(--brass);
+	border-radius: 2px;
+}
+
+.visually-hidden {
+	position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+	overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+.skip {
+	position: absolute; left: 1rem; top: -10rem; z-index: 100;
+	padding: 0.8rem 1.2rem; background: var(--brass); color: var(--ink);
+	font-family: var(--sans); font-weight: 700;
+}
+.skip:focus { top: 1rem; }
+
+.wrap { width: min(var(--page), 100% - 2 * var(--gutter)); margin-inline: auto; }
+
+/* ------------------------------------------------------------
+   2. Кнопки и поля
+   ------------------------------------------------------------ */
+.button, button, input[type="submit"] {
+	display: inline-block;
+	min-height: 2.6rem;
+	padding: 0.6rem 1.3rem;
+	border: 2px solid var(--note);
+	border-radius: var(--radius);
+	background: var(--note);
+	color: #fff;
+	font-family: var(--serif);
+	font-size: 0.88rem;
+	font-weight: 700;
+	line-height: 1.3;
+	text-transform: uppercase;
+	letter-spacing: var(--caps);
+	text-decoration: none;
+	cursor: pointer;
+}
+.button:hover, button:hover, input[type="submit"]:hover { background: var(--note-deep); border-color: var(--note-deep); color: #fff; }
+.button.is-quiet { background: var(--paper); color: var(--note); }
+.button.is-quiet:hover { background: var(--mist); color: var(--note-deep); }
+
+input[type="search"], input[type="text"], input[type="email"], input[type="url"], textarea {
+	width: 100%;
+	min-height: 2.6rem;
+	padding: 0.55rem 0.8rem;
+	border: 2px solid var(--ink);
+	border-radius: var(--radius);
+	background: var(--paper);
+	color: var(--ink);
+	font-family: var(--sans);
+	font-size: 1rem;
+}
+::placeholder { color: var(--muted); opacity: 1; }
+
+/* ------------------------------------------------------------
+   3. Шапка
+   ------------------------------------------------------------ */
+/* Сиреневая полоса под шапкой: цвет баннера старого сайта. */
+.site-header-top { background: var(--note-deep); color: var(--cream); border-bottom: 7px solid var(--brass); }
+.header-row {
+	display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+	gap: 1rem 2.5rem;
+	padding-block: 1.1rem;
+}
+.brand { display: flex; align-items: center; gap: 1.3rem; margin: 0; color: var(--cream); text-decoration: none; }
+.brand:hover { color: #fff; }
+.brand-logo { display: block; height: 5.6rem; width: auto; flex: none; }
+.brand-text { display: block; }
+.brand-name {
+	display: block;
+	font-family: var(--display);
+	font-size: 1.95rem;
+	font-weight: 700;
+	line-height: 1.1;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+.brand-tagline { display: block; max-width: 19rem; margin-top: 0.35rem; font-style: italic; line-height: 1.35; }
+
+.header-tools { display: flex; flex-direction: column; align-items: flex-end; gap: 0.7rem; }
+
+.header-phone { margin: 0; font-size: 1.2rem; font-weight: 700; }
+.header-phone a { color: var(--cream); text-decoration: none; white-space: nowrap; }
+.header-phone a:hover { color: #fff; text-decoration: underline; }
+
+.site-search { display: flex; gap: 0.5rem; width: 23rem; max-width: 100%; }
+.site-search input { flex: 1; min-width: 0; }
+.site-header-top .site-search input { border-color: var(--cream); }
+.site-header-top .site-search button { background: var(--cream); border-color: var(--cream); color: var(--note-deep); }
+.site-header-top .site-search button:hover { background: #fff; border-color: #fff; color: var(--note-deep); }
+
+.text-size { display: flex; align-items: center; gap: 0.4rem; font-size: 0.9rem; font-style: italic; color: var(--cream); }
+.text-size-label { margin-right: 0.3rem; }
+.text-size button {
+	min-width: 2.6rem; min-height: 2.6rem; padding: 0;
+	background: transparent; color: var(--cream); border-color: rgba(253, 240, 214, 0.55);
+	font-weight: 700; line-height: 1; letter-spacing: 0;
+}
+.text-size button:hover { background: rgba(253, 240, 214, 0.16); color: #fff; border-color: var(--cream); }
+.text-size button[aria-pressed="true"] { background: var(--cream); color: var(--note-deep); border-color: var(--cream); }
+.text-size button:nth-of-type(1) { font-size: 0.9rem; }
+.text-size button:nth-of-type(2) { font-size: 1.15rem; }
+.text-size button:nth-of-type(3) { font-size: 1.4rem; }
+.site-header-top :focus-visible { outline-color: #fff; box-shadow: 0 0 0 7px var(--brass); }
+
+/* ------------------------------------------------------------
+   4. Главное меню: одна строка, пункты всегда на виду
+   ------------------------------------------------------------ */
+.site-nav { background: var(--cream); border-bottom: 4px double var(--note-deep); font-family: var(--serif); }
+.site-nav .wrap { position: relative; }
+.site-nav ul { list-style: none; margin: 0; padding: 0; }
+
+/* Пункты стоят в одну строку и делят ширину поровну по длине названий.
+   Вторая строка не появляется никогда: на узком экране меню сворачивается в кнопку. */
+.menu { display: flex; flex-wrap: nowrap; }
+.menu > li { position: relative; display: flex; flex: 1 1 auto; border-left: 1px solid var(--line); }
+.menu > li:last-child { border-right: 1px solid var(--line); }
+.menu a {
+	display: flex; align-items: center; justify-content: center;
+	flex: 1;
+	min-height: 3.3rem;
+	padding: 0.5rem 0.7rem;
+	color: var(--note-deep);
+	font-size: 0.92rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: var(--caps);
+	text-decoration: none;
+	white-space: nowrap;
+}
+.menu > li > a:hover { background: var(--brass); color: var(--ink); }
+.menu > .current-menu-item > a,
+.menu > .current-menu-ancestor > a,
+.menu > .current-menu-parent > a,
+.menu > .current_page_item > a,
+.menu > .current_page_ancestor > a { background: var(--note-deep); color: var(--cream); }
+/* При увеличении текста кнопками «А» меню растёт медленнее, чтобы остаться в одной строке. */
+html[data-size="l"] .menu > li > a { font-size: 0.84rem; }
+html[data-size="xl"] .menu > li > a { font-size: 0.76rem; padding-inline: 0.5rem; }
+.site-nav :focus-visible { outline-offset: -4px; box-shadow: none; }
+
+.submenu-toggle {
+	min-height: 3.2rem; min-width: 2.6rem; padding: 0 0.6rem; margin-left: -0.5rem;
+	border: 0; border-radius: 0; background: transparent; color: var(--note-deep);
+}
+.submenu-toggle:hover { background: var(--brass); color: var(--ink); }
+.submenu-toggle::before {
+	content: ''; display: block; width: 0.55rem; height: 0.55rem; margin: -0.25rem auto 0;
+	border-right: 3px solid currentColor; border-bottom: 3px solid currentColor;
+	transform: rotate(45deg);
+}
+.submenu-toggle[aria-expanded="true"]::before { transform: rotate(-135deg); margin-top: 0.3rem; }
+
+.menu .sub-menu {
+	position: absolute; left: 0; top: 100%; z-index: 20;
+	min-width: 17rem; padding: 0.4rem 0;
+	background: var(--paper);
+	border: 2px solid var(--note-deep); border-top: 0;
+	box-shadow: 0 14px 30px rgba(42, 23, 27, 0.22);
+}
+.menu .sub-menu a { justify-content: flex-start; min-height: 3rem; padding: 0.5rem 1.1rem; color: var(--note); font-size: 0.85rem; }
+.menu .sub-menu a:hover { background: var(--mist); color: var(--note-deep); text-decoration: underline; }
+.menu .sub-menu .current-menu-item > a { color: var(--ink); font-weight: 700; box-shadow: inset 6px 0 0 var(--brass); }
+
+/* Со скриптом подменю открывается по нажатию, без скрипта по наведению. */
+.js .menu .sub-menu { display: none; }
+.js .menu li.is-open > .sub-menu { display: block; }
+html:not(.js) .menu li:not(:hover):not(:focus-within) > .sub-menu { display: none; }
+
+.nav-toggle { display: none; }
+
+/* ------------------------------------------------------------
+   5. Сетка страницы
+   ------------------------------------------------------------ */
+.layout {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 15rem;
+	gap: 3rem 4rem;
+	padding-block: 2.5rem 4.5rem;
+	align-items: start;
+}
+.layout > main { min-width: 0; max-width: 39rem; }
+
+.crumbs { margin: 0 0 1.4rem; font-size: 0.9rem; font-style: italic; color: var(--muted); }
+.crumbs a { display: inline-block; padding-block: 0.25rem; }
+.crumbs .sep { margin-inline: 0.5rem; }
+
+/* ------------------------------------------------------------
+   6. Заголовки
+   ------------------------------------------------------------ */
+h1, h2, h3, h4 { margin: 0; font-family: var(--display); font-weight: 700; line-height: 1.2; text-wrap: balance; overflow-wrap: break-word; }
+
+.page-title { font-size: 2.7rem; line-height: 1.12; }
+.page-intro { margin: 0.9rem 0 0; font-size: 1.15rem; color: var(--muted); }
+.page-head { margin-bottom: 2rem; }
+
+.section-title, .side-title {
+	margin: 0 0 0.4rem; padding-top: 1.1rem;
+	border-top: 4px solid var(--note-deep);
+	background: linear-gradient(var(--note-deep), var(--note-deep)) 0 3px / 100% 1px no-repeat;
+	font-family: var(--serif); font-size: 1rem; font-weight: 700;
+	text-transform: uppercase; letter-spacing: var(--caps);
+}
+
+/* ------------------------------------------------------------
+   7. Главная: первая статья крупно
+   ------------------------------------------------------------ */
+.lead { margin-bottom: 3.2rem; }
+.lead-title { font-size: 2.8rem; line-height: 1.1; }
+.lead-title a { color: var(--ink); text-decoration: none; }
+.lead-title a:hover { color: var(--note); text-decoration: underline; text-decoration-thickness: 0.07em; }
+.lead-excerpt { margin: 1.1rem 0 1.5rem; font-size: 1.2rem; line-height: 1.55; }
+.lead-image { display: block; margin: 0 0 1.5rem; }
+.lead-image img { display: block; width: 100%; border-radius: var(--radius); }
+
+.meta { margin: 0 0 0.5rem; font-size: 0.9rem; font-style: italic; color: var(--muted); }
+.meta > * + * { margin-left: 1.2rem; }
+.meta a { display: inline-block; padding-block: 0.2rem; }
+
+/* ------------------------------------------------------------
+   8. Список статей
+   ------------------------------------------------------------ */
+.rows { margin: 0; padding: 0; list-style: none; }
+.row { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0 1.6rem; padding-block: 1.5rem; border-bottom: 1px solid var(--line); }
+.row.has-image { grid-template-columns: minmax(0, 1fr) 11rem; }
+.row-title { font-size: 1.6rem; line-height: 1.2; }
+.row-title a { text-decoration: none; }
+.row-title a:hover { text-decoration: underline; }
+.row-title a:visited { color: var(--visited); }
+.row-excerpt { margin: 0.5rem 0 0; }
+.row-image img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; object-position: center 20%; border-radius: var(--radius); background: var(--mist); }
+
+.more { margin-top: 2rem; }
+
+.pagination { margin-top: 2.2rem; font-family: var(--sans); }
+.pagination .nav-links { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.pagination .page-numbers {
+	display: inline-flex; align-items: center; justify-content: center;
+	min-width: 2.8rem; min-height: 2.8rem; padding: 0.3rem 0.9rem;
+	border: 2px solid var(--note); border-radius: var(--radius);
+	font-weight: 700; text-decoration: none;
+}
+.pagination a.page-numbers:hover { background: var(--mist); }
+.pagination .page-numbers.current { background: var(--ink); border-color: var(--ink); color: #fff; }
+.pagination .page-numbers.dots { border-color: transparent; }
+
+/* ------------------------------------------------------------
+   9. Боковая колонка: рубрики
+   ------------------------------------------------------------ */
+.side { font-family: var(--sans); }
+.side-title { padding-bottom: 0.3rem; }
+.side ul { list-style: none; margin: 0; padding: 0; }
+.side li { border-top: 1px solid var(--line); }
+.side li a {
+	display: flex; justify-content: space-between; align-items: baseline; gap: 1rem;
+	min-height: 3rem; padding: 0.7rem 0.6rem 0.7rem 0;
+	font-size: 0.85rem; font-weight: 700; line-height: 1.35;
+	text-transform: uppercase; letter-spacing: var(--caps);
+	text-decoration: none;
+}
+.side li a:hover { background: var(--mist); text-decoration: underline; box-shadow: -0.6rem 0 0 var(--mist); }
+.side li .count { color: var(--muted); font-size: 1rem; font-weight: 400; letter-spacing: 0; font-variant-numeric: tabular-nums; }
+.side li.is-current a { color: var(--ink); box-shadow: -0.9rem 0 0 var(--paper), -1.25rem 0 0 var(--brass); }
+.side .children { padding-left: 1.1rem; }
+.side .children a { font-weight: 400; }
+.side .widget { margin-top: 2.5rem; }
+
+/* Проекты клуба: крупные кнопки, как пять кнопок «Рубрики» на старом сайте. */
+.side .projects { margin-bottom: 2.5rem; }
+.side .projects-list { display: grid; gap: 0.5rem; padding-top: 0.2rem; }
+.side .projects-list li { border: 0; }
+.side .projects-list a {
+	display: flex; align-items: center; justify-content: flex-start;
+	min-height: 3.4rem; padding: 0.6rem 1rem;
+	background: var(--cream); color: var(--note-deep);
+	border: 2px solid var(--line); border-radius: var(--radius);
+	font-size: 0.9rem; font-weight: 700;
+}
+.side .projects-list a:hover { background: var(--brass); border-color: var(--brass); color: var(--ink); box-shadow: none; text-decoration: none; }
+.side .projects-list .current-menu-item > a { background: var(--note-deep); border-color: var(--note-deep); color: var(--cream); }
+
+.side .venue { margin-top: 2.5rem; }
+.side .venue p { margin: 0.6rem 0 0; line-height: 1.45; }
+.side .venue a:not(.button) { font-weight: 700; }
+.side .venue .button { margin-top: 0.3rem; }
+
+/* ------------------------------------------------------------
+   10. Статья
+   ------------------------------------------------------------ */
+.article-head { margin-bottom: 1.8rem; }
+.article-head .meta { margin: 1rem 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: 0.3rem 1.2rem; }
+.article-head .meta > * + * { margin-left: 0; }
+.print-button {
+	font-style: normal;
+	min-height: 2.2rem; padding: 0.25rem 0.8rem;
+	background: var(--paper); color: var(--note); border-color: var(--line);
+	font-size: 0.9rem;
+}
+.print-button:hover { background: var(--mist); color: var(--note-deep); border-color: var(--note); }
+.article-image { margin: 0 0 1.8rem; }
+.article-image img { display: block; width: 100%; border-radius: var(--radius); }
+
+.prose { font-size: 1.1rem; line-height: 1.65; overflow-wrap: break-word; }
+.prose > * { margin-block: 0 1.25em; }
+.prose > *:last-child { margin-bottom: 0; }
+.prose h2 { margin-top: 2em; margin-bottom: 0.6em; font-size: 1.55em; }
+.prose h3 { margin-top: 1.8em; margin-bottom: 0.5em; font-size: 1.25em; }
+.prose h4 { margin-top: 1.6em; margin-bottom: 0.4em; font-size: 1.05em; font-family: var(--sans); }
+.prose a { text-decoration: underline; }
+.prose a:visited { color: var(--visited); }
+.prose u { text-decoration: none; font-weight: 700; }
+.prose ul, .prose ol { padding-left: 1.5em; }
+.prose li { margin-bottom: 0.45em; }
+.prose li::marker { color: var(--note); font-weight: 700; }
+.prose blockquote {
+	margin-inline: 0; padding: 0.2em 0 0.2em 1.3em;
+	border-left: 6px solid var(--brass);
+	font-size: 1.12em; font-style: italic; line-height: 1.5;
+}
+.prose blockquote p { margin: 0 0 0.6em; }
+.prose blockquote p:last-child { margin-bottom: 0; }
+.prose blockquote cite { display: block; margin-top: 0.6em; font-family: var(--sans); font-size: 0.8em; font-style: normal; color: var(--muted); }
+.prose hr { height: 4px; border: 0; background: var(--note-deep); width: 5rem; margin-inline: 0; margin-block: 2.2em; }
+.prose img { border-radius: var(--radius); }
+.prose figure { margin-inline: 0; }
+.prose figcaption, .prose .wp-caption-text { margin-top: 0.5em; font-family: var(--sans); font-size: 0.82em; color: var(--muted); line-height: 1.4; }
+.prose .wp-caption { max-width: 100%; }
+/* Текст не обтекает крупные картинки: в узкой колонке рядом с фото строки получаются
+   слишком короткими. Обтекание оставлено только для миниатюр. */
+.prose .alignleft, .prose .alignright, .prose .alignnone { display: block; margin: 0.5em 0 0.9em; }
+.prose img.size-thumbnail.alignleft { float: left; clear: left; max-width: 30%; margin: 0.3em 1.3em 0.7em 0; }
+.prose img.size-thumbnail.alignright { float: right; clear: right; max-width: 30%; margin: 0.3em 0 0.7em 1.3em; }
+.prose h2, .prose h3, .prose h4 { clear: both; }
+.prose .aligncenter { display: block; margin-inline: auto; }
+.prose::after { content: ''; display: table; clear: both; }
+.prose iframe { display: block; width: 100%; border: 0; }
+.prose .video, .prose iframe[src*="youtube"] { aspect-ratio: 16 / 9; height: auto; background: var(--ink); border-radius: var(--radius); }
+.prose .video iframe { width: 100%; height: 100%; }
+.prose audio { width: 100%; }
+.prose .table-scroll, .prose .wp-block-table { overflow-x: auto; }
+.prose table { width: 100%; border-collapse: collapse; font-family: var(--sans); font-size: 0.86em; line-height: 1.4; }
+.prose th, .prose td { padding: 0.6em 0.8em; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+.prose thead th, .prose table > tr:first-child th { background: var(--mist); border-bottom: 2px solid var(--note-deep); }
+.prose .has-large-font-size { font-size: 1.25em; }
+
+.article-foot { margin-top: 2.5rem; font-family: var(--sans); font-size: 0.95rem; }
+.tags { margin: 0 0 1rem; color: var(--muted); }
+.edit-link a { font-weight: 700; }
+
+.neighbors { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 2.5rem; padding-top: 1.5rem; border-top: 4px solid var(--note-deep); }
+.neighbors a {
+	display: block; padding: 0.9rem 1.1rem;
+	border: 2px solid var(--line); border-radius: var(--radius);
+	text-decoration: none; line-height: 1.3;
+}
+.neighbors a:hover { border-color: var(--note); background: var(--mist); }
+.neighbors .label { display: block; margin-bottom: 0.3rem; font-size: 0.9rem; font-style: italic; color: var(--muted); }
+.neighbors .title { font-weight: 700; font-size: 1.05rem; }
+.neighbors .next { grid-column: 2; }
+
+.children-list { margin-top: 2.5rem; }
+.children-list ul { list-style: none; margin: 0; padding: 0; }
+.children-list li { border-bottom: 1px solid var(--line); }
+.children-list a { display: block; padding: 0.8rem 0; font-size: 1.2rem; font-weight: 700; text-decoration: none; }
+.children-list a:hover { text-decoration: underline; }
+
+.notice { padding: 1.2rem 1.4rem; background: var(--mist); border-left: 6px solid var(--brass); }
+.notice > :first-child { margin-top: 0; }
+.notice > :last-child { margin-bottom: 0; }
+/* Тексты, перенесённые со старого сайта или вставленные из Word, часто несут свои
+   размеры и цвета. Приводим их к единому виду: красные оттенки становятся одним
+   цветом выделения, остальное наследует оформление сайта. */
+.prose [style*="color"] { color: inherit !important; }
+.prose [style*="#800000"], .prose [style*="#ff0000"], .prose [style*="#993300"],
+.prose [style*="#d53234"], .prose [style*="#c00000"], .prose [style*="color: red"], .prose [style*="color:red"] { color: var(--alert) !important; }
+.prose a[style*="color"], .prose a [style*="color"] { color: var(--note) !important; }
+.prose [style*="font-size"] { font-size: inherit !important; }
+.prose [style*="font-family"] { font-family: inherit !important; }
+.prose [style*="justify"] { text-align: left !important; }
+.prose object, .prose embed { display: none; }
+.prose h2 strong, .prose h3 strong, .prose h4 strong { font-weight: inherit; }
+
+.photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr)); gap: 0.6rem; }
+.photo-grid a { display: block; }
+.photo-grid img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; }
+
+.search-again { margin: 1.5rem 0; }
+.search-again .site-search { width: 100%; max-width: 30rem; }
+
+/* Комментарии */
+.comments { margin-top: 3rem; }
+.comments ol { list-style: none; margin: 0; padding: 0; }
+.comments .comment-body { padding-block: 1.2rem; border-bottom: 1px solid var(--line); }
+.comments .children { padding-left: 2rem; }
+.comments .comment-meta { font-family: var(--sans); font-size: 0.9rem; color: var(--muted); }
+.comments .avatar { display: none; }
+.comment-respond { margin-top: 2rem; }
+.comment-respond label { display: block; margin-bottom: 0.3rem; font-family: var(--sans); font-weight: 700; }
+.comment-respond p { margin: 0 0 1rem; }
+
+/* ------------------------------------------------------------
+   11. Подвал
+   ------------------------------------------------------------ */
+.site-footer { background: var(--note-deep); color: var(--cream); font-family: var(--sans); }
+.site-footer a { color: var(--cream); }
+.site-footer a:hover { color: #fff; }
+.site-footer :focus-visible { outline-color: #fff; box-shadow: 0 0 0 7px var(--brass); }
+.footer-grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 2rem 4rem; padding-block: 2.8rem 2rem; }
+.footer-logo { display: block; height: 5rem; width: auto; margin-bottom: 1rem; }
+.footer-name { margin: 0 0 0.4rem; font-family: var(--display); font-size: 1.45rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+.footer-contacts { margin: 1.2rem 0 0; }
+.footer-contacts p { margin: 0 0 0.35rem; }
+.footer-title { margin: 0 0 0.6rem; font-size: 0.9rem; font-weight: 700; text-transform: uppercase; letter-spacing: var(--caps); color: #e3cfe6; }
+.footer-menu { list-style: none; margin: 0; padding: 0; columns: 2; column-gap: 2rem; }
+.footer-menu li { break-inside: avoid; }
+.footer-menu a { display: inline-block; padding-block: 0.35rem; }
+.footer-bottom { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.5rem 2rem; padding-block: 1.2rem 1.8rem; border-top: 1px solid rgba(253, 240, 214, 0.35); font-size: 0.9rem; }
+.footer-bottom p { margin: 0; }
+
+/* ------------------------------------------------------------
+   12. Узкие экраны и очень крупный текст
+   ------------------------------------------------------------ */
+@media (max-width: 1080px) {
+	.layout { grid-template-columns: minmax(0, 1fr); }
+	.layout > main { max-width: 39rem; }
+}
+@media (max-width: 1340px) {
+	html[data-size="xl"] .layout { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 1500px) {
+	html[data-size="xl"] .header-tools { align-items: flex-start; }
+}
+@media (max-width: 1180px) {
+	.menu > li > a { font-size: 0.82rem; padding-inline: 0.45rem; letter-spacing: 0.04em; }
+	html[data-size="l"] .menu > li > a { font-size: 0.74rem; }
+	html[data-size="xl"] .menu > li > a { font-size: 0.66rem; padding-inline: 0.35rem; letter-spacing: 0.02em; }
+}
+@media (max-width: 900px) {
+	.nav-toggle {
+		display: flex; align-items: center; justify-content: space-between; width: 100%;
+		min-height: 3.2rem; padding: 0; border: 0; border-radius: 0; background: transparent; color: var(--note-deep); font-size: 1rem;
+	}
+	.nav-toggle:hover { background: transparent; color: var(--note-deep); }
+	.nav-toggle::after { content: 'открыть'; font-weight: 400; opacity: 0.85; text-transform: none; letter-spacing: 0; }
+	.nav-toggle[aria-expanded="true"]::after { content: 'закрыть'; }
+	.js .menu { display: none; }
+	.js .site-nav.is-open .menu { display: block; padding-bottom: 0.6rem; }
+	.menu { display: block; }
+	.menu > li { flex-wrap: wrap; border: 0; border-top: 1px solid var(--line); }
+	.menu > li:last-child { border-right: 0; }
+	.menu > li > a, html[data-size] .menu > li > a { justify-content: flex-start; padding-inline: 0; font-size: 0.95rem; letter-spacing: var(--caps); }
+	.menu .sub-menu { position: static; width: 100%; min-width: 0; border: 0; box-shadow: none; }
+	.submenu-toggle { margin-left: 0; }
+}
+@media (max-width: 760px) {
+	.header-row { padding-block: 1rem; }
+	.brand-name { font-size: 1.3rem; }
+	.brand-logo { height: 4.2rem; }
+	.brand { gap: 0.9rem; }
+	.header-tools { align-items: stretch; width: 100%; }
+	.site-search { width: 100%; }
+	.page-title { font-size: 1.9rem; }
+	.lead-title { font-size: 2rem; }
+	.row.has-image { grid-template-columns: minmax(0, 1fr); }
+	.row-image { order: -1; margin-bottom: 0.8rem; }
+	.neighbors { grid-template-columns: 1fr; }
+	.neighbors .next { grid-column: 1; }
+	.footer-grid { grid-template-columns: 1fr; }
+	.prose img.size-thumbnail.alignleft, .prose img.size-thumbnail.alignright { max-width: 40%; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	html { scroll-behavior: smooth; }
+}
+
+/* ------------------------------------------------------------
+   13. Печать: только текст статьи
+   ------------------------------------------------------------ */
+@media print {
+	html, html[data-size] { font-size: 12pt; }
+	.header-tools, .brand-logo, .site-nav, .side, .site-footer, .crumbs, .neighbors, .print-button, .edit-link, .more, .pagination, .skip, .comments { display: none !important; }
+	.layout { display: block; padding: 0; }
+	.layout > main { max-width: none; }
+	body, a, .brand { color: #000; }
+	.site-header-top { background: none; }
+	.prose a { text-decoration: underline; }
+}
