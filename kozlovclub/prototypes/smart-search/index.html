@@ -1,0 +1,705 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Прототип поиска Kozlov Club</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
+<style>
+/* Layout: the club site's own shell (grey search bar, white header, afisha grid); the new search panel drops from the bar. One look, light, like kozlovclub.ru. */
+:root{
+  --bg:#ffffff; --ink:#020817; --ink-soft:#5b6170; --bar:#eeeeee; --line:#dcdcdc; --card:#f0f0f0;
+  --buy:#f34841; --buy-active:#d53234; --read:#8e9f94; --read-active:#6e7e74; --price:#f24841; --mark:#fde0de;
+  --ribbon:#1d2327; --ribbon-ink:#f0f0f1; --shade:rgba(2,8,23,.45);
+  --font:'Roboto',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;
+  --wrap:1280px; --gutter:30px;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.4;-webkit-text-size-adjust:100%}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+:focus-visible{outline:2px solid var(--buy);outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* --- prototype ribbon (not part of the site) --- */
+.ribbon{background:var(--ribbon);color:var(--ribbon-ink);font-size:13px;line-height:1.35}
+.ribbon__in{max-width:var(--wrap);margin:0 auto;padding:8px var(--gutter);display:flex;gap:6px 18px;flex-wrap:wrap;align-items:baseline}
+.ribbon b{font-weight:500}
+.ribbon span{opacity:.75}
+
+/* --- site shell --- */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;background:var(--bg)}
+.sbar{background:var(--bar);height:0;overflow:hidden;transition:height .2s linear}
+.sbar.is-open{height:50px}
+.sbar__in{max-width:var(--wrap);margin:0 auto;padding:0 var(--gutter);height:50px;display:flex;align-items:center;gap:10px}
+.sbar input{flex:1;min-width:0;height:50px;background:transparent;border:0;outline:0;font:inherit;font-size:16px;text-transform:uppercase;letter-spacing:.02em;color:var(--ink);padding:0;border-radius:0;-webkit-appearance:none;appearance:none}
+.sbar input::placeholder{color:#7b7f88;opacity:1}
+.sbar input::-webkit-search-cancel-button{display:none}
+.sbar__btn{width:40px;height:40px;display:grid;place-items:center;flex:none;margin-right:-10px}
+.sbar__btn svg{width:18px;height:18px}
+.header{background:var(--bg);border-bottom:1px solid transparent;transition:border-color .2s}
+.header__in{max-width:var(--wrap);margin:0 auto;padding:22px var(--gutter);display:flex;align-items:center;justify-content:space-between;gap:30px}
+.logo{flex:none;width:200px}
+.logo img{display:block;width:100%;height:auto}
+.nav{flex:1;min-width:0;display:flex;flex-direction:column;gap:22px}
+.nav__top{display:flex;align-items:center;justify-content:space-between;gap:20px}
+.nav__contacts{font-weight:700;letter-spacing:.24em;text-transform:uppercase;font-size:15px;line-height:22px;display:flex;flex-wrap:wrap;gap:0 25px;min-width:0}
+.nav__icons{display:flex;align-items:center;gap:14px;flex:none}
+.icon-btn{width:40px;height:40px;display:grid;place-items:center;border-radius:50%}
+.icon-btn:hover{background:var(--bar)}
+.icon-btn svg{width:19px;height:19px}
+.nav__menu{display:flex;text-transform:uppercase;font-size:14px;letter-spacing:1px}
+.nav__menu span{flex:1;text-align:center;border-right:1px solid #b8b8b8;white-space:nowrap;padding:0 8px}
+.nav__menu span:first-child{text-align:left;padding-left:0}
+.nav__menu span:last-child{border-right:0;text-align:right;padding-right:0}
+
+.page{max-width:var(--wrap);margin:0 auto;padding-inline:var(--gutter);padding-block:26px 60px}
+.try{background:var(--card);padding:18px 20px;display:flex;flex-direction:column;gap:12px}
+.try h1{margin:0;font-size:17px;font-weight:500;text-transform:uppercase;letter-spacing:.04em}
+.try p{margin:0;color:var(--ink-soft);font-size:14px;max-width:70ch}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:6px 14px;border:1px solid var(--line);background:var(--bg);border-radius:18px;font-size:14px;line-height:1.2;white-space:nowrap}
+.chip:hover{border-color:var(--ink)}
+.chip small{color:var(--ink-soft);font-size:12px}
+.chip code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px}
+
+.afisha-title{margin:34px 0 16px;font-size:14px;text-transform:uppercase;letter-spacing:.2em;font-weight:500;color:var(--ink-soft)}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:44px 20px}
+.card{background:var(--card);display:flex;flex-direction:column;position:relative}
+.card__img{aspect-ratio:450/338;background:#d9d9d9;overflow:hidden}
+.card__img img{display:block;width:100%;height:100%;object-fit:cover}
+.card__title{padding:10px;font-weight:500;line-height:1.25;text-transform:uppercase;min-height:4.2em}
+.card__dt{padding:0 10px 10px;display:flex;align-items:center;gap:15px;text-transform:uppercase;font-weight:500}
+.card__day{font-size:50px;line-height:1}
+.card__rows{font-size:15px;line-height:25px}
+.card__price{color:var(--price)}
+.card__btn{margin:auto 10px 10px;height:50px;display:grid;place-items:center;color:#fff;font-size:12px;letter-spacing:.2em;text-transform:uppercase;background:var(--buy);transition:background .2s}
+.card__btn:hover{background:var(--buy-active)}
+.card__btn--read{background:var(--read)}
+.card__btn--read:hover{background:var(--read-active)}
+
+/* --- the search panel (this is what the plugin adds) --- */
+.shade{position:fixed;inset:0;background:var(--shade);opacity:0;pointer-events:none;transition:opacity .2s;z-index:40}
+.shade.is-on{opacity:1;pointer-events:auto}
+.kzs{position:absolute;left:0;right:0;top:50px;z-index:2;background:var(--bg);box-shadow:0 24px 40px rgba(2,8,23,.18);border-top:1px solid var(--line);max-height:min(74vh,720px);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.kzs__in{max-width:var(--wrap);margin:0 auto;padding:16px var(--gutter) 8px}
+.kzs__label{overflow-wrap:anywhere;font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-soft);margin:6px 0 10px;font-weight:500}
+.kzs__chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.kzs__list{list-style:none;margin:0 0 10px;padding:0;border-top:1px solid var(--line)}
+.kzs__row{display:grid;grid-template-columns:112px minmax(0,1fr) auto;grid-template-areas:"thumb main cta";gap:6px 18px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.kzs__row--multi{grid-template-areas:"thumb main cta" "thumb more cta"}
+.kzs__thumb{grid-area:thumb;display:block;width:112px;aspect-ratio:4/3;background:#d9d9d9;overflow:hidden}
+.kzs__thumb img{display:block;width:100%;height:100%;object-fit:cover}
+.kzs__main{grid-area:main;min-width:0;display:block}
+.kzs__row--multi .kzs__main{align-self:end}
+.kzs__title{display:block;font-weight:500;text-transform:uppercase;line-height:1.25;overflow-wrap:anywhere}
+.kzs__title mark{background:var(--mark);color:inherit;padding:0 .08em;margin:0 -.08em}
+.kzs__meta{display:block;margin-top:5px;font-size:14px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.015em;font-weight:500}
+.kzs__meta b{color:var(--ink);font-weight:500}
+.kzs__meta .p{color:var(--price);white-space:nowrap}
+.kzs__more{grid-area:more;display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;color:var(--ink-soft);align-self:start}
+.kzs__date{display:inline-flex;align-items:center;min-height:28px;padding:2px 10px;border:1px solid var(--line);border-radius:14px;color:var(--ink);font-size:13px;white-space:nowrap}
+.kzs__date:hover{border-color:var(--ink)}
+.kzs__cta{grid-area:cta;display:grid;place-items:center;height:44px;padding:0 20px;color:#fff;background:var(--buy);font-size:12px;letter-spacing:.2em;text-transform:uppercase;white-space:nowrap;transition:background .2s}
+.kzs__cta:hover{background:var(--buy-active)}
+.kzs__cta--read{background:var(--read)}
+.kzs__cta--read:hover{background:var(--read-active)}
+.kzs__row:hover .kzs__title,.kzs__main:focus-visible .kzs__title{text-decoration:underline;text-underline-offset:3px}
+.kzs__page{display:flex;justify-content:space-between;gap:16px;align-items:baseline;padding:12px 0;border-bottom:1px solid var(--line)}
+.kzs__page b{font-weight:500;text-transform:uppercase}
+.kzs__page span{color:var(--ink-soft);font-size:13px;white-space:nowrap}
+.kzs__page:hover b{text-decoration:underline;text-underline-offset:3px}
+.kzs__empty{padding:22px 0 14px}
+.kzs__empty strong{display:block;font-size:17px;font-weight:500;text-transform:uppercase;margin-bottom:6px}
+.kzs__empty p{margin:0 0 14px;color:var(--ink-soft);max-width:60ch;overflow-wrap:anywhere}
+.kzs__foot{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:8px 0 10px;font-size:13px;color:var(--ink-soft)}
+.kzs__foot a{color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+.kzs__none{padding:14px 0;color:var(--ink-soft)}
+.kzs__showmore{display:block;width:100%;height:46px;margin:0 0 10px;border:1px solid var(--line);text-transform:uppercase;font-size:12px;letter-spacing:.2em}
+.kzs__showmore:hover{border-color:var(--ink)}
+kbd{font-family:inherit;border:1px solid var(--line);border-radius:4px;padding:0 5px;font-size:12px;background:var(--bg)}
+
+@media (max-width:1100px){
+  .grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .nav__contacts{font-size:13px;letter-spacing:.16em}
+  .nav__menu{font-size:12px}
+}
+@media (max-width:860px){
+  :root{--gutter:16px}
+  .header__in{padding:12px var(--gutter)}
+  .logo{width:120px}
+  .nav{flex:none;gap:0}
+  .nav__contacts,.nav__menu{display:none}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:26px 12px}
+  .card__day{font-size:40px}
+  .card__rows{font-size:13px;line-height:21px}
+  .kzs__foot .keys{display:none}
+  /* phone: the panel takes the whole screen under the bar */
+  .top.is-search{position:fixed;inset:0;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);z-index:60}
+  .top.is-search .header{display:none}
+  .top.is-search .kzs{position:static;flex:1;min-height:0;max-height:none;box-shadow:none;padding-bottom:env(safe-area-inset-bottom,0px)}
+  .kzs__chips{flex-wrap:nowrap;overflow-x:auto;margin-inline:calc(var(--gutter) * -1);padding-inline:var(--gutter);scrollbar-width:none}
+  .kzs__chips::-webkit-scrollbar{display:none}
+  .kzs__row{grid-template-columns:88px minmax(0,1fr);grid-template-areas:"thumb main" "thumb cta";gap:10px 12px;align-items:start}
+  .kzs__row--multi{grid-template-areas:"thumb main" "thumb cta" "more more"}
+  .kzs__thumb{align-self:start}
+  .kzs__thumb{width:88px}
+  .kzs__row--multi .kzs__main{align-self:start}
+  .kzs__title{font-size:15px}
+  .kzs__meta{font-size:13px}
+  .kzs__cta{height:42px;padding:0 12px;font-size:11px;letter-spacing:.16em}
+  .kzs__meta .sep{display:none}
+  .kzs__meta .p{display:block;margin-top:2px}
+  .kzs__page{flex-direction:column;gap:2px}
+  .kzs__page span{white-space:normal;overflow-wrap:anywhere}
+  .kzs__date{min-height:34px;padding:4px 12px}
+}
+@media (min-width:521px) and (max-width:860px){
+  .kzs__cta{justify-self:start;min-width:220px}
+}
+@media (max-width:520px){
+  .grid{grid-template-columns:minmax(0,1fr)}
+  .ribbon span{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="ribbon"><div class="ribbon__in"><b>Прототип поиска.</b><span>Афиша снята с сайта 5 октября 2026. Ссылки ведут на kozlovclub.ru.</span></div></div>
+
+<div class="top" id="top">
+  <div class="sbar" id="sbar">
+    <form class="sbar__in" id="sform" role="search" autocomplete="off">
+      <label class="sr" for="q">Поиск по афише и сайту</label>
+      <input id="q" name="s" type="search" placeholder="Поиск по сайту" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="search" maxlength="80" aria-controls="kzs" aria-expanded="false">
+      <button class="sbar__btn" type="button" id="closeBtn" aria-label="Закрыть поиск"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
+    </form>
+  </div>
+  <header class="header">
+    <div class="header__in">
+      <a class="logo" href="https://kozlovclub.ru/" target="_blank" rel="noopener"><img src="logo.png" alt="Клуб Алексея Козлова" width="223" height="108"></a>
+      <div class="nav">
+        <div class="nav__top">
+          <div class="nav__contacts"><span>+7 (495) 296-12-00</span><span>ул. Маросейка, дом 9/2, «Kozlov Club»</span></div>
+          <div class="nav__icons">
+            <button class="icon-btn" type="button" id="openBtn" aria-label="Открыть поиск"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg></button>
+          </div>
+        </div>
+        <div class="nav__menu" aria-hidden="true"><span>О клубе</span><span>Афиша</span><span>Жанры</span><span>Меню</span><span>3D тур</span><span>FAQ</span><span>Контакты</span></div>
+      </div>
+    </div>
+  </header>
+  <div class="kzs" id="kzs" hidden></div>
+</div>
+<div class="shade" id="shade"></div>
+<div class="sr" id="kzsStatus" role="status" aria-live="polite"></div>
+
+<main class="page">
+  <section class="try">
+    <h1>Что попробовать</h1>
+    <p>Нажмите на лупу в шапке или на любой пример. Поиск идёт только по будущим концертам и страницам сайта.</p>
+    <div class="chips" id="examples"></div>
+  </section>
+  <h2 class="afisha-title">Афиша</h2>
+  <div class="grid" id="grid"></div>
+</main>
+
+<script>/* Kozlov Club search engine. Pure functions, no DOM. Reused as is in the plugin. */
+(function (root) {
+  'use strict';
+
+  var RU2LAT = { 'а': 'a', 'б': 'b', 'в': 'v', 'г': 'g', 'д': 'd', 'е': 'e', 'ё': 'e', 'ж': 'Z', 'з': 'z', 'и': 'i', 'й': 'i', 'к': 'k', 'л': 'l', 'м': 'm', 'н': 'n', 'о': 'o', 'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u', 'ф': 'f', 'х': 'H', 'ц': 'ts', 'ч': 'C', 'ш': 'S', 'щ': 'S', 'ъ': '', 'ы': 'i', 'ь': '', 'э': 'e', 'ю': 'u', 'я': 'a' };
+  var EN_KEYS = "`qwertyuiop[]asdfghjkl;'zxcvbnm,.";
+  var RU_KEYS = 'ёйцукенгшщзхъфывапролджэячсмитьбю';
+  var EN2RU = {}, RU2EN = {};
+  for (var i = 0; i < EN_KEYS.length; i++) { EN2RU[EN_KEYS[i]] = RU_KEYS[i]; RU2EN[RU_KEYS[i]] = EN_KEYS[i]; }
+
+  /* Частые слова афиши, которые пишут на двух языках по-разному. */
+  var SYN_PAIRS = [['jam', 'джем'], ['band', 'бэнд'], ['blues', 'блюз'], ['funk', 'фанк'], ['fusion', 'фьюжн'], ['tribute', 'трибьют'], ['night', 'найт'], ['brunch', 'бранч'], ['session', 'сэшн'], ['big', 'биг'], ['latin', 'латина'], ['gospel', 'госпел'], ['orchestra', 'оркестр'], ['club', 'клуб'], ['duo', 'дуэт'], ['project', 'проект'], ['quartet', 'квартет'], ['quintet', 'квинтет'], ['trio', 'трио'], ['soul', 'соул'], ['bebop', 'бибоп'], ['boogie', 'буги'], ['woogie', 'вуги'], ['house', 'хаус'], ['lounge', 'лаунж'], ['live', 'лайв'], ['day', 'дэй'], ['time', 'тайм'], ['new', 'нью'], ['love', 'лав'], ['life', 'лайф'], ['blue', 'блю'], ['people', 'пипл'], ['voice', 'войс'], ['sound', 'саунд'], ['sun', 'сан'], ['music', 'мьюзик'], ['friday', 'фрайдей'], ['sunday', 'сандей'], ['saturday', 'сатурдей'], ['party', 'пати'], ['show', 'шоу'], ['dance', 'дэнс'], ['acoustic', 'акустик'], ['swing', 'свинг'], ['groove', 'грув']];
+  var SYN = {};
+  SYN_PAIRS.forEach(function (p) { SYN[p[0]] = p[1]; SYN[p[1]] = p[0]; });
+
+  var STOP = {};
+  ['и', 'в', 'на', 'с', 'по', 'у', 'к', 'the', 'and', 'a', 'of', 'feat', 'концерт', 'концерты', 'концерта', 'концертов', 'билет', 'билеты', 'билетов', 'купить', 'афиша', 'афише', 'расписание', 'когда', 'выступление', 'выступает', 'программа'].forEach(function (w) { STOP[w] = 1; });
+
+  /* Окончания для грубого стемминга русских слов: «баронина» -> «баронин», «субботам» -> «суббот». */
+  var ENDINGS = ['иями', 'ями', 'ами', 'иях', 'ого', 'его', 'ому', 'ему', 'ыми', 'ими', 'ой', 'ей', 'ый', 'ий', 'ая', 'яя', 'ое', 'ее', 'ые', 'ие', 'ым', 'им', 'ых', 'их', 'ом', 'ем', 'ам', 'ям', 'ах', 'ях', 'ов', 'ев', 'ую', 'юю', 'ою', 'ею', 'а', 'я', 'ы', 'и', 'у', 'ю', 'е', 'о', 'ь'];
+  function stem(w) {
+    if (w.length < 4 || !/^[а-я]+$/.test(w)) return w;
+    for (var i = 0; i < ENDINGS.length; i++) {
+      var e = ENDINGS[i];
+      if (w.length - e.length >= 3 && w.slice(-e.length) === e) return w.slice(0, -e.length);
+    }
+    return w;
+  }
+
+  function norm(s) {
+    return String(s || '').toLowerCase().replace(/ё/g, 'е')
+      .replace(/[\u00c0-\u024f]/g, function (c) { return c.normalize ? c.normalize('NFD').replace(/[\u0300-\u036f]/g, '') : c; }).replace(/[«»"'`’‘“”]/g, '').replace(/[^a-zа-я0-9.]+/g, ' ').replace(/\.(?!\d)/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+  function tokens(s) {
+    var n = norm(s);
+    return n ? n.split(' ') : [];
+  }
+
+  /* Phonetic key: brings Cyrillic and Latin spellings of one name to the same string.
+     Capital letters are single sounds: S = ш, C = ч, Z = ж, H = х, J = дж. */
+  function pk(tok) {
+    var s = '', i, ch;
+    if (/[а-я]/.test(tok)) {
+      for (i = 0; i < tok.length; i++) { ch = tok[i]; s += RU2LAT.hasOwnProperty(ch) ? RU2LAT[ch] : ch; }
+      s = s.replace(/dZ/g, 'J');
+    } else {
+      // английские сочетания букв сводим к тому, как их пишут по-русски
+      s = tok.replace(/sch|sh/g, 'S').replace(/tch|ch/g, 'C').replace(/zh/g, 'Z').replace(/kh/g, 'H').replace(/^h/, 'H')
+        .replace(/ph/g, 'f').replace(/th/g, 't').replace(/ck/g, 'k').replace(/qu/g, 'kv').replace(/q/g, 'k').replace(/x/g, 'ks').replace(/w/g, 'v')
+        .replace(/dZ|dj/g, 'J').replace(/j/g, 'J')
+        .replace(/c(?=[eiy])/g, 's').replace(/c/g, 'k')
+        .replace(/y([aou])/g, function (m, v) { return v.toUpperCase(); })   // ya, yu, yo = я, ю, о; заглавная буква защищает от правила «ea»
+        .replace(/oo|ou/g, 'u').replace(/ee|ea/g, 'i').replace(/y/g, 'i')
+        .replace(/h/g, '')
+        .replace(/[AOU]/g, function (m) { return m.toLowerCase(); });
+    }
+    return s.replace(/([^aeiou])\1+/g, '$1');
+  }
+
+  function skel(key) { return key.replace(/[aeiou]/g, ''); }
+  function isVowel(c) { return 'aeiou'.indexOf(c) >= 0; }
+
+  function swapLayout(tok, map) {
+    var out = '', hit = 0, i, ch;
+    for (i = 0; i < tok.length; i++) { ch = tok[i]; if (map.hasOwnProperty(ch)) { out += map[ch]; hit++; } else { out += ch; } }
+    return hit ? out : '';
+  }
+
+  /* Edit distance from q to the closest prefix of t (Damerau). Stops early when above max. */
+  function prefixDistance(q, t, max) {
+    var n = q.length, m = Math.min(t.length, n + max), i, j;
+    if (!n) return 0;
+    var prev2 = null, prev = [], cur;
+    for (j = 0; j <= m; j++) prev[j] = j;
+    for (i = 1; i <= n; i++) {
+      cur = [i];
+      var rowMin = i;
+      for (j = 1; j <= m; j++) {
+        var cost = q.charCodeAt(i - 1) === t.charCodeAt(j - 1) ? 0 : 1;
+        var v = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + cost);
+        if (i > 1 && j > 1 && q.charCodeAt(i - 1) === t.charCodeAt(j - 2) && q.charCodeAt(i - 2) === t.charCodeAt(j - 1)) v = Math.min(v, prev2[j - 2] + 1);
+        cur[j] = v;
+        if (v < rowMin) rowMin = v;
+      }
+      if (rowMin > max) return max + 1;
+      prev2 = prev; prev = cur;
+    }
+    var best = max + 1;
+    for (j = Math.max(0, n - max); j <= m; j++) if (prev[j] < best) best = prev[j];
+    return best;
+  }
+
+  function allowed(len) { return len <= 4 ? 0 : (len <= 8 ? 1 : 2); }
+
+  /* Score of one query variant against one indexed token. 0 means no match. */
+  function scoreToken(v, t) {
+    var q = v.q, qk = v.k;
+    if (/^\d/.test(q)) return q === t.raw ? 100 : 0;
+    if (t.raw === q) return 100;
+    if (t.raw.indexOf(q) === 0) return 90;
+    if (t.stop) return 0;
+    // фонетический ключ не используем, если от слова почти ничего не осталось ("ыыыы" -> "i")
+    var keyOk = qk && qk.length >= (v.pen >= 5 ? 4 : 2) && (q.length - qk.length <= 2 || qk.length >= 4);
+    if (keyOk && t.key === qk) return 80;
+    // начало слова по звучанию: только между разными алфавитами и от четырёх звуков («кант» -> CANTALOOP)
+    if (keyOk && qk.length >= (v.pen >= 5 ? 5 : 4) && v.cyr !== t.cyr && t.key.indexOf(qk) === 0) return 70;
+    // падежные окончания: «баронина» -> «баронин», «зала» -> «зал»
+    if (v.st !== q) {
+      if (v.st.length >= 4 && t.raw.indexOf(v.st) === 0) return 60;
+      if (v.st.length >= 3 && v.st === t.st) return 60;
+    }
+    if (q.length >= 4 && t.raw.indexOf(q) > 0) return 45;
+    if (!v.fz || !keyOk) return 0;
+    var sameStart = qk[0] === t.key[0] || (isVowel(qk[0]) && isVowel(t.key[0]));
+    if (qk.length >= 5 && t.key.length >= 4 && sameStart) {
+      var max = allowed(qk.length);
+      var d = prefixDistance(qk, t.key, max);
+      if (d <= max) return d === 0 ? 55 : (d === 1 ? 50 : 35);
+    }
+    // одинаковый «скелет» из согласных: рэгтайм = ragtime, олмазова = алмазова
+    if (v.s && v.s.length >= 4 && v.s === t.sk && sameStart) return 40;
+    return 0;
+  }
+
+  function mk(raw, field) { var key = pk(raw); return { raw: raw, key: key, sk: skel(key), st: stem(raw), cyr: /[а-я]/.test(raw), f: field, stop: field === 't' && STOP[raw] === 1 }; }
+  function mkAll(words, field) { return words.map(function (w) { return mk(norm(w), field); }); }
+
+  var MONTHS = [['январь', 'января', 'янв'], ['февраль', 'февраля', 'фев'], ['март', 'марта', 'мар'], ['апрель', 'апреля', 'апр'], ['май', 'мая'], ['июнь', 'июня', 'июн'], ['июль', 'июля', 'июл'], ['август', 'августа', 'авг'], ['сентябрь', 'сентября', 'сен'], ['октябрь', 'октября', 'окт'], ['ноябрь', 'ноября', 'ноя'], ['декабрь', 'декабря', 'дек']];
+  var WEEKDAYS = [['воскресенье', 'вс', 'выходные'], ['понедельник', 'пн'], ['вторник', 'вт'], ['среда', 'среду', 'ср'], ['четверг', 'чт'], ['пятница', 'пятницу', 'пт'], ['суббота', 'субботу', 'сб', 'выходные']];
+  var STAGES = {
+    g: { name: 'Главная сцена', words: ['главная', 'главной', 'сцена', 'main', 'stage', 'маросейка'] },
+    m: { name: 'Мансарда', words: ['мансарда', 'мансарде', 'mansarda', 'mansard', 'сцена', 'маросейка'] },
+    b: { name: 'The Beat', words: ['beat', 'бит', 'сцена', 'маросейка'] },
+    u: { name: 'Unplugged', words: ['unplugged', 'анплагд', 'мясницкая', 'мясницкой', 'сцена'] }
+  };
+
+  function ymd(d) { return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+  function parseDate(s) { var p = s.split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
+
+  /**
+   * events: [title, 'YYYY-MM-DD', 'HH:MM', stageCode, priceText, slug, imageIndex, hasTickets]
+   * pages:  [{title, url, words}]
+   */
+  function build(events, pages, now) {
+    now = now || new Date();
+    var today = ymd(now);
+    var t1 = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1), t2 = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 2);
+    var tomorrow = ymd(t1), after = ymd(t2);
+    var items = [];
+    events.forEach(function (e, n) {
+      if (e[1] < today) return; // прошедшие не показываем
+      var d = parseDate(e[1]);
+      var titleWords = tokens(e[0]);
+      var toks = titleWords.map(function (w) { return mk(w, 't'); });
+      var day = d.getDate(), mon = d.getMonth();
+      var extra = [String(day), ('0' + day).slice(-2), day + '.' + ('0' + (mon + 1)).slice(-2), ('0' + day).slice(-2) + '.' + ('0' + (mon + 1)).slice(-2)]
+        .concat(MONTHS[mon]).concat(WEEKDAYS[d.getDay()]);
+      if (e[1] === today) extra.push('сегодня');
+      if (e[1] === tomorrow) extra.push('завтра');
+      if (e[1] === after) extra.push('послезавтра');
+      toks = toks.concat(mkAll(extra, 'd'));
+      if (/^\d\d:\d\d$/.test(e[2])) toks.push({ raw: e[2], key: '', sk: '', st: e[2], cyr: false, f: 'd', stop: false });
+      // составные слова через дефис ищутся и слитно: «рок-н-ролл» = «рокнролл»
+      (String(e[0]).toLowerCase().replace(/ё/g, 'е').match(/[a-zа-я0-9]+(?:-[a-zа-я0-9]+)+/g) || []).forEach(function (c) { toks.push(mk(c.replace(/-/g, ''), 'x')); });
+      if (STAGES[e[3]]) toks = toks.concat(mkAll(STAGES[e[3]].words, 's'));
+      var price = norm(e[4]);
+      var free = /свободн|бесплатн/.test(price), deposit = /депозит/.test(price);
+      if (free) toks = toks.concat(mkAll(['бесплатно', 'бесплатный', 'бесплатные', 'свободный', 'вход', 'free'], 'p'));
+      if (deposit) toks = toks.concat(mkAll(['депозит'], 'p'));
+      var digits = String(e[4]).replace(/\s+/g, '').match(/\d{3,}/);
+      if (digits) toks.push(mk(digits[0], 'p'));
+      items.push({ n: n, title: e[0], date: e[1], time: e[2], stage: e[3], price: e[4], slug: e[5], img: e[6], tickets: !!e[7], free: free, deposit: deposit, weekday: d.getDay(), toks: toks, group: norm(e[0]) });
+    });
+    var pageItems = (pages || []).map(function (p) {
+      return { title: p.title, url: p.url, note: p.note || '', toks: tokens(p.title).map(function (w) { return mk(w, 't'); }).concat(mkAll(p.words || [], 'k')) };
+    });
+    return { items: items, pages: pageItems, today: today };
+  }
+
+  function variant(q, pen, fz) { var k = pk(q); return { q: q, k: k, pen: pen, fz: fz, s: fz ? skel(k) : '', st: stem(q), cyr: /[а-я]/.test(q) }; }
+
+  function variants(tok) {
+    var out = [variant(tok, 0, true)];
+    if (SYN.hasOwnProperty(tok)) out.push(variant(SYN[tok], 2, false));
+    // неверная раскладка: берём вариант, только если получились одни буквы и слово не короче трёх знаков
+    var a = swapLayout(tok, EN2RU), b = swapLayout(tok, RU2EN);
+    if (a && a !== tok && a.length >= 3 && /^[а-я0-9.]+$/.test(a)) out.push(variant(a, 5, a.length >= 6));
+    if (b && b !== tok && b.length >= 3 && /^[a-z0-9.]+$/.test(b)) out.push(variant(b, 5, false));
+    return out;
+  }
+
+  var MONTH_WORDS = {};
+  MONTHS.forEach(function (m) { m.forEach(function (w) { MONTH_WORDS[w] = 1; }); });
+
+  function finish(list) {
+    var meaningful = list.filter(function (t) { return !STOP[t.text]; });
+    var out = meaningful.length ? meaningful : list;
+    // «5 октября»: число рядом с названием месяца ищем только среди дат, а не в названиях
+    var hasMonth = out.some(function (t) { return MONTH_WORDS[t.text] === 1; });
+    if (hasMonth) out.forEach(function (t) { if (/^\d{1,2}$/.test(t.text)) t.only = 'd'; });
+    return out;
+  }
+
+  /* Query tokens. Returns the normal reading and, when a word contains layout punctuation
+     (",fhjyby" = "баронин", "vty." = "меню"), a second reading where such words are taken whole in the other layout. */
+  function queryTokens(query) {
+    var raw = String(query || '').toLowerCase().replace(/ё/g, 'е').trim().split(/\s+/).filter(Boolean).slice(0, 12);
+    var main = [], alt = [], hasAlt = false;
+    raw.forEach(function (r) {
+      if (r.length > 60) r = r.slice(0, 60);
+      // время: «20:00», «20.30» (точка считается временем, если это не похоже на дату ДД.ММ)
+      var tm = /^(\d{1,2})([:.])(\d{2})$/.exec(r);
+      if (tm && +tm[1] <= 23 && +tm[3] <= 59 && (tm[2] === ':' || +tm[3] === 0 || +tm[3] > 12)) {
+        var hhmm = ('0' + tm[1]).slice(-2) + ':' + tm[3];
+        var tt = { text: r, vars: [{ q: hhmm, k: '', pen: 0, fz: false, s: '', st: hhmm, cyr: false }] };
+        main.push(tt); alt.push(tt);
+        return;
+      }
+      var parts = norm(r).split(' ').filter(Boolean).map(function (c) { return { text: c, vars: variants(c) }; });
+      parts.forEach(function (t) { main.push(t); });
+      var whole = norm(swapLayout(r, EN2RU));
+      if (!/[а-я]/.test(r) && /[\[\];',.`]/.test(r) && /^[а-я]{2,}$/.test(whole)) { alt.push({ text: whole, vars: [variant(whole, 5, whole.length >= 6)] }); hasAlt = true; }
+      else parts.forEach(function (t) { alt.push(t); });
+    });
+    return { main: finish(main), alt: hasAlt ? finish(alt) : null };
+  }
+
+  function matchItem(qts, toks) {
+    var total = 0, min = 1000, hit = {}, qi, vi, ti;
+    for (qi = 0; qi < qts.length; qi++) {
+      var best = 0, bestTok = -1, only = qts[qi].only;
+      for (vi = 0; vi < qts[qi].vars.length; vi++) {
+        var v = qts[qi].vars[vi];
+        for (ti = 0; ti < toks.length; ti++) {
+          if (only && toks[ti].f !== only) continue;
+          var s = scoreToken(v, toks[ti]);
+          if (s) { s -= v.pen; if (toks[ti].f !== 't') s -= 3; if (s > best) { best = s; bestTok = ti; } }
+        }
+      }
+      if (!best) return null;
+      total += best; if (best < min) min = best;
+      if (toks[bestTok].f === 't') hit[bestTok] = 1;
+    }
+    return { score: total / qts.length, min: min, hit: hit };
+  }
+
+  /* True when the query names every meaningful word of the title: such a group goes first. */
+  function coversTitle(hit, toks) {
+    var need = 0, got = 0, i;
+    for (i = 0; i < toks.length; i++) {
+      if (toks[i].f !== 't') break;
+      if (toks[i].stop) continue;
+      need++; if (hit[i]) got++;
+    }
+    return need > 0 && need === got;
+  }
+
+  function byDate(a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : (a.time < b.time ? -1 : a.time > b.time ? 1 : a.n - b.n); }
+
+  function groupFound(found) {
+    var groups = {}, order = [];
+    found.forEach(function (f) {
+      var g = groups[f.it.group];
+      if (!g) { g = groups[f.it.group] = { title: f.it.title, score: f.score, hit: f.hit, full: false, dates: [] }; order.push(g); }
+      if (f.score > g.score) { g.score = f.score; g.hit = f.hit; }
+      if (f.full) g.full = true;
+      g.dates.push(f.it);
+    });
+    order.forEach(function (g) { g.dates.sort(byDate); g.first = g.dates[0]; g.tier = Math.floor(g.score / 20) + (g.full ? 1 : 0); });
+    order.sort(function (a, b) { return a.tier !== b.tier ? b.tier - a.tier : byDate(a.first, b.first); });
+    return order;
+  }
+
+  function run(index, qts) {
+    var found = [], best = 0;
+    index.items.forEach(function (it) {
+      var m = matchItem(qts, it.toks);
+      if (m) found.push({ it: it, score: m.score, min: m.min, hit: m.hit, full: m.min >= 60 && coversTitle(m.hit, it.toks) });
+    });
+    // если есть уверенные совпадения, слабые нечёткие не показываем
+    var top = found.reduce(function (a, f) { return Math.max(a, f.min); }, 0);
+    if (top >= 65) found = found.filter(function (f) { return f.min >= 55; });
+    var pages = [];
+    index.pages.forEach(function (p) {
+      var m = matchItem(qts, p.toks);
+      if (m && m.min >= 50) pages.push({ page: p, score: m.score, min: m.min });
+    });
+    pages.sort(function (a, b) { return b.score - a.score; });
+    best = Math.max(top, pages.reduce(function (a, x) { return Math.max(a, x.min); }, 0));
+    return { found: found, pages: pages, best: best };
+  }
+
+  function search(index, query) {
+    var parsed = queryTokens(query), qts = parsed.main;
+    var letters = qts.reduce(function (a, t) { return a + t.text.length; }, 0);
+    if (!qts.length || letters < 2) return { query: query, groups: [], pages: [], count: 0, short: true };
+    var r = run(index, qts);
+    if (parsed.alt) { var r2 = run(index, parsed.alt); if (r2.best > r.best) { r = r2; qts = parsed.alt; } }
+    var res = { query: query, groups: groupFound(r.found), pages: r.pages.map(function (p) { return p.page; }), count: r.found.length };
+    // ничего не нашлось по всем словам сразу: показываем концерты, где совпала часть слов, и говорим об этом
+    if (!r.found.length && !r.pages.length && qts.length >= 2) {
+      var cand = [], maxN = 0;
+      index.items.forEach(function (it) {
+        var n = 0, total = 0, hit = {}, words = [];
+        qts.forEach(function (qt) {
+          var m = matchItem([qt], it.toks);
+          if (m && m.min >= 60) { n++; total += m.score; words.push(qt.text); for (var k in m.hit) hit[k] = 1; }
+        });
+        if (n) { cand.push({ it: it, score: total / n, min: 60, hit: hit, n: n, words: words }); if (n > maxN) maxN = n; }
+      });
+      cand = cand.filter(function (c) { return c.n === maxN; });
+      if (cand.length) {
+        var seen = {}, words = [];
+        cand.forEach(function (c) { c.words.forEach(function (w) { if (!seen[w]) { seen[w] = 1; words.push(w); } }); });
+        res.groups = groupFound(cand); res.count = cand.length; res.partial = true; res.words = words;
+      }
+    }
+    return res;
+  }
+
+  /* Indexes of title words to highlight for a group. */
+  function titleWords(title) {
+    var out = [], re = /[A-Za-zА-Яа-яЁё0-9.\u00c0-\u024f«»"'`’‘“”]+/g, m, n = 0, toks;
+    while ((m = re.exec(title))) {
+      toks = tokens(m[0]);
+      out.push({ start: m.index, end: m.index + m[0].length, from: n, to: n + toks.length });
+      n += toks.length;
+    }
+    return out;
+  }
+
+  root.KozlovSearch = { build: build, search: search, norm: norm, pk: pk, stem: stem, tokens: tokens, titleWords: titleWords, STAGES: STAGES, parseDate: parseDate, ymd: ymd };
+})(typeof window !== 'undefined' ? window : globalThis);
+</script>
+<script>
+(function(){
+  'use strict';
+  var DATA = [["CANTALOOP JAM","2026-10-05","20:00","b","ДЕПОЗИТ 2 000 РУБ.","cantaloop-jam-211",0,0],["АНТОН БАРОНИН & ORCHESTRA 2.0","2026-10-05","20:00","g","от 1000 руб.","anton-baronin-orchestra-2-0-11",1,1],["TRANE ZEN ART: ВЕЧЕР ПАМЯТИ ЮРИЯ ЩЁТКИНА","2026-10-05","20:00","m","Вход свободный","trane-zen-art-vecher-pamyati-yuriya-shhyotkina",2,0],["THE ROASTED ROOSTER: «DOUBLE CELEBRATION»","2026-10-06","20:00","b","от 1000 руб.","the-roasted-rooster-double-celebration",3,1],["THE CREATORS","2026-10-06","20:00","u","от 1000 руб.","the-creators",4,1],["EXCITE QUINTET","2026-10-06","20:00","g","от 1000 руб.","excite-quintet-22",5,1],["АЛЕКСЕЙ КУЗНЕЦОВ: ИНТЕЛЛИГЕНТНЫЙ ДЖАЗ-ГИТАР-БЭНД","2026-10-06","20:30","m","от 1000 руб.","aleksej-kuznecov-intelligentnyj-dzhaz-gitar-bend-97",6,1],["«ПРОХЛАДНЫЙ ВТОРНИК»: ОТКРЫТЫЙ ДЖЕМ-СЭШН","2026-10-06","22:00","b","ДЕПОЗИТ 2 000 РУБ.","proxladnyj-vtornik-otkrytyj-dzhem-seshn-130",7,0],["ТРИО СЕРГЕЯ КОРЧАГИНА","2026-10-07","20:00","b","от 1000 руб.","trio-sergeya-korchagina-9",8,1],["ILLO.TRIO","2026-10-07","20:00","g","от 1000 руб.","illo-trio-5",9,1],["ГИЯ ДЗАГНИДЗЕ: ТРИБЬЮТ ЭРИКУ КЛЭПТОНУ","2026-10-07","20:00","u","от 1000 руб.","giya-dzagnidze-tribyut-eriku-kleptonu-6",10,1],["RODNAYA","2026-10-07","20:30","m","от 1000 руб.","rodnaya-27",11,1],["«УРАГАННЫЙ ДЖЕМ» ПАВЛА ТИМОФЕЕВА","2026-10-07","22:00","b","ДЕПОЗИТ 2 000 РУБ.","uragannyj-dzhem-pavla-timofeeva-385",12,0],["САША АЛМАЗОВА И БЭНД","2026-10-08","20:00","g","от 3000 руб.","sasha-almazova-i-bend",13,1],["«TRANSFORMER»","2026-10-08","20:00","b","от 1000 руб.","transformer-6",14,1],["ПОЛИ МОНА И «КИСЛЫЙ БЭНД»: «ПОЛ-ЛИМОНА НОТ»","2026-10-08","20:00","u","от 900 руб.","poli-mona-i-kislyj-bend-pol-limona-not-2",15,1],["ORGANISM (THREEDOM)","2026-10-08","20:30","m","от 1000 руб.","organism-threedom",16,1],["БОЛЬШОЙ ДЖАЗОВЫЙ ДЖЕМ","2026-10-08","22:00","b","ДЕПОЗИТ 2 000 РУБ.","bolshoj-dzhazovyj-dzhem-88",17,0],["TELLIODORA & АНДРЕЙ МАРУХИН","2026-10-09","18:00","u","от 1500 руб.","telliodora-andrej-maruxin-46",18,1],["MOONSHINE","2026-10-09","18:00","m","от 1000 руб.","moonshine-84",19,1],["ЗОНА 4/5","2026-10-09","19:00","g","ДЕПОЗИТ 2 000 РУБ.","zona-4-5-23",20,0],["АННА КОРОЛЕВА И «АРСЕНАЛ» АЛЕКСЕЯ КОЗЛОВА","2026-10-09","20:00","g","от 2500 руб.","anna-koroleva-i-arsenal-alekseya-kozlova-112",21,1],["МИШУРИС БЛЮЗ БЭНД","2026-10-09","21:00","u","от 1500 руб.","mishuris-blyuz-bend-5",22,1],["FRIDAY SWING","2026-10-09","22:00","b","ДЕПОЗИТ 2 000 РУБ.","friday-swing-306",23,0],["FRIDAY NIGHT: CUBA LIVE (КУБА)","2026-10-09","22:00","m","от 1500 руб.","friday-night-cuba-live-kuba-2",24,1],["SATURDAY JAZZ BRUNCH","2026-10-10","14:00","b","ДЕПОЗИТ 2 000 РУБ.","saturday-jazz-brunch-240",25,0],["КВИНТЕТ ВИКТОРИИ КРИВОЗУБОВОЙ «НА ПАРУ СЛОВ»","2026-10-10","18:00","m","от 1500 руб.","kvintet-viktorii-krivozubovoj-na-paru-slov-38",26,1],["MOSCOW RAGTIME BAND","2026-10-10","18:00","u","от 1500 руб.","moscow-ragtime-band-252",27,1],["MARIMBA PLUS","2026-10-10","20:00","g","от 2000 руб.","marimba-plus-114",28,1],["JAZZ DANCE ORCHESTRA","2026-10-10","21:00","u","от 1500 руб.","jazz-dance-orchestra-47",29,1],["SATURDAY NIGHT: AFRO-DITE (ЯМАЙКА/РОССИЯ)","2026-10-10","22:00","m","от 1500 руб.","saturday-night-afro-dite-yamajka-rossiya-14",30,1],["ПАВЕЛ ЕРШОВ И КВАРТЕТ ДМИТРИЯ КУПЦОВА: SWING & GYPSY","2026-10-10","22:00","b","ДЕПОЗИТ 2 000 РУБ.","pavel-ershov-i-kvartet-dmitriya-kupcova-swing-gypsy-183",31,0],["JOINTRIP (КУБА/РОССИЯ): CREEDENCE TRIBUTE","2026-10-10","23:59","g","от 1500 руб.","jointrip-kuba-rossiya-creedence-tribute-3",32,1],["SUNDAY JAZZ BRUNCH","2026-10-11","14:00","b","ДЕПОЗИТ 2 000 РУБ.","sunday-jazz-brunch-243",33,0],["ЯН БЕДЕРМАН И СЕРГЕЙ ЛЕТОВ","2026-10-11","15:00","m","от 1000 руб.","yan-bederman-i-sergej-letov-7",34,1],["ACOUSTIC JAM SESSION","2026-10-11","17:00","b","ДЕПОЗИТ 2 000 РУБ.","acoustic-jam-session-335",35,0],["DOWNTOWNBEAT JAM","2026-10-11","20:00","b","ДЕПОЗИТ 2 000 РУБ.","downtownbeat-jam-276",36,0],["VERMICELLI ORCHESTRA: «РОК-Н-РОЛЛ ЭПОХИ БАРОККО»","2026-10-11","20:00","u","от 1500 руб.","vermicelli-orchestra-rok-n-roll-epoxi-barokko",37,1],["НЕИЗВЕСТНЫЙ КОМПОЗИТОР","2026-10-11","20:00","g","от 2000 руб.","neizvestnyj-kompozitor-14",38,1],["ESH SAMBA JAZZ QUINTET","2026-10-11","20:30","m","от 1500 руб.","esh-samba-jazz-quintet-29",39,1],["CANTALOOP JAM","2026-10-12","20:00","b","ДЕПОЗИТ 2 000 РУБ.","cantaloop-jam-212",40,0],["ВЕЧЕР ПАМЯТИ АНАТОЛИЯ ГЕРАСИМОВА","2026-10-12","20:00","g","от 1000 руб.","vecher-pamyati-anatoliya-gerasimova-5",41,1],["TRANE ZEN ART: МАКСИМ ШИБИН И АЛЕКСАНДР ГОРОХ","2026-10-12","20:00","m","Вход свободный","trane-zen-art-maksim-shibin-i-aleksandr-gorox",42,0],["АЛИНА ФИЛИППОВА И БЭНД ПРОТАСОВА","2026-10-13","20:00","u","от 1000 руб.","alina-filippova-i-bend-protasova-4",43,1],["«ДИКИЙ БРАСС», СЕРАФИМ ФАРБОТКО И LETAI","2026-10-13","20:00","g","от 1500 руб.","dikij-brass-serafim-farbotko-i-letai-2",44,1],["ТРИО ПАВЛА ЕРШОВА","2026-10-13","20:00","b","от 1000 руб.","trio-pavla-ershova-13",45,1],["HOT CLUB DE RUSSIA: SOME LIKE IT HOT","2026-10-13","20:30","m","от 900 руб.","hot-club-de-russia-some-like-it-hot",46,1],["«ЖАРКИЙ ВТОРНИК»: NYC VIBE NIGHT JAM","2026-10-13","22:00","b","ДЕПОЗИТ 2 000 РУБ.","zharkij-vtornik-nyc-vibe-night-jam-7",47,0],["БДО ПЕТРА ВОСТОКОВА: «ДЖАЗ, РОК И МЕДНЫЕ ТРУБЫ»","2026-10-14","20:00","g","от 1500 руб.","bdo-petra-vostokova-dzhaz-rok-i-mednye-truby",48,1],["OPERA NIGHT CLUB","2026-10-14","20:00","u","от 2000 руб.","opera-night-club-10",49,1],["PLANCK’STONE","2026-10-14","20:00","b","от 1000 руб.","planckstone-60",50,1],["ЕКАТЕРИНА ГОТЛИБ И КВАРТЕТ МАКСА ДОРБЕКО: «ДА ЭТО ЖЕ МОЯ ЛЮБИМАЯ ПЕСНЯ!»","2026-10-14","20:30","m","от 1500 руб.","ekaterina-gotlib-i-kvartet-maksa-dorbeko-da-eto-zhe-moya-lyubimaya-pesnya",51,1],["«УРАГАННЫЙ ДЖЕМ» ПАВЛА ТИМОФЕЕВА","2026-10-14","22:00","b","ДЕПОЗИТ 2 000 РУБ.","uragannyj-dzhem-pavla-timofeeva-384",52,0],["SASHA MAGEROVA BAND","2026-10-15","20:00","g","от 1500 руб.","sasha-magerova-band-12",53,1],["КВИНТЕТ ДМИТРИЯ САФОНОВА: «LIMINAL SPACES»","2026-10-15","20:00","b","от 1000 руб.","kvintet-dmitriya-safonova-liminal-spaces",54,1],["ЕВГЕНИЙ ЛЕБЕДЕВ","2026-10-15","20:00","u","от 1000 руб.","evgenij-lebedev-4",55,1],["СТЮАРТ КВАРТЕТ","2026-10-15","20:30","m","от 1000 руб.","styuart-kvartet-8",56,1],["БОЛЬШОЙ ДЖАЗОВЫЙ ДЖЕМ","2026-10-15","22:00","b","ДЕПОЗИТ 2 000 РУБ.","bolshoj-dzhazovyj-dzhem-89",57,0],["DJANGO FRIENDS","2026-10-16","18:00","u","от 1000 руб.","django-friends-55",58,1],["СОФИ ГЕРТЬЕ: «WHEN OCTOBER GOES»","2026-10-16","18:00","m","от 1000 руб.","sofi-gerte-when-october-goes",59,1],["ЗОНА 4/5","2026-10-16","19:00","g","ДЕПОЗИТ 2 000 РУБ.","zona-4-5-24",60,0],["АРСЕНАЛ: ПЕРВЫЙ НЕБЕСНЫЙ ДЕНЬ РОЖДЕНИЯ АЛЕКСЕЯ КОЗЛОВА","2026-10-16","20:00","g","от 2500 руб.","anna-koroleva-i-arsenal-alekseya-kozlova-111",61,1],["100% JAZZ BAND & СТЕФАНИЯ ДАМОЦИДИ (РОССИЯ/ГРЕЦИЯ)","2026-10-16","21:00","u","от 1500 руб.","100-jazz-band-stefaniya-damocidi-rossiya-greciya-15",62,1],["FRIDAY NIGHT: DOLCE GAVANA (КУБА/РОССИЯ)","2026-10-16","22:00","m","от 1500 руб.","friday-night-dolce-gavana-kuba-rossiya-4",63,1],["FRIDAY SWING","2026-10-16","22:00","b","ДЕПОЗИТ 2 000 РУБ.","friday-swing-305",64,0],["SATURDAY JAZZ BRUNCH","2026-10-17","14:00","b","ДЕПОЗИТ 2 000 РУБ.","saturday-jazz-brunch-241",65,0],["MOSCOW RAGTIME BAND","2026-10-17","18:00","m","от 1500 руб.","moscow-ragtime-band-254",66,1],["АЛИСА ДИККЕРТ & DIKKERT GROOVE BAND","2026-10-17","18:00","u","от 1000 руб.","alisa-dikkert-dikkert-groove-band-3",67,1],["СВЕТЛАНА ЖАВОРОНКОВА & ACOUSTIC SOUL","2026-10-17","20:00","g","от 2000 руб.","svetlana-zhavoronkova-acoustic-soul-29",68,1],["СОФИЯ АЦБЕХА НЕГГА","2026-10-17","21:00","u","от 1500 руб.","sofiya-acbexa-negga-88",69,1],["SATURDAY NIGHT: BETTY BOOP LOVERS & ЕЛЕНА МОИСЕЕНКО","2026-10-17","22:00","m","от 1000 руб.","saturday-night-betty-boop-lovers-elena-moiseenko-18",70,1],["ПАВЕЛ ЕРШОВ И КВАРТЕТ ДМИТРИЯ КУПЦОВА: SWING & GYPSY","2026-10-17","22:00","b","ДЕПОЗИТ 2 000 РУБ.","pavel-ershov-i-kvartet-dmitriya-kupcova-swing-gypsy-184",71,0],["ЯНКО САНТАНА И ORQUESTA EL DOMI (ДОМИНИКАНА)","2026-10-17","23:59","g","от 1500 руб.","yanko-santana-i-orquesta-el-domi-dominikana-6",72,1],["SUNDAY JAZZ BRUNCH","2026-10-18","14:00","b","ДЕПОЗИТ 2 000 РУБ.","sunday-jazz-brunch-244",73,0],["ОЛЬГА СИНЯЕВА И ЛУЧШИЕ СТУДЕНТЫ «АКАДЕМИИ ВОКАЛА»","2026-10-18","14:00","m","1000 руб.","olga-sinyaeva-i-luchshie-studenty-akademii-vokala-3",74,1],["ACOUSTIC JAM SESSION","2026-10-18","17:00","b","ДЕПОЗИТ 2 000 РУБ.","acoustic-jam-session-337",58,0],["THE BEAT BOMBERS","2026-10-18","20:00","u","от 1000 руб.","the-beat-bombers-18",75,1],["АРКАДИЙ ШИЛКЛОПЕР: ЮБИЛЕЙНЫЙ ВЕЧЕР «HORNISSIMO-70»","2026-10-18","20:00","g","от 2000 руб.","arkadij-shilkloper-yubilejnyj-vecher-hornissimo-70",76,1],["DOWNTOWNBEAT JAM","2026-10-18","20:00","b","ДЕПОЗИТ 2 000 РУБ.","downtownbeat-jam-274",77,0],["АННА ГОФМАН И ТАТЬЯНА ШИШКОВА: «ПЕСНИ МОРЯ»","2026-10-18","20:30","m","от 1000 руб.","anna-gofman-i-tatyana-shishkova-pesni-morya",78,1],["CANTALOOP JAM","2026-10-19","20:00","b","ДЕПОЗИТ 2 000 РУБ.","cantaloop-jam-214",79,0],["ОРКЕСТР СВЯТОСЛАВА ТЕКУЧЁВА, МАРИЯ КАЦ, АЛЕКСАНДР «ЛЕВ» КОНОВАЛОВ","2026-10-19","20:00","g","от 2000 руб.","orkestr-svyatoslava-tekuchyova-mariya-kac-aleksandr-lev-konovalov-2",80,1],["TRANE ZEN ART: ORGAN LAB ВЛАДИМИРА НЕСТЕРЕНКО","2026-10-19","20:00","m","Вход свободный","organ-lab-vladimira-nesterenko-15",81,0],["RESONANT HANDS","2026-10-19","20:00","u","от 1000 руб.","resonant-hands-6",82,1],["АНАТОЛИЙ ОСИПОВ И ANATOLY OSIPOV GROUP: ПРЕЗЕНТАЦИЯ АЛЬБОМА «SPIRAL»","2026-10-20","20:00","g","от 1000 руб.","anatolij-osipov-i-anatoly-osipov-group-prezentaciya-alboma-spiral",83,1],["НАТАША ТАЛАЛАЙ / COLORISTICS / FLOWER POWER","2026-10-20","20:00","u","от 1000 руб.","natasha-talalay-coloristics-flower-power",84,1],["ПРОЕКТ ДАРЬИ КУЛИЦКОЙ","2026-10-20","20:00","b","от 1000 руб.","proekt-dari-kulickoj",85,1],["АНДРЕЙ КОТОВ: «ПЕСНИ СТРАННИКОВ»","2026-10-20","20:30","m","от 1000 руб.","andrej-kotov-pesni-strannikov",86,1],["«ПРОХЛАДНЫЙ ВТОРНИК»: ОТКРЫТЫЙ ДЖЕМ-СЭШН","2026-10-20","22:00","b","ДЕПОЗИТ 2 000 РУБ.","proxladnyj-vtornik-otkrytyj-dzhem-seshn-131",87,0],["ИЛЬЯ ДЕЛИЗОНАС: «СКРИПКА В ДЖАЗЕ»","2026-10-21","20:00","b","от 1000 руб.","ilya-delizonas-skripka-v-dzhaze",88,1],["КВАРТЕТ АЛЕКСЕЯ ПОПОВА (СПБ/МОСКВА)","2026-10-21","20:00","u","от 1000 руб.","kvartet-alekseya-popova-spb-moskva",89,1],["QASCAD","2026-10-21","20:00","g","от 1000 руб.","qascad-34",90,1],["СЕРГЕЙ ФИЛАТОВ И СЕРГЕЙ КЛЕВЕНСКИЙ","2026-10-21","20:30","m","от 1000 руб.","sergej-filatov-i-sergej-klevenskij-14",91,1],["«УРАГАННЫЙ ДЖЕМ» ПАВЛА ТИМОФЕЕВА","2026-10-21","22:00","b","ДЕПОЗИТ 2 000 РУБ.","uragannyj-dzhem-pavla-timofeeva-383",92,0],["НАНИ ЕВА","2026-10-22","20:00","g","от 2000 руб.","nani-eva-20",93,1],["МИРИ (АЛЕКСАНДРА ФИНКЕЛЬШТЕЙН)","2026-10-22","20:00","u","от 1500 руб.","miri-aleksandra-finkelshtejn",94,1],["CIGAR HALL: «NAT KING COLE – L.O.V.E.»","2026-10-22","20:00","b","от 1000 руб.","cigar-hall-nat-king-cole-l-o-v-e",95,1],["КВИНТЕТ МАКСИМА ДУРОВА","2026-10-22","20:30","m","от 1000 руб.","kvintet-maksima-durova-35",96,1],["БОЛЬШОЙ ДЖАЗОВЫЙ ДЖЕМ","2026-10-22","22:00","b","ДЕПОЗИТ 2 000 РУБ.","bolshoj-dzhazovyj-dzhem-90",97,0],["МАРИНА ШАКЛЕИНА & SHABADOBO JAZZ BAND","2026-10-23","18:00","u","от 1000 руб.","marina-shakleina-shabadobo-jazz-band-8",98,1],["HELLO, SATCHMO!","2026-10-23","18:00","m","от 1500 руб.","hello-satchmo-15",99,1],["ЗОНА 4/5","2026-10-23","19:00","g","ДЕПОЗИТ 2 000 РУБ.","zona-4-5-25",100,0],["АННА КОРОЛЕВА И «АРСЕНАЛ» АЛЕКСЕЯ КОЗЛОВА","2026-10-23","20:00","g","от 2500 руб.","anna-koroleva-i-arsenal-alekseya-kozlova-114",101,1],["JOINTRIP (КУБА/РОССИЯ)","2026-10-23","21:00","u","от 1500 руб.","jointrip-kuba-rossiya-12",102,1],["FRIDAY NIGHT: MOREIRA’S JAZZ BAND (КУБА)","2026-10-23","22:00","m","от 1500 руб.","friday-night-moreiras-jazz-band-kuba-2",103,1],["FRIDAY SWING","2026-10-23","22:00","b","ДЕПОЗИТ 2 000 РУБ.","friday-swing-304",104,0],["FUTURE ART LAB & ASET: «WALT DISNEY: БОЛЬШАЯ МУЗЫКА»","2026-10-24","13:00","g","от 1500 руб.","future-art-lab-aset-walt-disney-bolshaya-muzyka",105,1],["SATURDAY JAZZ BRUNCH","2026-10-24","14:00","b","ДЕПОЗИТ 2 000 РУБ.","saturday-jazz-brunch-242",106,0],["АЛЁНА ВОЙСКАЯ: «BOURBON, DUST & VINYL»","2026-10-24","18:00","m","от 1000 руб.","alyona-vojskaya-bourbon-dust-vinyl",107,1],["MOSCOW RAGTIME BAND","2026-10-24","18:00","u","от 1500 руб.","moscow-ragtime-band-251",27,1],["АРТУР ГАЗАРОВ & SAMBATERIA","2026-10-24","20:00","g","от 1500 руб.","artur-gazarov-sambateria-33",108,1],["AFRO-DITE (ЯМАЙКА/РОССИЯ)","2026-10-24","21:00","u","от 1500 руб.","afro-dite-yamajka-rossiya-34",109,1],["ПАВЕЛ ЕРШОВ И КВАРТЕТ ДМИТРИЯ КУПЦОВА: SWING & GYPSY","2026-10-24","22:00","b","ДЕПОЗИТ 2 000 РУБ.","pavel-ershov-i-kvartet-dmitriya-kupcova-swing-gypsy-185",71,0],["SATURDAY NIGHT: МИШУРИС БЛЮЗ БЭНД","2026-10-24","22:00","m","от 1500 руб.","saturday-night-mishuris-blyuz-bend-2",110,1],["TRIBUTE NIGHT: CARLOS SANTANA","2026-10-24","23:59","g","от 1000 руб.","tribute-night-carlos-santana-16",111,1],["SUNDAY JAZZ BRUNCH","2026-10-25","14:00","b","ДЕПОЗИТ 2 000 РУБ.","sunday-jazz-brunch-245",112,0],["АНДРЕЙ ВИНОГРАДОВ","2026-10-25","15:00","m","от 1000 руб.","andrej-vinogradov-84",113,1],["ACOUSTIC JAM SESSION","2026-10-25","17:00","b","ДЕПОЗИТ 2 000 РУБ.","acoustic-jam-session-336",114,0],["DOWNTOWNBEAT BAND: «ЯЗЫК БИБОПА»","2026-10-25","20:00","b","от 1000 руб.","downtownbeat-band-yazyk-bibopa",115,1],["МАКСИМОВ/СОКУЛЕР PROJECT","2026-10-25","20:00","u","от 1000 руб.","maksimov-sokuler-project-6",116,1],["МАРИАМ МЕРАБОВА","2026-10-25","20:00","g","от 3500 руб.","mariam-merabova-15",117,1],["ANI MINASI QUINTET","2026-10-25","20:30","m","от 1000 руб.","ani-minasi-quintet-4",118,1],["DOWNTOWNBEAT JAM","2026-10-25","22:00","b","ДЕПОЗИТ 2 000 РУБ.","downtownbeat-jam-277",119,0],["JAZZ BIRDS 2026: ИНСТРУМЕНТАЛЬНЫЙ КОНКУРС","2026-10-26","10:00","g","Вход свободный","jazz-birds-2026-instrumentalnyj-konkurs",120,0],["TRANE ZEN ART: АНТОН ЗАЛЕТАЕВ И «ЛЁТНЫЙ СЕЗОН»","2026-10-26","20:00","m","Вход свободный","trane-zen-art-anton-zaletaev-i-lyotnyj-sezon-13",121,0],["CANTALOOP JAM","2026-10-26","20:00","b","ДЕПОЗИТ 2 000 РУБ.","cantaloop-jam-213",122,0],["HODÍLA ÍZBA","2026-10-26","20:00","g","от 1500 руб.","hodila-izba-2",123,1],["МАРТИН АЛЬВАРАДО (АРГЕНТИНА) И ТОНИ КАРАПЕТЯН","2026-10-26","20:00","u","от 2000 руб.","martin-alvarado-argentina-i-toni-karapetyan",124,1],["JAZZ BIRDS 2026: 1-Й ДЕНЬ ВОКАЛЬНОГО КОНКУРСА","2026-10-27","11:00","g","Вход свободный","jazz-birds-2026-1-j-den-vokalnogo-konkursa",120,0],["ДРАМ-КУПОЛ","2026-10-27","20:00","u","от 1000 руб.","dram-kupol",125,1],["КОРОЛЕВА – ЧЕРНАКОВА – БАБАЯН: «ORION»","2026-10-27","20:00","g","от 1000 руб.","koroleva-chernakova-babayan-orion-4",126,1],["КВАРТЕТ ЛУ ГОЛОВИНОЙ: «ВАЛЬС-МАНУШ»","2026-10-27","20:00","b","от 1000 руб.","kvartet-lu-golovinoj-vals-manush",127,1],["GUITAR DAY: ЮРИЙ УСКОВ & SOUL MEN","2026-10-27","20:30","m","от 900 руб.","guitar-day-yurij-uskov-soul-men",128,1],["«ЖАРКИЙ ВТОРНИК»: NYC VIBE NIGHT JAM","2026-10-27","22:00","b","ДЕПОЗИТ 2 000 РУБ.","zharkij-vtornik-nyc-vibe-night-jam-6",129,0],["JAZZ BIRDS 2026: 2-Й ДЕНЬ ВОКАЛЬНОГО КОНКУРСА","2026-10-28","10:00","g","Вход свободный","jazz-birds-2026-2-j-den-vokalnogo-konkursa",120,0],["POSTMODERN BAND: «ЗОЛОТАЯ ЭПОХА ДЖАЗА»","2026-10-28","20:00","b","от 2500 руб.","postmodern-band-zolotaya-epoxa-dzhaza-7",130,1],["ДАНИИЛ КРАМЕР: «ИГРЫ В ДЖАЗ»","2026-10-28","20:00","g","от 1500 руб.","daniil-kramer-igry-v-dzhaz",131,1],["OPERA NIGHT CLUB","2026-10-28","20:00","u","от 2000 руб.","opera-night-club-12",132,1],["БЕЛЫЙ ОСТРОГ","2026-10-28","20:30","m","от 1000 руб.","belyj-ostrog-38",133,1],["«УРАГАННЫЙ ДЖЕМ» ПАВЛА ТИМОФЕЕВА","2026-10-28","22:00","b","ДЕПОЗИТ 2 000 РУБ.","uragannyj-dzhem-pavla-timofeeva-382",134,0],["JAZZ BIRDS 2026: 3-Й ДЕНЬ ВОКАЛЬНОГО КОНКУРСА","2026-10-29","10:00","","Вход свободный","jazz-birds-2026-3-j-den-vokalnogo-konkursa",120,0],["БАРКЛАССИКА: ТРИБЬЮТ ШНИТКЕ","2026-10-29","20:00","u","от 1500 руб.","barklassika-tribyut-shnitke",135,1],["ДМИТРИЙ МОСЬПАН И «МОСДЖАЗ КВАРТЕТ»: «ДЖАЗОВЫЕ ИСТОРИИ»","2026-10-29","20:00","b","от 1000 руб.","dmitrij-mospan-i-mosdzhaz-kvartet-dzhazovye-istorii-7",136,1],["ИЛУГДИН ТРИО: ПЕРЕЗАГРУЗКА","2026-10-29","20:00","g","от 1500 руб.","ilugdin-trio-perezagruzka-2",137,1],["ALEXANDER DOVGOPOLY PROJECT","2026-10-29","20:30","m","от 1000 руб.","alexander-dovgopoly-project-44",138,1],["БОЛЬШОЙ ДЖАЗОВЫЙ ДЖЕМ","2026-10-29","22:00","b","ДЕПОЗИТ 2 000 РУБ.","bolshoj-dzhazovyj-dzhem-91",139,0],["JAZZ BIRDS 2026: 4-Й ДЕНЬ ВОКАЛЬНОГО КОНКУРСА","2026-10-30","10:00","g","Вход свободный","jazz-birds-2026-4-j-den-vokalnogo-konkursa",120,0],["BALKANIMANS BAND","2026-10-30","18:00","u","от 1000 руб.","balkanimans-band-6",140,1],["PROVANS: «СВОЁ»","2026-10-30","18:00","m","от 1200 руб.","provans-svoyo",141,1],["ЗОНА 4/5","2026-10-30","19:00","g","ДЕПОЗИТ 2 000 РУБ.","zona-4-5-26",20,0],["АННА КОРОЛЕВА И «АРСЕНАЛ» АЛЕКСЕЯ КОЗЛОВА","2026-10-30","20:00","g","от 2500 руб.","anna-koroleva-i-arsenal-alekseya-kozlova-115",142,1],["CELENTANO SHOW","2026-10-30","21:00","u","от 1500 руб.","celentano-show-22",143,1],["FRIDAY SWING","2026-10-30","22:00","b","ДЕПОЗИТ 2 000 РУБ.","friday-swing-308",144,0],["FRIDAY NIGHT: СЕРГЕЙ РУЧКИН И БЭНД","2026-10-30","22:00","m","от 1000 руб.","friday-night-sergej-ruchkin-i-bend-37",145,1],["SATURDAY JAZZ BRUNCH","2026-10-31","14:00","b","ДЕПОЗИТ 2 000 РУБ.","saturday-jazz-brunch-243",146,0],["ДМИТРИЙ КАЗАЧКОВ","2026-10-31","18:00","u","от 1000 руб.","dmitrij-kazachkov-7",147,1],["MOSCOW RAGTIME BAND","2026-10-31","18:00","m","от 1500 руб.","moscow-ragtime-band-250",66,1],["«УРАГАННЫЙ ДЖАЗ» ПАВЛА ТИМОФЕЕВА: «ПРИСТЕГНИТЕ РЕМНИ!»","2026-10-31","20:00","g","от 1500 руб.","uragannyj-dzhaz-pavla-timofeeva-pristegnite-remni",92,1],["SOMEWHERE MUSIC SESSION (КАМЕРУН/РОССИЯ)","2026-10-31","21:00","u","от 2000 руб.","somewhere-music-session-kamerun-rossiya",148,1],["ПАВЕЛ ЕРШОВ И КВАРТЕТ ДМИТРИЯ КУПЦОВА: SWING & GYPSY","2026-10-31","22:00","b","от 2000 руб.","pavel-ershov-i-kvartet-dmitriya-kupcova-swing-gypsy-186",31,0],["SATURDAY NIGHT: JAZZPLAY & МАРГАРИТА СИМАНОВА","2026-10-31","22:00","m","от 1500 руб.","saturday-night-jazzplay-margarita-simanova-5",149,1],["CUBA LIVE JAM","2026-10-31","23:59","g","от 1500 руб.","cuba-live-jam",24,1],["SUNDAY JAZZ BRUNCH","2026-11-01","14:00","b","ДЕПОЗИТ 2 000 РУБ.","sunday-jazz-brunch-246",150,0],["ПЁТР ТЕРМЕН И ЯКОВ ЧАШНИКОВ: «ТЕРМЕНВОКС И ОРГАН ХАММОНДА»","2026-11-01","15:00","m","от 900 руб.","pyotr-termen-i-yakov-chashnikov-termenvoks-i-organ-xammonda-2",151,1],["ACOUSTIC JAM SESSION","2026-11-01","17:00","b","ДЕПОЗИТ 2 000 РУБ.","acoustic-jam-session-343",152,0],["SPOKANKI","2026-11-01","20:00","g","от 3500 руб.","spokanki-8",153,1],["ИРИНА СУРИНА И «МАЙНУГИН-БЭНД»","2026-11-01","20:00","u","от 900 руб.","irina-surina-i-majnugin-bend",154,1],["DOWNTOWNBEAT JAM","2026-11-01","20:00","b","ДЕПОЗИТ 2 000 РУБ.","downtownbeat-jam-278",155,0],["ESH SAMBA JAZZ QUINTET","2026-11-01","20:30","m","от 1500 руб.","esh-samba-jazz-quintet-30",156,1],["TRANE ZEN ART: ДЖАЗОВАЯ ФЕЕРИЯ","2026-11-02","20:00","m","от 800 руб.","trane-zen-art-dzhazovaya-feeriya-2",157,1],["АРТЁМ СТУЛЬНИКОВ – НИКОЛАЙ ИВАНИЛОВ – РИНАТА ЮСУПОВА","2026-11-02","20:00","u","от 900 руб.","artyom-stulnikov-nikolaj-ivanilov-rinata-yusupova",158,1],["CANTALOOP JAM","2026-11-02","20:00","b","ДЕПОЗИТ 2 000 РУБ.","cantaloop-jam-215",0,0],["ЮРИЙ ТЕРЛЕЦКИЙ & YURS’KI BAND","2026-11-02","20:00","g","от 1000 руб.","yurij-terleckij-yurski-band-6",159,1],["ELERON BAND","2026-11-03","20:00","b","от 1000 руб.","eleron-band-3",160,1],["TONY KARAPETYAN: ПРЕЗЕНТАЦИЯ АЛЬБОМА «MODERN NOMAD»","2026-11-03","20:00","g","от 1500 руб.","tony-karapetyan-prezentaciya-alboma-modern-nomad",161,1],["ПАВЕЛ ВОЛЬФСОН: ВЕЧЕР ФИНГЕРСТАЙЛА","2026-11-03","20:00","u","от 900 руб.","pavel-volfson-vecher-fingerstajla",162,1],["АЛЕКСЕЙ КУЗНЕЦОВ: ИНТЕЛЛИГЕНТНЫЙ ДЖАЗ-ГИТАР-БЭНД","2026-11-03","20:30","m","от 1000 руб.","aleksej-kuznecov-intelligentnyj-dzhaz-gitar-bend-98",163,1],["FAMILY JAZZ BRUNCH","2026-11-04","14:00","b","ДЕПОЗИТ 2 000 РУБ.","family-jazz-brunch-81",164,0],["ТРИО СЕРГЕЯ КОРЧАГИНА","2026-11-04","20:00","b","от 1000 руб.","trio-sergeya-korchagina-10",8,1],["БДО ПЕТРА ВОСТОКОВА: «ДЖАЗ, РОК И МЕДНЫЕ ТРУБЫ»","2026-11-04","20:00","g","от 1500 руб.","bdo-petra-vostokova-dzhaz-rok-i-mednye-truby-2",165,1],["JAZZ B’S POEMS","2026-11-04","20:00","u","от 900 руб.","jazz-bs-poems-2",166,1],["«УРАГАННЫЙ ДЖЕМ» ПАВЛА ТИМОФЕЕВА","2026-11-04","22:00","b","ДЕПОЗИТ 2 000 РУБ.","uragannyj-dzhem-pavla-timofeeva-389",167,0],["ЛРК ТРИО","2026-11-05","20:00","g","от 2000 руб.","lrk-trio-43",168,1],["КОМНАТА 60 (КИРОВ/СПБ)","2026-11-05","20:00","u","от 1000 руб.","komnata-60-kirov-spb-3",169,1],["СОФИЯ АЦБЕХА НЕГГА","2026-11-05","20:30","m","от 1500 руб.","sofiya-acbexa-negga-89",170,1],["БОЛЬШОЙ ДЖАЗОВЫЙ ДЖЕМ","2026-11-05","22:00","b","ДЕПОЗИТ 2 000 РУБ.","bolshoj-dzhazovyj-dzhem-95",57,0],["МУКУЧ СУДЖЯН ПРЕДСТАВЛЯЕТ: GP QUINTET","2026-11-06","18:00","m","от 1000 руб.","mukuch-sudzhyan-predstavlyaet-gp-quintet",171,1],["ЗОНА 4/5","2026-11-06","19:00","g","ДЕПОЗИТ 2 000 РУБ.","zona-4-5-27",60,0],["АННА КОРОЛЕВА И «АРСЕНАЛ» АЛЕКСЕЯ КОЗЛОВА","2026-11-06","20:00","g","от 2500 руб.","anna-koroleva-i-arsenal-alekseya-kozlova-119",21,1],["ALGORITHM (КАМЕРУН/РОССИЯ)","2026-11-06","21:00","u","от 1500 руб.","algorithm-kamerun-rossiya-8",172,1],["FRIDAY SWING","2026-11-06","22:00","b","ДЕПОЗИТ 2 000 РУБ.","friday-swing-311",23,0],["SATURDAY JAZZ BRUNCH","2026-11-07","14:00","b","ДЕПОЗИТ 2 000 РУБ.","saturday-jazz-brunch-247",33,0],["ОЛЬГА ОЛЕЙНИКОВА & SUNNY SIDE SINGERS","2026-11-07","14:00","g","от 1000 руб.","olga-olejnikova-sunny-side-singers-7",173,1],["АЛИСА ИГНАТЬЕВА","2026-11-07","18:00","m","от 1000 руб.","alisa-ignateva-18",174,1],["MOSCOW RAGTIME BAND","2026-11-07","18:00","u","от 1500 руб.","moscow-ragtime-band-255",175,1],["КВИНТЕТ МАКСИМА ДУРОВА","2026-11-07","20:00","g","от 1500 руб.","kvintet-maksima-durova-36",176,1],["DARIEL RENE & HOT HAVANA JAZZ TRIO (КУБА)","2026-11-07","21:00","u","от 1500 руб.","dariel-rene-hot-havana-jazz-trio-kuba-35",177,1],["ПАВЕЛ ЕРШОВ И КВАРТЕТ ДМИТРИЯ КУПЦОВА: SWING & GYPSY","2026-11-07","22:00","b","ДЕПОЗИТ 2 000 РУБ.","pavel-ershov-i-kvartet-dmitriya-kupcova-swing-gypsy-187",71,0],["STICKY JAM","2026-11-07","23:59","g","ДЕПОЗИТ 2 000 РУБ.","sticky-jam-62",178,0],["SUNDAY JAZZ BRUNCH","2026-11-08","14:00","b","ДЕПОЗИТ 2 000 РУБ.","sunday-jazz-brunch-247",25,0],["ЯН БЕДЕРМАН И БРОНИСЛАВ ВИНОГРОДСКИЙ","2026-11-08","15:00","m","от 1000 руб.","yan-bederman-i-bronislav-vinogrodskij-28",179,1],["ACOUSTIC JAM SESSION","2026-11-08","17:00","b","ДЕПОЗИТ 2 000 РУБ.","acoustic-jam-session-342",180,0],["TRIANIMA (АВСТРИЯ): «RE:COLORED»","2026-11-08","20:00","u","от 1000 руб.","trianima-avstriya-recolored",181,1],["IV АЛЬПЕРИНФЕСТ: «ВСПОМИНАЯ МИШУ – ПРАЗДНОВАНИЕ В МУЗЫКЕ»","2026-11-08","20:00","g","от 1500 руб.","iv-alperinfest-vspominaya-mishu-prazdnovanie-v-muzyke",182,1],["DOWNTOWNBEAT JAM","2026-11-08","20:00","b","ДЕПОЗИТ 2 000 РУБ.","downtownbeat-jam-279",36,0],["CANTALOOP JAM","2026-11-09","20:00","b","ДЕПОЗИТ 2 000 РУБ.","cantaloop-jam-216",40,0],["КВАРТЕТ АНТОНА ДАВИДЯНЦА","2026-11-09","20:00","g","от 3500 руб.","kvartet-antona-davidyanca",183,1],["ТРИО ПАВЛА ЕРШОВА","2026-11-10","20:00","b","от 1000 руб.","trio-pavla-ershova-14",45,1],["КВИНТЕТ ПАВЛА ЧЕКМАКОВСКОГО","2026-11-10","20:00","g","от 1500 руб.","kvintet-pavla-chekmakovskogo-19",184,1],["«ЖАРКИЙ ВТОРНИК»: NYC VIBE NIGHT JAM","2026-11-10","22:00","b","ДЕПОЗИТ 2 000 РУБ.","zharkij-vtornik-nyc-vibe-night-jam-9",47,0],["АННА БУТУРЛИНА: «ОТ СЕРДЦА К СЕРДЦУ»","2026-11-11","20:00","g","от 1500 руб.","anna-buturlina-ot-serdca-k-serdcu",185,1],["ГИЯ ДЗАГНИДЗЕ: ТРИБЬЮТ ЭРИКУ КЛЭПТОНУ","2026-11-11","20:00","u","от 1000 руб.","giya-dzagnidze-tribyut-eriku-kleptonu-7",186,1],["KLE2GO","2026-11-11","20:30","m","от 1000 руб.","kle2go-42",187,1],["«УРАГАННЫЙ ДЖЕМ» ПАВЛА ТИМОФЕЕВА","2026-11-11","22:00","b","ДЕПОЗИТ 2 000 РУБ.","uragannyj-dzhem-pavla-timofeeva-388",52,0],["БЕЛЫЙ ОСТРОГ: 35 ЛЕТ НА СЦЕНЕ","2026-11-12","20:00","g","от 1000 руб.","belyj-ostrog-35-let-na-scene",188,1],["КВАРТЕТ НИКОЛАЯ КУЛИКОВА","2026-11-12","20:00","b","от 1000 руб.","kvartet-nikolaya-kulikova-14",189,1],["БОЛЬШОЙ ДЖАЗОВЫЙ ДЖЕМ","2026-11-12","22:00","b","ДЕПОЗИТ 2 000 РУБ.","bolshoj-dzhazovyj-dzhem-94",17,0],["MOONSHINE","2026-11-13","18:00","m","от 1000 руб.","moonshine-85",190,1],["ЗОНА 4/5","2026-11-13","19:00","g","ДЕПОЗИТ 2 000 РУБ.","zona-4-5-28",20,0],["АННА КОРОЛЕВА И «АРСЕНАЛ» АЛЕКСЕЯ КОЗЛОВА","2026-11-13","20:00","g","от 2500 руб.","anna-koroleva-i-arsenal-alekseya-kozlova-118",191,1],["FRIDAY SWING","2026-11-13","22:00","b","ДЕПОЗИТ 2 000 РУБ.","friday-swing-312",64,0],["FRIDAY NIGHT: НЭШ АЛЬБЕРТ","2026-11-13","22:00","m","от 1000 руб.","friday-night-nesh-albert-3",192,1],["FUTURE ART LAB & АННА ЧАЙКОВСКАЯ: «MADE IN ENGLAND»","2026-11-14","13:00","g","от 1500 руб.","future-art-lab-anna-chajkovskaya-made-in-england-2",193,1],["SATURDAY JAZZ BRUNCH","2026-11-14","14:00","b","ДЕПОЗИТ 2 000 РУБ.","saturday-jazz-brunch-246",65,0],["LADELL MCLIN (США) & ALEX SOLOVIEV","2026-11-14","14:30","m","от 2000 руб.","ladell-mclin-ssha-alex-soloviev-4",194,1],["ЛЕНА ШЕРИ: ТРИБЬЮТ НОРЕ ДЖОНС","2026-11-14","18:00","u","от 1000 руб.","lena-sheri-tribyut-nore-dzhons-3",195,1],["MOSCOW RAGTIME BAND","2026-11-14","18:00","m","от 1500 руб.","moscow-ragtime-band-256",196,1],["ОЛЬГА СИНЯЕВА & ALLSEEBAND","2026-11-14","20:00","g","от 1500 руб.","olga-sinyaeva-allseeband-26",197,1],["AFRO-DITE (ЯМАЙКА/РОССИЯ)","2026-11-14","21:00","u","от 1500 руб.","afro-dite-yamajka-rossiya-35",198,1],["ПАВЕЛ ЕРШОВ И КВАРТЕТ ДМИТРИЯ КУПЦОВА: SWING & GYPSY","2026-11-14","22:00","b","ДЕПОЗИТ 2 000 РУБ.","pavel-ershov-i-kvartet-dmitriya-kupcova-swing-gypsy-188",31,0],["JOINTRIP (КУБА/РОССИЯ): ТРИБЬЮТ ЛЕННИ КРАВИЦУ","2026-11-14","23:59","g","от 1500 руб.","jointrip-kuba-rossiya-tribyut-lenni-kravicu-2",199,1],["SUNDAY JAZZ BRUNCH","2026-11-15","14:00","b","ДЕПОЗИТ 2 000 РУБ.","sunday-jazz-brunch-248",73,0],["ТЕРМЕН – БУРСОВ – КОДЖИРО (РОССИЯ/ЯПОНИЯ)","2026-11-15","15:00","m","от 900 руб.","termen-bursov-kodzhiro-rossiya-yaponiya",200,1],["ACOUSTIC JAM SESSION","2026-11-15","17:00","b","ДЕПОЗИТ 2 000 РУБ.","acoustic-jam-session-341",201,0],["MARIMBA PLUS","2026-11-15","20:00","g","от 2000 руб.","marimba-plus-115",28,1],["THE BEAT BOMBERS","2026-11-15","20:00","u","от 1000 руб.","the-beat-bombers-19",75,1],["DOWNTOWNBEAT JAM","2026-11-15","20:00","b","ДЕПОЗИТ 2 000 РУБ.","downtownbeat-jam-280",77,0],["ДАРЬЯ ЧЕРНАКОВА И АНТОН БАРОНИН","2026-11-15","20:30","m","от 1000 руб.","darya-chernakova-i-anton-baronin-3",202,0],["TRANE ZEN ART: G.RMUSIC","2026-11-16","20:00","m","Вход свободный","trane-zen-art-g-rmusic-9",203,0],["CANTALOOP JAM","2026-11-16","20:00","b","ДЕПОЗИТ 2 000 РУБ.","cantaloop-jam-217",79,0],["RESONANT HANDS","2026-11-16","20:00","u","от 1000 руб.","resonant-hands-7",204,0],["СЕРГЕЙ ДОЛЖЕНКОВ & NEW BLOOD BIG BAND","2026-11-17","20:00","g","от 2000 руб.","sergej-dolzhenkov-new-blood-big-band-26",205,1],["КВАРТЕТ МАРКА ГАЙДАРА","2026-11-17","20:00","b","от 1000 руб.","kvartet-marka-gajdara-7",206,1],["HELLO, SATCHMO!","2026-11-18","18:00","m","от 1500 руб.","hello-satchmo-16",207,1],["АНТОН ЗАЛЕТАЕВ И «ЛЁТНЫЙ СЕЗОН»","2026-11-18","20:00","b","от 1000 руб.","anton-zaletaev-i-lyotnyj-sezon-35",121,1],["ТАЛЬ БАБИЦКИЙ (ИЗРАИЛЬ) И ДЖАЗОВЫЙ ОРКЕСТР ДЕНИСА МЕЛЬНИКОВА","2026-11-18","20:00","g","от 1500 руб.","tal-babickij-izrail-i-dzhazovyj-orkestr-denisa-melnikova-2",208,1],["«УРАГАННЫЙ ДЖЕМ» ПАВЛА ТИМОФЕЕВА","2026-11-18","22:00","b","ДЕПОЗИТ 2 000 РУБ.","uragannyj-dzhem-pavla-timofeeva-387",92,0],["AMBER SEPT","2026-11-19","20:00","g","от 1500 руб.","amber-sept-32",209,1],["БОЛЬШОЙ ДЖАЗОВЫЙ ДЖЕМ","2026-11-19","22:00","b","ДЕПОЗИТ 2 000 РУБ.","bolshoj-dzhazovyj-dzhem-93",57,0],["DJANGO FRIENDS","2026-11-20","18:00","u","от 1000 руб.","django-friends-56",201,1],["ЗОНА 4/5","2026-11-20","19:00","g","ДЕПОЗИТ 2 000 РУБ.","zona-4-5-29",100,0],["АННА КОРОЛЕВА И «АРСЕНАЛ» АЛЕКСЕЯ КОЗЛОВА","2026-11-20","20:00","g","от 2500 руб.","anna-koroleva-i-arsenal-alekseya-kozlova-117",101,1],["100% JAZZ BAND & СТЕФАНИЯ ДАМОЦИДИ (РОССИЯ/ГРЕЦИЯ)","2026-11-20","21:00","u","от 1500 руб.","100-jazz-band-stefaniya-damocidi-rossiya-greciya-16",62,1],["FRIDAY SWING","2026-11-20","22:00","b","ДЕПОЗИТ 2 000 РУБ.","friday-swing-310",104,0],["SATURDAY JAZZ BRUNCH","2026-11-21","14:00","b","ДЕПОЗИТ 2 000 РУБ.","saturday-jazz-brunch-245",106,0],["КВИНТЕТ ВИКТОРИИ КРИВОЗУБОВОЙ «НА ПАРУ СЛОВ»","2026-11-21","18:00","m","от 1500 руб.","kvintet-viktorii-krivozubovoj-na-paru-slov-39",210,1],["MOSCOW RAGTIME BAND","2026-11-21","18:00","u","от 1500 руб.","moscow-ragtime-band-257",175,1],["СВЕТЛАНА ЖАВОРОНКОВА & SECRET ATELIER","2026-11-21","20:00","g","от 2000 руб.","svetlana-zhavoronkova-secret-atelier-20",211,1],["СОФИЯ АЦБЕХА НЕГГА","2026-11-21","21:00","u","от 1500 руб.","sofiya-acbexa-negga-90",212,1],["ПАВЕЛ ЕРШОВ И КВАРТЕТ ДМИТРИЯ КУПЦОВА: SWING & GYPSY","2026-11-21","22:00","b","ДЕПОЗИТ 2 000 РУБ.","pavel-ershov-i-kvartet-dmitriya-kupcova-swing-gypsy-189",71,0],["SUNDAY JAZZ BRUNCH","2026-11-22","14:00","b","ДЕПОЗИТ 2 000 РУБ.","sunday-jazz-brunch-249",112,0],["MOONBERRY JAM","2026-11-22","14:00","g","от 1000 руб.","moonberry-jam-4",213,1],["ACOUSTIC JAM SESSION","2026-11-22","17:00","b","ДЕПОЗИТ 2 000 РУБ.","acoustic-jam-session-340",114,0],["СЕРГЕЙ ЖИЛИН И «ФОНОГРАФ ДЖАЗ КВИНТЕТ»: «РУССКОЕ. ИЗБРАННОЕ»","2026-11-22","20:00","g","от 2000 руб.","sergej-zhilin-i-fonograf-dzhaz-kvintet-russkoe-izbrannoe-2",214,1],["DOWNTOWNBEAT JAM","2026-11-22","22:00","b","ДЕПОЗИТ 2 000 РУБ.","downtownbeat-jam-281",119,0],["ТРИО «ВТОРОЕ ПРИБЛИЖЕНИЕ» И АНТОН КОТИКОВ","2026-11-23","20:00","g","от 1000 руб.","trio-vtoroe-priblizhenie-i-anton-kotikov-2",215,1],["CANTALOOP JAM","2026-11-23","20:00","b","ДЕПОЗИТ 2 000 РУБ.","cantaloop-jam-218",122,0],["КВАРТЕТ ЛУ ГОЛОВИНОЙ","2026-11-24","20:00","b","от 1000 руб.","kvartet-lu-golovinoj-2",216,1],["OPERA NIGHT & АННА КОРОЛЕВА: «СНЫ СИНАТРЫ»","2026-11-24","20:00","g","от 2000 руб.","opera-night-anna-koroleva-sny-sinatry",217,1],["«ЖАРКИЙ ВТОРНИК»: NYC VIBE NIGHT JAM","2026-11-24","22:00","b","ДЕПОЗИТ 2 000 РУБ.","zharkij-vtornik-nyc-vibe-night-jam-8",129,0],["POSTMODERN JAZZ PARTY","2026-11-25","20:00","b","от 2500 руб.","postmodern-jazz-party-47",130,1],["ТРИО «ЗАЛЕССКИЙ ДЖАЗ»","2026-11-25","20:00","u","от 1000 руб.","trio-zalesskij-dzhaz-6",218,1],["БЕЛЫЙ ОСТРОГ","2026-11-25","20:30","m","от 1000 руб.","belyj-ostrog-39",219,1],["«УРАГАННЫЙ ДЖЕМ» ПАВЛА ТИМОФЕЕВА","2026-11-25","22:00","b","ДЕПОЗИТ 2 000 РУБ.","uragannyj-dzhem-pavla-timofeeva-386",134,0],["ДМИТРИЙ МОСЬПАН И «МОСДЖАЗ КВАРТЕТ»: «ДЖАЗОВЫЕ ИСТОРИИ»","2026-11-26","20:00","b","от 1000 руб.","dmitrij-mospan-i-mosdzhaz-kvartet-dzhazovye-istorii-8",136,1],["БОЛЬШОЙ ДЖАЗОВЫЙ ДЖЕМ","2026-11-26","22:00","b","ДЕПОЗИТ 2 000 РУБ.","bolshoj-dzhazovyj-dzhem-92",139,0],["ЗОНА 4/5","2026-11-27","19:00","g","ДЕПОЗИТ 2 000 РУБ.","zona-4-5-30",20,0],["АННА КОРОЛЕВА И «АРСЕНАЛ» АЛЕКСЕЯ КОЗЛОВА","2026-11-27","20:00","g","от 2500 руб.","anna-koroleva-i-arsenal-alekseya-kozlova-116",142,1],["FRIDAY SWING","2026-11-27","22:00","b","ДЕПОЗИТ 2 000 РУБ.","friday-swing-309",144,0],["FRIDAY NIGHT: AFRO-DITE (ЯМАЙКА/РОССИЯ)","2026-11-27","22:00","m","от 1500 руб.","friday-night-afro-dite-yamajka-rossiya-11",220,1],["SATURDAY JAZZ BRUNCH","2026-11-28","14:00","b","ДЕПОЗИТ 2 000 РУБ.","saturday-jazz-brunch-244",146,0],["MOSCOW RAGTIME BAND","2026-11-28","18:00","m","от 1500 руб.","moscow-ragtime-band-258",196,1],["ПАВЕЛ ЕРШОВ И КВАРТЕТ ДМИТРИЯ КУПЦОВА: SWING & GYPSY","2026-11-28","22:00","b","ДЕПОЗИТ 2 000 РУБ.","pavel-ershov-i-kvartet-dmitriya-kupcova-swing-gypsy-190",31,0],["TRIBUTE NIGHT: JAMIROQUAI","2026-11-28","23:59","g","от 1000 руб.","tribute-night-jamiroquai-11",221,1],["«ИСКРА ХОР»","2026-11-29","13:00","g","от 900 руб.","iskra-xor-2",222,1],["SUNDAY JAZZ BRUNCH","2026-11-29","14:00","b","ДЕПОЗИТ 2 000 РУБ.","sunday-jazz-brunch-250",223,0],["ACOUSTIC JAM SESSION","2026-11-29","17:00","b","ДЕПОЗИТ 2 000 РУБ.","acoustic-jam-session-339",35,0],["DOWNTOWNBEAT JAM","2026-11-29","20:00","b","ДЕПОЗИТ 2 000 РУБ.","downtownbeat-jam-282",77,0],["ОЛЬГА ОЛЕЙНИКОВА И «ЗАКОНЫ ОМА»","2026-11-29","20:00","g","от 1000 руб.","olga-olejnikova-i-zakony-oma-3",224,1],["CANTALOOP JAM","2026-11-30","20:00","b","ДЕПОЗИТ 2 000 РУБ.","cantaloop-jam-219",0,0],["ДАНИИЛ КРАМЕР И РОМАН МИРОШНИЧЕНКО: «ДИАЛОГ ВИРТУОЗОВ»","2026-11-30","20:00","g","от 1500 руб.","daniil-kramer-i-roman-miroshnichenko-dialog-virtuozov-5",225,1]];
+  var PAGES = [{"title":"Меню ресторана","url":"/menu/","words":["меню","ресторан","еда","кухня","бар","блюда","напитки","вино","ужин"]},{"title":"Контакты","url":"/contacts/","words":["адрес","телефон","как","добраться","проезд","карта","где","находится","маросейка","мясницкая","бронь","забронировать","столик"]},{"title":"Правила для посетителей","url":"/pravila/","words":["правила","дети","детям","возраст","дресс","код","возврат","билетов","вход"]},{"title":"FAQ: частые вопросы","url":"/faq/","words":["вопросы","ответы","faq","помощь"]},{"title":"Схемы залов","url":"/sxemy-zalov/","words":["схема","зал","места","столики","рассадка"]},{"title":"Интерьер и сцены","url":"/interiorstage/","words":["интерьер","сцены","фото","зал","фотографии"]},{"title":"Абонементы","url":"/abonementy/","words":["абонемент","подписка"]},{"title":"VIP-карты","url":"/vip-card/","words":["vip","вип","карта","скидка"]},{"title":"Видеоархив","url":"/videoarxiv/","words":["видео","записи","концертов"]},{"title":"Live: трансляции","url":"/live/","words":["live","трансляция","онлайн","эфир","лайв"]},{"title":"Для прессы","url":"/dlya-pressy/","words":["пресса","сми","аккредитация","журналистам"]},{"title":"Партнеры","url":"/partners/","words":["партнеры","спонсоры"]},{"title":"Правила для музыкантов","url":"/pravila-dlya-muzykantov/","words":["правила","музыкантам","артистам","саундчек"]},{"title":"Технический райдер","url":"/technicalrider/","words":["райдер","звук","оборудование","аппарат"]},{"title":"Event: мероприятия в клубе","url":"/jazzevent/","words":["мероприятие","банкет","корпоратив","аренда","event"]},{"title":"Политика конфиденциальности","url":"/privacy/","words":["политика","конфиденциальность","персональные","данные"]}];
+  var SITE = 'https://kozlovclub.ru';
+  var K = window.KozlovSearch;
+  var index = K.build(DATA, PAGES, new Date());
+  var MON = ['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
+  var WD = ['вс','пн','вт','ср','чт','пт','сб'];
+  var WDFULL = ['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'];
+  var today = index.today, tomorrow = K.ymd(new Date(Date.now() + 864e5));
+
+  var top = document.getElementById('top'), sbar = document.getElementById('sbar'), input = document.getElementById('q');
+  var panel = document.getElementById('kzs'), shade = document.getElementById('shade');
+  var LIMIT = 12, limit = LIMIT, isOpen = false;
+
+  function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function dateLabel(it, short){
+    var d = K.parseDate(it.date);
+    var base = d.getDate() + ' ' + MON[d.getMonth()];
+    if (short) return base;
+    var rel = it.date === today ? 'сегодня' : (it.date === tomorrow ? 'завтра' : WD[d.getDay()]);
+    return base + ', ' + rel;
+  }
+  function eventUrl(it){ return SITE + '/event/' + it.slug + '/'; }
+  function thumb(it){ return it.img >= 0 ? 't/' + ('00' + it.img).slice(-3) + '.webp' : ''; }
+  function stageName(it){ return K.STAGES[it.stage] ? K.STAGES[it.stage].name : 'Клуб Алексея Козлова'; }
+
+  function markTitle(title, hit){
+    var words = K.titleWords(title), out = '', pos = 0;
+    words.forEach(function(w){
+      var on = false, i;
+      for (i = w.from; i < w.to; i++) if (hit && hit[i]) on = true;
+      out += esc(title.slice(pos, w.start));
+      out += on ? '<mark>' + esc(title.slice(w.start, w.end)) + '</mark>' : esc(title.slice(w.start, w.end));
+      pos = w.end;
+    });
+    return out + esc(title.slice(pos));
+  }
+
+  function rowHtml(g){
+    var it = g.first, url = eventUrl(it), img = thumb(it);
+    var more = g.dates.slice(1), shown = more.slice(0, 5);
+    var h = '<li class="kzs__row' + (more.length ? ' kzs__row--multi' : '') + '">';
+    h += '<a class="kzs__thumb" href="' + url + '" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">' + (img ? '<img src="' + img + '" alt="" loading="lazy" width="140" height="105">' : '') + '</a>';
+    h += '<a class="kzs__main" data-nav href="' + url + '" target="_blank" rel="noopener"><span class="kzs__title">' + markTitle(g.title, g.hit) + '</span>';
+    h += '<span class="kzs__meta"><b>' + esc(dateLabel(it)) + ' · ' + esc(it.time) + '</b> · ' + esc(stageName(it)) + '<span class="sep"> · </span><span class="p">' + esc(it.price) + '</span></span></a>';
+    if (more.length){
+      h += '<div class="kzs__more"><span>Ещё даты:</span>';
+      shown.forEach(function(d){ h += '<a class="kzs__date" href="' + eventUrl(d) + '" target="_blank" rel="noopener">' + esc(dateLabel(d, true)) + ', ' + WD[K.parseDate(d.date).getDay()] + (d.stage !== it.stage ? ' · ' + esc(stageName(d)) : '') + '</a>'; });
+      if (more.length > shown.length) h += '<span>и ещё ' + (more.length - shown.length) + '</span>';
+      h += '</div>';
+    }
+    h += '<a class="kzs__cta' + (it.tickets ? '' : ' kzs__cta--read') + '" href="' + url + '" target="_blank" rel="noopener" tabindex="-1">' + (it.tickets ? 'Купить билет' : 'Подробнее') + '</a>';
+    return h + '</li>';
+  }
+
+  var QUICK = [['Сегодня','сегодня'],['Завтра','завтра'],['Выходные','выходные'],['Главная сцена','главная сцена'],['Мансарда','мансарда'],['The Beat','the beat'],['Unplugged','unplugged'],['Вход свободный','бесплатно']];
+  function chipsHtml(){
+    return '<div class="kzs__chips">' + QUICK.map(function(c){ return '<button type="button" class="chip" data-q="' + esc(c[1]) + '">' + esc(c[0]) + '</button>'; }).join('') + '</div>';
+  }
+  function plural(n, a, b, c){ var m = n % 100, k = n % 10; return (m > 10 && m < 20) ? c : (k === 1 ? a : (k > 1 && k < 5 ? b : c)); }
+
+  function render(){
+    var q = input.value, html = '<div class="kzs__in">', status = '';
+    var res = K.search(index, q);
+    if (!q.trim() || res.short){
+      // пустой запрос: быстрый выбор и ближайшие концерты
+      var seen = {}, near = [];
+      index.items.forEach(function(it){ if (near.length < 6 && !seen[it.group]){ seen[it.group] = 1; near.push({ title: it.title, first: it, dates: [it], hit: null }); } });
+      html += '<div class="kzs__label">Быстрый выбор</div>' + chipsHtml();
+      html += '<div class="kzs__label">Ближайшие концерты</div>' + (near.length ? '<ul class="kzs__list">' + near.map(rowHtml).join('') + '</ul>' : '<p class="kzs__none">В афише пока нет будущих концертов.</p>');
+      status = '';
+    } else if (!res.groups.length && !res.pages.length){
+      status = 'Ничего не найдено';
+      html += '<div class="kzs__empty"><strong>В ближайшей афише такого нет</strong><p>По запросу «' + esc(q.trim().length > 60 ? q.trim().slice(0, 60) + '…' : q.trim()) + '» концертов до конца ноября не нашлось. Попробуйте имя артиста, день недели или сцену.</p></div>' + chipsHtml();
+    } else {
+      if (res.groups.length){
+        var label = res.count + ' ' + plural(res.count, 'концерт', 'концерта', 'концертов');
+        if (res.partial) label = 'Точного совпадения нет. Показаны концерты по ' + (res.words.length > 1 ? 'словам' : 'слову') + ' «' + esc(res.words.join('», «')) + '»';
+        html += '<div class="kzs__label">' + label + '</div>';
+        status = res.partial ? 'Точного совпадения нет, показаны похожие концерты: ' + res.count : 'Найдено: ' + label;
+        html += '<ul class="kzs__list">' + res.groups.slice(0, limit).map(rowHtml).join('') + '</ul>';
+        if (res.groups.length > limit) html += '<button type="button" class="kzs__showmore" id="moreBtn">Показать ещё ' + Math.min(LIMIT, res.groups.length - limit) + '</button>';
+      }
+      if (res.pages.length){
+        html += '<div class="kzs__label">Страницы сайта</div><div>';
+        res.pages.slice(0, 4).forEach(function(p){ html += '<a class="kzs__page" data-nav href="' + SITE + p.url + '" target="_blank" rel="noopener"><b>' + esc(p.title) + '</b><span>kozlovclub.ru' + esc(p.url) + '</span></a>'; });
+        html += '</div>';
+      }
+    }
+    html += '<div class="kzs__foot"><a href="' + SITE + '/" target="_blank" rel="noopener">Вся афиша</a><span class="keys"><kbd>↓</kbd> <kbd>↑</kbd> выбрать, <kbd>Enter</kbd> открыть, <kbd>Esc</kbd> закрыть</span></div></div>';
+    if (res.pages.length && !res.groups.length && !res.short) status = 'Найдены страницы сайта: ' + res.pages.length;
+    panel.innerHTML = html;
+    panel.scrollTop = 0;
+    document.getElementById('kzsStatus').textContent = status;
+  }
+
+  function open(q, viaChip){
+    if (!isOpen){
+      isOpen = true; sbar.classList.add('is-open'); top.classList.add('is-search'); shade.classList.add('is-on');
+      panel.hidden = false; input.setAttribute('aria-expanded', 'true');
+      if (window.matchMedia('(max-width:860px)').matches) document.documentElement.style.overflow = 'hidden';
+    }
+    if (typeof q === 'string'){ input.value = q; }
+    limit = LIMIT; render();
+    // после нажатия на подсказку на телефоне клавиатуру не поднимаем, чтобы были видны результаты
+    if (viaChip && window.matchMedia('(pointer:coarse)').matches) { input.blur(); return; }
+    try { input.focus({ preventScroll: true }); } catch (e) { input.focus(); }
+  }
+  function close(){
+    if (!isOpen) return;
+    isOpen = false; sbar.classList.remove('is-open'); top.classList.remove('is-search'); shade.classList.remove('is-on');
+    panel.hidden = true; input.setAttribute('aria-expanded', 'false'); input.value = '';
+    document.documentElement.style.overflow = '';
+    try { document.getElementById('openBtn').focus({ preventScroll: true }); } catch (e) { document.getElementById('openBtn').focus(); }
+  }
+
+  document.getElementById('openBtn').addEventListener('click', function(){ isOpen ? close() : open(); });
+  document.getElementById('closeBtn').addEventListener('click', close);
+  shade.addEventListener('click', close);
+  input.addEventListener('input', function(){ limit = LIMIT; render(); });
+  document.getElementById('sform').addEventListener('submit', function(e){
+    e.preventDefault();
+    var first = panel.querySelector('[data-nav]');
+    if (first && input.value.trim()) first.focus(); // в плагине Enter откроет страницу результатов
+  });
+  panel.addEventListener('click', function(e){
+    var chip = e.target.closest('[data-q]');
+    if (chip){ open(chip.getAttribute('data-q'), true); return; }
+    if (e.target.id === 'moreBtn'){ limit += LIMIT; var y = panel.scrollTop; render(); panel.scrollTop = y; }
+  });
+  document.addEventListener('keydown', function(e){
+    if (!isOpen) return;
+    if (e.key === 'Escape'){ e.preventDefault(); close(); return; }
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    var links = Array.prototype.slice.call(panel.querySelectorAll('[data-nav]'));
+    if (!links.length) return;
+    var i = links.indexOf(document.activeElement);
+    e.preventDefault();
+    if (e.key === 'ArrowDown') (links[i + 1] || links[i] || links[0]).focus();
+    else if (i <= 0) input.focus();
+    else links[i - 1].focus();
+  });
+
+  /* --- examples and the afisha backdrop (prototype only) --- */
+  var EX = [['баронин','имя артиста'],['боронин','с опечаткой'],['baronin','латиницей'],[',fhjyby','не та раскладка'],['кантолуп','CANTALOOP по-русски'],['рэгтайм','RAGTIME по-русски'],['билеты на баронина','живая фраза'],['суббота мансарда','день и сцена'],['22:00 the beat','время и сцена'],['7 октября','дата'],['бесплатно','вход свободный'],['меню','страница сайта'],['как добраться','страница сайта'],['бутман','нет в афише']];
+  document.getElementById('examples').innerHTML = EX.map(function(x){ return '<button type="button" class="chip" data-q="' + esc(x[0]) + '"><code>' + esc(x[0]) + '</code><small>' + esc(x[1]) + '</small></button>'; }).join('');
+  document.getElementById('examples').addEventListener('click', function(e){
+    var chip = e.target.closest('[data-q]');
+    if (chip){ window.scrollTo(0, 0); open(chip.getAttribute('data-q'), true); }
+  });
+
+  var cards = index.items.slice(0, 12).map(function(it){
+    var d = K.parseDate(it.date), big = it.n < 12 ? 'b/' + ('0' + it.n).slice(-2) + '.webp' : thumb(it);
+    return '<article class="card"><a class="card__img" href="' + eventUrl(it) + '" target="_blank" rel="noopener" tabindex="-1">' + (big ? '<img src="' + big + '" alt="" loading="lazy" width="450" height="338">' : '') + '</a>' +
+      '<a class="card__title" href="' + eventUrl(it) + '" target="_blank" rel="noopener">' + esc(it.title) + '</a>' +
+      '<div class="card__dt"><div class="card__day">' + ('0' + d.getDate()).slice(-2) + '</div><div class="card__rows"><div>' + MON[d.getMonth()] + ' | ' + esc(it.time) + ' | ' + WDFULL[d.getDay()] + '</div><div class="card__price">' + esc(it.price) + '</div></div></div>' +
+      '<a class="card__btn' + (it.tickets ? '' : ' card__btn--read') + '" href="' + eventUrl(it) + '" target="_blank" rel="noopener">' + (it.tickets ? 'Купить билет' : 'Подробнее') + '</a></article>';
+  });
+  document.getElementById('grid').innerHTML = cards.length ? cards.join('') : '<p class="kzs__none">В афише пока нет будущих концертов.</p>';
+  window.__kzs = { index: index, search: function(q){ return K.search(index, q); } }; // для автоматических проверок
+})();
+</script>
+
+</body></html>
