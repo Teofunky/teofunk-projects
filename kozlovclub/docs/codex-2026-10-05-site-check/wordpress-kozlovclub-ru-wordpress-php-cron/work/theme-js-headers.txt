@@ -1,0 +1,11 @@
+HTTP/2 200 
+server: nginx-reuseport/1.21.1
+date: Mon, 05 Oct 2026 06:23:13 GMT
+content-type: application/x-javascript
+last-modified: Fri, 17 Apr 2026 15:30:08 GMT
+vary: Accept-Encoding
+etag: W/"69e25200-1644"
+expires: Mon, 12 Oct 2026 06:23:13 GMT
+cache-control: max-age=604800
+content-encoding: gzip
+

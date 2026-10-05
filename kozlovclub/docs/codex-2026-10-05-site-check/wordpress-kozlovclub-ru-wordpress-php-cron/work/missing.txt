@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html>
+	<head>
+<!-- Top.Mail.Ru counter -->
+<script type="text/javascript">
+var _tmr = window._tmr || (window._tmr = []);
+_tmr.push({id: "3502092", type: "pageView", start: (new Date()).getTime()});
+(function (d, w, id) {
+  if (d.getElementById(id)) return;
+  var ts = d.createElement("script"); ts.type = "text/javascript"; ts.async = true; ts.id = id;
+  ts.src = "https://top-fwz1.mail.ru/js/code.js";
+  var f = function () {var s = d.getElementsByTagName("script")[0]; s.parentNode.insertBefore(ts, s);};
+  if (w.opera == "[object Opera]") { d.addEventListener("DOMContentLoaded", f, false); } else { f(); }
+})(document, window, "tmr-code");
+</script>
+<noscript><div><img src="https://top-fwz1.mail.ru/counter?id=3502092;js=na" style="position:absolute;left:-9999px;" alt="Top.Mail.Ru" /></div></noscript>
+<!-- /Top.Mail.Ru counter -->
+<!-- script src="//web.webformscr.com/apps/fc3/build/loader.js" async sp-form-id="a6f4a1ab5e4e45b27dbe80685b08063d3f194dd6d04baa3a7b602962c7eb47cd"></script -->
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        
+       
+
+
+                		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+
+      
+
+		<link rel="pingback" href="https://kozlovclub.ru/xmlrpc.php" />
+
+    
+			<meta name='robots' content='noindex, follow' />
+	<style>img:is([sizes="auto" i], [sizes^="auto," i]) { contain-intrinsic-size: 3000px 1500px }</style>
+	
+	<!-- This site is optimized with the Yoast SEO plugin v21.0 - https://yoast.com/wordpress/plugins/seo/ -->
+	<title>Page not found | Джаз Клуб Алексея Козлова</title>
+	<meta property="og:locale" content="ru_RU" />
+	<meta property="og:title" content="Page not found | Джаз Клуб Алексея Козлова" />
+	<meta property="og:site_name" content="Джаз Клуб Алексея Козлова" />
+	<script type="application/ld+json" class="yoast-schema-graph">{"@context":"https://schema.org","@graph":[{"@type":"WebSite","@id":"https://kozlovclub.ru/#website","url":"https://kozlovclub.ru/","name":"Джаз Клуб Алексея Козлова","description":"афиша| билеты","publisher":{"@id":"https://kozlovclub.ru/#organization"},"potentialAction":[{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https://kozlovclub.ru/?s={search_term_string}"},"query-input":"required name=search_term_string"}],"inLanguage":"ru-RU"},{"@type":"Organization","@id":"https://kozlovclub.ru/#organization","name":"Kozlov Club","url":"https://kozlovclub.ru/","logo":{"@type":"ImageObject","inLanguage":"ru-RU","@id":"https://kozlovclub.ru/#/schema/logo/image/","url":"https://kozlovclub.ru/wp-content/uploads/2020/08/favicon.png","contentUrl":"https://kozlovclub.ru/wp-content/uploads/2020/08/favicon.png","width":16,"height":16,"caption":"Kozlov Club"},"image":{"@id":"https://kozlovclub.ru/#/schema/logo/image/"},"sameAs":["https://www.facebook.com/KozlovClub","https://www.instagram.com/kozlovclub/","https://www.youtube.com/user/kozlovclubtv","https://ru.wikipedia.org/wiki/Клуб_Алексея_Козлова"]}]}</script>
+	<!-- / Yoast SEO plugin. -->
+
+
+<link rel='dns-prefetch' href='//ticketscloud.com' />
+<link rel='dns-prefetch' href='//fonts.googleapis.com' />
+<script type="text/javascript">
+/* <![CDATA[ */
+window._wpemojiSettings = {"baseUrl":"https:\/\/s.w.org\/images\/core\/emoji\/15.0.3\/72x72\/","ext":".png","svgUrl":"https:\/\/s.w.org\/images\/core\/emoji\/15.0.3\/svg\/","svgExt":".svg","source":{"concatemoji":"https:\/\/kozlovclub.ru\/wp-includes\/js\/wp-emoji-release.min.js?ver=6.7.2"}};
+/*! This file is auto-generated */
+!function(i,n){var o,s,e;function c(e){try{var t={supportTests:e,timestamp:(new Date).valueOf()};sessionStorage.setItem(o,JSON.stringify(t))}catch(e){}}function p(e,t,n){e.clearRect(0,0,e.canvas.width,e.canvas.height),e.fillText(t,0,0);var t=new Uint32Array(e.getImageData(0,0,e.canvas.width,e.canvas.height).data),r=(e.clearRect(0,0,e.canvas.width,e.canvas.height),e.fillText(n,0,0),new Uint32Array(e.getImageData(0,0,e.canvas.width,e.canvas.height).data));return t.every(function(e,t){return e===r[t]})}function u(e,t,n){switch(t){case"flag":return n(e,"\ud83c\udff3\ufe0f\u200d\u26a7\ufe0f","\ud83c\udff3\ufe0f\u200b\u26a7\ufe0f")?!1:!n(e,"\ud83c\uddfa\ud83c\uddf3","\ud83c\uddfa\u200b\ud83c\uddf3")&&!n(e,"\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc65\udb40\udc6e\udb40\udc67\udb40\udc7f","\ud83c\udff4\u200b\udb40\udc67\u200b\udb40\udc62\u200b\udb40\udc65\u200b\udb40\udc6e\u200b\udb40\udc67\u200b\udb40\udc7f");case"emoji":return!n(e,"\ud83d\udc26\u200d\u2b1b","\ud83d\udc26\u200b\u2b1b")}return!1}function f(e,t,n){var r="undefined"!=typeof WorkerGlobalScope&&self instanceof WorkerGlobalScope?new OffscreenCanvas(300,150):i.createElement("canvas"),a=r.getContext("2d",{willReadFrequently:!0}),o=(a.textBaseline="top",a.font="600 32px Arial",{});return e.forEach(function(e){o[e]=t(a,e,n)}),o}function t(e){var t=i.createElement("script");t.src=e,t.defer=!0,i.head.appendChild(t)}"undefined"!=typeof Promise&&(o="wpEmojiSettingsSupports",s=["flag","emoji"],n.supports={everything:!0,everythingExceptFlag:!0},e=new Promise(function(e){i.addEventListener("DOMContentLoaded",e,{once:!0})}),new Promise(function(t){var n=function(){try{var e=JSON.parse(sessionStorage.getItem(o));if("object"==typeof e&&"number"==typeof e.timestamp&&(new Date).valueOf()<e.timestamp+604800&&"object"==typeof e.supportTests)return e.supportTests}catch(e){}return null}();if(!n){if("undefined"!=typeof Worker&&"undefined"!=typeof OffscreenCanvas&&"undefined"!=typeof URL&&URL.createObjectURL&&"undefined"!=typeof Blob)try{var e="postMessage("+f.toString()+"("+[JSON.stringify(s),u.toString(),p.toString()].join(",")+"));",r=new Blob([e],{type:"text/javascript"}),a=new Worker(URL.createObjectURL(r),{name:"wpTestEmojiSupports"});return void(a.onmessage=function(e){c(n=e.data),a.terminate(),t(n)})}catch(e){}c(n=f(s,u,p))}t(n)}).then(function(e){for(var t in e)n.supports[t]=e[t],n.supports.everything=n.supports.everything&&n.supports[t],"flag"!==t&&(n.supports.everythingExceptFlag=n.supports.everythingExceptFlag&&n.supports[t]);n.supports.everythingExceptFlag=n.supports.everythingExceptFlag&&!n.supports.flag,n.DOMReady=!1,n.readyCallback=function(){n.DOMReady=!0}}).then(function(){return e}).then(function(){var e;n.supports.everything||(n.readyCallback(),(e=n.source||{}).concatemoji?t(e.concatemoji):e.wpemoji&&e.twemoji&&(t(e.twemoji),t(e.wpemoji)))}))}((window,document),window._wpemojiSettings);
+/* ]]> */
+</script>
+<link rel='stylesheet' id='ai1ec_style-css' href='//kozlovclub.ru/wp-content/plugins/all-in-one-event-calendar/cache/95f9c89c_ai1ec_parsed_css.css?ver=2.6.8' type='text/css' media='all' />
+<style id='wp-emoji-styles-inline-css' type='text/css'>
+
+	img.wp-smiley, img.emoji {
+		display: inline !important;
+		border: none !important;
+		box-shadow: none !important;
+		height: 1em !important;
+		width: 1em !important;
+		margin: 0 0.07em !important;
+		vertical-align: -0.1em !important;
+		background: none !important;
+		padding: 0 !important;
+	}
+</style>
+<link rel='stylesheet' id='wp-block-library-css' href='https://kozlovclub.ru/wp-includes/css/dist/block-library/style.min.css?ver=6.7.2' type='text/css' media='all' />
+<style id='classic-theme-styles-inline-css' type='text/css'>
+/*! This file is auto-generated */
+.wp-block-button__link{color:#fff;background-color:#32373c;border-radius:9999px;box-shadow:none;text-decoration:none;padding:calc(.667em + 2px) calc(1.333em + 2px);font-size:1.125em}.wp-block-file__button{background:#32373c;color:#fff;text-decoration:none}
+</style>
+<style id='global-styles-inline-css' type='text/css'>
+:root{--wp--preset--aspect-ratio--square: 1;--wp--preset--aspect-ratio--4-3: 4/3;--wp--preset--aspect-ratio--3-4: 3/4;--wp--preset--aspect-ratio--3-2: 3/2;--wp--preset--aspect-ratio--2-3: 2/3;--wp--preset--aspect-ratio--16-9: 16/9;--wp--preset--aspect-ratio--9-16: 9/16;--wp--preset--color--black: #000000;--wp--preset--color--cyan-bluish-gray: #abb8c3;--wp--preset--color--white: #ffffff;--wp--preset--color--pale-pink: #f78da7;--wp--preset--color--vivid-red: #cf2e2e;--wp--preset--color--luminous-vivid-orange: #ff6900;--wp--preset--color--luminous-vivid-amber: #fcb900;--wp--preset--color--light-green-cyan: #7bdcb5;--wp--preset--color--vivid-green-cyan: #00d084;--wp--preset--color--pale-cyan-blue: #8ed1fc;--wp--preset--color--vivid-cyan-blue: #0693e3;--wp--preset--color--vivid-purple: #9b51e0;--wp--preset--gradient--vivid-cyan-blue-to-vivid-purple: linear-gradient(135deg,rgba(6,147,227,1) 0%,rgb(155,81,224) 100%);--wp--preset--gradient--light-green-cyan-to-vivid-green-cyan: linear-gradient(135deg,rgb(122,220,180) 0%,rgb(0,208,130) 100%);--wp--preset--gradient--luminous-vivid-amber-to-luminous-vivid-orange: linear-gradient(135deg,rgba(252,185,0,1) 0%,rgba(255,105,0,1) 100%);--wp--preset--gradient--luminous-vivid-orange-to-vivid-red: linear-gradient(135deg,rgba(255,105,0,1) 0%,rgb(207,46,46) 100%);--wp--preset--gradient--very-light-gray-to-cyan-bluish-gray: linear-gradient(135deg,rgb(238,238,238) 0%,rgb(169,184,195) 100%);--wp--preset--gradient--cool-to-warm-spectrum: linear-gradient(135deg,rgb(74,234,220) 0%,rgb(151,120,209) 20%,rgb(207,42,186) 40%,rgb(238,44,130) 60%,rgb(251,105,98) 80%,rgb(254,248,76) 100%);--wp--preset--gradient--blush-light-purple: linear-gradient(135deg,rgb(255,206,236) 0%,rgb(152,150,240) 100%);--wp--preset--gradient--blush-bordeaux: linear-gradient(135deg,rgb(254,205,165) 0%,rgb(254,45,45) 50%,rgb(107,0,62) 100%);--wp--preset--gradient--luminous-dusk: linear-gradient(135deg,rgb(255,203,112) 0%,rgb(199,81,192) 50%,rgb(65,88,208) 100%);--wp--preset--gradient--pale-ocean: linear-gradient(135deg,rgb(255,245,203) 0%,rgb(182,227,212) 50%,rgb(51,167,181) 100%);--wp--preset--gradient--electric-grass: linear-gradient(135deg,rgb(202,248,128) 0%,rgb(113,206,126) 100%);--wp--preset--gradient--midnight: linear-gradient(135deg,rgb(2,3,129) 0%,rgb(40,116,252) 100%);--wp--preset--font-size--small: 13px;--wp--preset--font-size--medium: 20px;--wp--preset--font-size--large: 36px;--wp--preset--font-size--x-large: 42px;--wp--preset--spacing--20: 0.44rem;--wp--preset--spacing--30: 0.67rem;--wp--preset--spacing--40: 1rem;--wp--preset--spacing--50: 1.5rem;--wp--preset--spacing--60: 2.25rem;--wp--preset--spacing--70: 3.38rem;--wp--preset--spacing--80: 5.06rem;--wp--preset--shadow--natural: 6px 6px 9px rgba(0, 0, 0, 0.2);--wp--preset--shadow--deep: 12px 12px 50px rgba(0, 0, 0, 0.4);--wp--preset--shadow--sharp: 6px 6px 0px rgba(0, 0, 0, 0.2);--wp--preset--shadow--outlined: 6px 6px 0px -3px rgba(255, 255, 255, 1), 6px 6px rgba(0, 0, 0, 1);--wp--preset--shadow--crisp: 6px 6px 0px rgba(0, 0, 0, 1);}:where(.is-layout-flex){gap: 0.5em;}:where(.is-layout-grid){gap: 0.5em;}body .is-layout-flex{display: flex;}.is-layout-flex{flex-wrap: wrap;align-items: center;}.is-layout-flex > :is(*, div){margin: 0;}body .is-layout-grid{display: grid;}.is-layout-grid > :is(*, div){margin: 0;}:where(.wp-block-columns.is-layout-flex){gap: 2em;}:where(.wp-block-columns.is-layout-grid){gap: 2em;}:where(.wp-block-post-template.is-layout-flex){gap: 1.25em;}:where(.wp-block-post-template.is-layout-grid){gap: 1.25em;}.has-black-color{color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-color{color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-color{color: var(--wp--preset--color--white) !important;}.has-pale-pink-color{color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-color{color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-color{color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-color{color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-color{color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-color{color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-color{color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-color{color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-color{color: var(--wp--preset--color--vivid-purple) !important;}.has-black-background-color{background-color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-background-color{background-color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-background-color{background-color: var(--wp--preset--color--white) !important;}.has-pale-pink-background-color{background-color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-background-color{background-color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-background-color{background-color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-background-color{background-color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-background-color{background-color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-background-color{background-color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-background-color{background-color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-background-color{background-color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-background-color{background-color: var(--wp--preset--color--vivid-purple) !important;}.has-black-border-color{border-color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-border-color{border-color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-border-color{border-color: var(--wp--preset--color--white) !important;}.has-pale-pink-border-color{border-color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-border-color{border-color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-border-color{border-color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-border-color{border-color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-border-color{border-color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-border-color{border-color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-border-color{border-color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-border-color{border-color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-border-color{border-color: var(--wp--preset--color--vivid-purple) !important;}.has-vivid-cyan-blue-to-vivid-purple-gradient-background{background: var(--wp--preset--gradient--vivid-cyan-blue-to-vivid-purple) !important;}.has-light-green-cyan-to-vivid-green-cyan-gradient-background{background: var(--wp--preset--gradient--light-green-cyan-to-vivid-green-cyan) !important;}.has-luminous-vivid-amber-to-luminous-vivid-orange-gradient-background{background: var(--wp--preset--gradient--luminous-vivid-amber-to-luminous-vivid-orange) !important;}.has-luminous-vivid-orange-to-vivid-red-gradient-background{background: var(--wp--preset--gradient--luminous-vivid-orange-to-vivid-red) !important;}.has-very-light-gray-to-cyan-bluish-gray-gradient-background{background: var(--wp--preset--gradient--very-light-gray-to-cyan-bluish-gray) !important;}.has-cool-to-warm-spectrum-gradient-background{background: var(--wp--preset--gradient--cool-to-warm-spectrum) !important;}.has-blush-light-purple-gradient-background{background: var(--wp--preset--gradient--blush-light-purple) !important;}.has-blush-bordeaux-gradient-background{background: var(--wp--preset--gradient--blush-bordeaux) !important;}.has-luminous-dusk-gradient-background{background: var(--wp--preset--gradient--luminous-dusk) !important;}.has-pale-ocean-gradient-background{background: var(--wp--preset--gradient--pale-ocean) !important;}.has-electric-grass-gradient-background{background: var(--wp--preset--gradient--electric-grass) !important;}.has-midnight-gradient-background{background: var(--wp--preset--gradient--midnight) !important;}.has-small-font-size{font-size: var(--wp--preset--font-size--small) !important;}.has-medium-font-size{font-size: var(--wp--preset--font-size--medium) !important;}.has-large-font-size{font-size: var(--wp--preset--font-size--large) !important;}.has-x-large-font-size{font-size: var(--wp--preset--font-size--x-large) !important;}
+:where(.wp-block-post-template.is-layout-flex){gap: 1.25em;}:where(.wp-block-post-template.is-layout-grid){gap: 1.25em;}
+:where(.wp-block-columns.is-layout-flex){gap: 2em;}:where(.wp-block-columns.is-layout-grid){gap: 2em;}
+:root :where(.wp-block-pullquote){font-size: 1.5em;line-height: 1.6;}
+</style>
+<link rel='stylesheet' id='google-css' href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,900&#038;subset=cyrillic' type='text/css' media='all' />
+<link rel='stylesheet' id='google2-css' href='https://fonts.googleapis.com/css?family=Lora&#038;subset=cyrillic' type='text/css' media='all' />
+<link rel='stylesheet' id='kozlov-style-css' href='https://kozlovclub.ru/wp-content/themes/KozlovCLub/style.css?ver=6.7.2' type='text/css' media='all' />
+<link rel='stylesheet' id='fancybox-css' href='https://kozlovclub.ru/wp-content/plugins/easy-fancybox/fancybox/1.5.4/jquery.fancybox.min.css?ver=6.7.2' type='text/css' media='screen' />
+<link rel='stylesheet' id='a3a3_lazy_load-css' href='//kozlovclub.ru/wp-content/uploads/sass/a3_lazy_load.min.css?ver=1791145276' type='text/css' media='all' />
+<link rel='stylesheet' id='__EPYT__style-css' href='https://kozlovclub.ru/wp-content/plugins/youtube-embed-plus/styles/ytprefs.min.css?ver=14.2.6.1' type='text/css' media='all' />
+<style id='__EPYT__style-inline-css' type='text/css'>
+
+                .epyt-gallery-thumb {
+                        width: 20%;
+                }
+                
+                         @media (min-width:0px) and (max-width: 767px) {
+                            .epyt-gallery-rowbreak {
+                                display: none;
+                            }
+                            .epyt-gallery-allthumbs[class*="epyt-cols"] .epyt-gallery-thumb {
+                                width: 100% !important;
+                            }
+                          }
+</style>
+<link rel='stylesheet' id='wpglobus-css' href='https://kozlovclub.ru/wp-content/plugins/wpglobus/includes/css/wpglobus.css?ver=2.12.2' type='text/css' media='all' />
+<script type="text/javascript" src="https://kozlovclub.ru/wp-content/themes/KozlovCLub/js/libs/jquery-3.2.1.min.js?ver=6.7.2" id="jquery-js"></script>
+<script type="text/javascript" id="__ytprefs__-js-extra">
+/* <![CDATA[ */
+var _EPYT_ = {"ajaxurl":"https:\/\/kozlovclub.ru\/wp-admin\/admin-ajax.php","security":"ffc3503d65","gallery_scrolloffset":"20","eppathtoscripts":"https:\/\/kozlovclub.ru\/wp-content\/plugins\/youtube-embed-plus\/scripts\/","eppath":"https:\/\/kozlovclub.ru\/wp-content\/plugins\/youtube-embed-plus\/","epresponsiveselector":"[\"iframe.__youtube_prefs__\"]","epdovol":"1","version":"14.2.6.1","evselector":"iframe.__youtube_prefs__[src], iframe[src*=\"youtube.com\/embed\/\"], iframe[src*=\"youtube-nocookie.com\/embed\/\"]","ajax_compat":"","maxres_facade":"eager","ytapi_load":"light","pause_others":"","stopMobileBuffer":"1","facade_mode":"","not_live_on_channel":""};
+/* ]]> */
+</script>
+<script type="text/javascript" src="https://kozlovclub.ru/wp-content/plugins/youtube-embed-plus/scripts/ytprefs.min.js?ver=14.2.6.1" id="__ytprefs__-js"></script>
+<script type="text/javascript" id="utils-js-extra">
+/* <![CDATA[ */
+var userSettings = {"url":"\/","uid":"0","time":"1791181030","secure":"1"};
+/* ]]> */
+</script>
+<script type="text/javascript" src="https://kozlovclub.ru/wp-includes/js/utils.min.js?ver=6.7.2" id="utils-js"></script>
+<link rel="https://api.w.org/" href="https://kozlovclub.ru/wp-json/" /><link rel="EditURI" type="application/rsd+xml" title="RSD" href="https://kozlovclub.ru/xmlrpc.php?rsd" />
+<meta name="generator" content="WordPress 6.7.2" />
+			<style media="screen">
+				.wpglobus_flag_ru{background-image:url(https://kozlovclub.ru/wp-content/plugins/wpglobus/flags/ru.png)}
+.wpglobus_flag_en{background-image:url(https://kozlovclub.ru/wp-content/plugins/wpglobus/flags/us.png)}
+			</style>
+			
+		<script src="/wp-content/themes/KozlovCLub/js/libs/jquery.animateNumber.min.js"></script>	
+				
+				<script>window.ticketscloudid='eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiIsImlzcyI6InRpY2tldHNjbG91ZC5ydSJ9.eyJwIjoiNWNlZmE4MTUxMzFjMGQwMDBmOWU5YmI1In0.UO8dYRJNhMsXTk2fspJJuF_yGo4LggOkQadFqtsXZWc';</script>
+		<meta name="yandex-verification" content="06c1efa3b6f5e029" />
+		<script type="text/javascript">!function(){var t=document.createElement("script");t.type="text/javascript",t.async=!0,t.src="https://vk.com/js/api/openapi.js?169",t.onload=function(){VK.Retargeting.Init("VK-RTRG-103063-cbLpq"),VK.Retargeting.Hit()},document.head.appendChild(t)}();</script><noscript><img src="https://vk.com/rtrg?p=VK-RTRG-103063-cbLpq" style="position:fixed; left:-999px;" alt=""/></noscript>
+		<script type="text/javascript">!function(){var t=document.createElement("script");t.type="text/javascript",t.async=!0,t.src='https://vk.com/js/api/openapi.js?171',t.onload=function(){VK.Retargeting.Init("VK-RTRG-1871816-4rce2"),VK.Retargeting.Hit()},document.head.appendChild(t)}();</script><noscript><img src="https://vk.com/rtrg?p=VK-RTRG-1871816-4rce2" style="position:fixed; left:-999px;" alt=""/></noscript>
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript" >
+(function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+m[i].l=1*new Date();
+for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+(window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+
+ym(44419291, "init", {
+clickmap:true,
+trackLinks:true,
+accurateTrackBounce:true,
+webvisor:true,
+ecommerce:"dataLayer"
+});
+</script>
+<noscript><div><img src="https://mc.yandex.ru/watch/44419291" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<!-- /Yandex.Metrika counter -->
+
+	</head>
+	<body class="error404">
+		
+		<!-- <script type="text/javascript">(window.Image?(new Image()):document.createElement('img')).src='https://vk.com/rtrg?p=VK-RTRG-103063-cbLpq';</script> --><!— Rating Mail.ru counter —>
+<script type="text/javascript">
+var _tmr = window._tmr || (window._tmr = []);
+_tmr.push({id: "3208431", type: "pageView", start: (new Date()).getTime(), pid: "USER_ID"});
+(function (d, w, id) {
+if (d.getElementById(id)) return;
+var ts = d.createElement("script"); ts.type = "text/javascript"; ts.async = true; ts.id = id;
+ts.src = "https://top-fwz1.mail.ru/js/code.js";
+var f = function () {var s = d.getElementsByTagName("script")[0]; s.parentNode.insertBefore(ts, s);};
+if (w.opera == "[object Opera]") { d.addEventListener("DOMContentLoaded", f, false); } else { f(); }
+})(document, window, "topmailru-code");
+</script><noscript><div>
+<img src="https://top-fwz1.mail.ru/counter?id=3208431;js=na" style="border:0;position:absolute;left:-9999px;" alt="Top.Mail.Ru" />
+</div></noscript>
+<!-- Rating Mail.ru counter -->
+
+<!-- Rating@Mail.ru counter dynamic remarketing appendix -->
+<script type="text/javascript">
+var _tmr = _tmr || [];
+_tmr.push({
+type: 'itemView',
+productid: 'VALUE',
+pagetype: 'VALUE',
+list: 'VALUE',
+totalvalue: 'VALUE'
+});
+</script>
+<!-- Rating@Mail.ru counter dynamic remarketing appendix -->
+<!-- GIF0 КБ -->
+
+
+		
+		<div class="search_block">
+			<div class="inner">
+				<form method="get" class="searchform" action="https://kozlovclub.ru">
+											<input type="text" autocomplete="off" value="" placeholder="Поиск по сайту"  name="s" class="searchinput" />
+										<input type="image" src="https://kozlovclub.ru/wp-content/themes/KozlovCLub/assets/icons/search.png" class="searchsubmit" />
+				</form>
+			</div>
+		</div>
+
+		<div class="page">
+			<header class="header">
+				<div class="inner">
+					<div class="wrap">
+						<div class="logo">
+							<a href="https://kozlovclub.ru"><img src="https://kozlovclub.ru/wp-content/webp-express/webp-images/doc-root/wp-content/themes/KozlovCLub/assets/images/logo-kozlovclub.png.webp" alt="Клуб Алексея Козлова" /></a>
+						</div>
+						<div class="nav">
+															<div class="contacts">
+                  <span>+7 (495) 296-12-00</span>
+                  <span>ул. Маросейка, дом 9/2, «Kozlov club»</span>
+                  <span class="open__primary__widget">Забронировать столик на бесплатный концерт</span>
+                </div>
+							
+							<menu class="menu">
+								<nav id="main-menu" class="menu-container"><ul id = "primary" class = "primary"><li id="menu-item-1344" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-1344"><a href="#">О клубе</a>
+<ul class="sub-menu">
+	<li id="menu-item-641" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-641"><a href="https://kozlovclub.ru/dlya-pressy/">Для прессы</a></li>
+	<li id="menu-item-56704" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-56704"><a href="https://kozlovclub.ru/abonementy">Абонементы</a></li>
+	<li id="menu-item-44903" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-44903"><a href="https://kozlovclub.ru/interiorstage/">Интерьер и сцены</a></li>
+	<li id="menu-item-31975" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-31975"><a href="https://kozlovclub.ru/sxemy-zalov/">Схемы залов</a></li>
+	<li id="menu-item-16823" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-16823"><a href="https://kozlovclub.ru/videoarxiv/">Видеоархив</a></li>
+	<li id="menu-item-87" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-87"><a href="https://kozlovclub.ru/partners/">Партнеры</a></li>
+	<li id="menu-item-30311" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-30311"><a href="https://kozlovclub.ru/jazzevent/">Event</a></li>
+	<li id="menu-item-42008" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-42008"><a href="https://www.kozlov.fund/">ФОНД КОЗЛОВА</a></li>
+	<li id="menu-item-37090" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-37090"><a href="https://jazzist.ru"><p data-tadv-p="keep"><span style="color: #d53234;">JAZZIST</span></strong></p></a></li>
+	<li id="menu-item-1000" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-1000"><a href="https://kozlovclub.ru/live/"><p data-tadv-p="keep"><strong><span style="color: #d53234;">LIVE</span></strong></p></a></li>
+</ul>
+</li>
+<li id="menu-item-37872" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-home menu-item-has-children menu-item-37872"><a href="https://kozlovclub.ru/">АФИША</a>
+<ul class="sub-menu">
+	<li id="menu-item-37534" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-37534"><a href="/?sort=main_scene">Концерты на главной сцене</a></li>
+	<li id="menu-item-37536" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-37536"><a href="/?sort=mansard">Концерты на сцене &#171;Мансарда&#187;</a></li>
+	<li id="menu-item-37535" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-37535"><a href="/?sort=the_beat">Концерты на сцене The Beat</a></li>
+	<li id="menu-item-42280" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-42280"><a href="https://kozlovclub.ru/?sort=myasnitskaya">Концерты на Мясницкой 15</a></li>
+	<li id="menu-item-37533" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-37533"><a href="/?genre=arsenal">Концерты Арсенала</a></li>
+	<li id="menu-item-37522" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-37522"><a href="/?genre=free">Концерты с бесплатным входом</a></li>
+</ul>
+</li>
+<li id="menu-item-37494" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-has-children menu-item-37494"><a href="#">Жанры</a>
+<ul class="sub-menu">
+	<li id="menu-item-37496" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-37496"><a href="/?genre=jazz">Джаз</a></li>
+	<li id="menu-item-37523" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-37523"><a href="/?genre=fusion">Фьюжн</a></li>
+	<li id="menu-item-37524" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-37524"><a href="/?genre=soul">Соул</a></li>
+	<li id="menu-item-37530" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-37530"><a href="/?genre=jazz-rock">Джаз-рок</a></li>
+	<li id="menu-item-37528" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-37528"><a href="/?genre=gospel">Госпел</a></li>
+	<li id="menu-item-37529" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-37529"><a href="/?genre=blues">Блюз</a></li>
+	<li id="menu-item-37519" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-37519"><a href="/?genre=manush">Мануш</a></li>
+	<li id="menu-item-37520" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-37520"><a href="/?genre=jam">Джем-сэшн</a></li>
+	<li id="menu-item-48535" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-48535"><a href="https://kozlovclub.ru/?genre=%20for%20kids">Детям</a></li>
+	<li id="menu-item-37521" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-37521"><a href="/?genre=avangard">Авангард</a></li>
+	<li id="menu-item-37527" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-37527"><a href="/?genre=classics">Классика</a></li>
+	<li id="menu-item-37531" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-37531"><a href="/?genre=ethnics">Этника</a></li>
+	<li id="menu-item-37532" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-37532"><a href="/?genre=rock">Рок</a></li>
+</ul>
+</li>
+<li id="menu-item-43673" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-43673"><a href="https://kozlovclub.ru/menu/">Меню</a></li>
+<li id="menu-item-52471" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-52471"><a href="https://pro3d.pro/f8Cq3YyH9vN/?m=f8Cq3YyH9vN">3D ТУР</a></li>
+<li id="menu-item-30297" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-has-children menu-item-30297"><a href="https://kozlovclub.ru/faq/">FAQ</a>
+<ul class="sub-menu">
+	<li id="menu-item-20445" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-20445"><a href="https://kozlovclub.ru/technicalrider/">Технический райдер</a></li>
+	<li id="menu-item-16117" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-16117"><a href="https://kozlovclub.ru/pravila/">Правила для посетителей</a></li>
+	<li id="menu-item-16496" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-16496"><a href="https://kozlovclub.ru/pravila-dlya-muzykantov/">Правила для музыкантов</a></li>
+	<li id="menu-item-35787" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-privacy-policy menu-item-35787"><a rel="privacy-policy" href="https://kozlovclub.ru/privacy/">Политика конфиденциальности</a></li>
+</ul>
+</li>
+<li id="menu-item-84" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-84"><a href="https://kozlovclub.ru/contacts/">Контакты</a></li>
+</ul></nav>							</menu>
+
+<!-- 							<div class="language">
+								<ul>
+									<li class="lang-ru active"><a href="/" hreflang="ru" title="Рус"><span>Рус</span></a></li>
+									<li class="lang-en "><a href="/en/" hreflang="en" title="Eng"><span>Eng</span></a></li>
+								</ul>
+							</div> -->
+
+
+							<span class="calendar-btn mobile calendar-toggler"></span>
+							<span class="info-btn mobile"></span>
+							<span class="search-btn mobile"></span>
+							<span class="burger mobile"></span>
+
+						</div>
+
+							<div class="calendar-item calendar-toggler">
+								<div class="calendar-item-icon"></div>
+
+								<div class="calendar-item-text">
+																			календарь
+																	</div>
+							</div>
+
+					</div> <!-- wrap -->
+				</div> <!-- inner -->
+			</header>
+
+<section class="error-404">
+	<div class="container">
+		<div class="error-404__content"> 
+			<svg width="439" height="158" viewBox="0 0 439 158" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M0 122.858V99.1558L71.7575 2.60936H108.724L38.4881 99.1558L21.3098 94.1546H141.123V122.858H0ZM81.9775 154.822V122.858L83.0648 94.1546V65.669H116.334V154.822H81.9775Z" fill="#333333"></path> <path d="M216.893 157.432C204.426 157.432 193.264 154.387 183.406 148.299C173.549 142.065 165.793 133.078 160.14 121.335C154.486 109.593 151.659 95.3867 151.659 78.7158C151.659 62.0449 154.486 47.8383 160.14 36.0962C165.793 24.3541 173.549 15.4387 183.406 9.35022C193.264 3.11674 204.426 0 216.893 0C229.505 0 240.667 3.11674 250.38 9.35022C260.238 15.4387 267.993 24.3541 273.647 36.0962C279.3 47.8383 282.127 62.0449 282.127 78.7158C282.127 95.3867 279.3 109.593 273.647 121.335C267.993 133.078 260.238 142.065 250.38 148.299C240.667 154.387 229.505 157.432 216.893 157.432ZM216.893 127.641C222.837 127.641 227.983 125.974 232.332 122.64C236.826 119.306 240.305 114.015 242.769 106.766C245.379 99.5182 246.683 90.168 246.683 78.7158C246.683 67.2636 245.379 57.9134 242.769 50.6651C240.305 43.4169 236.826 38.1257 232.332 34.7915C227.983 31.4573 222.837 29.7902 216.893 29.7902C211.095 29.7902 205.948 31.4573 201.454 34.7915C197.106 38.1257 193.626 43.4169 191.017 50.6651C188.553 57.9134 187.32 67.2636 187.32 78.7158C187.32 90.168 188.553 99.5182 191.017 106.766C193.626 114.015 197.106 119.306 201.454 122.64C205.948 125.974 211.095 127.641 216.893 127.641Z" fill="#333333"></path> <path d="M297.503 122.858V99.1558L369.261 2.60936H406.227L335.991 99.1558L318.813 94.1546H438.626V122.858H297.503ZM379.481 154.822V122.858L380.568 94.1546V65.669H413.837V154.822H379.481Z" fill="#333333"></path> </svg>
+			<h1>Страница не найдена</h1>
+			<p> Неправильно набран адрес или <br> такой страницы не существует</p> 
+			<a href="/" class="tc-background-tomato">Перейти на главную</a>
+	
+		</div>
+	</div>
+</section>
+
+
+			<footer class="footer">
+				<div class="upper">
+					<div class="inner">
+						<div class="wrap">
+							<div class="copyright">alexeykozlovclub &copy; 2017</div>
+															<div class="contacts">+7 (495) 296-12-00 <span>info@kozlovclub.ru</span> ул. Маросейка, дом 9/2</div>
+							
+              
+						</div>
+					</div>
+				</div>
+				<div class="bottom">
+					<div class="inner">
+						<div class="wrap">
+							<div class="social_icons">
+																	<div class="title">Следите за нами в социальных сетях</div>
+								
+								<div class="items">
+									<ul>
+										<li><a href="https://vk.com/kozlovclubfan" target="_blank"><img src="https://kozlovclub.ru/wp-content/webp-express/webp-images/doc-root/wp-content/themes/KozlovCLub/assets/icons/vk.png.webp" /></a></li>
+										<li><a href="https://t.me/kozlovclub" target="_blank"><img src="https://kozlovclub.ru/wp-content/themes/KozlovCLub/assets/icons/telegram.png" /></a></li>
+										<li><a href="https://www.youtube.com/user/kozlovclubtv" target="_blank"><img src="https://kozlovclub.ru/wp-content/webp-express/webp-images/doc-root/wp-content/themes/KozlovCLub/assets/icons/youtube.png.webp" /></a></li>
+									</ul>
+								</div>
+							</div> <!-- social_icons -->
+						</div>
+					</div>
+				</div>
+			</footer>
+		</div> <!-- .page -->
+
+<div class="block-modal block-modal--datepicker">
+	<div class="block-modal-overlay"></div>
+	<div class="block-modal-inner">
+		<div class="block-modal-main">
+			<div class="block-modal-body">
+				<div class="calendar-picker">
+					<div class="block-modal-close calendar-picker-close"><span>&times;</span></div>
+					<div class="calendar-picker-content"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<!-- Yandex.Metrika counter -->
+<script type="text/javascript" >
+
+// function AppMetrica(){(function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};m[i].l=1*new Date();k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})(window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");ym(44419291, "init", {clickmap:true,trackLinks:true,accurateTrackBounce:true,webvisor:true});}
+// $(document).one('scroll mosemove',AppMetrica);
+// setTimeout(AppMetrica,6000)
+
+
+setDatepicker(10, 2026, 'ru');
+
+function setDatepicker (curMonth, curYear, language) {
+
+	$.ajax({
+		url: "/wp-content/themes/KozlovCLub/components/datepicker.php",
+		method: 'GET',
+		data : {
+			'month' : curMonth,
+			'year' : curYear,
+			'language': language,
+		}
+	}).done(function (data) {
+		data = jQuery.parseJSON(data);
+		$('.calendar-picker-content').html(data);
+	});
+}
+
+$(document).on('click', '.datepicker_nav-item', function () {
+	var setMonth = $(this).data('set-month');
+	var setYear = $(this).data('set-year');
+	var language = 'ru';
+
+	$.ajax({
+		url: "/wp-content/themes/KozlovCLub/components/datepicker.php",
+		method: 'GET',
+		data : {
+			'month': setMonth,
+			'year': setYear,
+			'language': language,
+		}
+	}).done(function (data) {
+		data = jQuery.parseJSON(data);
+		$('.calendar-picker-content').html(data);
+	});
+});
+
+$(document).on('click', '.block-modal-close', function () {
+	$(this).parents('.block-modal').fadeOut();
+});
+
+$(document).on('click', '.calendar-toggler', function (e) {
+  e.preventDefault();
+	$('.block-modal--datepicker').fadeIn();
+});
+
+</script>
+
+		<script type="text/javascript" src="https://kozlovclub.ru/wp-content/themes/KozlovCLub/js/libs/owl.carousel.min.js?ver=20151215" id="kozlov-formstyler-js"></script>
+<script type="text/javascript" src="https://kozlovclub.ru/wp-content/themes/KozlovCLub/js/script.js?ver=20151215" id="kozlov-scripts-js"></script>
+<script type="text/javascript" src="https://ticketscloud.com:443/static/scripts/widget/tcwidget.js" id="tcwidget-js"></script>
+<script type="text/javascript" id="kozlov-chat-widget-v2-js-before">
+/* <![CDATA[ */
+window.process=window.process||{env:{NODE_ENV:"production"}};
+/* ]]> */
+</script>
+<script type="text/javascript" src="https://kozlovclub.ru/kozlov-chat-widget-v2.js?ver=20260530-3" id="kozlov-chat-widget-v2-js"></script>
+<script type="text/javascript" src="https://kozlovclub.ru/wp-content/plugins/easy-fancybox/vendor/purify.min.js?ver=6.7.2" id="fancybox-purify-js"></script>
+<script type="text/javascript" id="jquery-fancybox-js-extra">
+/* <![CDATA[ */
+var efb_i18n = {"close":"Close","next":"Next","prev":"Previous","startSlideshow":"Start slideshow","toggleSize":"Toggle size"};
+/* ]]> */
+</script>
+<script type="text/javascript" src="https://kozlovclub.ru/wp-content/plugins/easy-fancybox/fancybox/1.5.4/jquery.fancybox.min.js?ver=6.7.2" id="jquery-fancybox-js"></script>
+<script type="text/javascript" id="jquery-fancybox-js-after">
+/* <![CDATA[ */
+var fb_timeout, fb_opts={'autoScale':true,'showCloseButton':true,'margin':20,'pixelRatio':'false','centerOnScroll':false,'enableEscapeButton':true,'overlayShow':true,'hideOnOverlayClick':true,'minVpHeight':320,'disableCoreLightbox':'true','enableBlockControls':'true','fancybox_openBlockControls':'true' };
+if(typeof easy_fancybox_handler==='undefined'){
+var easy_fancybox_handler=function(){
+jQuery([".nolightbox","a.wp-block-file__button","a.pin-it-button","a[href*='pinterest.com\/pin\/create']","a[href*='facebook.com\/share']","a[href*='twitter.com\/share']"].join(',')).addClass('nofancybox');
+jQuery('a.fancybox-close').on('click',function(e){e.preventDefault();jQuery.fancybox.close()});
+/* IMG */
+						var unlinkedImageBlocks=jQuery(".wp-block-image > img:not(.nofancybox,figure.nofancybox>img)");
+						unlinkedImageBlocks.wrap(function() {
+							var href = jQuery( this ).attr( "src" );
+							return "<a href='" + href + "'></a>";
+						});
+var fb_IMG_select=jQuery('a[href*=".jpg" i]:not(.nofancybox,li.nofancybox>a,figure.nofancybox>a),area[href*=".jpg" i]:not(.nofancybox),a[href*=".jpeg" i]:not(.nofancybox,li.nofancybox>a,figure.nofancybox>a),area[href*=".jpeg" i]:not(.nofancybox),a[href*=".png" i]:not(.nofancybox,li.nofancybox>a,figure.nofancybox>a),area[href*=".png" i]:not(.nofancybox),a[href*=".webp" i]:not(.nofancybox,li.nofancybox>a,figure.nofancybox>a),area[href*=".webp" i]:not(.nofancybox)');
+fb_IMG_select.addClass('fancybox image');
+var fb_IMG_sections=jQuery('.gallery,.wp-block-gallery,.tiled-gallery,.wp-block-jetpack-tiled-gallery,.ngg-galleryoverview,.ngg-imagebrowser,.nextgen_pro_blog_gallery,.nextgen_pro_film,.nextgen_pro_horizontal_filmstrip,.ngg-pro-masonry-wrapper,.ngg-pro-mosaic-container,.nextgen_pro_sidescroll,.nextgen_pro_slideshow,.nextgen_pro_thumbnail_grid,.tiled-gallery');
+fb_IMG_sections.each(function(){jQuery(this).find(fb_IMG_select).attr('rel','gallery-'+fb_IMG_sections.index(this));});
+jQuery('a.fancybox,area.fancybox,.fancybox>a').each(function(){jQuery(this).fancybox(jQuery.extend(true,{},fb_opts,{'transition':'elastic','easingIn':'easeOutBack','easingOut':'easeInBack','opacity':false,'hideOnContentClick':false,'titleShow':true,'titlePosition':'over','titleFromAlt':true,'showNavArrows':true,'enableKeyboardNav':true,'cyclic':false,'mouseWheel':'false'}))});
+};};
+jQuery(easy_fancybox_handler);jQuery(document).on('post-load',easy_fancybox_handler);
+/* ]]> */
+</script>
+<script type="text/javascript" src="https://kozlovclub.ru/wp-content/plugins/youtube-embed-plus/scripts/fitvids.min.js?ver=14.2.6.1" id="__ytprefsfitvids__-js"></script>
+<script type="text/javascript" id="wpglobus-js-extra">
+/* <![CDATA[ */
+var WPGlobus = {"version":"2.12.2","language":"ru","enabledLanguages":["ru","en"]};
+/* ]]> */
+</script>
+<script type="text/javascript" src="https://kozlovclub.ru/wp-content/plugins/wpglobus/includes/js/wpglobus.min.js?ver=2.12.2" id="wpglobus-js"></script>
+
+
+		
+    <script defer src="https://remarked.ru/widget/new/points/446068/config.446068.js"></script>
+    <script defer src="https://remarked.ru/widget/new/js/tables/newidget.js"></script>
+    <script defer src="https://remarked.ru/widget/new/js/tables/Tables.widget.js"></script>	
+
+	<link rel="stylesheet" href="https://remarked.ru/widget/new/css/stylesheet.css">
+    <link rel="stylesheet" href="https://remarked.ru/widget/new/points/446068/446068.css">
+    <link rel="stylesheet" href="https://remarked.ru/widget/new/css/tables/Tables.widget.css">
+		
+</body>
+</html>
+<!--
+Performance optimized by W3 Total Cache. Learn more: https://www.boldgrid.com/w3-total-cache/?utm_source=w3tc&utm_medium=footer_comment&utm_campaign=free_plugin
+
+Object Caching 19/23 objects using Redis
+Page Caching using Disk 
+Database Caching 6/15 queries in 0.006 seconds using Redis
+
+Served from: kozlovclub.ru @ 2026-10-05 09:17:10 by W3 Total Cache
+-->

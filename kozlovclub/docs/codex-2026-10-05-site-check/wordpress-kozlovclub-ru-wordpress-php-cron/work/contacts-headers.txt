@@ -1,0 +1,18 @@
+HTTP/2 200 
+server: nginx-reuseport/1.21.1
+date: Mon, 05 Oct 2026 06:14:39 GMT
+content-type: text/html; charset=UTF-8
+x-powered-by: PHP/7.4.33
+x-pingback: https://kozlovclub.ru/xmlrpc.php
+link: <https://kozlovclub.ru/wp-json/>; rel="https://api.w.org/"
+link: <https://kozlovclub.ru/wp-json/wp/v2/pages/60>; rel="alternate"; title="JSON"; type="application/json"
+link: <https://kozlovclub.ru/?p=60>; rel=shortlink
+last-modified: Mon, 05 Oct 2026 04:08:46 GMT
+expires: Mon, 05 Oct 2026 05:08:46 GMT
+pragma: public
+cache-control: max-age=0, public
+etag: "7cb7947a3e7541ad92f3dabd5988b2f0"
+content-encoding: gzip
+vary: Accept-Encoding
+referrer-policy: no-referrer-when-downgrade
+

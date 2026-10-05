@@ -1,0 +1,32 @@
+[
+  {
+    "url": "https://kozlovclub.ru/",
+    "run": 1,
+    "result": "200 0.455536 0.491020 60548"
+  },
+  {
+    "url": "https://kozlovclub.ru/",
+    "run": 2,
+    "result": "200 0.472545 0.510232 60548"
+  },
+  {
+    "url": "https://kozlovclub.ru/",
+    "run": 3,
+    "result": "200 0.455917 0.492723 60548"
+  },
+  {
+    "url": "https://kozlovclub.ru/event/aleksej-kuznecov-intelligentnyj-dzhaz-gitar-bend-97/",
+    "run": 1,
+    "result": "200 0.470465 0.470865 16534"
+  },
+  {
+    "url": "https://kozlovclub.ru/event/aleksej-kuznecov-intelligentnyj-dzhaz-gitar-bend-97/",
+    "run": 2,
+    "result": "200 0.492233 0.492636 16534"
+  },
+  {
+    "url": "https://kozlovclub.ru/event/aleksej-kuznecov-intelligentnyj-dzhaz-gitar-bend-97/",
+    "run": 3,
+    "result": "200 0.418585 0.419091 16534"
+  }
+]

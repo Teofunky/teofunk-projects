@@ -1,0 +1,120 @@
+[
+  {
+    "url": "https://kozlovclub.ru/page-sitemap.xml",
+    "status": "200",
+    "count": 27,
+    "duplicates": 0
+  },
+  {
+    "url": "https://kozlovclub.ru/tilda-sitemap.xml",
+    "status": "200",
+    "count": 11,
+    "duplicates": 0
+  },
+  {
+    "url": "https://kozlovclub.ru/menu-sitemap.xml",
+    "status": "200",
+    "count": 46,
+    "duplicates": 0
+  },
+  {
+    "url": "https://kozlovclub.ru/ai1ec_event-sitemap.xml",
+    "status": "200",
+    "error": "XML or text declaration not at start of entity: line 2, column 0"
+  },
+  {
+    "url": "https://kozlovclub.ru/ai1ec_event-sitemap2.xml",
+    "status": "200",
+    "error": "XML or text declaration not at start of entity: line 2, column 0"
+  },
+  {
+    "url": "https://kozlovclub.ru/ai1ec_event-sitemap3.xml",
+    "status": "200",
+    "count": 1000,
+    "duplicates": 0
+  },
+  {
+    "url": "https://kozlovclub.ru/ai1ec_event-sitemap4.xml",
+    "status": "200",
+    "count": 1000,
+    "duplicates": 0
+  },
+  {
+    "url": "https://kozlovclub.ru/ai1ec_event-sitemap5.xml",
+    "status": "200",
+    "count": 1000,
+    "duplicates": 0
+  },
+  {
+    "url": "https://kozlovclub.ru/ai1ec_event-sitemap6.xml",
+    "status": "200",
+    "count": 1000,
+    "duplicates": 0
+  },
+  {
+    "url": "https://kozlovclub.ru/ai1ec_event-sitemap7.xml",
+    "status": "200",
+    "count": 1000,
+    "duplicates": 0
+  },
+  {
+    "url": "https://kozlovclub.ru/ai1ec_event-sitemap8.xml",
+    "status": "200",
+    "count": 1000,
+    "duplicates": 0
+  },
+  {
+    "url": "https://kozlovclub.ru/ai1ec_event-sitemap9.xml",
+    "status": "200",
+    "count": 1000,
+    "duplicates": 0
+  },
+  {
+    "url": "https://kozlovclub.ru/ai1ec_event-sitemap10.xml",
+    "status": "200",
+    "count": 1000,
+    "duplicates": 0
+  },
+  {
+    "url": "https://kozlovclub.ru/ai1ec_event-sitemap11.xml",
+    "status": "200",
+    "count": 1000,
+    "duplicates": 0
+  },
+  {
+    "url": "https://kozlovclub.ru/ai1ec_event-sitemap12.xml",
+    "status": "200",
+    "count": 1000,
+    "duplicates": 0
+  },
+  {
+    "url": "https://kozlovclub.ru/ai1ec_event-sitemap13.xml",
+    "status": "200",
+    "count": 1000,
+    "duplicates": 0
+  },
+  {
+    "url": "https://kozlovclub.ru/ai1ec_event-sitemap14.xml",
+    "status": "200",
+    "count": 1000,
+    "duplicates": 0
+  },
+  {
+    "url": "https://kozlovclub.ru/ai1ec_event-sitemap15.xml",
+    "status": "200",
+    "count": 1000,
+    "duplicates": 0
+  },
+  {
+    "url": "https://kozlovclub.ru/ai1ec_event-sitemap16.xml",
+    "status": "200",
+    "count": 1000,
+    "duplicates": 0
+  },
+  {
+    "url": "https://kozlovclub.ru/ai1ec_event-sitemap17.xml",
+    "status": "200",
+    "count": 984,
+    "duplicates": 0
+  }
+]

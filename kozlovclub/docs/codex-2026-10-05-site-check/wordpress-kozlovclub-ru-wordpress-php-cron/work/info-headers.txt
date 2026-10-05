@@ -1,0 +1,12 @@
+HTTP/2 200 
+server: nginx-reuseport/1.21.1
+date: Mon, 05 Oct 2026 06:23:14 GMT
+content-type: text/html; charset=UTF-8
+content-length: 32831
+x-powered-by: PHP/7.4.33
+cache-control: max-age=3600
+expires: Mon, 05 Oct 2026 07:23:14 GMT
+vary: Accept-Encoding
+content-encoding: gzip
+referrer-policy: no-referrer-when-downgrade
+

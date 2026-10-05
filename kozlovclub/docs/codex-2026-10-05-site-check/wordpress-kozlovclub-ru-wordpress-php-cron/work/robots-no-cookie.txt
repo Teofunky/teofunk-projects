@@ -1,0 +1,21 @@
+User-agent: *
+Disallow: /wp-admin/
+Allow: /wp-admin/admin-ajax.php
+Disallow: /xmlrpc.php
+Disallow: /search/
+Disallow: /author/
+Disallow: /*?s=
+Disallow: /*&s=
+Disallow: /*?sort=
+Disallow: /*&sort=
+Disallow: /*?genre=
+Disallow: /*&genre=
+Disallow: */feed
+Disallow: */trackback
+Disallow: */embed
+Disallow: /*action~
+Disallow: /*controller=ai1ec_exporter_controller
+
+Clean-param: utm_source&utm_medium&utm_campaign&utm_content&utm_term&yclid&ysclid&gclid&fbclid
+
+Sitemap: https://kozlovclub.ru/sitemap_index.xml

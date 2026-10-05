@@ -1,0 +1,18 @@
+HTTP/2 301 
+server: nginx-reuseport/1.21.1
+date: Mon, 05 Oct 2026 06:17:09 GMT
+content-type: text/html; charset=iso-8859-1
+content-length: 311
+location: https://kozlovclub.ru/
+cache-control: max-age=3600
+expires: Mon, 05 Oct 2026 07:17:09 GMT
+
+HTTP/2 200 
+server: nginx-reuseport/1.21.1
+date: Mon, 05 Oct 2026 06:17:09 GMT
+content-type: text/html
+content-length: 274
+last-modified: Thu, 13 Oct 2022 07:23:05 GMT
+etag: "6347bcd9-112"
+accept-ranges: bytes
+

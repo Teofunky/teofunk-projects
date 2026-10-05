@@ -1,0 +1,262 @@
+{
+  "tags": {
+    "html": 1,
+    "head": 1,
+    "script": 37,
+    "noscript": 5,
+    "div": 3743,
+    "img": 301,
+    "meta": 14,
+    "link": 21,
+    "style": 7,
+    "title": 1,
+    "body": 1,
+    "form": 1,
+    "input": 2,
+    "header": 1,
+    "a": 1214,
+    "span": 14,
+    "menu": 1,
+    "nav": 1,
+    "ul": 6,
+    "li": 43,
+    "p": 2,
+    "strong": 1,
+    "button": 191,
+    "footer": 1
+  },
+  "scripts": [
+    "https://kozlovclub.ru/wp-content/themes/KozlovCLub/js/libs/jquery-3.2.1.min.js?ver=6.7.2",
+    "//kozlovclub.ru/wp-content/plugins/a3-lazy-load/assets/js/jquery.lazyloadxt.extra.min.js?ver=2.7.9",
+    "//kozlovclub.ru/wp-content/plugins/a3-lazy-load/assets/js/jquery.lazyloadxt.srcset.min.js?ver=2.7.9",
+    "//kozlovclub.ru/wp-content/plugins/a3-lazy-load/assets/js/jquery.lazyloadxt.extend.js?ver=2.7.9",
+    "https://kozlovclub.ru/wp-content/plugins/youtube-embed-plus/scripts/ytprefs.min.js?ver=14.2.6.1",
+    "https://kozlovclub.ru/wp-includes/js/utils.min.js?ver=6.7.2",
+    "/wp-content/themes/KozlovCLub/js/libs/jquery.animateNumber.min.js",
+    "https://kozlovclub.ru/wp-content/themes/KozlovCLub/js/libs/owl.carousel.min.js?ver=20151215",
+    "https://kozlovclub.ru/wp-content/themes/KozlovCLub/js/script.js?ver=20151215",
+    "https://ticketscloud.com:443/static/scripts/widget/tcwidget.js",
+    "https://kozlovclub.ru/kozlov-chat-widget-v2.js?ver=20260530-3",
+    "https://kozlovclub.ru/wp-content/plugins/easy-fancybox/vendor/purify.min.js?ver=6.7.2",
+    "https://kozlovclub.ru/wp-content/plugins/easy-fancybox/fancybox/1.5.4/jquery.fancybox.min.js?ver=6.7.2",
+    "https://kozlovclub.ru/wp-content/plugins/youtube-embed-plus/scripts/fitvids.min.js?ver=14.2.6.1",
+    "https://kozlovclub.ru/wp-content/plugins/wpglobus/includes/js/wpglobus.min.js?ver=2.12.2",
+    "https://remarked.ru/widget/new/points/446068/config.446068.js",
+    "https://remarked.ru/widget/new/js/tables/newidget.js",
+    "https://remarked.ru/widget/new/js/tables/Tables.widget.js"
+  ],
+  "links": [
+    {
+      "rel": "pingback",
+      "href": "https://kozlovclub.ru/xmlrpc.php"
+    },
+    {
+      "rel": "canonical",
+      "href": "https://kozlovclub.ru/"
+    },
+    {
+      "rel": "dns-prefetch",
+      "href": "//ticketscloud.com"
+    },
+    {
+      "rel": "dns-prefetch",
+      "href": "//fonts.googleapis.com"
+    },
+    {
+      "rel": "stylesheet",
+      "id": "ai1ec_style-css",
+      "href": "//kozlovclub.ru/wp-content/plugins/all-in-one-event-calendar/cache/95f9c89c_ai1ec_parsed_css.css?ver=2.6.8",
+      "type": "text/css",
+      "media": "all"
+    },
+    {
+      "rel": "stylesheet",
+      "id": "wp-block-library-css",
+      "href": "https://kozlovclub.ru/wp-includes/css/dist/block-library/style.min.css?ver=6.7.2",
+      "type": "text/css",
+      "media": "all"
+    },
+    {
+      "rel": "stylesheet",
+      "id": "google-css",
+      "href": "https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,900&subset=cyrillic",
+      "type": "text/css",
+      "media": "all"
+    },
+    {
+      "rel": "stylesheet",
+      "id": "google2-css",
+      "href": "https://fonts.googleapis.com/css?family=Lora&subset=cyrillic",
+      "type": "text/css",
+      "media": "all"
+    },
+    {
+      "rel": "stylesheet",
+      "id": "kozlov-style-css",
+      "href": "https://kozlovclub.ru/wp-content/themes/KozlovCLub/style.css?ver=6.7.2",
+      "type": "text/css",
+      "media": "all"
+    },
+    {
+      "rel": "stylesheet",
+      "id": "fancybox-css",
+      "href": "https://kozlovclub.ru/wp-content/plugins/easy-fancybox/fancybox/1.5.4/jquery.fancybox.min.css?ver=6.7.2",
+      "type": "text/css",
+      "media": "screen"
+    },
+    {
+      "rel": "stylesheet",
+      "id": "jquery-lazyloadxt-spinner-css-css",
+      "href": "//kozlovclub.ru/wp-content/plugins/a3-lazy-load/assets/css/jquery.lazyloadxt.spinner.css?ver=6.7.2",
+      "type": "text/css",
+      "media": "all"
+    },
+    {
+      "rel": "stylesheet",
+      "id": "a3a3_lazy_load-css",
+      "href": "//kozlovclub.ru/wp-content/uploads/sass/a3_lazy_load.min.css?ver=1791145276",
+      "type": "text/css",
+      "media": "all"
+    },
+    {
+      "rel": "stylesheet",
+      "id": "__EPYT__style-css",
+      "href": "https://kozlovclub.ru/wp-content/plugins/youtube-embed-plus/styles/ytprefs.min.css?ver=14.2.6.1",
+      "type": "text/css",
+      "media": "all"
+    },
+    {
+      "rel": "stylesheet",
+      "id": "wpglobus-css",
+      "href": "https://kozlovclub.ru/wp-content/plugins/wpglobus/includes/css/wpglobus.css?ver=2.12.2",
+      "type": "text/css",
+      "media": "all"
+    },
+    {
+      "rel": "https://api.w.org/",
+      "href": "https://kozlovclub.ru/wp-json/"
+    },
+    {
+      "rel": "EditURI",
+      "type": "application/rsd+xml",
+      "title": "RSD",
+      "href": "https://kozlovclub.ru/xmlrpc.php?rsd"
+    },
+    {
+      "rel": "alternate",
+      "hreflang": "ru-RU",
+      "href": "https://kozlovclub.ru/"
+    },
+    {
+      "rel": "alternate",
+      "hreflang": "en-US",
+      "href": "https://kozlovclub.ru/en/"
+    },
+    {
+      "rel": "stylesheet",
+      "href": "https://remarked.ru/widget/new/css/stylesheet.css"
+    },
+    {
+      "rel": "stylesheet",
+      "href": "https://remarked.ru/widget/new/points/446068/446068.css"
+    },
+    {
+      "rel": "stylesheet",
+      "href": "https://remarked.ru/widget/new/css/tables/Tables.widget.css"
+    }
+  ],
+  "meta": [
+    {
+      "http-equiv": "Content-Type",
+      "content": "text/html; charset=UTF-8"
+    },
+    {
+      "name": "viewport",
+      "content": "width=device-width, initial-scale=1.0, user-scalable=no"
+    },
+    {
+      "name": "robots",
+      "content": "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+    },
+    {
+      "name": "description",
+      "content": "афиша концертов послушать живой джаз в Москве афиша| билеты |"
+    },
+    {
+      "property": "og:locale",
+      "content": "ru_RU"
+    },
+    {
+      "property": "og:type",
+      "content": "website"
+    },
+    {
+      "property": "og:title",
+      "content": "Джаз Клуб Алексея Козлова"
+    },
+    {
+      "property": "og:description",
+      "content": "афиша концертов послушать живой джаз в Москве афиша| билеты |"
+    },
+    {
+      "property": "og:url",
+      "content": "https://kozlovclub.ru/"
+    },
+    {
+      "property": "og:site_name",
+      "content": "Джаз Клуб Алексея Козлова"
+    },
+    {
+      "name": "twitter:card",
+      "content": "summary_large_image"
+    },
+    {
+      "name": "google-site-verification",
+      "content": "1oWNsZdaSMNjZ9TkavV2eWnE5GeGGrGHLoXCe_kmACo"
+    },
+    {
+      "name": "generator",
+      "content": "WordPress 6.7.2"
+    },
+    {
+      "name": "yandex-verification",
+      "content": "06c1efa3b6f5e029"
+    }
+  ],
+  "images_count": 301,
+  "lazy_images": 0,
+  "img_sample": [
+    {
+      "src": "https://top-fwz1.mail.ru/counter?id=3502092;js=na",
+      "style": "position:absolute;left:-9999px;",
+      "alt": "Top.Mail.Ru"
+    },
+    {
+      "src": "https://vk.com/rtrg?p=VK-RTRG-103063-cbLpq",
+      "style": "position:fixed; left:-999px;",
+      "alt": ""
+    },
+    {
+      "src": "https://vk.com/rtrg?p=VK-RTRG-1871816-4rce2",
+      "style": "position:fixed; left:-999px;",
+      "alt": ""
+    },
+    {
+      "src": "https://mc.yandex.ru/watch/44419291",
+      "style": "position:absolute; left:-9999px;",
+      "alt": ""
+    },
+    {
+      "src": "https://top-fwz1.mail.ru/counter?id=3208431;js=na",
+      "style": "border:0;position:absolute;left:-9999px;",
+      "alt": "Top.Mail.Ru"
+    }
+  ],
+  "schema": [
+    "{\"@context\":\"https://schema.org\",\"@graph\":[{\"@type\":\"CollectionPage\",\"@id\":\"https://kozlovclub.ru/\",\"url\":\"https://kozlovclub.ru/\",\"name\":\"Джаз Клуб Алексея Козлова | афиша| билеты | концерты в Москве\",\"isPartOf\":{\"@id\":\"https://kozlovclub.ru/#website\"},\"about\":{\"@id\":\"https://kozlovclub.ru/#organization\"},\"description\":\"афиша концертов послушать живой джаз в Москве афиша| билеты |\",\"breadcrumb\":{\"@id\":\"https://kozlovclub.ru/#breadcrumb\"},\"inLanguage\":\"ru-RU\"},{\"@type\":\"BreadcrumbList\",\"@id\":\"https://kozlovclub.ru/#breadcrumb\",\"itemListElement\":[{\"@type\":\"ListItem\",\"position\":1,\"name\":\"Home\"}]},{\"@type\":\"WebSite\",\"@id\":\"https://kozlovclub.ru/#website\",\"url\":\"https://kozlovclub.ru/\",\"name\":\"Джаз Клуб Алексея Козлова\",\"description\":\"афиша| билеты\",\"publisher\":{\"@id\":\"https://kozlovclub.ru/#organization\"},\"potentialAction\":[{\"@type\":\"SearchAction\",\"target\":{\"@type\":\"EntryPoint\",\"urlTemplate\":\"https://kozlovclub.ru/?s={search_term_string}\"},\"query-input\":\"required name=search_term_string\"}],\"inLanguage\":\"ru-RU\"},{\"@type\":\"Organization\",\"@id\":\"https://kozlovclub.ru/#organization\",\"name\":\"Kozlov Club\",\"url\":\"https://kozlovclub.ru/\",\"logo\":{\"@type\":\"ImageObject\",\"inLanguage\":\"ru-RU\",\"@id\":\"https://kozlovclub.ru/#/schema/logo/image/\",\"url\":\"https://kozlovclub.ru/wp-content/uploads/2020/08/favicon.png\",\"contentUrl\":\"https://kozlovclub.ru/wp-content/uploads/2020/08/favicon.png\",\"width\":16,\"height\":16,\"caption\":\"Kozlov Club\"},\"image\":{\"@id\":\"https://kozlovclub.ru/#/schema/logo/image/\"},\"sameAs\":[\"https://www.facebook.com/KozlovClub\",\"https://www.instagram.com/kozlovclub/\",\"https://www.youtube.com/user/kozlovclubtv\",\"https://ru.wikipedia.org/wiki/Клуб_Алексея_Козлова\"]}]}"
+  ],
+  "title": [
+    "Джаз Клуб Алексея Козлова | афиша| билеты | концерты в Москве"
+  ],
+  "h1": []
+}

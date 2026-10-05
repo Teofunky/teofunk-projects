@@ -1,0 +1,18 @@
+HTTP/1.1 301 Moved Permanently
+Server: nginx-reuseport/1.21.1
+Date: Mon, 05 Oct 2026 06:17:07 GMT
+Content-Type: text/html
+Content-Length: 179
+Connection: keep-alive
+Keep-Alive: timeout=30
+Location: https://kozlovclub.ru/
+
+HTTP/2 200 
+server: nginx-reuseport/1.21.1
+date: Mon, 05 Oct 2026 06:17:08 GMT
+content-type: text/html
+content-length: 274
+last-modified: Thu, 13 Oct 2022 07:23:05 GMT
+etag: "6347bcd9-112"
+accept-ranges: bytes
+
