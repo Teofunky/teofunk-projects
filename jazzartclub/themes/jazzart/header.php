@@ -10,42 +10,16 @@
 <a class="skip" href="#content">Перейти к тексту</a>
 
 <header class="site-header">
-	<div class="site-header-top">
 	<div class="wrap header-row">
 		<a class="brand" href="<?php echo esc_url( home_url( '/' ) ); ?>" rel="home">
-			<img class="brand-logo" src="<?php echo esc_url( jac_logo_url() ); ?>" alt="Jazz Art Club" width="150" height="90">
-			<span class="brand-text">
-				<span class="brand-name"><?php bloginfo( 'name' ); ?></span>
-				<?php if ( get_bloginfo( 'description' ) ) : ?>
-					<span class="brand-tagline"><?php bloginfo( 'description' ); ?></span>
-				<?php endif; ?>
-			</span>
+			<img class="brand-logo" src="<?php echo esc_url( jac_logo_url() ); ?>" alt="Джаз Арт Клуб: на главную" width="105" height="63">
 		</a>
 
-		<div class="header-tools">
-			<?php $jac_phone = get_theme_mod( 'jac_phone' ); ?>
-			<?php if ( $jac_phone ) : ?>
-				<p class="header-phone">Телефон: <a href="tel:<?php echo esc_attr( preg_replace( '~[^\d+]~', '', $jac_phone ) ); ?>"><?php echo esc_html( $jac_phone ); ?></a></p>
-			<?php endif; ?>
-			<?php get_search_form(); ?>
-			<div class="text-size" role="group" aria-label="Размер текста">
-				<span class="text-size-label">Размер текста</span>
-				<button type="button" data-size="m" aria-pressed="true" title="Обычный"><span aria-hidden="true">А</span><span class="visually-hidden">Обычный</span></button>
-				<button type="button" data-size="l" aria-pressed="false" title="Крупный"><span aria-hidden="true">А</span><span class="visually-hidden">Крупный</span></button>
-				<button type="button" data-size="xl" aria-pressed="false" title="Очень крупный"><span aria-hidden="true">А</span><span class="visually-hidden">Очень крупный</span></button>
-			</div>
-		</div>
-	</div>
-	</div>
-
-	<nav class="site-nav" aria-label="Главное меню">
-		<div class="wrap">
+		<nav class="site-nav" aria-label="Главное меню">
 			<button type="button" class="nav-toggle" aria-expanded="false" aria-controls="primary-menu">Меню</button>
 			<?php
-			$jac_menus = has_nav_menu( 'primary' ) ? array() : wp_get_nav_menus();
 			wp_nav_menu( array(
 				'theme_location' => 'primary',
-				'menu'           => $jac_menus ? $jac_menus[0] : '',
 				'container'      => false,
 				'menu_id'        => 'primary-menu',
 				'menu_class'     => 'menu',
@@ -53,10 +27,22 @@
 				'fallback_cb'    => 'jac_menu_fallback',
 			) );
 			?>
+		</nav>
+
+		<div class="header-tools">
+			<?php $jac_phone = get_theme_mod( 'jac_phone' ); ?>
+			<?php if ( $jac_phone ) : ?>
+				<a class="header-phone" href="tel:<?php echo esc_attr( preg_replace( '~[^\d+]~', '', $jac_phone ) ); ?>"><?php echo esc_html( $jac_phone ); ?></a>
+			<?php endif; ?>
+			<a class="button header-search" href="<?php echo esc_url( home_url( '/?s=' ) ); ?>" data-search-toggle aria-controls="search-panel" aria-expanded="false">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m20 20-4.7-4.7"/></svg>
+				Поиск
+			</a>
 		</div>
-	</nav>
+	</div>
+	<div class="search-panel" id="search-panel" hidden>
+		<div class="wrap"><?php get_search_form(); ?></div>
+	</div>
 </header>
 
-<div class="wrap layout">
-	<main id="content">
-		<?php jac_crumbs(); ?>
+<main id="content">

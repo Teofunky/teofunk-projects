@@ -98,12 +98,7 @@ function jac_import_content() {
 	kses_init_filters();
 
 	if ( ! empty( $data['source'] ) && ! get_theme_mod( 'jac_old_site' ) ) {
-		// Если старый сайт умеет работать по защищённому адресу (https), берём картинки по нему:
-		// тогда они показываются и на пробной копии с https.
-		$source = esc_url_raw( $data['source'] );
-		$secure = preg_replace( '~^http:~', 'https:', $source );
-		$probe  = wp_remote_head( $secure . '/', array( 'timeout' => 8, 'redirection' => 0 ) );
-		set_theme_mod( 'jac_old_site', is_wp_error( $probe ) ? $source : $secure );
+		set_theme_mod( 'jac_old_site', esc_url_raw( $data['source'] ) );
 	}
 
 	jac_finish_setup();
@@ -122,72 +117,98 @@ function jac_remove_samples() {
 	}
 }
 
-/** Создаёт меню и назначает его области темы, если она ещё пуста. */
+/**
+ * Создаёт меню и назначает его области темы.
+ *
+ * Каждый пункт: array( тип, адрес, подпись, номер родителя в этом же списке или null ).
+ * Тип: home, page, post или category.
+ */
 function jac_make_menu( $location, $name, $entries ) {
-	$locations = (array) get_theme_mod( 'nav_menu_locations', array() );
-	if ( ! empty( $locations[ $location ] ) && wp_get_nav_menu_object( $locations[ $location ] ) ) {
-		return;
-	}
 	$menu = wp_get_nav_menu_object( $name );
 	if ( ! $menu ) {
 		$menu_id = wp_create_nav_menu( $name );
 		if ( is_wp_error( $menu_id ) ) {
 			return;
 		}
-		foreach ( $entries as $entry ) {
-			list( $slug, $label, $type ) = $entry;
-			if ( 'home' === $type ) {
-				wp_update_nav_menu_item( $menu_id, 0, array(
-					'menu-item-type'   => 'custom',
-					'menu-item-url'    => home_url( '/' ),
-					'menu-item-title'  => $label,
-					'menu-item-status' => 'publish',
-				) );
-				continue;
-			}
-			$target = get_page_by_path( $slug, OBJECT, $type );
-			if ( ! $target || 'publish' !== $target->post_status ) {
-				continue;
-			}
-			wp_update_nav_menu_item( $menu_id, 0, array(
-				'menu-item-type'      => 'post_type',
-				'menu-item-object'    => $type,
-				'menu-item-object-id' => $target->ID,
+		$made = array();
+		foreach ( $entries as $index => $entry ) {
+			list( $type, $slug, $label, $parent ) = array_pad( $entry, 4, null );
+			$args = array(
 				'menu-item-title'     => $label,
 				'menu-item-status'    => 'publish',
-			) );
+				'menu-item-parent-id' => ( null !== $parent && isset( $made[ $parent ] ) ) ? $made[ $parent ] : 0,
+			);
+			if ( 'home' === $type ) {
+				$args += array( 'menu-item-type' => 'custom', 'menu-item-url' => home_url( '/' ) );
+			} elseif ( 'category' === $type ) {
+				$term = get_term_by( 'slug', $slug, 'category' );
+				if ( ! $term ) {
+					continue;
+				}
+				$args += array( 'menu-item-type' => 'taxonomy', 'menu-item-object' => 'category', 'menu-item-object-id' => $term->term_id );
+			} else {
+				$target = get_page_by_path( $slug, OBJECT, $type );
+				if ( ! $target || 'publish' !== $target->post_status ) {
+					continue;
+				}
+				$args += array( 'menu-item-type' => 'post_type', 'menu-item-object' => $type, 'menu-item-object-id' => $target->ID );
+			}
+			$item = wp_update_nav_menu_item( $menu_id, 0, $args );
+			if ( ! is_wp_error( $item ) ) {
+				$made[ $index ] = $item;
+			}
 		}
 	} else {
 		$menu_id = $menu->term_id;
 	}
+	$locations              = (array) get_theme_mod( 'nav_menu_locations', array() );
 	$locations[ $location ] = (int) $menu_id;
 	set_theme_mod( 'nav_menu_locations', $locations );
 }
+
+/** Меню сайта. Названия новые, поэтому меню прежней версии темы остаются нетронутыми в «Внешний вид → Меню». */
+function jac_make_menus() {
+	jac_make_menu( 'primary', 'Меню сайта', array(
+		array( 'home', '', 'Главная' ),
+		array( 'page', 'anons', 'Афиша' ),
+		array( 'post', 'vocaljazz', 'Фестиваль' ),
+		array( 'post', 'jazz-paroxod', 'Джаз пароход' ),
+		array( 'page', 'about', 'О клубе' ),
+		array( 'page', 'xronika', 'Хроника', 4 ),
+		array( 'page', 'autors', 'Авторы', 4 ),
+		array( 'page', 'partners', 'Партнёры', 4 ),
+		array( 'page', 'uslugi', 'Услуги', 4 ),
+		array( 'category', 'novosti', 'Новости' ),
+		array( 'page', 'contacts', 'Контакты' ),
+	) );
+	jac_make_menu( 'projects', 'Проекты', array(
+		array( 'post', 'vocaljazz', 'Фестиваль вокального джаза' ),
+		array( 'post', 'jazz-paroxod', 'Джаз пароход' ),
+		array( 'post', 'jazz-opera', 'Джазовая опера' ),
+		array( 'post', 'arxiv', 'Архив записей' ),
+		array( 'post', 'art-gallery', 'Арт-галерея' ),
+		array( 'post', 'collection', 'Коллекция дисков' ),
+	) );
+}
+
+/**
+ * Обновление сайта, перенесённого прежней версией темы: новое меню и настройки по умолчанию.
+ * Статьи не трогаются. Срабатывает один раз после загрузки новой версии темы.
+ */
+add_action( 'init', function () {
+	if ( (int) get_option( 'jac_schema' ) >= 2 || ! get_option( 'jac_setup_done' ) ) {
+		return;
+	}
+	jac_make_menus();
+	update_option( 'jac_schema', 2 );
+}, 30 );
 
 /** Меню, главная, адреса страниц, контакты. Можно запускать повторно. */
 function jac_finish_setup() {
 	global $wp_rewrite;
 
-	// Главное меню: одна строка, все страницы старого сайта.
-	jac_make_menu( 'primary', 'Главное меню', array(
-		array( '', 'Главная', 'home' ),
-		array( 'anons', 'Анонсы', 'page' ),
-		array( 'about', 'О клубе', 'page' ),
-		array( 'xronika', 'Хроника', 'page' ),
-		array( 'autors', 'Авторы', 'page' ),
-		array( 'partners', 'Партнёры', 'page' ),
-		array( 'uslugi', 'Услуги', 'page' ),
-		array( 'contacts', 'Контакты', 'page' ),
-	) );
-
-	// Проекты клуба: пять кнопок из боковой колонки старого сайта.
-	jac_make_menu( 'projects', 'Проекты клуба', array(
-		array( 'vocaljazz', 'Фестиваль вокального джаза', 'post' ),
-		array( 'jazz-paroxod', 'Джаз пароход', 'post' ),
-		array( 'jazz-opera', 'Джазовая опера', 'post' ),
-		array( 'arxiv', 'Архив записей', 'post' ),
-		array( 'art-gallery', 'Арт-галерея', 'post' ),
-	) );
+	jac_make_menus();
+	update_option( 'jac_schema', 2 );
 
 	// На главной показываем «Анонсы»: текущую программу концертов.
 	$anons = get_page_by_path( 'anons' );
@@ -239,13 +260,10 @@ add_action( 'admin_notices', function () {
 	if ( $done && isset( $_GET['jac_imported'] ) ) { // phpcs:ignore
 		$counts = wp_count_posts();
 		$pages  = wp_count_posts( 'page' );
-		echo '<div class="notice notice-success"><p style="font-size:15px"><strong>Готово.</strong> Перенесено: статей ' . (int) $counts->publish . ', страниц ' . (int) $pages->publish . '. Меню, главная страница и контакты настроены.</p>';
+		echo '<div class="notice notice-success"><p style="font-size:15px"><strong>Готово.</strong> Перенесено: статей ' . (int) $counts->publish . ', страниц ' . (int) $pages->publish . '. Меню, афиша и контакты настроены.</p>';
 		echo '<p><a class="button button-primary button-hero" href="' . esc_url( home_url( '/' ) ) . '">Открыть сайт</a></p>';
 		if ( jac_old_site() ) {
-			echo '<p>Картинки пока показываются со старого сайта (' . esc_html( jac_old_site() ) . '). Когда скопируете папку <code>wp-content/uploads</code> на этот сервер, они начнут браться отсюда сами.</p>';
-			if ( is_ssl() && 0 === strpos( jac_old_site(), 'http:' ) ) {
-				echo '<p><strong>Важно:</strong> старый сайт работает только по адресу http, поэтому на этой копии с https браузер может не показать его картинки. Откройте копию по адресу <code>' . esc_html( preg_replace( '~^https:~', 'http:', home_url( '/' ) ) ) . '</code> или скопируйте папку с картинками.</p>';
-			}
+			echo '<p>Картинки сайт копирует со старого сайта сам, при первом показе каждой страницы. Скопировать все сразу: <a href="' . esc_url( admin_url( 'tools.php?page=jac-images' ) ) . '">Инструменты → Картинки со старого сайта</a>.</p>';
 		}
 		echo '</div>';
 		return;

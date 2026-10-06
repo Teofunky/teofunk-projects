@@ -2,6 +2,26 @@
 	'use strict';
 	var root = document.documentElement;
 
+	/* Шапка: меню в одну строку рядом с логотипом; не помещается, уходит на вторую строку;
+	   не помещается и там, сворачивается в кнопку «Меню». Проверяется при загрузке,
+	   изменении ширины окна и размера текста. */
+	var header = document.querySelector('.site-header');
+	var navBox = document.querySelector('.site-nav');
+	var menuList = document.querySelector('.site-nav .menu');
+	function fitHeader() {
+		if (!header || !navBox || !menuList) { return; }
+		header.classList.remove('is-stacked', 'is-collapsed');
+		if (menuList.scrollWidth > navBox.clientWidth + 1) {
+			header.classList.add('is-stacked');
+			if (menuList.scrollWidth > navBox.clientWidth + 1) { header.classList.add('is-collapsed'); }
+		}
+	}
+	fitHeader();
+	var fitTimer;
+	window.addEventListener('resize', function () { clearTimeout(fitTimer); fitTimer = setTimeout(fitHeader, 80); });
+	if (document.fonts && document.fonts.ready) { document.fonts.ready.then(fitHeader); }
+	window.addEventListener('load', fitHeader);
+
 	/* Размер текста: запоминаем выбор читателя. */
 	var sizeButtons = document.querySelectorAll('.text-size button');
 	function applySize(size) {
@@ -14,6 +34,7 @@
 		sizeButtons.forEach(function (b) {
 			b.setAttribute('aria-pressed', b.getAttribute('data-size') === size ? 'true' : 'false');
 		});
+		fitHeader();
 	}
 	applySize(root.getAttribute('data-size'));
 	sizeButtons.forEach(function (b) {
@@ -67,6 +88,19 @@
 			if (t) { t.focus(); }
 		}
 	});
+
+	/* Поиск: кнопка в шапке раскрывает строку поиска. Без скрипта она ведёт на страницу поиска. */
+	var searchToggle = document.querySelector('[data-search-toggle]');
+	var searchPanel = document.getElementById('search-panel');
+	if (searchToggle && searchPanel) {
+		searchToggle.addEventListener('click', function (e) {
+			e.preventDefault();
+			var open = searchPanel.hasAttribute('hidden');
+			if (open) { searchPanel.removeAttribute('hidden'); } else { searchPanel.setAttribute('hidden', ''); }
+			searchToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+			if (open) { var field = searchPanel.querySelector('input[type="search"]'); if (field) { field.focus(); } }
+		});
+	}
 
 	/* Меню на телефоне. */
 	var nav = document.querySelector('.site-nav');

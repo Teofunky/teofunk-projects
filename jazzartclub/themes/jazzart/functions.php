@@ -1,17 +1,17 @@
 <?php
 /**
  * Тема «Джаз Арт Клуб».
- * Крупный шрифт, высокий контраст, простое меню.
+ * Светлая, с крупным текстом; главная собирается из афиши и разделов клуба.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'JAC_VERSION', '1.0.0' );
+define( 'JAC_VERSION', '2.0.0' );
 
 if ( ! isset( $content_width ) ) {
-	$content_width = 780;
+	$content_width = 760;
 }
 
 /* ------------------------------------------------------------
@@ -30,15 +30,15 @@ add_action( 'after_setup_theme', function () {
 	add_image_size( 'jac-wide', 1560, 0, false );
 
 	register_nav_menus( array(
-		'primary' => 'Главное меню (синяя полоса вверху)',
-		'projects' => 'Проекты клуба (кнопки в боковой колонке)',
+		'primary'  => 'Главное меню (в шапке)',
+		'projects' => 'Проекты клуба (плитки на главной и список сбоку)',
 		'footer'   => 'Меню в подвале',
 	) );
 } );
 
 add_action( 'widgets_init', function () {
 	register_sidebar( array(
-		'name'          => 'Боковая колонка (под рубриками)',
+		'name'          => 'Боковая колонка (внизу)',
 		'id'            => 'side',
 		'before_widget' => '<section class="widget %2$s">',
 		'after_widget'  => '</section>',
@@ -74,7 +74,7 @@ add_action( 'wp_head', function () {
 	$fonts = get_template_directory_uri() . '/assets/fonts/';
 	echo '<link rel="preload" href="' . esc_url( $fonts . 'pt-serif-cyrillic-400-normal.woff2' ) . '" as="font" type="font/woff2" crossorigin>' . "\n";
 	echo '<link rel="preload" href="' . esc_url( $fonts . 'pt-serif-cyrillic-700-normal.woff2' ) . '" as="font" type="font/woff2" crossorigin>' . "\n";
-	echo '<link rel="preload" href="' . esc_url( $fonts . 'old-standard-tt-cyrillic-700-normal.woff2' ) . '" as="font" type="font/woff2" crossorigin>' . "\n";
+	echo '<link rel="preload" href="' . esc_url( $fonts . 'playfair-display-cyrillic-wght-normal.woff2' ) . '" as="font" type="font/woff2" crossorigin>' . "\n";
 	echo "<script>(function(d){d.classList.add('js');try{var s=localStorage.getItem('jac-size');if(s==='l'||s==='xl'){d.setAttribute('data-size',s);}}catch(e){}})(document.documentElement);</script>\n";
 }, 1 );
 
@@ -87,7 +87,7 @@ add_action( 'wp_head', function () {
 	echo '<link rel="icon" href="' . esc_url( $dir . 'icon-32.png' ) . '" sizes="32x32">' . "\n";
 	echo '<link rel="icon" href="' . esc_url( $dir . 'icon-512.png' ) . '" sizes="512x512">' . "\n";
 	echo '<link rel="apple-touch-icon" href="' . esc_url( $dir . 'icon-180.png' ) . '">' . "\n";
-	echo '<meta name="theme-color" content="#5b050e">' . "\n";
+	echo '<meta name="theme-color" content="#fbf5ea">' . "\n";
 } );
 
 // Смайлики-картинки сайту не нужны, убираем лишний скрипт.
@@ -98,19 +98,22 @@ remove_action( 'wp_print_styles', 'print_emoji_styles' );
  * Вспомогательные функции
  * ------------------------------------------------------------ */
 
-/** Логотип: загруженный в «Свойства сайта» или встроенный в тему (кремовый, для бордовой шапки). */
-function jac_logo_url() {
-	$custom = get_theme_mod( 'custom_logo' );
-	if ( $custom ) {
-		$src = wp_get_attachment_image_url( $custom, 'medium' );
+/**
+ * Логотип. В шапке (светлой) бордовый, в подвале (бордовом) кремовый.
+ * Если в «Свойства сайта» загружен свой логотип, в шапке показывается он.
+ */
+function jac_logo_url( $place = 'header' ) {
+	if ( 'header' === $place ) {
+		$custom = get_theme_mod( 'custom_logo' );
+		$src    = $custom ? wp_get_attachment_image_url( $custom, 'medium' ) : '';
 		if ( $src ) {
 			return $src;
 		}
 	}
-	return get_template_directory_uri() . '/assets/logo.svg';
+	return get_template_directory_uri() . '/assets/' . ( 'footer' === $place ? 'logo.svg' : 'logo-maroon.svg' );
 }
 
-/** Страница, которая показывается на главной (по умолчанию «Анонсы»). */
+/** Страница афиши (по умолчанию «Анонсы»): из неё собираются карточки концертов. */
 function jac_home_page() {
 	$id   = (int) get_theme_mod( 'jac_home_page', 0 );
 	$page = $id ? get_post( $id ) : null;
@@ -164,64 +167,14 @@ function jac_meta( $post = null ) {
 	return $out;
 }
 
-/**
- * Картинки и файлы из статей лежат в wp-content/uploads. Пока эта папка не скопирована
- * на новый сервер, показываем файлы прямо со старого сайта. Как только файл появляется
- * на месте, берётся он. Адрес старого сайта: «Внешний вид → Настроить → Перенос».
- */
-function jac_old_site() {
-	$old = untrailingslashit( (string) get_theme_mod( 'jac_old_site', '' ) );
-	$host = function ( $url ) {
-		return preg_replace( '~^www\.~i', '', strtolower( (string) wp_parse_url( $url, PHP_URL_HOST ) ) );
-	};
-	// Как только сайт открыт на адресе старого сайта (с www или без), перенос считается завершённым.
-	if ( ! $old || $host( $old ) === $host( home_url() ) ) {
-		return '';
-	}
-	return $old;
-}
-
-function jac_upload_url( $path ) {
-	if ( 0 !== strpos( $path, '/wp-content/uploads/' ) ) {
-		return $path;
-	}
-	$old = jac_old_site();
-	if ( ! $old ) {
-		return $path;
-	}
-	$file = WP_CONTENT_DIR . substr( rawurldecode( strtok( $path, '?#' ) ), strlen( '/wp-content' ) );
-	return file_exists( $file ) ? $path : $old . $path;
-}
-
-add_filter( 'the_content', function ( $html ) {
-	if ( false === strpos( $html, '/wp-content/uploads/' ) || ! jac_old_site() ) {
-		return $html;
-	}
-	return preg_replace_callback( '~(\b(?:src|href)=["\'])(/wp-content/uploads/[^"\']+)~i', function ( $m ) {
-		return $m[1] . jac_upload_url( $m[2] );
-	}, $html );
-}, 20 );
-
-// Пробная копия на другом адресе не должна попадать в поисковики вместо настоящего сайта.
-add_filter( 'wp_robots', function ( $robots ) {
-	if ( jac_old_site() ) {
-		$robots['noindex']  = true;
-		$robots['nofollow'] = true;
-		unset( $robots['max-image-preview'] );
-	}
-	return $robots;
-} );
-
 /** Картинка для списка статей: «изображение записи», а если его нет, первая картинка из текста. */
-function jac_row_image( $post = null ) {
+function jac_row_image( $post = null, $width = 480 ) {
 	$post = get_post( $post );
 	if ( has_post_thumbnail( $post ) ) {
 		return get_the_post_thumbnail( $post, 'jac-row', array( 'alt' => '', 'loading' => 'lazy' ) );
 	}
-	if ( preg_match( '~<img\b[^>]*\bsrc=["\']([^"\']+)["\']~i', $post->post_content, $m ) ) {
-		return '<img src="' . esc_url( jac_upload_url( $m[1] ) ) . '" alt="" loading="lazy">';
-	}
-	return '';
+	$src = jac_first_image( $post );
+	return $src ? '<img src="' . esc_url( jac_img( $src, $width ) ) . '" alt="" loading="lazy">' : '';
 }
 
 /** «Вы здесь»: путь от главной до текущей страницы. */
@@ -244,7 +197,8 @@ function jac_crumbs() {
 		foreach ( array_reverse( get_post_ancestors( get_the_ID() ) ) as $id ) {
 			$items[] = '<a href="' . esc_url( get_permalink( $id ) ) . '">' . esc_html( get_the_title( $id ) ) . '</a>';
 		}
-		$current = get_the_title();
+		$afisha  = jac_home_page();
+		$current = ( $afisha && get_the_ID() === $afisha->ID && jac_events( $afisha )['events'] ) ? 'Афиша' : get_the_title();
 	} elseif ( is_category() ) {
 		$term = get_queried_object();
 		foreach ( array_reverse( get_ancestors( $term->term_id, 'category' ) ) as $id ) {
@@ -267,14 +221,55 @@ function jac_crumbs() {
 	echo '<nav class="crumbs" aria-label="Вы здесь">' . implode( '<span class="sep" aria-hidden="true">›</span>', $items ) . '</nav>';
 }
 
-/** Кнопки «Проекты клуба»: главные разделы, как на старом сайте. */
+/** Пункты меню «Проекты клуба» с картинкой и коротким описанием (для плиток на главной). */
+function jac_project_items() {
+	$locations = get_nav_menu_locations();
+	if ( empty( $locations['projects'] ) ) {
+		return array();
+	}
+	$items = wp_get_nav_menu_items( $locations['projects'] );
+	$out   = array();
+	foreach ( (array) $items as $item ) {
+		$post  = ( 'post_type' === $item->type ) ? get_post( (int) $item->object_id ) : null;
+		$text  = $post ? trim( preg_replace( '~\s+~u', ' ', wp_strip_all_tags( strip_shortcodes( $post->post_content ) ) ) ) : '';
+		$out[] = array(
+			'title' => $item->title,
+			'url'   => $item->url,
+			'image' => $post ? jac_first_image( $post ) : '',
+			'text'  => $text ? wp_trim_words( $text, 16, '…' ) : '',
+			'here'  => $post && is_singular() && get_queried_object_id() === $post->ID,
+		);
+	}
+	return $out;
+}
+
+/** Список «Проекты клуба» в боковой колонке. */
 function jac_projects() {
-	if ( ! has_nav_menu( 'projects' ) ) {
+	$items = jac_project_items();
+	if ( ! $items ) {
 		return;
 	}
-	echo '<nav class="projects" aria-labelledby="projects-title"><h2 class="side-title" id="projects-title">Проекты клуба</h2>';
-	wp_nav_menu( array( 'theme_location' => 'projects', 'container' => false, 'menu_class' => 'projects-list', 'depth' => 1, 'fallback_cb' => false ) );
-	echo '</nav>';
+	echo '<nav class="side-block" aria-labelledby="projects-title"><h2 class="side-title" id="projects-title">Проекты клуба</h2><ul class="side-links">';
+	foreach ( $items as $item ) {
+		echo '<li' . ( $item['here'] ? ' class="is-current"' : '' ) . '><a href="' . esc_url( $item['url'] ) . '"' . ( $item['here'] ? ' aria-current="page"' : '' ) . '>' . esc_html( $item['title'] ) . '</a></li>';
+	}
+	echo '</ul></nav>';
+}
+
+/** Ближайший концерт в боковой колонке. */
+function jac_next_concert() {
+	$page = jac_home_page();
+	if ( $page && is_page( $page->ID ) ) {
+		return;
+	}
+	$next = jac_upcoming( 1 );
+	if ( ! $next ) {
+		return;
+	}
+	$e = $next[0];
+	echo '<section class="side-block side-concert" aria-labelledby="next-title"><h2 class="side-title" id="next-title">Ближайший концерт</h2>';
+	echo '<a class="side-concert-link" href="' . esc_url( jac_afisha_url( $e ) ) . '">' . jac_date_badge( $e ) . '<span class="side-concert-text"><span class="side-concert-title">' . esc_html( $e['title'] ) . '</span>' . ( $e['time'] ? '<span class="side-concert-time">Начало в ' . esc_html( $e['time'] ) . '</span>' : '' ) . '</span></a>';
+	echo '<p><a class="more-link" href="' . esc_url( jac_afisha_url() ) . '">Вся афиша</a></p></section>';
 }
 
 /** Карточка «Где проходят концерты». */
@@ -284,7 +279,7 @@ function jac_venue() {
 	if ( ! $address && ! $phone ) {
 		return;
 	}
-	echo '<section class="venue" aria-labelledby="venue-title"><h2 class="side-title" id="venue-title">Где проходят концерты</h2>';
+	echo '<section class="side-block venue" aria-labelledby="venue-title"><h2 class="side-title" id="venue-title">Где проходят концерты</h2>';
 	if ( $address ) {
 		echo '<p>' . esc_html( $address ) . '</p>';
 	}
@@ -293,43 +288,69 @@ function jac_venue() {
 	}
 	$contacts = get_page_by_path( 'contacts' );
 	if ( $contacts && 'publish' === $contacts->post_status && ! is_page( $contacts->ID ) ) {
-		echo '<p><a class="button is-quiet" href="' . esc_url( get_permalink( $contacts ) ) . '">Все контакты</a></p>';
+		echo '<p><a class="more-link" href="' . esc_url( get_permalink( $contacts ) ) . '">Как добраться</a></p>';
 	}
 	echo '</section>';
 }
 
-/** Список рубрик для боковой колонки. */
+/** Рубрики: строка ссылок над списком статей. */
 function jac_rubrics() {
-	$current = 0;
-	if ( is_category() ) {
-		$current = get_queried_object_id();
-	} elseif ( is_singular( 'post' ) && jac_rubric() ) {
-		$current = jac_rubric()->term_id;
-	}
-	$terms = get_categories( array( 'hide_empty' => true, 'parent' => 0, 'orderby' => 'name' ) );
-	if ( ! $terms ) {
+	$current = is_category() ? get_queried_object_id() : 0;
+	$terms   = get_categories( array( 'hide_empty' => true, 'orderby' => 'count', 'order' => 'DESC' ) );
+	if ( count( $terms ) < 2 ) {
 		return;
 	}
-	echo '<nav aria-labelledby="rubrics-title"><h2 class="side-title" id="rubrics-title">Рубрики</h2><ul>';
+	echo '<nav class="chips" aria-label="Рубрики"><ul>';
 	foreach ( $terms as $term ) {
-		jac_rubric_item( $term, $current );
+		$here = ( $term->term_id === $current );
+		echo '<li><a href="' . esc_url( get_category_link( $term ) ) . '"' . ( $here ? ' class="is-current" aria-current="page"' : '' ) . '>' . esc_html( $term->name ) . ' <span class="count">' . (int) $term->count . '</span></a></li>';
 	}
 	echo '</ul></nav>';
 }
 
-function jac_rubric_item( $term, $current ) {
-	$class = ( $term->term_id === $current ) ? ' class="is-current"' : '';
-	$aria  = ( $term->term_id === $current && is_category() ) ? ' aria-current="page"' : '';
-	echo '<li' . $class . '><a href="' . esc_url( get_category_link( $term ) ) . '"' . $aria . '><span>' . esc_html( $term->name ) . '</span><span class="count">' . (int) $term->count . '</span></a>';
-	$children = get_categories( array( 'hide_empty' => true, 'parent' => $term->term_id, 'orderby' => 'name' ) );
-	if ( $children ) {
-		echo '<ul class="children">';
-		foreach ( $children as $child ) {
-			jac_rubric_item( $child, $current );
-		}
-		echo '</ul>';
+/** Соседние разделы из главного меню: для «О клубе» это «Хроника», «Авторы», «Партнёры», «Услуги». */
+function jac_subnav() {
+	$locations = get_nav_menu_locations();
+	if ( empty( $locations['primary'] ) || ! is_singular() ) {
+		return;
 	}
-	echo '</li>';
+	$items = (array) wp_get_nav_menu_items( $locations['primary'] );
+	$id    = get_queried_object_id();
+	$mine  = null;
+	foreach ( $items as $item ) {
+		if ( 'post_type' === $item->type && (int) $item->object_id === $id ) {
+			$mine = $item;
+			break;
+		}
+	}
+	if ( ! $mine ) {
+		return;
+	}
+	$parent_id = (int) $mine->menu_item_parent ? (int) $mine->menu_item_parent : (int) $mine->ID;
+	$group     = array();
+	foreach ( $items as $item ) {
+		if ( (int) $item->ID === $parent_id || (int) $item->menu_item_parent === $parent_id ) {
+			$group[] = $item;
+		}
+	}
+	if ( count( $group ) < 2 ) {
+		return;
+	}
+	echo '<nav class="chips subnav" aria-label="Раздел"><ul>';
+	foreach ( $group as $item ) {
+		$here = ( (int) $item->object_id === $id && 'post_type' === $item->type );
+		echo '<li><a href="' . esc_url( $item->url ) . '"' . ( $here ? ' class="is-current" aria-current="page"' : '' ) . '>' . esc_html( $item->title ) . '</a></li>';
+	}
+	echo '</ul></nav>';
+}
+
+/** Кнопки «Размер текста». */
+function jac_text_size() {
+	echo '<div class="text-size" role="group" aria-label="Размер текста"><span class="text-size-label">Размер текста</span>';
+	foreach ( array( 'm' => 'Обычный', 'l' => 'Крупный', 'xl' => 'Очень крупный' ) as $size => $label ) {
+		echo '<button type="button" data-size="' . esc_attr( $size ) . '" aria-pressed="' . ( 'm' === $size ? 'true' : 'false' ) . '" title="' . esc_attr( $label ) . '"><span aria-hidden="true">А</span><span class="visually-hidden">' . esc_html( $label ) . '</span></button>';
+	}
+	echo '</div>';
 }
 
 /** Постраничная навигация с понятными подписями. */
@@ -415,20 +436,26 @@ add_action( 'customize_register', function ( $wp_customize ) {
 	$wp_customize->add_setting( 'jac_credit', array( 'default' => '', 'sanitize_callback' => 'sanitize_text_field' ) );
 	$wp_customize->add_control( 'jac_credit', array( 'label' => 'Подпись в самом низу (после года и названия)', 'section' => 'jac_contacts', 'type' => 'text' ) );
 
-	$wp_customize->add_section( 'jac_home', array( 'title' => 'Главная страница', 'priority' => 29 ) );
+	$wp_customize->add_section( 'jac_home', array( 'title' => 'Главная страница и афиша', 'priority' => 29 ) );
 	$wp_customize->add_setting( 'jac_home_page', array( 'default' => 0, 'sanitize_callback' => 'absint' ) );
 	$wp_customize->add_control( 'jac_home_page', array(
-		'label'       => 'Что показывать на главной',
-		'description' => 'Текст выбранной страницы целиком. Обычно это «Анонсы»: программа концертов. Если не выбрано, на главной будет список статей.',
+		'label'       => 'Страница с программой концертов',
+		'description' => 'Обычно «Анонсы». Из её текста сайт собирает карточки концертов для главной и страницу «Афиша».',
 		'section'     => 'jac_home',
 		'type'        => 'dropdown-pages',
+	) );
+	$wp_customize->add_setting( 'jac_hero_text', array( 'default' => '', 'sanitize_callback' => 'sanitize_text_field' ) );
+	$wp_customize->add_control( 'jac_hero_text', array(
+		'label'   => 'Строка под названием клуба на главной',
+		'section' => 'jac_home',
+		'type'    => 'textarea',
 	) );
 
 	$wp_customize->add_section( 'jac_move', array( 'title' => 'Перенос со старого сайта', 'priority' => 32 ) );
 	$wp_customize->add_setting( 'jac_old_site', array( 'default' => '', 'sanitize_callback' => 'esc_url_raw' ) );
 	$wp_customize->add_control( 'jac_old_site', array(
 		'label'       => 'Адрес старого сайта',
-		'description' => 'Пока папка с картинками не скопирована на этот сервер, картинки берутся отсюда, а сама копия закрыта от поисковиков. Когда сайт заработает на основном адресе, это отключится само.',
+		'description' => 'Отсюда сайт сам копирует картинки статей при первом показе. Пока сайт открыт на другом адресе, он закрыт от поисковиков. Когда сайт заработает на основном адресе, это отключится само.',
 		'section'     => 'jac_move',
 		'type'        => 'url',
 	) );
@@ -463,7 +490,7 @@ add_action( 'wp_dashboard_setup', function () {
 			<a class="button button-primary button-hero" href="<?php echo esc_url( admin_url( 'post-new.php' ) ); ?>">Написать новую статью</a>
 			<a class="button button-hero" href="<?php echo esc_url( admin_url( 'edit.php' ) ); ?>">Все статьи</a>
 		</p>
-		<p style="color:#50575e;">Исправить готовую статью: откройте её на сайте и нажмите «Редактировать статью» под текстом. Программа концертов: «Страницы → АНОНСЫ», она же показывается на главной. Кнопки «Проекты клуба» и пункты меню: «Внешний вид → Меню».</p>
+		<p style="color:#50575e;">Исправить готовую статью: откройте её на сайте и нажмите «Редактировать статью» под текстом. Программа концертов: «Страницы → АНОНСЫ», из неё сайт сам делает карточки на главной и страницу «Афиша». Плитки «Проекты клуба» и пункты меню: «Внешний вид → Меню».</p>
 		<?php
 	}, null, null, 'normal', 'high' );
 } );
@@ -480,5 +507,7 @@ add_action( 'template_redirect', function () {
 	}
 }, 1 );
 
-// Перенос содержимого старого сайта одной кнопкой и первичная настройка.
+// Картинки (в том числе копирование со старого сайта), афиша, перенос содержимого.
+require get_template_directory() . '/inc/images.php';
+require get_template_directory() . '/inc/events.php';
 require get_template_directory() . '/inc/import.php';
