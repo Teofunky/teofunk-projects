@@ -1,4 +1,4 @@
-/*! Kozlov Smart Search 1.0.1. Поиск по афише в браузере посетителя. Глобальных переменных не создаёт, jQuery не использует. */
+/*! Kozlov Smart Search 1.0.2. Поиск по афише в браузере посетителя. Глобальных переменных не создаёт, jQuery не использует. */
 (function () {
 'use strict';
 
@@ -196,7 +196,8 @@ function kssEngine() {
    *         stageCodes: буквы g, m, b, u (у концерта может быть несколько сцен); textId: номер текста анонса или -1
    * pages:  [{title, url, words}]
    * now:    Date (любой часовой пояс посетителя, пересчитывается во время клуба)
-   * extra:  { genres: {code: name}, offset: смещение часового пояса клуба в миллисекундах }
+   * extra:  { genres: {code: name}, offset: смещение часового пояса клуба в миллисекундах,
+   *           cutOffset: смещение часов афиши в миллисекундах (по ним концерт убирается из списка) }
    * Тексты анонсов подключаются отдельно: attachTexts(index, payload).
    */
   function build(events, pages, now, extra) {
@@ -208,6 +209,8 @@ function kssEngine() {
       genres[k] = { name: name || (genres[k] && genres[k].name) || k, words: genreWords(k, name) };
     });
     var m = clubNow(now, extra.offset), today = m.ymd, tomorrow = addDays(today, 1), after = addDays(today, 2);
+    // часы афиши: по ним сайт решает, что концерт прошёл. Если сервер их не прислал, берём часы клуба
+    var cut = (typeof extra.cutOffset === 'number' && isFinite(extra.cutOffset)) ? clubNow(now, extra.cutOffset) : m;
     // ближайшие выходные: если сегодня суббота или воскресенье, то текущие
     var wdToday = weekdayOf(today);
     var sat = wdToday === 0 ? addDays(today, -1) : addDays(today, (6 - wdToday));
@@ -216,8 +219,8 @@ function kssEngine() {
     (Array.isArray(events) ? events : []).forEach(function (e, n) {
       // строка без названия, даты или времени пропускается
       if (!e || typeof e[0] !== 'string' || !e[0] || typeof e[1] !== 'string' || !/^\d{4}-\d\d-\d\d$/.test(e[1]) || typeof e[2] !== 'string') return;
-      // концерт считается будущим, пока не наступило время начала по времени клуба
-      if (e[1] < today || (e[1] === today && e[2] <= m.hm)) return;
+      // концерт остаётся в поиске, пока он есть на афише: сравниваем с часами афиши
+      if (e[1] < cut.ymd || (e[1] === cut.ymd && e[2] <= cut.hm)) return;
       var dp = dateParts(e[1]);
       var toks = tokens(e[0]).map(function (w) { return mk(w, 't'); });
       // составные слова через дефис ищутся и слитно: «рок-н-ролл» = «рокнролл»
@@ -667,7 +670,8 @@ function kssUI(K, CSS) {
 
   function rebuild() {
     var offset = (typeof raw.off === 'number' && isFinite(raw.off)) ? raw.off * 1000 : undefined;
-    index = K.build(raw.ev, raw.pages, nowDate(), { genres: (raw.genres && !Array.isArray(raw.genres)) ? raw.genres : {}, offset: offset });
+    var cut = (typeof raw.cut === 'number' && isFinite(raw.cut)) ? raw.cut * 1000 : undefined;
+    index = K.build(raw.ev, raw.pages, nowDate(), { genres: (raw.genres && !Array.isArray(raw.genres)) ? raw.genres : {}, offset: offset, cutOffset: cut });
     if (content) { index.content = content; index.hasTexts = content.words.length > 0; }
   }
 

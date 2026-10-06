@@ -193,6 +193,8 @@ if ( ! class_exists( 'KSS_Admin' ) ) :
 						</tbody>
 					</table>
 
+					<?php self::render_compare( $index ); ?>
+
 					<?php if ( ! empty( $stats['sample'] ) && is_array( $stats['sample'] ) ) : ?>
 						<h3>Ближайшие концерты в индексе</h3>
 						<p class="description">Сверьте с афишей на главной странице: дата, время, сцена и цена должны совпадать.</p>
@@ -236,6 +238,109 @@ if ( ! class_exists( 'KSS_Admin' ) ) :
 				</ol>
 				<p class="description">Плагин ничего не записывает в события, страницы и таблицы календаря. Концерты, закрытые паролем, в поиск не попадают. Собственные данные плагина: одна запись настроек (<code>kss_settings</code>), временный кэш индекса и пустой файл блокировки во временной папке сервера. При удалении плагина они стираются.</p>
 			</div>
+			<?php
+		}
+
+		/**
+		 * Сверка с афишей: браузер администратора читает главную страницу сайта и сравнивает
+		 * день и время на каждой карточке с индексом. Только чтение, работает только на странице настроек.
+		 *
+		 * @param array $index Индекс поиска.
+		 */
+		protected static function render_compare( $index ) {
+			if ( empty( $index['ev'] ) || ! is_array( $index['ev'] ) ) {
+				return;
+			}
+			$rows = array();
+			foreach ( $index['ev'] as $e ) {
+				if ( is_array( $e ) && isset( $e[0], $e[1], $e[2], $e[5] ) ) {
+					$rows[] = array( (string) $e[5], (string) $e[1], (string) $e[2], (string) $e[0] );
+				}
+			}
+			$json = wp_json_encode( array( 'home' => home_url( '/' ), 'rows' => $rows ), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES );
+			if ( ! is_string( $json ) || ! $rows ) {
+				return;
+			}
+			?>
+			<h3>Сверка с афишей</h3>
+			<p class="description">Сравнивает день и время каждого концерта в поиске с карточками на главной странице сайта. Ничего не изменяет.</p>
+			<p><button type="button" class="button" id="kss-compare">Сверить с афишей</button> <span id="kss-compare-state" aria-live="polite"></span></p>
+			<div id="kss-compare-out" style="max-width:960px"></div>
+			<script type="application/json" id="kss-compare-data"><?php echo $json; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></script>
+			<script>
+			(function () {
+				var d = document, btn = d.getElementById('kss-compare'), out = d.getElementById('kss-compare-out'), state = d.getElementById('kss-compare-state'), src = d.getElementById('kss-compare-data');
+				if (!btn || !out || !state || !src || !window.fetch || !window.DOMParser) { if (btn) btn.disabled = true; return; }
+				var data;
+				try { data = JSON.parse(src.textContent); } catch (e) { btn.disabled = true; return; }
+				function slugOf(href) {
+					var p = String(href || '').split('#')[0].split('?')[0].replace(/\/+$/, '').split('/');
+					return (p[p.length - 1] || '').toLowerCase();
+				}
+				function line(text, bold) {
+					var p = d.createElement('p');
+					if (bold) { var b = d.createElement('strong'); b.textContent = text; p.appendChild(b); } else { p.textContent = text; }
+					out.appendChild(p);
+				}
+				function list(items) {
+					var ul = d.createElement('ul'), i, li;
+					ul.style.listStyle = 'disc'; ul.style.marginLeft = '20px';
+					for (i = 0; i < items.length; i++) { li = d.createElement('li'); li.textContent = items[i]; ul.appendChild(li); }
+					out.appendChild(ul);
+				}
+				function show(kind) { out.className = 'notice inline notice-' + kind; state.textContent = ''; btn.disabled = false; }
+				function compare(html) {
+					var doc = new DOMParser().parseFromString(html, 'text/html'), nodes = doc.querySelectorAll('.event');
+					var pool = {}, bySlug = {}, cards = 0, i, a, c, r, day, tm, slug, key;
+					for (i = 0; i < nodes.length; i++) {
+						a = nodes[i].querySelector('a.title'); c = nodes[i].querySelector('.cell_1'); r = nodes[i].querySelector('.row_1');
+						if (!a || !c || !r) continue;
+						day = (c.textContent || '').replace(/\D/g, ''); tm = (r.textContent || '').match(/(\d{1,2}):(\d\d)/);
+						slug = slugOf(a.getAttribute('href'));
+						if (!day || !tm || !slug) continue;
+						day = ('0' + day).slice(-2); tm = ('0' + tm[1]).slice(-2) + ':' + tm[2];
+						key = slug + '|' + day + '|' + tm;
+						pool[key] = (pool[key] || 0) + 1;
+						(bySlug[slug] = bySlug[slug] || []).push(day + ' число, ' + tm);
+						cards++;
+					}
+					out.textContent = '';
+					if (!cards) {
+						line('Карточки афиши на главной странице не найдены. Сверка невозможна: возможно, изменилась разметка темы.', true);
+						show('warning');
+						return;
+					}
+					var same = 0, wrong = [], absent = [], row;
+					for (i = 0; i < data.rows.length; i++) {
+						row = data.rows[i]; slug = String(row[0]).toLowerCase(); key = slug + '|' + String(row[1]).slice(8, 10) + '|' + row[2];
+						if (pool[key] > 0) { pool[key]--; same++; }
+						else if (bySlug[slug]) wrong.push(row[3] + ': в поиске ' + row[1] + ' ' + row[2] + ', на афише ' + bySlug[slug].join(' и '));
+						else absent.push(row[3] + ' (' + row[1] + ' ' + row[2] + ')');
+					}
+					if (wrong.length) {
+						line('Расхождения с афишей: ' + wrong.length + ' из ' + data.rows.length + ' концертов.', true);
+						list(wrong.slice(0, 30));
+						if (wrong.length > 30) line('и ещё ' + (wrong.length - 30) + '.');
+						line('Нажмите «Пересобрать индекс сейчас», обновите эту страницу и повторите сверку. Если расхождения остались, выберите режим «Выключен».');
+					} else {
+						line('Совпало: ' + same + ' из ' + data.rows.length + '. День и время каждого концерта в поиске такие же, как на афише.', true);
+					}
+					if (absent.length) {
+						line('Концертов из поиска, которых нет на главной странице: ' + absent.length + '. Так бывает, если концерт только что начался или афиша изменилась после сборки индекса.');
+						list(absent.slice(0, 10));
+					}
+					if (!wrong.length && cards > same) line('Карточек на афише, которых нет в поиске: ' + (cards - same) + ' (например, концерты, закрытые паролем, или добавленные после сборки индекса).');
+					show(wrong.length ? 'error' : (absent.length ? 'warning' : 'success'));
+				}
+				btn.addEventListener('click', function () {
+					btn.disabled = true; out.textContent = ''; out.className = ''; state.textContent = 'Читаю афишу…';
+					window.fetch(data.home, { credentials: 'same-origin', cache: 'no-store' })
+						.then(function (r) { if (!r.ok) throw new Error('http ' + r.status); return r.text(); })
+						.then(compare)
+						.catch(function () { out.textContent = ''; line('Не удалось открыть главную страницу сайта. Повторите позже.', true); show('warning'); });
+				});
+			})();
+			</script>
 			<?php
 		}
 	}

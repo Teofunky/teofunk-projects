@@ -95,7 +95,8 @@ function kssUI(K, CSS) {
 
   function rebuild() {
     var offset = (typeof raw.off === 'number' && isFinite(raw.off)) ? raw.off * 1000 : undefined;
-    index = K.build(raw.ev, raw.pages, nowDate(), { genres: (raw.genres && !Array.isArray(raw.genres)) ? raw.genres : {}, offset: offset });
+    var cut = (typeof raw.cut === 'number' && isFinite(raw.cut)) ? raw.cut * 1000 : undefined;
+    index = K.build(raw.ev, raw.pages, nowDate(), { genres: (raw.genres && !Array.isArray(raw.genres)) ? raw.genres : {}, offset: offset, cutOffset: cut });
     if (content) { index.content = content; index.hasTexts = content.words.length > 0; }
   }
 

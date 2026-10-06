@@ -369,6 +369,31 @@ if ( ! class_exists( 'KSS_Index' ) ) :
 			return new DateTimeZone( 'Europe/Moscow' );
 		}
 
+		/**
+		 * Дата и время концерта в том виде, в каком их печатает афиша сайта.
+		 *
+		 * Тема выводит время вызовом date() от значения start, без пересчёта в часовой пояс сайта:
+		 * в базе лежит время «как на часах клуба». Поэтому здесь тот же вызов, а не wp_date()
+		 * и не перевод в пояс сайта: иначе поиск покажет время со сдвигом (в 1.0.1 было +3 часа).
+		 *
+		 * @param int $start Значение start из таблицы календаря.
+		 * @return array [ 'Y-m-d', 'H:i' ]
+		 */
+		public static function when( $start ) {
+			$start = (int) $start;
+			// phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+			return array( date( 'Y-m-d', $start ), date( 'H:i', $start ) );
+		}
+
+		/**
+		 * Смещение «часов афиши» от UTC в секундах: афиша показывает концерт, пока start > time(),
+		 * а время печатает через date(). Сравнивая с этими часами, поиск убирает концерт в ту же минуту, что и афиша.
+		 */
+		public static function afisha_offset( $now ) {
+			// phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+			return (int) date( 'Z', (int) $now );
+		}
+
 		public static function tables_ok() {
 			global $wpdb;
 			foreach ( array( 'ai1ec_event_instances', 'ai1ec_events' ) as $name ) {
@@ -644,7 +669,9 @@ if ( ! class_exists( 'KSS_Index' ) ) :
 			$index = array(
 				'v'        => self::SCHEMA,
 				'built'    => $now,
+				// off: часы клуба (для «сегодня» и «завтра»); cut: часы афиши (когда концерт пропадает из списка)
 				'off'      => (int) $tz->getOffset( new DateTime( '@' . $now ) ),
+				'cut'      => self::afisha_offset( $now ),
 				'evBase'   => $home . '/event/',
 				'imgBase'  => isset( $up['baseurl'] ) ? self::relative( $up['baseurl'] ) . '/' : '',
 				'webpBase' => '',
@@ -859,8 +886,7 @@ if ( ! class_exists( 'KSS_Index' ) ) :
 				if ( ! preg_match( '/^[A-Za-z0-9_%.-]+$/', $slug ) ) {
 					continue;
 				}
-				$dt = new DateTime( '@' . $start );
-				$dt->setTimezone( $tz );
+				$when = self::when( $start );
 
 				foreach ( $p['genres'] as $code => $name ) {
 					$genre_names[ $code ] = $name;
@@ -879,8 +905,8 @@ if ( ! class_exists( 'KSS_Index' ) ) :
 
 				$index['ev'][] = array(
 					$title,
-					$dt->format( 'Y-m-d' ),
-					$dt->format( 'H:i' ),
+					$when[0],
+					$when[1],
 					$p['stages'],
 					self::price( $row->cost ),
 					$slug,
