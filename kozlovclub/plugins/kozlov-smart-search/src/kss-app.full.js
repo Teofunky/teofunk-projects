@@ -1,4 +1,4 @@
-/*! Kozlov Smart Search 1.0.0. Поиск по афише в браузере посетителя. Глобальных переменных не создаёт, jQuery не использует. */
+/*! Kozlov Smart Search 1.0.1. Поиск по афише в браузере посетителя. Глобальных переменных не создаёт, jQuery не использует. */
 (function () {
 'use strict';
 
@@ -582,10 +582,15 @@ function kssUI(K, CSS) {
   try { cfg = JSON.parse(cfgEl.textContent || '{}'); } catch (e) { return; }
   if (!cfg || typeof cfg.index !== 'string' || !cfg.index) return;
 
-  var bar = doc.querySelector('.search_block');
-  var form = bar ? bar.querySelector('form') : null;
-  var input = bar ? bar.querySelector('input.searchinput, input[name="s"]') : null;
-  if (!bar || !form || !input || !Element.prototype.attachShadow || !win.fetch || !win.MutationObserver) return;
+  // Строка поиска темы. На сайте она одна на всех страницах; если шаблон выведет несколько,
+  // поиск работает с той, что сейчас раскрыта.
+  var bars = [];
+  Array.prototype.forEach.call(doc.querySelectorAll('.search_block'), function (b) {
+    var f = b.querySelector('form'), i = b.querySelector('input.searchinput, input[name="s"]');
+    if (f && i) bars.push({ bar: b, form: f, input: i });
+  });
+  if (!bars.length || !Element.prototype.attachShadow || !win.fetch || !win.MutationObserver) return;
+  var cur = bars[0], bar = cur.bar, form = cur.form, input = cur.input;
 
   var MON = ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
   var WD = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб'];
@@ -598,7 +603,7 @@ function kssUI(K, CSS) {
   var filter = { when: null, stage: null, free: false };
   var raw = null, index = null, content = null, loadedAt = 0, skew = 0, textsAsked = false, resynced = false;
   var host = null, shadow = null, root = null, panel = null, statusEl = null, closeBtn = null;
-  var observer = null, layoutQueued = false, listeners = [];
+  var observer = null, layoutQueued = false, listeners = [], buying = false;
 
   function setState(s) { state = s; try { cfgEl.setAttribute('data-kss', s); } catch (e) { /* не критично */ } }
   setState('idle');
@@ -624,7 +629,7 @@ function kssUI(K, CSS) {
       if (observer) observer.disconnect();
       if (host && host.parentNode) host.parentNode.removeChild(host);
       host = shadow = root = panel = null; isOpen = false;
-      input.removeAttribute('aria-expanded');
+      bars.forEach(function (c) { c.input.removeAttribute('aria-expanded'); });
     } catch (x) { /* уже нечего убирать */ }
     try { if (win.console && e && cfg.preview) win.console.warn('[kozlov-smart-search] выключен:', e); } catch (x) { /* не критично */ }
   }
@@ -911,6 +916,17 @@ function kssUI(K, CSS) {
 
   /* ---------- открытие и закрытие ---------- */
   function barActive() { return bar.classList.contains('active'); }
+  function activeOne() {
+    if (barActive()) return cur;
+    for (var i = 0; i < bars.length; i++) if (bars[i].bar.classList.contains('active')) return bars[i];
+    return null;
+  }
+  /* Переключение на другую строку поиска: панель закрывается и откроется уже под ней. */
+  function use(c) {
+    if (c === cur) return;
+    hide();
+    cur = c; bar = c.bar; form = c.form; input = c.input;
+  }
 
   function open() {
     if (state === 'failed') return;
@@ -950,27 +966,59 @@ function kssUI(K, CSS) {
   }
 
   function sync() {
-    if (barActive()) { if (!isOpen) { open(); focusQuiet(input); } }
+    var a = activeOne();
+    if (a) { use(a); if (!isOpen) { open(); focusQuiet(input); } }
     else hide();
   }
 
-  function ticketsReady() { return !!(win.ticketsCloudWidget || win.tcBuyTicketClickCallbackBinded); }
-  function ticketsOpen() { return !!doc.querySelector('#tc-widget-overlay, [id^="tc-widget"], iframe[name^="tc-frame"], iframe[class*="tc-widget"], iframe[src*="ticketscloud"]'); }
+  /* Элемент действительно виден на экране: не скрыт стилями и не пустой. */
+  function shown(el) {
+    if (!el || !el.getBoundingClientRect) return false;
+    var r = el.getBoundingClientRect(), s = win.getComputedStyle(el);
+    if (!(r.width > 0 && r.height > 0) || s.display === 'none' || s.visibility === 'hidden') return false;
+    return r.bottom > 0 && r.right > 0 && r.top < (win.innerHeight || 1e6) && r.left < (win.innerWidth || 1e6);
+  }
+  /* Скрипт Ticketscloud начинает слушать нажатия не сразу: он сам выставляет этот флаг, когда готов (на сайте: после загрузки страницы).
+     Пока флага нет, «Купить билет» работает как обычная ссылка на страницу концерта. */
+  function ticketsReady() {
+    return win.tcBuyTicketClickCallbackBinded === true || (!!win.ticketsCloudWidget && doc.readyState === 'complete');
+  }
+  /* Виден ли виджет Ticketscloud. С token: виден ли виджет именно этого концерта.
+     Элементы виджета, оставшиеся на странице скрытыми после закрытия, не считаются. */
+  function ticketsShown(token) {
+    var frames = doc.querySelectorAll('iframe[name^="tc-frame"], iframe[data-tc-event-id], iframe[class*="tc-widget"]'), i, f;
+    for (i = 0; i < frames.length; i++) {
+      f = frames[i];
+      if (token && f.getAttribute('data-tc-event-id') !== token && f.getAttribute('name') !== 'tc-frame-' + token) continue;
+      if (shown(f)) return true;
+    }
+    return token ? false : shown(doc.getElementById('tc-widget-overlay'));
+  }
 
-  /* «Купить билет»: открываем тот же виджет Ticketscloud, что и кнопки афиши. Не открылся: ведём на страницу концерта. */
+  /* «Купить билет»: открываем тот же виджет Ticketscloud, что и кнопки афиши, тем же способом: нажатием на элемент с атрибутом tc-event.
+     Затем проверяем, что на экране появился виджет именно этого концерта. Не появился за полторы секунды: ведём на страницу концерта. */
   function buy(token, url) {
-    var b = doc.createElement('button');
+    if (buying) return;
+    buying = true;
+    var b = doc.createElement('button'), tries = 0;
     b.type = 'button'; b.className = 'kss-tc-proxy'; b.tabIndex = -1;
     b.setAttribute('tc-event', token); b.setAttribute('aria-hidden', 'true');
     b.style.display = 'none';
     doc.body.appendChild(b);
-    b.click();
-    setTimeout(function () {
-      try {
-        if (b.parentNode) b.parentNode.removeChild(b);
-        if (!ticketsOpen() && url !== '#') win.location.href = url;
-      } catch (e) { /* не критично */ }
-    }, 2500);
+    var done = function (opened) {
+      buying = false;
+      try { if (b.parentNode) b.parentNode.removeChild(b); } catch (e) { /* не критично */ }
+      if (!opened && url && url !== '#') win.location.href = url;
+    };
+    var check = function () {
+      var opened = false;
+      try { opened = ticketsShown(token); } catch (e) { opened = false; }
+      if (opened) { done(true); return; }
+      if (++tries > 15) { done(false); return; }
+      setTimeout(check, 100);
+    };
+    try { b.click(); } catch (e) { done(false); return; }
+    check();
   }
 
   function onPanelClick(e) {
@@ -999,23 +1047,29 @@ function kssUI(K, CSS) {
 
   /* ---------- связь со строкой поиска темы ---------- */
   observer = new win.MutationObserver(guard(sync));
-  observer.observe(bar, { attributes: true, attributeFilter: ['class'] });
-
-  on(input, 'input', function () {
-    if (!barActive()) return;
-    if (!isOpen) open();
-    limit = LIMIT; render();
-  });
-  on(input, 'focus', function () { if (barActive() && !isOpen) open(); });
-  on(form, 'submit', function (e) {
-    // пока наш поиск работает, Enter не уводит на страницу штатного поиска, а переводит к первому результату
-    if (!isOpen || (state !== 'ready' && state !== 'loading')) return;
-    e.preventDefault();
-    var first = panel ? panel.querySelector('[data-nav]') : null;
-    if (first) focusQuiet(first);
+  bars.forEach(function (c) {
+    observer.observe(c.bar, { attributes: true, attributeFilter: ['class'] });
+    on(c.input, 'input', function () {
+      if (!c.bar.classList.contains('active')) return;
+      use(c);
+      if (!isOpen) open();
+      limit = LIMIT; render();
+    });
+    on(c.input, 'focus', function () {
+      if (!c.bar.classList.contains('active')) return;
+      use(c);
+      if (!isOpen) open();
+    });
+    on(c.form, 'submit', function (e) {
+      // пока наш поиск работает, Enter не уводит на страницу штатного поиска, а переводит к первому результату
+      if (c !== cur || !isOpen || (state !== 'ready' && state !== 'loading')) return;
+      e.preventDefault();
+      var first = panel ? panel.querySelector('[data-nav]') : null;
+      if (first) focusQuiet(first);
+    });
   });
   on(doc, 'keydown', function (e) {
-    if (!isOpen || ticketsOpen()) return;
+    if (!isOpen || ticketsShown()) return;
     if (e.key === 'Escape' || e.key === 'Esc') { e.preventDefault(); closeBar(); return; }
     if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
     var links = Array.prototype.slice.call(panel.querySelectorAll('[data-nav]'));
@@ -1034,7 +1088,7 @@ function kssUI(K, CSS) {
   on(win, 'pageshow', function (e) { if (e && e.persisted) sync(); });
 
   // строка поиска уже раскрыта (посетитель нажал лупу до загрузки скрипта)
-  if (barActive() && !/[?&]s=/.test(win.location.search)) guard(function () { open(); focusQuiet(input); })();
+  if (activeOne() && !/[?&]s=/.test(win.location.search)) guard(sync)();
 }
 
 var KSS_CSS = ".kss-root{all:initial;display:block;font-family:'Roboto',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;font-size:16px;line-height:1.4;color:#020817;-webkit-text-size-adjust:100%;--kss-bg:#ffffff;--kss-ink:#020817;--kss-soft:#5b6170;--kss-line:#dcdcdc;--kss-buy:#f34841;--kss-buy-a:#d53234;--kss-read:#8e9f94;--kss-read-a:#6e7e74;--kss-price:#f24841;--kss-mark:#fde0de;--kss-bar:#eeeeee;--kss-top:50px;--kss-bar-top:0px;--kss-bar-h:50px;--kss-close-left:0px;--kss-pl:30px;--kss-pr:30px;--kss-vh:100vh}.kss-root *{box-sizing:border-box}.kss-root[hidden]{display:none}.kss-shade{position:fixed;left:0;right:0;bottom:0;top:var(--kss-top);background:rgba(2,8,23,.45)}.kss-close{position:fixed;top:var(--kss-bar-top);left:var(--kss-close-left);width:44px;height:var(--kss-bar-h);display:flex;align-items:center;justify-content:center;margin:0;padding:0;border:0;border-radius:0;background:var(--kss-bar);color:var(--kss-ink);cursor:pointer;font:inherit;-webkit-appearance:none;appearance:none}.kss-close-icon{display:block;width:18px;height:18px}.kss-panel{position:fixed;left:0;right:0;top:var(--kss-top);background:var(--kss-bg);box-shadow:0 24px 40px rgba(2,8,23,.18);border-top:1px solid var(--kss-line);max-height:min(74vh,720px);overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}.kss-in{padding:16px var(--kss-pr) 8px var(--kss-pl)}.kss-label{overflow-wrap:anywhere;font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--kss-soft);margin:6px 0 10px;font-weight:500}.kss-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}.kss-chip{display:inline-flex;align-items:center;min-height:36px;margin:0;padding:6px 14px;border:1px solid var(--kss-line);background:var(--kss-bg);color:var(--kss-ink);border-radius:18px;font:inherit;font-size:14px;line-height:1.2;white-space:nowrap;cursor:pointer;-webkit-appearance:none;appearance:none}.kss-chip:hover{border-color:var(--kss-ink)}.kss-chip-on,.kss-chip-on:hover{background:var(--kss-ink);border-color:var(--kss-ink);color:#fff}.kss-chip-reset{border-style:dashed;color:var(--kss-soft)}.kss-list{list-style:none;margin:0 0 10px;padding:0;border-top:1px solid var(--kss-line)}.kss-row{display:grid;grid-template-columns:112px minmax(0,1fr) auto;grid-template-areas:\"thumb main cta\";gap:6px 18px;align-items:center;margin:0;padding:12px 0;border-bottom:1px solid var(--kss-line)}.kss-row-multi{grid-template-areas:\"thumb main cta\" \"thumb more cta\"}.kss-sep{margin:0;padding:18px 0 8px;border-bottom:1px solid var(--kss-line);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--kss-soft);font-weight:500}.kss-thumb{grid-area:thumb;display:block;width:112px;height:84px;background:#d9d9d9;overflow:hidden}.kss-img{display:block;width:100%;height:100%;object-fit:cover;border:0}.kss-main{grid-area:main;min-width:0;display:block;color:inherit;text-decoration:none}.kss-row-multi .kss-main{align-self:end}.kss-title{display:block;font-weight:500;text-transform:uppercase;line-height:1.25;overflow-wrap:anywhere}.kss-mark{background:var(--kss-mark);color:inherit;padding:0 .08em;margin:0 -.08em}.kss-meta{display:block;margin-top:5px;font-size:14px;color:var(--kss-soft);text-transform:uppercase;letter-spacing:.015em;font-weight:500}.kss-when{color:var(--kss-ink);font-weight:500}.kss-price{color:var(--kss-price);white-space:nowrap}.kss-note{display:block;margin-top:4px;font-size:13px;color:var(--kss-soft);overflow-wrap:anywhere}.kss-more{grid-area:more;display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;color:var(--kss-soft);align-self:start}.kss-date{display:inline-flex;align-items:center;min-height:28px;padding:2px 10px;border:1px solid var(--kss-line);border-radius:14px;color:var(--kss-ink);font-size:13px;white-space:nowrap;text-decoration:none}.kss-date:hover{border-color:var(--kss-ink)}.kss-cta{grid-area:cta;display:grid;place-items:center;height:44px;padding:0 20px;color:#fff;background:var(--kss-buy);font-size:12px;letter-spacing:.2em;text-transform:uppercase;white-space:nowrap;text-decoration:none;transition:background .2s}.kss-cta:hover{background:var(--kss-buy-a)}.kss-cta-read{background:var(--kss-read)}.kss-cta-read:hover{background:var(--kss-read-a)}.kss-row:hover .kss-title{text-decoration:underline;text-underline-offset:3px}.kss-main:focus-visible .kss-title{text-decoration:underline;text-underline-offset:3px}.kss-page{display:flex;justify-content:space-between;gap:16px;align-items:baseline;padding:12px 0;border-bottom:1px solid var(--kss-line);color:inherit;text-decoration:none}.kss-page-title{font-weight:500;text-transform:uppercase}.kss-page-url{color:var(--kss-soft);font-size:13px;white-space:nowrap}.kss-page:hover .kss-page-title{text-decoration:underline;text-underline-offset:3px}.kss-empty{padding:22px 0 14px}.kss-empty-title{display:block;font-size:17px;font-weight:500;text-transform:uppercase;margin-bottom:6px}.kss-empty-text{margin:0 0 14px;color:var(--kss-soft);max-width:60ch;overflow-wrap:anywhere}.kss-none{margin:0;padding:14px 0;color:var(--kss-soft)}.kss-foot{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:8px 0 10px;font-size:13px;color:var(--kss-soft)}.kss-foot-link{color:var(--kss-ink);text-decoration:underline;text-underline-offset:3px}.kss-kbd{font-family:inherit;border:1px solid var(--kss-line);border-radius:4px;padding:0 5px;font-size:12px;background:var(--kss-bg)}.kss-preview{margin:0 0 12px;padding:8px 12px;background:#fff7e0;border:1px solid #ecd9a0;font-size:13px;color:#5c4a12}.kss-showmore{display:block;width:100%;height:46px;margin:0 0 10px;padding:0;border:1px solid var(--kss-line);border-radius:0;background:var(--kss-bg);color:var(--kss-ink);font:inherit;text-transform:uppercase;font-size:12px;letter-spacing:.2em;cursor:pointer;-webkit-appearance:none;appearance:none}.kss-showmore:hover{border-color:var(--kss-ink)}.kss-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}.kss-close:focus,.kss-chip:focus,.kss-main:focus,.kss-date:focus,.kss-cta:focus,.kss-page:focus,.kss-showmore:focus,.kss-foot-link:focus{outline:2px solid var(--kss-buy);outline-offset:2px}.kss-close:focus:not(:focus-visible),.kss-chip:focus:not(:focus-visible),.kss-main:focus:not(:focus-visible),.kss-date:focus:not(:focus-visible),.kss-cta:focus:not(:focus-visible),.kss-page:focus:not(:focus-visible),.kss-showmore:focus:not(:focus-visible),.kss-foot-link:focus:not(:focus-visible){outline:none}@media (max-width:860px){.kss-panel{bottom:auto;max-height:none;height:calc(var(--kss-vh) - var(--kss-top));box-shadow:none}.kss-in{padding-bottom:calc(72px + env(safe-area-inset-bottom,0px))}.kss-keys{display:none}.kss-chips{flex-wrap:nowrap;overflow-x:auto;margin-left:calc(var(--kss-pl) * -1);margin-right:calc(var(--kss-pr) * -1);padding-left:var(--kss-pl);padding-right:var(--kss-pr);scrollbar-width:none}.kss-chips::-webkit-scrollbar{display:none}.kss-row{grid-template-columns:88px minmax(0,1fr);grid-template-areas:\"thumb main\" \"thumb cta\";gap:10px 12px;align-items:start}.kss-row-multi{grid-template-areas:\"thumb main\" \"thumb cta\" \"more more\"}.kss-thumb{width:88px;height:66px;align-self:start}.kss-row-multi .kss-main{align-self:start}.kss-title{font-size:15px}.kss-meta{font-size:13px}.kss-cta{height:42px;padding:0 12px;font-size:11px;letter-spacing:.16em}.kss-dot{display:none}.kss-price{display:block;margin-top:2px}.kss-page{flex-direction:column;gap:2px}.kss-page-url{white-space:normal;overflow-wrap:anywhere}.kss-date{min-height:34px;padding:4px 12px}}@media (min-width:521px) and (max-width:860px){.kss-cta{justify-self:start;min-width:220px}}@media (prefers-reduced-motion:reduce){.kss-cta{transition:none}}";

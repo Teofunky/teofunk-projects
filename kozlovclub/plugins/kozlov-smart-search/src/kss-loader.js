@@ -9,8 +9,11 @@
     var cfg = JSON.parse(el.textContent || '{}');
     if (!cfg || typeof cfg.app !== 'string' || !cfg.app || !cfg.index) return;
     // поиск подключается только к строке поиска темы; на страницах без неё скрипт ничего не делает
-    var bar = d.querySelector('.search_block');
-    if (!bar || !bar.querySelector('form') || !bar.querySelector('input.searchinput, input[name="s"]')) return;
+    var all = d.querySelectorAll('.search_block'), bars = [], i;
+    for (i = 0; i < all.length; i++) {
+      if (all[i].querySelector('form') && all[i].querySelector('input.searchinput, input[name="s"]')) bars.push(all[i]);
+    }
+    if (!bars.length) return;
 
     var done = false, mo = null;
     var load = function () {
@@ -22,10 +25,10 @@
       (d.head || d.documentElement).appendChild(s);
     };
 
-    if (bar.classList.contains('active')) { load(); return; }
+    for (i = 0; i < bars.length; i++) if (bars[i].classList.contains('active')) { load(); return; }
     mo = new w.MutationObserver(load);
-    mo.observe(bar, { attributes: true, attributeFilter: ['class'] });
-    var btns = d.querySelectorAll('.search-btn'), i;
+    for (i = 0; i < bars.length; i++) mo.observe(bars[i], { attributes: true, attributeFilter: ['class'] });
+    var btns = d.querySelectorAll('.search-btn');
     for (i = 0; i < btns.length; i++) {
       btns[i].addEventListener('mouseenter', load, { once: true, passive: true });
       btns[i].addEventListener('touchstart', load, { once: true, passive: true });

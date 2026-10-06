@@ -93,6 +93,9 @@ if ( ! class_exists( 'KSS_Rest' ) ) :
 					if ( 0 === strpos( (string) $request->get_route(), '/' . self::NS . '/' ) && (int) $response->get_status() >= 400 ) {
 						$response->header( 'Cache-Control', 'private, no-store' );
 						$response->header( 'Expires', self::PAST );
+						if ( 503 === (int) $response->get_status() ) {
+							$response->header( 'Retry-After', '5' );
+						}
 					}
 				}
 			} catch ( \Throwable $e ) {

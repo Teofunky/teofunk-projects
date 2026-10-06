@@ -10,10 +10,15 @@ function kssUI(K, CSS) {
   try { cfg = JSON.parse(cfgEl.textContent || '{}'); } catch (e) { return; }
   if (!cfg || typeof cfg.index !== 'string' || !cfg.index) return;
 
-  var bar = doc.querySelector('.search_block');
-  var form = bar ? bar.querySelector('form') : null;
-  var input = bar ? bar.querySelector('input.searchinput, input[name="s"]') : null;
-  if (!bar || !form || !input || !Element.prototype.attachShadow || !win.fetch || !win.MutationObserver) return;
+  // Строка поиска темы. На сайте она одна на всех страницах; если шаблон выведет несколько,
+  // поиск работает с той, что сейчас раскрыта.
+  var bars = [];
+  Array.prototype.forEach.call(doc.querySelectorAll('.search_block'), function (b) {
+    var f = b.querySelector('form'), i = b.querySelector('input.searchinput, input[name="s"]');
+    if (f && i) bars.push({ bar: b, form: f, input: i });
+  });
+  if (!bars.length || !Element.prototype.attachShadow || !win.fetch || !win.MutationObserver) return;
+  var cur = bars[0], bar = cur.bar, form = cur.form, input = cur.input;
 
   var MON = ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
   var WD = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб'];
@@ -26,7 +31,7 @@ function kssUI(K, CSS) {
   var filter = { when: null, stage: null, free: false };
   var raw = null, index = null, content = null, loadedAt = 0, skew = 0, textsAsked = false, resynced = false;
   var host = null, shadow = null, root = null, panel = null, statusEl = null, closeBtn = null;
-  var observer = null, layoutQueued = false, listeners = [];
+  var observer = null, layoutQueued = false, listeners = [], buying = false;
 
   function setState(s) { state = s; try { cfgEl.setAttribute('data-kss', s); } catch (e) { /* не критично */ } }
   setState('idle');
@@ -52,7 +57,7 @@ function kssUI(K, CSS) {
       if (observer) observer.disconnect();
       if (host && host.parentNode) host.parentNode.removeChild(host);
       host = shadow = root = panel = null; isOpen = false;
-      input.removeAttribute('aria-expanded');
+      bars.forEach(function (c) { c.input.removeAttribute('aria-expanded'); });
     } catch (x) { /* уже нечего убирать */ }
     try { if (win.console && e && cfg.preview) win.console.warn('[kozlov-smart-search] выключен:', e); } catch (x) { /* не критично */ }
   }
@@ -339,6 +344,17 @@ function kssUI(K, CSS) {
 
   /* ---------- открытие и закрытие ---------- */
   function barActive() { return bar.classList.contains('active'); }
+  function activeOne() {
+    if (barActive()) return cur;
+    for (var i = 0; i < bars.length; i++) if (bars[i].bar.classList.contains('active')) return bars[i];
+    return null;
+  }
+  /* Переключение на другую строку поиска: панель закрывается и откроется уже под ней. */
+  function use(c) {
+    if (c === cur) return;
+    hide();
+    cur = c; bar = c.bar; form = c.form; input = c.input;
+  }
 
   function open() {
     if (state === 'failed') return;
@@ -378,27 +394,59 @@ function kssUI(K, CSS) {
   }
 
   function sync() {
-    if (barActive()) { if (!isOpen) { open(); focusQuiet(input); } }
+    var a = activeOne();
+    if (a) { use(a); if (!isOpen) { open(); focusQuiet(input); } }
     else hide();
   }
 
-  function ticketsReady() { return !!(win.ticketsCloudWidget || win.tcBuyTicketClickCallbackBinded); }
-  function ticketsOpen() { return !!doc.querySelector('#tc-widget-overlay, [id^="tc-widget"], iframe[name^="tc-frame"], iframe[class*="tc-widget"], iframe[src*="ticketscloud"]'); }
+  /* Элемент действительно виден на экране: не скрыт стилями и не пустой. */
+  function shown(el) {
+    if (!el || !el.getBoundingClientRect) return false;
+    var r = el.getBoundingClientRect(), s = win.getComputedStyle(el);
+    if (!(r.width > 0 && r.height > 0) || s.display === 'none' || s.visibility === 'hidden') return false;
+    return r.bottom > 0 && r.right > 0 && r.top < (win.innerHeight || 1e6) && r.left < (win.innerWidth || 1e6);
+  }
+  /* Скрипт Ticketscloud начинает слушать нажатия не сразу: он сам выставляет этот флаг, когда готов (на сайте: после загрузки страницы).
+     Пока флага нет, «Купить билет» работает как обычная ссылка на страницу концерта. */
+  function ticketsReady() {
+    return win.tcBuyTicketClickCallbackBinded === true || (!!win.ticketsCloudWidget && doc.readyState === 'complete');
+  }
+  /* Виден ли виджет Ticketscloud. С token: виден ли виджет именно этого концерта.
+     Элементы виджета, оставшиеся на странице скрытыми после закрытия, не считаются. */
+  function ticketsShown(token) {
+    var frames = doc.querySelectorAll('iframe[name^="tc-frame"], iframe[data-tc-event-id], iframe[class*="tc-widget"]'), i, f;
+    for (i = 0; i < frames.length; i++) {
+      f = frames[i];
+      if (token && f.getAttribute('data-tc-event-id') !== token && f.getAttribute('name') !== 'tc-frame-' + token) continue;
+      if (shown(f)) return true;
+    }
+    return token ? false : shown(doc.getElementById('tc-widget-overlay'));
+  }
 
-  /* «Купить билет»: открываем тот же виджет Ticketscloud, что и кнопки афиши. Не открылся: ведём на страницу концерта. */
+  /* «Купить билет»: открываем тот же виджет Ticketscloud, что и кнопки афиши, тем же способом: нажатием на элемент с атрибутом tc-event.
+     Затем проверяем, что на экране появился виджет именно этого концерта. Не появился за полторы секунды: ведём на страницу концерта. */
   function buy(token, url) {
-    var b = doc.createElement('button');
+    if (buying) return;
+    buying = true;
+    var b = doc.createElement('button'), tries = 0;
     b.type = 'button'; b.className = 'kss-tc-proxy'; b.tabIndex = -1;
     b.setAttribute('tc-event', token); b.setAttribute('aria-hidden', 'true');
     b.style.display = 'none';
     doc.body.appendChild(b);
-    b.click();
-    setTimeout(function () {
-      try {
-        if (b.parentNode) b.parentNode.removeChild(b);
-        if (!ticketsOpen() && url !== '#') win.location.href = url;
-      } catch (e) { /* не критично */ }
-    }, 2500);
+    var done = function (opened) {
+      buying = false;
+      try { if (b.parentNode) b.parentNode.removeChild(b); } catch (e) { /* не критично */ }
+      if (!opened && url && url !== '#') win.location.href = url;
+    };
+    var check = function () {
+      var opened = false;
+      try { opened = ticketsShown(token); } catch (e) { opened = false; }
+      if (opened) { done(true); return; }
+      if (++tries > 15) { done(false); return; }
+      setTimeout(check, 100);
+    };
+    try { b.click(); } catch (e) { done(false); return; }
+    check();
   }
 
   function onPanelClick(e) {
@@ -427,23 +475,29 @@ function kssUI(K, CSS) {
 
   /* ---------- связь со строкой поиска темы ---------- */
   observer = new win.MutationObserver(guard(sync));
-  observer.observe(bar, { attributes: true, attributeFilter: ['class'] });
-
-  on(input, 'input', function () {
-    if (!barActive()) return;
-    if (!isOpen) open();
-    limit = LIMIT; render();
-  });
-  on(input, 'focus', function () { if (barActive() && !isOpen) open(); });
-  on(form, 'submit', function (e) {
-    // пока наш поиск работает, Enter не уводит на страницу штатного поиска, а переводит к первому результату
-    if (!isOpen || (state !== 'ready' && state !== 'loading')) return;
-    e.preventDefault();
-    var first = panel ? panel.querySelector('[data-nav]') : null;
-    if (first) focusQuiet(first);
+  bars.forEach(function (c) {
+    observer.observe(c.bar, { attributes: true, attributeFilter: ['class'] });
+    on(c.input, 'input', function () {
+      if (!c.bar.classList.contains('active')) return;
+      use(c);
+      if (!isOpen) open();
+      limit = LIMIT; render();
+    });
+    on(c.input, 'focus', function () {
+      if (!c.bar.classList.contains('active')) return;
+      use(c);
+      if (!isOpen) open();
+    });
+    on(c.form, 'submit', function (e) {
+      // пока наш поиск работает, Enter не уводит на страницу штатного поиска, а переводит к первому результату
+      if (c !== cur || !isOpen || (state !== 'ready' && state !== 'loading')) return;
+      e.preventDefault();
+      var first = panel ? panel.querySelector('[data-nav]') : null;
+      if (first) focusQuiet(first);
+    });
   });
   on(doc, 'keydown', function (e) {
-    if (!isOpen || ticketsOpen()) return;
+    if (!isOpen || ticketsShown()) return;
     if (e.key === 'Escape' || e.key === 'Esc') { e.preventDefault(); closeBar(); return; }
     if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
     var links = Array.prototype.slice.call(panel.querySelectorAll('[data-nav]'));
@@ -462,5 +516,5 @@ function kssUI(K, CSS) {
   on(win, 'pageshow', function (e) { if (e && e.persisted) sync(); });
 
   // строка поиска уже раскрыта (посетитель нажал лупу до загрузки скрипта)
-  if (barActive() && !/[?&]s=/.test(win.location.search)) guard(function () { open(); focusQuiet(input); })();
+  if (activeOne() && !/[?&]s=/.test(win.location.search)) guard(sync)();
 }

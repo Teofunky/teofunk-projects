@@ -1,6 +1,7 @@
 <?php
 /**
  * Сборка поискового индекса. Только чтение: один SELECT по таблицам календаря и чтение полей событий.
+ * Концерты, закрытые паролем, в индекс не попадают.
  * Результат хранится в кэше и не строится на каждый запрос посетителя.
  */
 
@@ -15,40 +16,69 @@ if ( ! class_exists( 'KSS_Index' ) ) :
 		const SCHEMA     = 1;
 		const KEY_INDEX  = 'kss_index_v1';
 		const KEY_TEXTS  = 'kss_texts_v1';
-		const KEY_LOCK   = 'kss_lock_v1';
+		const KEY_LOCK   = 'kss_lock_v1';   // запасная блокировка, когда файловая недоступна
+		const KEY_DIRTY  = 'kss_dirty_v1';  // когда в последний раз сохраняли событие или страницу
+		const KEY_FAIL   = 'kss_fail_v1';   // сборка только что не удалась
 		const FRESH      = 600;    // столько секунд кэш отдаётся без пересборки
 		const KEEP       = 86400;  // столько секунд хранится запасная копия
+		const MIN_GAP    = 20;     // между двумя пересборками проходит не меньше стольких секунд
+		const FAIL_PAUSE = 30;     // после неудачной сборки столько секунд новых попыток нет
+		const WAIT_MS    = 4000;   // столько запрос ждёт при пустом кэше, пока индекс собирает другой запрос
 		const MAX_EVENTS = 1500;
 		const MAX_DOC    = 700;    // слов на один анонс
 		const MAX_VOCAB  = 40000;
 
-		protected static $flush_planned = false;
+		protected static $dirty_planned = false;
 
 		public static function init() {
-			// После сохранения события или страницы кэш сбрасывается в конце запроса, когда все поля уже записаны.
-			add_action( 'save_post', array( __CLASS__, 'plan_flush' ), 99, 0 );
-			add_action( 'deleted_post', array( __CLASS__, 'plan_flush' ), 99, 0 );
-			add_action( 'trashed_post', array( __CLASS__, 'plan_flush' ), 99, 0 );
-			add_action( 'untrashed_post', array( __CLASS__, 'plan_flush' ), 99, 0 );
+			// После сохранения события или страницы индекс помечается устаревшим в конце запроса, когда все поля уже записаны.
+			// Прежняя копия при этом остаётся в кэше: посетители получают её, пока один запрос собирает новую.
+			add_action( 'save_post', array( __CLASS__, 'on_save' ), 99, 2 );
+			add_action( 'deleted_post', array( __CLASS__, 'plan_dirty' ), 99, 0 );
+			add_action( 'trashed_post', array( __CLASS__, 'plan_dirty' ), 99, 0 );
+			add_action( 'untrashed_post', array( __CLASS__, 'plan_dirty' ), 99, 0 );
 		}
 
-		public static function plan_flush() {
+		/** Сохранение записи: индекс зависит только от концертов и страниц; черновики-ревизии и прочие типы записей его не трогают. */
+		public static function on_save( $post_id = 0, $post = null ) {
 			try {
-				if ( self::$flush_planned ) {
+				if ( is_object( $post ) && isset( $post->post_type ) && ! in_array( $post->post_type, array( 'ai1ec_event', 'page' ), true ) ) {
 					return;
 				}
-				self::$flush_planned = true;
-				add_action( 'shutdown', array( __CLASS__, 'flush' ), 1, 0 );
+				self::plan_dirty();
 			} catch ( \Throwable $e ) {
 				kss_log( $e );
 			}
 		}
 
+		public static function plan_dirty() {
+			try {
+				if ( self::$dirty_planned ) {
+					return;
+				}
+				self::$dirty_planned = true;
+				add_action( 'shutdown', array( __CLASS__, 'mark_dirty' ), 1, 0 );
+			} catch ( \Throwable $e ) {
+				kss_log( $e );
+			}
+		}
+
+		public static function mark_dirty() {
+			try {
+				set_transient( self::KEY_DIRTY, time(), self::KEEP );
+			} catch ( \Throwable $e ) {
+				kss_log( $e );
+			}
+		}
+
+		/** Полный сброс кэша: после смены настроек и по кнопке «Пересобрать индекс». */
 		public static function flush() {
 			try {
 				delete_transient( self::KEY_INDEX );
 				delete_transient( self::KEY_TEXTS );
 				delete_transient( self::KEY_LOCK );
+				delete_transient( self::KEY_DIRTY );
+				delete_transient( self::KEY_FAIL );
 			} catch ( \Throwable $e ) {
 				kss_log( $e );
 			}
@@ -103,43 +133,223 @@ if ( ! class_exists( 'KSS_Index' ) ) :
 		}
 
 		/**
-		 * Возвращает индекс ('index') или тексты анонсов ('texts') из кэша; при необходимости пересобирает.
-		 * Пока один запрос пересобирает индекс, остальные получают прежнюю копию.
+		 * Копия из кэша и её состояние.
 		 *
 		 * @param string $part  'index' или 'texts'.
-		 * @param bool   $force Пересобрать независимо от возраста кэша.
+		 * @param string $state Сюда пишется 'fresh' (свежая), 'stale' (устарела) или 'none' (копии нет).
+		 * @param int    $built Сюда пишется время сборки копии.
+		 * @return array|null
+		 */
+		protected static function read( $part, &$state, &$built ) {
+			$state = 'none';
+			$built = 0;
+			$index = get_transient( self::KEY_INDEX );
+			if ( ! is_array( $index ) || ! isset( $index['sig'], $index['built'] ) || $index['sig'] !== self::signature() ) {
+				return null;
+			}
+			$data = $index;
+			if ( 'texts' === $part ) {
+				$texts = get_transient( self::KEY_TEXTS );
+				if ( ! is_array( $texts ) || ! isset( $texts['built'] ) || (int) $texts['built'] !== (int) $index['built'] ) {
+					return null;
+				}
+				$data = $texts;
+			}
+			$built = (int) $index['built'];
+			$age   = time() - $built;
+			$dirty = (int) get_transient( self::KEY_DIRTY );
+			$state = ( $age >= 0 && $age < self::FRESH && $built > $dirty ) ? 'fresh' : 'stale';
+			return $data;
+		}
+
+		/**
+		 * Сбрасывает память текущего запроса о записях кэша плагина,
+		 * чтобы следующее чтение увидело то, что успел записать другой запрос.
+		 */
+		protected static function forget_local() {
+			try {
+				$keys = array( self::KEY_INDEX, self::KEY_TEXTS, self::KEY_DIRTY, self::KEY_FAIL, self::KEY_LOCK );
+				if ( wp_using_ext_object_cache() ) {
+					foreach ( $keys as $key ) {
+						wp_cache_get( $key, 'transient', true );
+					}
+					return;
+				}
+				$no = wp_cache_get( 'notoptions', 'options' );
+				foreach ( $keys as $key ) {
+					foreach ( array( '_transient_' . $key, '_transient_timeout_' . $key ) as $option ) {
+						wp_cache_delete( $option, 'options' );
+						if ( is_array( $no ) ) {
+							unset( $no[ $option ] );
+						}
+					}
+				}
+				if ( is_array( $no ) ) {
+					wp_cache_set( 'notoptions', $no, 'options' );
+				}
+			} catch ( \Throwable $e ) {
+				kss_log( $e );
+			}
+		}
+
+		/** Файл блокировки во временной папке сервера. В нём ничего не хранится. */
+		public static function lock_file() {
+			global $wpdb;
+			$dir = function_exists( 'get_temp_dir' ) ? get_temp_dir() : sys_get_temp_dir();
+			return rtrim( (string) $dir, '/\\' ) . '/kss-' . substr( md5( ABSPATH . '|' . $wpdb->prefix . '|' . ( defined( 'DB_NAME' ) ? DB_NAME : '' ) ), 0, 16 ) . '.lock';
+		}
+
+		/**
+		 * Блокировка пересборки: одновременно индекс собирает только один запрос.
+		 * Основной способ: flock на файле. Он атомарный и снимается сам, если процесс оборвался.
+		 * Если файловая блокировка на сервере недоступна, используется запись в кэше.
+		 *
+		 * @param int    $wait_ms Сколько миллисекунд ждать, если блокировку держит другой запрос. 0: не ждать.
+		 * @param string $kind    Сюда пишется способ: 'file' или 'cache'.
+		 * @return resource|bool Блокировка или false, если её держит другой запрос.
+		 */
+		protected static function lock( $wait_ms, &$kind = '' ) {
+			$deadline = microtime( true ) + max( 0, (int) $wait_ms ) / 1000;
+			$kind     = 'file';
+			$handle   = false;
+			try {
+				$handle = @fopen( self::lock_file(), 'c' ); // phpcs:ignore
+			} catch ( \Throwable $e ) {
+				$handle = false;
+			}
+			if ( is_resource( $handle ) ) {
+				while ( true ) {
+					$would_block = 0;
+					if ( @flock( $handle, LOCK_EX | LOCK_NB, $would_block ) ) { // phpcs:ignore
+						return $handle;
+					}
+					if ( ! $would_block ) {
+						break; // flock на этом сервере не работает: переходим к запасному способу
+					}
+					if ( microtime( true ) >= $deadline ) {
+						@fclose( $handle ); // phpcs:ignore
+						return false;
+					}
+					usleep( 100000 );
+				}
+				@fclose( $handle ); // phpcs:ignore
+			}
+			$kind = 'cache';
+			while ( true ) {
+				if ( wp_using_ext_object_cache() ) {
+					if ( wp_cache_add( self::KEY_LOCK, 1, 'transient', 60 ) ) {
+						return true;
+					}
+				} else {
+					self::forget_local();
+					if ( ! get_transient( self::KEY_LOCK ) ) {
+						set_transient( self::KEY_LOCK, 1, 60 );
+						return true;
+					}
+				}
+				if ( microtime( true ) >= $deadline ) {
+					return false;
+				}
+				usleep( 100000 );
+			}
+		}
+
+		protected static function unlock( $lock ) {
+			try {
+				if ( is_resource( $lock ) ) {
+					@flock( $lock, LOCK_UN ); // phpcs:ignore
+					@fclose( $lock ); // phpcs:ignore
+				} elseif ( true === $lock ) {
+					delete_transient( self::KEY_LOCK );
+				}
+			} catch ( \Throwable $e ) {
+				kss_log( $e );
+			}
+		}
+
+		/** Какой способ блокировки работает на этом сервере: 'file' или 'cache'. Для страницы настроек. */
+		public static function lock_kind() {
+			$kind = '';
+			$lock = self::lock( 0, $kind );
+			if ( false !== $lock ) {
+				self::unlock( $lock );
+			}
+			return $kind;
+		}
+
+		/**
+		 * Возвращает индекс ('index') или тексты анонсов ('texts') из кэша; при необходимости пересобирает.
+		 *
+		 * Нагрузка ограничена так:
+		 *  - свежая копия отдаётся без обращения к таблицам календаря;
+		 *  - собирает индекс всегда только один запрос (блокировка), остальные получают прежнюю копию;
+		 *  - при пустом кэше остальные запросы ждут готовый индекс, а не собирают его сами;
+		 *  - между двумя пересборками проходит не меньше MIN_GAP секунд, после неудачи пауза FAIL_PAUSE секунд.
+		 *
+		 * @param string $part  'index' или 'texts'.
+		 * @param bool   $force Пересобрать независимо от возраста кэша (кнопка в настройках).
 		 * @return array|null
 		 */
 		public static function get( $part = 'index', $force = false ) {
-			$sig   = self::signature();
-			$index = get_transient( self::KEY_INDEX );
-			$texts = null;
-			$ok    = is_array( $index ) && isset( $index['sig'], $index['built'] ) && $index['sig'] === $sig;
-			if ( $ok && 'texts' === $part ) {
-				$texts = get_transient( self::KEY_TEXTS );
-				$ok    = is_array( $texts ) && isset( $texts['built'] ) && (int) $texts['built'] === (int) $index['built'];
-			}
-			$cached = $ok ? ( 'texts' === $part ? $texts : $index ) : null;
-			if ( $ok && ! $force ) {
-				$age = time() - (int) $index['built'];
-				if ( ( $age >= 0 && $age < self::FRESH ) || get_transient( self::KEY_LOCK ) ) {
+			$state  = 'none';
+			$built  = 0;
+			$cached = self::read( $part, $state, $built );
+			if ( ! $force ) {
+				if ( 'fresh' === $state ) {
+					return $cached;
+				}
+				if ( get_transient( self::KEY_FAIL ) ) {
+					return $cached;
+				}
+				if ( null !== $cached && abs( time() - $built ) < self::MIN_GAP ) {
 					return $cached;
 				}
 			}
 
-			set_transient( self::KEY_LOCK, 1, 60 );
-			try {
-				$built = self::build();
-			} catch ( \Throwable $e ) {
-				delete_transient( self::KEY_LOCK );
-				kss_log( $e );
-				return $cached;
+			// Есть прежняя копия: не ждём, её и отдаём. Копии нет: ждём, пока индекс соберёт другой запрос.
+			$lock = self::lock( ( null === $cached || $force ) ? self::WAIT_MS : 0 );
+			if ( false === $lock ) {
+				if ( null !== $cached ) {
+					return $cached;
+				}
+				self::forget_local();
+				return self::read( $part, $state, $built );
 			}
-			$built['index']['sig'] = $sig;
-			set_transient( self::KEY_TEXTS, $built['texts'], self::KEEP );
-			set_transient( self::KEY_INDEX, $built['index'], self::KEEP );
-			delete_transient( self::KEY_LOCK );
-			return 'texts' === $part ? $built['texts'] : $built['index'];
+
+			try {
+				if ( ! $force ) {
+					// пока этот запрос ждал блокировку, индекс мог собрать другой
+					self::forget_local();
+					$again = self::read( $part, $state, $built );
+					if ( 'fresh' === $state || ( null !== $again && abs( time() - $built ) < self::MIN_GAP ) ) {
+						return $again;
+					}
+					if ( get_transient( self::KEY_FAIL ) ) {
+						return ( null !== $again ) ? $again : $cached;
+					}
+				}
+				$result                 = self::build();
+				$result['index']['sig'] = self::signature();
+				set_transient( self::KEY_TEXTS, $result['texts'], self::KEEP );
+				set_transient( self::KEY_INDEX, $result['index'], self::KEEP );
+				delete_transient( self::KEY_FAIL );
+				try {
+					do_action( 'kss_index_built', $result['index']['stats'] );
+				} catch ( \Throwable $e ) {
+					kss_log( $e );
+				}
+				return 'texts' === $part ? $result['texts'] : $result['index'];
+			} catch ( \Throwable $e ) {
+				kss_log( $e );
+				try {
+					set_transient( self::KEY_FAIL, 1, self::FAIL_PAUSE );
+				} catch ( \Throwable $ignored ) {
+					return $cached;
+				}
+				return $cached;
+			} finally {
+				self::unlock( $lock );
+			}
 		}
 
 		/* ------------------------------------------------------------ помощники */
@@ -466,7 +676,7 @@ if ( ! class_exists( 'KSS_Index' ) ) :
 						 FROM {$wpdb->prefix}ai1ec_event_instances AS i
 						 INNER JOIN {$wpdb->posts} AS p ON p.ID = i.post_id
 						 LEFT JOIN {$wpdb->prefix}ai1ec_events AS e ON e.post_id = i.post_id
-						 WHERE i.start > %d AND p.post_status = 'publish'
+						 WHERE i.start > %d AND p.post_status = 'publish' AND p.post_password = ''
 						 ORDER BY i.start ASC, i.post_id ASC
 						 LIMIT %d",
 						$now,

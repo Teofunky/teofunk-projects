@@ -187,7 +187,8 @@ if ( ! class_exists( 'KSS_Admin' ) ) :
 							<tr><td>Текстов анонсов / слов в словаре</td><td><?php echo (int) ( isset( $stats['texts'] ) ? $stats['texts'] : 0 ); ?> / <?php echo (int) ( isset( $stats['vocab'] ) ? $stats['vocab'] : 0 ); ?></td></tr>
 							<tr><td>Размер индекса / текстов</td><td><?php echo esc_html( self::kb( self::bytes( array_diff_key( $index, array( 'stats' => 1, 'sig' => 1 ) ) ) ) ); ?> / <?php echo esc_html( is_array( $texts ) ? self::kb( self::bytes( $texts ) ) : 'нет' ); ?> (до сжатия)</td></tr>
 							<tr><td>Собран</td><td><?php echo esc_html( wp_date( 'd.m.Y H:i:s', (int) $index['built'] ) ); ?>, за <?php echo (int) ( isset( $stats['ms'] ) ? $stats['ms'] : 0 ); ?> мс</td></tr>
-							<tr><td>Обновление</td><td>Автоматически раз в <?php echo (int) ( KSS_Index::FRESH / 60 ); ?> минут и после сохранения события или страницы</td></tr>
+							<tr><td>Обновление</td><td>Автоматически раз в <?php echo (int) ( KSS_Index::FRESH / 60 ); ?> минут и после сохранения события или страницы, но не чаще одного раза в <?php echo (int) KSS_Index::MIN_GAP; ?> секунд</td></tr>
+							<tr><td>Защита от одновременной пересборки</td><td><?php echo 'file' === KSS_Index::lock_kind() ? 'файловая блокировка (flock)' : 'блокировка через кэш (файловая на этом сервере недоступна)'; ?>. Индекс всегда собирает один запрос, остальные получают готовую копию.</td></tr>
 							<tr><td>Адрес индекса</td><td><code><?php echo esc_html( rest_url( KSS_Rest::NS . '/index' ) ); ?></code></td></tr>
 						</tbody>
 					</table>
@@ -233,7 +234,7 @@ if ( ! class_exists( 'KSS_Admin' ) ) :
 					<li>Выберите режим «Выключен» и сохраните: на сайте сразу останется штатный поиск темы.</li>
 					<li>Если админка недоступна, добавьте в <code>wp-config.php</code> строку <code>define( 'KSS_DISABLE', true );</code> или удалите папку <code>wp-content/plugins/kozlov-smart-search</code>.</li>
 				</ol>
-				<p class="description">Плагин ничего не записывает в события, страницы и таблицы календаря. Собственные данные плагина: одна запись настроек (<code>kss_settings</code>) и временный кэш индекса. При удалении плагина они стираются.</p>
+				<p class="description">Плагин ничего не записывает в события, страницы и таблицы календаря. Концерты, закрытые паролем, в поиск не попадают. Собственные данные плагина: одна запись настроек (<code>kss_settings</code>), временный кэш индекса и пустой файл блокировки во временной папке сервера. При удалении плагина они стираются.</p>
 			</div>
 			<?php
 		}
