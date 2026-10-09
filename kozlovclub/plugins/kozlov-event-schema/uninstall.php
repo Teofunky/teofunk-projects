@@ -1,6 +1,6 @@
 <?php
 /**
- * Удаление плагина: стираем только собственную настройку.
+ * Удаление плагина: стираем только собственные данные (настройку и поле статуса).
  *
  * @package Kozlov_Event_Schema
  */
@@ -10,3 +10,4 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 }
 
 delete_option( 'kozlov_event_schema_settings' );
+delete_post_meta_by_key( '_kozlov_event_status' );

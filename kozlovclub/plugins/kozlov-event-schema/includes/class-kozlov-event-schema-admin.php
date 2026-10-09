@@ -106,7 +106,7 @@ class Kozlov_Event_Schema_Admin {
 	 */
 	private static function render_settings() {
 		$enabled = kozlov_event_schema_is_enabled();
-		echo '<p>Плагин добавляет в &lt;head&gt; страниц будущих концертов один блок JSON-LD с датой, сценой, адресом, ценой и картинкой. Данные берутся из полей анонса, которые уже заполняют редакторы. Тема, база и афиша не меняются.</p>';
+		echo '<p>Плагин добавляет в &lt;head&gt; страниц будущих концертов один блок JSON-LD (MusicEvent) с датой, сценой, адресом, ценой, жанрами и картинкой. Данные берутся из полей анонса, которые уже заполняют редакторы. Тема и афиша не меняются. Если концерт отменён или перенесён без новой даты, отметьте это в блоке «Статус для поисковиков» справа в редакторе анонса.</p>';
 		echo '<form method="post" action="options.php">';
 		settings_fields( self::GROUP );
 		echo '<table class="form-table" role="presentation"><tr><th scope="row">Разметка на сайте</th><td>';
@@ -314,7 +314,11 @@ class Kozlov_Event_Schema_Admin {
 			echo '<td>' . esc_html( $status ) . '</td>';
 			echo '<td>' . esc_html( '' !== $info['stage'] ? $info['stage'] : 'не отмечена' ) . '</td>';
 			echo '<td>' . esc_html( $info['price'] ) . '</td>';
-			echo '<td>' . ( $row['ready'] ? 'выводится' : 'нет' ) . ' · <a href="' . esc_url( $preview ) . '">показать</a></td>';
+			$mark = $row['ready'] ? 'выводится' : 'нет';
+			if ( '' !== $info['schedule'] && 'По расписанию' !== $info['schedule'] ) {
+				$mark .= ' (' . $info['schedule'] . ')';
+			}
+			echo '<td>' . esc_html( $mark ) . ' · <a href="' . esc_url( $preview ) . '">показать</a></td>';
 			if ( $show_issues ) {
 				$texts = array();
 				foreach ( $row['shown'] as $code ) {

@@ -7,7 +7,9 @@
  * - сцена: поля Magic Fields location_main_scene / location_mansarda / location_the_beat / location_myasnitskaya;
  * - описание: поле Magic Fields textblock_1_description;
  * - продажа билетов: поле ticketscloud_link;
- * - картинка: изображение записи.
+ * - жанры: поле Magic Fields genre_categories (значения вида «Джаз|Jazz»);
+ * - картинка: изображение записи;
+ * - отмена или перенос: собственное поле плагина _kozlov_event_status (по умолчанию пусто).
  *
  * Класс только читает данные. Никаких записей в базу.
  *
@@ -45,6 +47,18 @@ class Kozlov_Event_Schema_Builder {
 
 	const DESCRIPTION_MAX = 500;
 
+	/** Собственное поле плагина: статус концерта для поисковиков. */
+	const STATUS_META = '_kozlov_event_status';
+
+	/** Поле Magic Fields с жанрами. */
+	const GENRE_META = 'genre_categories';
+
+	/** Отметки из списка жанров, которые не являются жанрами и не идут в keywords. */
+	const NOT_KEYWORDS = array( 'Вход свободный' );
+
+	/** Отметки, при которых событие не концерт, а обучающее (тип EducationEvent). */
+	const EDUCATION_TAGS = array( 'Лекция', 'Мастер-класс' );
+
 	/** Проблемы, при которых разметка на сайте не выводится. */
 	const BLOCKING = array( 'no_calendar_row', 'bad_start', 'no_title', 'no_url', 'recurring', 'password', 'not_published', 'ended' );
 
@@ -65,18 +79,22 @@ class Kozlov_Event_Schema_Builder {
 			'location_main_scene'   => array(
 				'label' => 'Главная сцена',
 				'venue' => 'marosejka',
+				'id'    => 'stage-main',
 			),
 			'location_mansarda'     => array(
 				'label' => 'Мансарда',
 				'venue' => 'marosejka',
+				'id'    => 'stage-mansarda',
 			),
 			'location_the_beat'     => array(
 				'label' => 'The Beat',
 				'venue' => 'marosejka',
+				'id'    => 'stage-the-beat',
 			),
 			'location_myasnitskaya' => array(
 				'label' => 'Сцена на Мясницкой, 15',
 				'venue' => 'myasnitskaya',
+				'id'    => 'stage-myasnitskaya',
 			),
 		);
 	}
@@ -104,29 +122,89 @@ class Kozlov_Event_Schema_Builder {
 	}
 
 	/**
+	 * Статусы концерта: значение поля => [подпись, eventStatus].
+	 *
+	 * @return array
+	 */
+	public static function statuses() {
+		return array(
+			''          => array( 'По расписанию', 'https://schema.org/EventScheduled' ),
+			'postponed' => array( 'Перенесён, новая дата неизвестна', 'https://schema.org/EventPostponed' ),
+			'cancelled' => array( 'Отменён', 'https://schema.org/EventCancelled' ),
+		);
+	}
+
+	/**
+	 * Текущий статус концерта (ключ из statuses()).
+	 *
+	 * @param int $post_id ID записи.
+	 * @return string
+	 */
+	public static function status( $post_id ) {
+		$value = get_post_meta( $post_id, self::STATUS_META, true );
+		$value = is_scalar( $value ) ? (string) $value : '';
+		return array_key_exists( $value, self::statuses() ) ? $value : '';
+	}
+
+	/**
+	 * Отметки из «Жанров» (русская часть до «|»).
+	 *
+	 * @param int $post_id ID записи.
+	 * @return string[]
+	 */
+	public static function genres( $post_id ) {
+		$raw  = get_post_meta( $post_id, self::GENRE_META, false );
+		$flat = array();
+		$walk = function ( $value ) use ( &$walk, &$flat ) {
+			$value = maybe_unserialize( $value );
+			if ( is_array( $value ) ) {
+				foreach ( $value as $item ) {
+					$walk( $item );
+				}
+			} elseif ( is_scalar( $value ) ) {
+				$flat[] = (string) $value;
+			}
+		};
+		$walk( $raw );
+
+		$out = array();
+		foreach ( $flat as $value ) {
+			$parts = explode( '|', $value );
+			$name  = self::plain_text( $parts[0] );
+			if ( '' !== $name && ! in_array( $name, $out, true ) ) {
+				$out[] = $name;
+			}
+		}
+		return $out;
+	}
+
+	/**
 	 * Человекочитаемые описания проблем (для страницы проверки).
 	 *
 	 * @return array
 	 */
 	public static function issue_labels() {
 		return array(
-			'no_calendar_row' => 'Нет даты в календаре: разметка не выводится',
-			'bad_start'       => 'Не читается дата начала: разметка не выводится',
-			'no_title'        => 'Нет заголовка: разметка не выводится',
-			'no_url'          => 'Нет адреса страницы: разметка не выводится',
-			'recurring'       => 'Повторяющееся событие: разметка не выводится',
-			'password'        => 'Защищён паролем: разметка не выводится',
-			'not_published'   => 'Не опубликован: разметка появится после публикации',
-			'ended'           => 'Уже прошёл',
-			'no_stage'        => 'Не отмечена сцена (в разметке будет адрес Маросейка, 9/2)',
-			'multi_stage'     => 'Отмечено несколько сцен (взята первая)',
-			'price_empty'     => 'Не указана стоимость: блок цены не выводится',
-			'price_unknown'   => 'Стоимость не распознана: блок цены не выводится',
-			'paid_no_tickets' => 'Платный, но нет ссылки Ticketscloud: блок цены не выводится',
-			'no_image'        => 'Нет изображения записи',
-			'small_image'     => 'Ширина изображения меньше 720 px: в разметку не включено',
-			'no_description'  => 'Пустой «Текстовый блок №1»: описание не выводится',
-			'long_end'        => 'Окончание позже чем через 7 дней или раньше начала: endDate не выводится',
+			'no_calendar_row'  => 'Нет даты в календаре: разметка не выводится',
+			'bad_start'        => 'Не читается дата начала: разметка не выводится',
+			'no_title'         => 'Нет заголовка: разметка не выводится',
+			'no_url'           => 'Нет адреса страницы: разметка не выводится',
+			'recurring'        => 'Повторяющееся событие: разметка не выводится',
+			'password'         => 'Защищён паролем: разметка не выводится',
+			'not_published'    => 'Не опубликован: разметка появится после публикации',
+			'ended'            => 'Уже прошёл',
+			'no_stage'         => 'Не отмечена сцена (в разметке будет адрес Маросейка, 9/2)',
+			'multi_stage'      => 'Отмечено несколько сцен (взята первая)',
+			'price_empty'      => 'Не указана стоимость: блок цены не выводится',
+			'price_unknown'    => 'Стоимость не распознана: блок цены не выводится',
+			'paid_no_tickets'  => 'Платный, но нет ссылки Ticketscloud: блок цены не выводится',
+			'no_image'         => 'Нет изображения записи',
+			'small_image'      => 'Ширина изображения меньше 720 px: в разметку не включено',
+			'no_description'   => 'Пустой «Текстовый блок №1»: описание не выводится',
+			'long_end'         => 'Окончание позже чем через 7 дней или раньше начала: endDate не выводится',
+			'no_genres'        => 'Не отмечены жанры: keywords не выводятся',
+			'status_postponed' => 'Отмечен как перенесённый: в разметке EventPostponed, без цены',
+			'status_cancelled' => 'Отмечен как отменённый: в разметке EventCancelled, без цены',
 		);
 	}
 
@@ -222,10 +300,11 @@ class Kozlov_Event_Schema_Builder {
 		$now    = null === $now ? time() : (int) $now;
 		$issues = array();
 		$info   = array(
-			'start'  => '',
-			'stage'  => '',
-			'price'  => '',
-			'status' => $post->post_status,
+			'start'    => '',
+			'stage'    => '',
+			'price'    => '',
+			'status'   => $post->post_status,
+			'schedule' => '',
 		);
 		$empty  = array(
 			'data'   => null,
@@ -287,10 +366,12 @@ class Kozlov_Event_Schema_Builder {
 		$stage_keys = self::stage_keys( $post->ID );
 		$stages     = self::stages();
 		$venues     = self::venues();
+		$home       = self::encode_url( home_url( '/' ) );
 		if ( empty( $stage_keys ) ) {
 			$issues[]   = 'no_stage';
 			$venue_key  = 'marosejka';
 			$place_name = self::CLUB_NAME;
+			$place_id   = $home . '#venue-marosejka';
 		} else {
 			if ( count( $stage_keys ) > 1 ) {
 				$issues[] = 'multi_stage';
@@ -298,32 +379,59 @@ class Kozlov_Event_Schema_Builder {
 			$stage         = $stages[ $stage_keys[0] ];
 			$venue_key     = $stage['venue'];
 			$place_name    = self::CLUB_NAME . ', ' . $stage['label'];
+			$place_id      = $home . '#' . $stage['id'];
 			$info['stage'] = $stage['label'];
 		}
 		$address = array_merge( array( '@type' => 'PostalAddress' ), $venues[ $venue_key ] );
 
+		// Жанры: keywords и тип события.
+		$genres   = self::genres( $post->ID );
+		$keywords = array_values( array_diff( $genres, self::NOT_KEYWORDS ) );
+		$type     = array_intersect( $genres, self::EDUCATION_TAGS ) ? 'EducationEvent' : 'MusicEvent';
+		if ( empty( $keywords ) ) {
+			$issues[] = 'no_genres';
+		}
+
+		// Отмена или перенос (поле заполняют только при необходимости).
+		$status_key       = self::status( $post->ID );
+		$statuses         = self::statuses();
+		$info['schedule'] = $statuses[ $status_key ][0];
+		if ( '' !== $status_key ) {
+			$issues[] = 'status_' . $status_key;
+		}
+
+		// Организатор: та же сущность, что Organization в разметке Yoast (если Yoast включён).
+		$organizer = array(
+			'@type' => 'Organization',
+			'name'  => self::CLUB_NAME,
+			'url'   => $home,
+		);
+		if ( defined( 'WPSEO_VERSION' ) ) {
+			$organizer = array_merge( array( '@id' => $home . '#organization' ), $organizer );
+		}
+
 		$data = array(
 			'@context'            => 'https://schema.org',
-			'@type'               => 'Event',
+			'@type'               => $type,
 			'@id'                 => $url . '#event',
 			'name'                => $name,
 			'url'                 => $url,
 			'startDate'           => $times['start'],
-			'eventStatus'         => 'https://schema.org/EventScheduled',
+			'eventStatus'         => $statuses[ $status_key ][1],
 			'eventAttendanceMode' => 'https://schema.org/OfflineEventAttendanceMode',
 			'location'            => array(
-				'@type'   => 'Place',
+				'@type'   => 'MusicVenue',
+				'@id'     => $place_id,
 				'name'    => $place_name,
 				'address' => $address,
 			),
-			'organizer'           => array(
-				'@type' => 'Organization',
-				'name'  => self::CLUB_NAME,
-				'url'   => self::encode_url( home_url( '/' ) ),
-			),
+			'organizer'           => $organizer,
 		);
 		if ( null !== $times['end'] ) {
 			$data['endDate'] = $times['end'];
+		}
+		if ( ! empty( $keywords ) ) {
+			$data['keywords'] = implode( ', ', $keywords );
 		}
 
 		// Описание.
@@ -355,7 +463,11 @@ class Kozlov_Event_Schema_Builder {
 		$cost          = self::parse_cost( isset( $row['cost'] ) ? $row['cost'] : '' );
 		$info['price'] = $cost['text'];
 		$tickets_link  = trim( (string) get_post_meta( $post->ID, 'ticketscloud_link', true ) );
-		switch ( $cost['kind'] ) {
+		// У отменённого или перенесённого концерта цену не выводим.
+		$price_kind = '' === $status_key ? $cost['kind'] : 'skip';
+		switch ( $price_kind ) {
+			case 'skip':
+				break;
 			case 'free':
 				$data['isAccessibleForFree'] = true;
 				$data['offers']              = self::offer( 0, $url );
@@ -392,6 +504,9 @@ class Kozlov_Event_Schema_Builder {
 	/**
 	 * Offer одного билета.
 	 *
+	 * Наличие билетов (availability) не выводим: ссылка Ticketscloud не означает,
+	 * что билеты не распроданы, а неверный InStock хуже, чем отсутствие поля.
+	 *
 	 * @param int    $price Цена в рублях.
 	 * @param string $url   Страница с покупкой.
 	 * @return array
@@ -402,7 +517,6 @@ class Kozlov_Event_Schema_Builder {
 			'price'         => (int) $price,
 			'priceCurrency' => 'RUB',
 			'url'           => $url,
-			'availability'  => 'https://schema.org/InStock',
 		);
 	}
 
