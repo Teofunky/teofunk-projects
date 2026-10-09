@@ -65,6 +65,9 @@ class Kozlov_Event_Schema_Builder {
 	/** Проблемы, при которых разметка на сайте не выводится. */
 	const BLOCKING = array( 'no_calendar_row', 'bad_start', 'no_title', 'no_url', 'recurring', 'password', 'not_published', 'ended' );
 
+	/** Статусы, при которых разметка выводится и после исходной даты. */
+	const KEEP_AFTER_DATE = array( 'postponed', 'cancelled' );
+
 	/**
 	 * Кэш строк календаря на время одного запроса.
 	 *
@@ -234,9 +237,9 @@ class Kozlov_Event_Schema_Builder {
 			'no_description'     => 'Пустой «Текстовый блок №1»: описание не выводится',
 			'long_end'           => 'Окончание позже чем через 7 дней или раньше начала: endDate не выводится',
 			'no_genres'          => 'Не отмечены жанры: keywords не выводятся',
-			'status_postponed'   => 'Отмечен как отложенный: в разметке EventPostponed, без цены',
+			'status_postponed'   => 'Отмечен как отложенный: в разметке EventPostponed. Проверьте, что это написано в тексте анонса',
 			'status_rescheduled' => 'Отмечен как перенесённый на новую дату: в разметке EventRescheduled',
-			'status_cancelled'   => 'Отмечен как отменённый: в разметке EventCancelled, без цены',
+			'status_cancelled'   => 'Отмечен как отменённый: в разметке EventCancelled. Проверьте, что это написано в тексте анонса',
 			'no_previous_start'  => 'Перенесён, но не указана прежняя дата (или она совпадает с новой): previousStartDate не выводится',
 		);
 	}
@@ -383,8 +386,17 @@ class Kozlov_Event_Schema_Builder {
 		if ( $times['long_end'] ) {
 			$issues[] = 'long_end';
 		}
+		// Статус нужен до проверки «прошёл»: отложенный и отменённый концерт остаются в разметке
+		// и после исходной даты (Google: startDate не трогать, менять только eventStatus).
+		$status_key       = self::status( $post->ID );
+		$statuses         = self::statuses();
+		$info['schedule'] = $statuses[ $status_key ][0];
+		if ( '' !== $status_key ) {
+			$issues[] = 'status_' . $status_key;
+		}
+
 		$finish = null !== $times['end_utc'] ? $times['end_utc'] : $times['start_utc'] + self::DEFAULT_LENGTH;
-		if ( $finish < $now ) {
+		if ( $finish < $now && ! in_array( $status_key, self::KEEP_AFTER_DATE, true ) ) {
 			$issues[] = 'ended';
 		}
 
@@ -423,14 +435,6 @@ class Kozlov_Event_Schema_Builder {
 		$type     = array_intersect( $genres, self::EDUCATION_TAGS ) ? 'EducationEvent' : 'MusicEvent';
 		if ( empty( $keywords ) ) {
 			$issues[] = 'no_genres';
-		}
-
-		// Отмена или перенос (поле заполняют только при необходимости).
-		$status_key       = self::status( $post->ID );
-		$statuses         = self::statuses();
-		$info['schedule'] = $statuses[ $status_key ][0];
-		if ( '' !== $status_key ) {
-			$issues[] = 'status_' . $status_key;
 		}
 
 		// Организатор: та же сущность, что Organization в разметке Yoast (если Yoast включён).
@@ -505,11 +509,9 @@ class Kozlov_Event_Schema_Builder {
 		$cost          = self::parse_cost( isset( $row['cost'] ) ? $row['cost'] : '' );
 		$info['price'] = $cost['text'];
 		$tickets_link  = trim( (string) get_post_meta( $post->ID, 'ticketscloud_link', true ) );
-		// У отменённого и отложенного концерта цену не выводим; у перенесённого билеты продолжают действовать.
-		$price_kind = in_array( $status_key, array( 'cancelled', 'postponed' ), true ) ? 'skip' : $cost['kind'];
-		switch ( $price_kind ) {
-			case 'skip':
-				break;
+		// Цена выводится при любом статусе: по правилам Google при отмене, отсрочке и переносе
+		// меняется только eventStatus (и startDate с previousStartDate при переносе), остальные свойства не трогают.
+		switch ( $cost['kind'] ) {
 			case 'free':
 				$data['isAccessibleForFree'] = true;
 				$data['offers']              = self::offer( 0, $url );

@@ -174,6 +174,11 @@ class Kozlov_Event_Schema_Admin {
 		$ids = $wpdb->get_col( $wpdb->prepare( "SELECT e.`post_id` FROM `{$table}` e INNER JOIN `{$wpdb->posts}` p ON p.ID = e.post_id WHERE p.post_type = %s AND p.post_status IN ('publish','future','draft','pending','private') AND e.`start` >= %d ORDER BY e.`start` ASC LIMIT %d", Kozlov_Event_Schema_Builder::POST_TYPE, $since, self::CHECK_LIMIT ) );
 		$ids = array_map( 'intval', (array) $ids );
 
+		// Отложенные и отменённые показываем всегда, даже если исходная дата прошла: их разметка продолжает выводиться.
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery
+		$kept = $wpdb->get_col( $wpdb->prepare( "SELECT pm.post_id FROM `{$wpdb->postmeta}` pm INNER JOIN `{$wpdb->posts}` p ON p.ID = pm.post_id WHERE pm.meta_key = %s AND pm.meta_value IN ('postponed','cancelled') AND p.post_type = %s AND p.post_status IN ('publish','future','draft','pending','private') LIMIT %d", Kozlov_Event_Schema_Builder::STATUS_META, Kozlov_Event_Schema_Builder::POST_TYPE, self::CHECK_LIMIT ) );
+		$ids  = array_values( array_unique( array_merge( $ids, array_map( 'intval', (array) $kept ) ) ) );
+
 		if ( empty( $ids ) ) {
 			echo '<p>Ближайших событий не найдено.</p>';
 			return;
@@ -254,7 +259,7 @@ class Kozlov_Event_Schema_Admin {
 			$all[] = $row;
 		}
 
-		echo '<p>Проверено событий с датой от вчерашнего дня: <strong>' . (int) count( $posts ) . '</strong> (опубликовано: ' . (int) $published . '). Разметка готова к выводу: <strong>' . (int) $ready . '</strong>.</p>';
+		echo '<p>Проверено событий (с датой от вчерашнего дня, а также все отложенные и отменённые): <strong>' . (int) count( $posts ) . '</strong> (опубликовано: ' . (int) $published . '). Разметка готова к выводу: <strong>' . (int) $ready . '</strong>.</p>';
 
 		if ( ! empty( $counts ) ) {
 			arsort( $counts );

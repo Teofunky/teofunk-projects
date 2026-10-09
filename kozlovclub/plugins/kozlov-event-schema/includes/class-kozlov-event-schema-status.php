@@ -72,6 +72,7 @@ class Kozlov_Event_Schema_Status {
 			echo '<p style="margin:10px 0 4px;"><label for="kozlov-event-schema-previous">Прежняя дата (только для «Перенесён на новую дату»):</label></p>';
 			echo '<input type="datetime-local" id="kozlov-event-schema-previous" name="' . esc_attr( self::PREVIOUS_FIELD ) . '" value="' . esc_attr( $previous ) . '" style="width:100%">';
 
+			echo '<p style="color:#b32d2e;font-weight:600;">Статус здесь виден только поисковикам. При отмене, отсрочке или переносе обязательно напишите то же самое в тексте анонса.</p>';
 			echo '<p class="description">«Отложен»: новой даты нет, дату в календаре не меняйте.<br>«Перенесён на новую дату»: выберите этот статус, проверьте прежнюю дату и поставьте новую дату в календаре.<br>«Отменён»: дату не меняйте и анонс не удаляйте.</p>';
 		} catch ( Throwable $e ) {
 			return;

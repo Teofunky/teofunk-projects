@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Kozlov Event Schema
  * Description:       Разметка schema.org MusicEvent (JSON-LD) для страниц концертов. Читает данные анонсов, тему и афишу не меняет; хранит только свою настройку и необязательный статус «отложен / перенесён / отменён». Включается в «Настройки → Разметка концертов».
- * Version:           1.1.1
+ * Version:           1.1.2
  * Requires at least: 5.3
  * Requires PHP:      7.2
  * Author:            Kozlov Club
@@ -21,7 +21,7 @@ if ( defined( 'KOZLOV_EVENT_SCHEMA_VERSION' ) ) {
 	return;
 }
 
-define( 'KOZLOV_EVENT_SCHEMA_VERSION', '1.1.1' );
+define( 'KOZLOV_EVENT_SCHEMA_VERSION', '1.1.2' );
 define( 'KOZLOV_EVENT_SCHEMA_OPTION', 'kozlov_event_schema_settings' );
 define( 'KOZLOV_EVENT_SCHEMA_DIR', plugin_dir_path( __FILE__ ) );
 define( 'KOZLOV_EVENT_SCHEMA_FILE', __FILE__ );
