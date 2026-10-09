@@ -56,7 +56,20 @@ af_eq( array( 'free' => '1' ), $fri, array( 'W2', 'FE', 'S1' ), 'free' );
 af_eq( array( 'stage' => 'the_beat' ), $fri, array( 'T3', 'YO', 'NI', 'LT', 'N1' ), 'the_beat' );
 af_eq( array( 'stage' => 'main' ), $fri, array( 'W1', 'M1', 'MS' ), 'main' );
 af_eq( array( 'stage' => 'myasnitskaya,mansarda', 'days' => '10' ), $fri, array( 'T1', 'W2', 'KD' ), 'две сцены, 10 дней' );
-af_eq( array( 'stage' => 'nonsense' ), $fri, array( 'T1', 'T3', 'W1', 'W2', 'M1', 'FE', 'KD', 'S0', 'S1', 'XS', 'MS', 'YO', 'NI', 'LT', 'N1' ), 'неизвестная сцена = без фильтра' );
+af_eq( array( 'stage' => 'nonsense' ), $fri, array(), 'неизвестная сцена = пусто, а не все сцены' );
+af_eq( array( 'stage' => 'the_beat,nonsense' ), $fri, array(), 'одна сцена с опечаткой = пусто' );
+af_eq( array( 'stage' => 'Unplugged' ), $fri, array( 'T1' ), 'Unplugged = Мясницкая' );
+af_eq( array( 'free' => '1', 'days' => '200' ), $fri, array( 'W2', 'FE', 'S1', 'F2' ), 'free строго: цена или депозит исключают' );
+$c = Kozlov_Afisha_Data::cost( '1500 руб., детям бесплатно' );
+af_ok( false === $c['free'] && true === $c['has_price'], 'цена с «бесплатно» не бесплатно' );
+$c = Kozlov_Afisha_Data::cost( '[:ru]Вход свободный[:en]Free' );
+af_ok( true === $c['free'] && 'Вход свободный' === $c['text'], 'Вход свободный' );
+$c = Kozlov_Afisha_Data::cost( 'Вход свободный, депозит' );
+af_ok( false === $c['free'], 'свободный с депозитом не бесплатно' );
+$a = Kozlov_Afisha_Data::normalize_args( array( 'stage' => 'glavnaja', 'when' => 'tomorrow', 'days' => 'много', 'group' => 'week' ) );
+af_ok( 4 === count( $a['warnings'] ) && true === $a['stage_invalid'], 'замечания к параметрам: ' . count( $a['warnings'] ) );
+$a = Kozlov_Afisha_Data::normalize_args( array( 'genre' => 'jazz', 'days' => '30' ) );
+af_ok( array() === $a['warnings'], 'без замечаний при верных параметрах' );
 af_eq( array( 'when' => 'today' ), $fri, array( 'T1', 'T3' ), 'today пятница' );
 af_eq( array( 'when' => 'weekend' ), $fri, array( 'T1', 'T3', 'W1', 'W2' ), 'weekend пятница' );
 af_eq( array( 'when' => 'weekend' ), '2026-10-14 12:00', array( 'FE', 'KD' ), 'weekend среда' );
@@ -99,6 +112,8 @@ af_ok( false !== strpos( $html, 'ДЕПОЗИТ 2 000 РУБ.' ) && false === st
 af_ok( false !== strpos( $html, 'Вход свободный</div>' ), 'бесплатно из сериализованной цены' );
 af_ok( false === strpos( $html, 'a:2:{' ), 'нет сырого сериализованного текста' );
 af_ok( false !== strpos( $html, 'shortened' ), 'длинный заголовок shortened' );
+af_ok( false === strpos( $html, 'set_height' ), 'без set_height (не обрезается скриптом темы)' );
+af_ok( false !== strpos( $html, 'href="' . esc_url( get_permalink( $ids['T1'] ) ) . '">купить билет</a>' ), 'запасная ссылка купить билет' );
 af_ok( false !== strpos( $html, 'href="' . esc_url( get_permalink( $ids['T3'] ) ) . '">подробнее</a>' ), 'без билетов: подробнее' );
 af_ok( false !== strpos( $html, 'Вся афиша клуба' ), 'ссылка на всю афишу' );
 af_ok( false === strpos( $html, '?sort=' ), 'нет ссылок на ?sort=' );
@@ -156,12 +171,47 @@ $wpdb   = $GLOBALS['wpdb'];
 $cached = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->options} WHERE option_name LIKE '\\_transient\\_kozlov\\_afisha\\_%'" );
 af_ok( $cached >= 1 || wp_using_ext_object_cache(), 'кэш создан' );
 
+// Подсказки редактору: только вошедшим с правом edit_pages.
+wp_set_current_user( 0 );
+$guest = do_shortcode( '[kozlov_afisha stage="glavnaja"]' );
+wp_set_current_user( 1 );
+$admin = do_shortcode( '[kozlov_afisha stage="glavnaja"]' );
+$admin2 = do_shortcode( '[kozlov_afisha genre="ежик"]' );
+wp_set_current_user( 0 );
+af_ok( false === strpos( $guest, 'kozlov-afisha__admin' ) && false !== strpos( $guest, 'kozlov-afisha__empty' ), 'гость: без подсказок, пустой список' );
+af_ok( false !== strpos( $admin, 'kozlov-afisha__admin' ) && false !== strpos( $admin, 'glavnaja' ), 'редактор: подсказка о сцене' );
+af_ok( false !== strpos( $admin2, 'Нет концертов с жанром' ), 'редактор: подсказка о жанре' );
+af_ok( 1 === substr_count( $out1 . $out2 . $guest . $admin . $admin2, 'kozlov-afisha-pages-tc-fallback' ), 'скрипт запасной покупки один раз' );
+
+// Сброс кэша при сохранении анонса.
+$v1 = get_option( 'kozlov_afisha_cache_ver' );
+usleep( 2000 );
+wp_update_post( array( 'ID' => $ids['M1'], 'post_title' => 'ПОНЕДЕЛЬНИК' ) );
+$v2 = get_option( 'kozlov_afisha_cache_ver' );
+af_ok( false !== $v2 && $v1 !== $v2, 'версия кэша меняется при сохранении анонса' );
+usleep( 2000 );
+wp_update_post( array( 'ID' => $ids['PAGE'], 'post_title' => 'Джаз в Москве' ) );
+af_ok( get_option( 'kozlov_afisha_cache_ver' ) === $v2, 'сохранение обычной страницы кэш не сбрасывает' );
+
+// Проверка данных для справки.
+$d = Kozlov_Afisha_Data::diagnostics( 60 );
+af_ok( 1 === $d['recurring'] && 0 === $d['bad_time'] && '' === $d['error'] && $d['shown'] > 0, 'diagnostics: ' . wp_json_encode( $d ) );
+
 // Ошибка внутри: страница не падает.
 $GLOBALS['wpdb']->suppress_errors( true );
 $saved        = $wpdb->prefix;
 $wpdb->prefix = 'nosuchprefix_';
 $out          = Kozlov_Afisha_Render::render( Kozlov_Afisha_Data::normalize_args( array( 'genre' => 'blues', 'days' => '33' ) ), af_at( $fri ) );
+$built        = Kozlov_Afisha_Render::build( Kozlov_Afisha_Data::normalize_args( array( 'genre' => 'blues', 'days' => '34' ) ), af_at( $fri ) );
+$wpdb->prefix = 'nosuchprefix2_';
+wp_set_current_user( 1 );
+$sc           = do_shortcode( '[kozlov_afisha days="35"]' );
+wp_set_current_user( 0 );
 $wpdb->prefix = $saved;
 af_ok( false !== strpos( $out, 'kozlov-afisha__empty' ), 'нет таблицы календаря: пустой список, без ошибок' );
+af_ok( '' !== $built['error'], 'нет таблицы: ошибка видна в build()' );
+af_ok( false !== strpos( $sc, 'Не удалось прочитать календарь' ), 'нет таблицы: подсказка редактору' );
+$cached = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->options} WHERE option_value LIKE '%nosuchprefix2%'" );
+af_ok( 0 === $cached, 'ошибка не кэшируется' );
 
 echo 'pass=' . $GLOBALS['af_pass'] . ' fail=' . $GLOBALS['af_fail'] . "\n";

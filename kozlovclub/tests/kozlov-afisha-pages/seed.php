@@ -34,6 +34,9 @@ $cases = array(
 	'NI'  => array( 'title' => 'БЕЗ КАРТИНКИ', 'stage' => array( 'location_the_beat' ), 'start' => '2026-10-25 20:00', 'end' => '2026-10-25 22:00', 'cost' => 'от 1000 руб.', 'tc' => $hex, 'img' => 0, 'genres_rows' => array( 'Фанк|Funk', 'Соул|Soul' ) ),
 	'LT'  => array( 'title' => 'ОЧЕНЬ ДЛИННОЕ НАЗВАНИЕ КОНЦЕРТА, КОТОРОЕ НЕ ПОМЕЩАЕТСЯ В ДВЕ СТРОКИ КАРТОЧКИ НА ГЛАВНОЙ', 'stage' => array( 'location_the_beat' ), 'start' => '2026-10-26 20:00', 'end' => '2026-10-26 22:00', 'cost' => 'от 1000 руб.', 'tc' => $hex, 'genres' => array( 'Джаз|Jazz' ) ),
 	'NE'  => array( 'title' => 'БЕЗ ОКОНЧАНИЯ', 'stage' => array( 'location_the_beat' ), 'start' => '2026-10-09 13:00', 'end' => '2026-10-09 13:00', 'cost' => 'от 1000 руб.', 'tc' => $hex, 'instant' => 1, 'genres' => array( 'Джаз|Jazz' ) ),
+	'F1'  => array( 'title' => 'ДЕТЯМ БЕСПЛАТНО, ВЗРОСЛЫМ НЕТ', 'stage' => array( 'location_mansarda' ), 'start' => '2026-12-15 20:00', 'end' => '2026-12-15 22:00', 'cost' => '1500 руб., детям бесплатно', 'tc' => '', 'genres' => array( 'Вход свободный|Free' ) ),
+	'F2'  => array( 'title' => 'СВОБОДНЫЙ 18+', 'stage' => array( 'location_mansarda' ), 'start' => '2026-12-16 20:00', 'end' => '2026-12-16 22:00', 'cost' => 'Вход свободный (18+)', 'tc' => '' ),
+	'F3'  => array( 'title' => 'МЕТКА СВОБОДНЫЙ, НО ДЕПОЗИТ', 'stage' => array( 'location_mansarda' ), 'start' => '2026-12-17 20:00', 'end' => '2026-12-17 22:00', 'cost' => 'ДЕПОЗИТ 1000 РУБ.', 'tc' => '', 'genres' => array( 'Вход свободный|Free' ) ),
 	'FAR' => array( 'title' => 'ДАЛЕКО', 'stage' => array( 'location_the_beat' ), 'start' => '2027-06-01 20:00', 'end' => '2027-06-01 22:00', 'cost' => 'от 1000 руб.', 'tc' => $hex, 'genres' => array( 'Джаз|Jazz' ) ),
 );
 
