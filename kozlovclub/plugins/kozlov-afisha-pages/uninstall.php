@@ -20,3 +20,5 @@ $wpdb->query(
 		$wpdb->esc_like( '_transient_timeout_kozlov_afisha_' ) . '%'
 	)
 );
+
+delete_option( 'kozlov_afisha_cache_ver' );

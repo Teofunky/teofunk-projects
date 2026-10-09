@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name:       Kozlov Afisha Pages
- * Description:       Шорткод [kozlov_afisha] для посадочных страниц: афиша по жанру, сцене, «сегодня», «на выходных», «бесплатно» в дизайне карточек сайта. Только читает данные анонсов, ничего не записывает. Справка: «Настройки → Страницы афиши».
- * Version:           1.0.0
+ * Description:       Шорткод [kozlov_afisha] для посадочных страниц: афиша по жанру, сцене, «сегодня», «на выходных», «бесплатно» в дизайне карточек сайта. Анонсы, тему и главную не меняет; пишет только временный кэш готовых списков. Справка: «Настройки → Страницы афиши».
+ * Version:           1.0.1
  * Requires at least: 5.3
  * Requires PHP:      7.2
  * Author:            Kozlov Club
@@ -20,7 +20,7 @@ if ( defined( 'KOZLOV_AFISHA_PAGES_VERSION' ) ) {
 	return;
 }
 
-define( 'KOZLOV_AFISHA_PAGES_VERSION', '1.0.0' );
+define( 'KOZLOV_AFISHA_PAGES_VERSION', '1.0.1' );
 define( 'KOZLOV_AFISHA_PAGES_DIR', plugin_dir_path( __FILE__ ) );
 define( 'KOZLOV_AFISHA_PAGES_FILE', __FILE__ );
 
@@ -73,8 +73,8 @@ function kozlov_afisha_pages_shortcode( $atts ) {
 			'kozlov_afisha'
 		);
 
-		// Список зависит от текущего времени: страницу целиком не кладём в кэш W3 Total Cache,
-		// а готовый список держим в кэше 5 минут.
+		// Список зависит от текущего времени: просим W3 Total Cache не класть страницу в кэш целиком,
+		// а готовый список держим 5 минут (сбрасывается при сохранении анонса).
 		if ( ! defined( 'DONOTCACHEPAGE' ) ) {
 			define( 'DONOTCACHEPAGE', true );
 		}

@@ -29,6 +29,9 @@ class Kozlov_Afisha_Render {
 
 	const STYLE_HANDLE = 'kozlov-afisha-pages';
 
+	/** Версия кэша: меняется при сохранении, удалении и восстановлении анонса. */
+	const VERSION_OPTION = 'kozlov_afisha_cache_ver';
+
 	/**
 	 * Выведены ли уже стили на этой странице.
 	 *
@@ -37,10 +40,43 @@ class Kozlov_Afisha_Render {
 	private static $style_done = false;
 
 	/**
-	 * Хуки фронта.
+	 * Выведен ли уже скрипт запасной ссылки «купить билет».
+	 *
+	 * @var bool
+	 */
+	private static $script_done = false;
+
+	/**
+	 * Хуки.
 	 */
 	public static function init() {
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_style' ) );
+		add_action( 'save_post_' . Kozlov_Afisha_Data::POST_TYPE, array( __CLASS__, 'flush' ) );
+		add_action( 'deleted_post', array( __CLASS__, 'flush_if_event' ) );
+		add_action( 'trashed_post', array( __CLASS__, 'flush_if_event' ) );
+		add_action( 'untrashed_post', array( __CLASS__, 'flush_if_event' ) );
+	}
+
+	/**
+	 * Сбрасывает кэш списков: следующий показ страницы соберёт афишу заново.
+	 */
+	public static function flush() {
+		try {
+			update_option( self::VERSION_OPTION, (string) microtime( true ), false );
+		} catch ( Throwable $e ) {
+			return;
+		}
+	}
+
+	/**
+	 * Сброс кэша, если удалён или восстановлен анонс.
+	 *
+	 * @param int $post_id ID записи.
+	 */
+	public static function flush_if_event( $post_id ) {
+		if ( Kozlov_Afisha_Data::POST_TYPE === get_post_type( $post_id ) ) {
+			self::flush();
+		}
 	}
 
 	/**
@@ -73,13 +109,15 @@ class Kozlov_Afisha_Render {
 		$k = '.kozlov-afisha.kozlov-afisha';
 		return $k . '{margin:10px 0 40px;line-height:normal}'
 			. $k . ' .kozlov-afisha__group{margin:0}'
-			. $k . ' .event_month{font-size:16px;font-weight:500;letter-spacing:.05em;line-height:1.3;margin:30px 0 54px;padding:0}'
-			. $k . ' .kozlov-afisha__group:first-child .event_month{margin-top:10px}'
+			. $k . ' .event_month{font-size:16px;font-weight:500;letter-spacing:.05em;line-height:1.3;margin:40px 0 64px;padding:0}'
+			. $k . ' .kozlov-afisha__group:first-child .event_month{margin-top:20px}'
 			. $k . ' .events.view_cell{margin:0}'
 			. $k . ' .kozlov-afisha__group--plain .events.view_cell{margin-top:44px}'
 			. $k . ' .events .event a{text-decoration:none}'
 			. $k . ' .events .event .desc a.title,' . $k . ' .events .event .top_info{color:#424242}'
-			. $k . ' .events.view_cell .event .desc .title{height:50px;overflow:hidden}'
+			. $k . ' .events.view_cell .event .desc .title{min-height:50px;height:auto;overflow:visible}'
+			. $k . '.kozlov-afisha--no-tc .events .event .readmore .btn-widget{display:none}'
+			. '.kozlov-afisha__admin{margin:10px 0;padding:10px 14px;border-left:4px solid #d63638;background:#fcf0f1;color:#1d2327;font-size:14px;line-height:1.4}'
 			. $k . ' .events .event .readmore a{color:#fff}'
 			. $k . ' .kozlov-afisha__note,' . $k . ' .kozlov-afisha__empty,' . $k . ' .kozlov-afisha__more{padding:10px 0;margin:0}'
 			. $k . ' .kozlov-afisha__more a{text-decoration:underline}';
@@ -96,33 +134,97 @@ class Kozlov_Afisha_Render {
 
 		$club  = new DateTimeZone( Kozlov_Afisha_Data::CLUB_TZ );
 		$today = new DateTime( 'now', $club );
-		$key   = self::CACHE_PREFIX . md5( wp_json_encode( $args ) . '|' . $today->format( 'Y-m-d' ) . '|' . KOZLOV_AFISHA_PAGES_VERSION . '|' . home_url( '/' ) );
+		$ver   = (string) get_option( self::VERSION_OPTION, '0' );
+		$key   = self::CACHE_PREFIX . md5( wp_json_encode( $args ) . '|' . $today->format( 'Y-m-d' ) . '|' . KOZLOV_AFISHA_PAGES_VERSION . '|' . home_url( '/' ) . '|' . $ver );
 
-		$html = get_transient( $key );
-		if ( ! is_string( $html ) || '' === $html ) {
-			$html = self::render( $args );
-			set_transient( $key, $html, self::CACHE_TTL );
+		$built = get_transient( $key );
+		if ( ! is_array( $built ) || ! isset( $built['html'], $built['error'], $built['count'] ) || ! is_string( $built['html'] ) ) {
+			$built = self::build( $args );
+			// Ошибку чтения календаря не кэшируем: следующий показ попробует снова.
+			if ( '' === $built['error'] ) {
+				set_transient( $key, $built, self::CACHE_TTL );
+			}
 		}
+
+		$html = self::editor_notes( $args, $built ) . $built['html'];
 
 		if ( ! self::$style_done ) {
 			// Шорткод вне основной записи страницы: стили выводим один раз прямо перед афишей.
 			self::$style_done = true;
 			$html             = '<style id="kozlov-afisha-pages-inline-css">' . self::css() . '</style>' . $html;
 		}
+		if ( ! self::$script_done && false !== strpos( $built['html'], 'tc-event=' ) ) {
+			self::$script_done = true;
+			$html             .= self::fallback_script();
+		}
 
 		return $html;
 	}
 
 	/**
-	 * HTML афиши.
+	 * Скрипт запасного пути покупки: если виджет Ticketscloud не загрузился,
+	 * скрываем невидимую кнопку виджета, и «купить билет» ведёт на страницу концерта.
+	 *
+	 * @return string
+	 */
+	private static function fallback_script() {
+		return '<script id="kozlov-afisha-pages-tc-fallback">(function(){function c(){if(typeof window.ticketsCloudWidget!=="undefined"){return;}var w=document.querySelectorAll(".kozlov-afisha");for(var i=0;i<w.length;i++){w[i].className+=" kozlov-afisha--no-tc";}}function s(){setTimeout(c,5000);}if(document.readyState==="complete"){s();}else{window.addEventListener("load",s);}})();</script>';
+	}
+
+	/**
+	 * Подсказки только для тех, кто может править страницы: ошибки параметров и чтения календаря.
+	 * Посетители их не видят. В кэш не попадают.
+	 *
+	 * @param array $args  Параметры.
+	 * @param array $built Результат build().
+	 * @return string
+	 */
+	private static function editor_notes( array $args, array $built ) {
+		if ( ! function_exists( 'current_user_can' ) || ! current_user_can( 'edit_pages' ) ) {
+			return '';
+		}
+		$notes = isset( $args['warnings'] ) && is_array( $args['warnings'] ) ? $args['warnings'] : array();
+		if ( '' !== $built['error'] ) {
+			$notes[] = 'Не удалось прочитать календарь, поэтому список пуст: ' . $built['error'];
+		} elseif ( 0 === (int) $built['count'] && ! empty( $args['genre'] ) ) {
+			$notes[] = 'Нет концертов с жанром «' . implode( ', ', $args['genre'] ) . '» на выбранный период. Проверьте название жанра: «Настройки → Страницы афиши».';
+		}
+		if ( empty( $notes ) ) {
+			return '';
+		}
+		$out = '';
+		foreach ( $notes as $note ) {
+			$out .= '<p class="kozlov-afisha__admin">Видно только редакторам. ' . esc_html( $note ) . '</p>';
+		}
+		return $out;
+	}
+
+	/**
+	 * HTML афиши (для тестов и совместимости).
 	 *
 	 * @param array    $args Нормализованные параметры.
 	 * @param int|null $now  Текущее время (unix), для тестов.
 	 * @return string
 	 */
 	public static function render( array $args, $now = null ) {
+		$built = self::build( $args, $now );
+		return $built['html'];
+	}
+
+	/**
+	 * Сборка афиши.
+	 *
+	 * @param array    $args Нормализованные параметры.
+	 * @param int|null $now  Текущее время (unix), для тестов.
+	 * @return array {html: string, error: string, count: int}
+	 */
+	public static function build( array $args, $now = null ) {
 		$now    = null === $now ? time() : (int) $now;
 		$result = Kozlov_Afisha_Data::select( $args, $now );
+		$meta   = array(
+			'error' => (string) $result['error'],
+			'count' => count( $result['items'] ),
+		);
 		$club   = new DateTimeZone( Kozlov_Afisha_Data::CLUB_TZ );
 		$today  = new DateTime( '@' . $now );
 		$today->setTimezone( $club );
@@ -133,7 +235,7 @@ class Kozlov_Afisha_Render {
 		if ( empty( $result['items'] ) ) {
 			$empty = '' !== $args['empty'] ? $args['empty'] : self::default_empty( $args['when'] );
 			$out  .= '<p class="kozlov-afisha__empty">' . esc_html( $empty ) . ' <a href="' . esc_url( $home ) . '">Смотрите всю афишу клуба</a>.</p>';
-			return $out . '</div>';
+			return array_merge( $meta, array( 'html' => $out . '</div>' ) );
 		}
 
 		if ( '' !== $result['fallback'] ) {
@@ -184,7 +286,7 @@ class Kozlov_Afisha_Render {
 			$out .= '<p class="kozlov-afisha__more">' . esc_html( $more ) . '<a href="' . esc_url( $home ) . '">Вся афиша клуба</a></p>';
 		}
 
-		return $out . '</div>';
+		return array_merge( $meta, array( 'html' => $out . '</div>' ) );
 	}
 
 	/**
@@ -273,7 +375,7 @@ class Kozlov_Afisha_Render {
 
 		$title_len = function_exists( 'mb_strlen' ) ? mb_strlen( $title, 'UTF-8' ) : strlen( $title );
 		$out      .= '<div class="desc">';
-		$out      .= '<a class="title set_height' . ( $title_len > 60 ? ' shortened' : '' ) . '" href="' . esc_url( $url ) . '">' . esc_html( $title ) . '</a>';
+		$out      .= '<a class="title' . ( $title_len > 60 ? ' shortened' : '' ) . '" href="' . esc_url( $url ) . '">' . esc_html( $title ) . '</a>';
 
 		$row1 = array( self::month( $item['start'], 'short' ) );
 		if ( ! $item['allday'] ) {
@@ -291,7 +393,8 @@ class Kozlov_Afisha_Render {
 		$out .= '<div class="readmore">';
 		if ( '' !== $item['tickets'] ) {
 			$out .= '<div class="btn-widget"><button class="tc-background-tomato" type="button" tc-event="' . esc_attr( $item['tickets'] ) . '">Купить билет</button></div>';
-			$out .= '<a class="btn-widget-buy">купить билет</a>';
+			// Ссылка под невидимой кнопкой виджета: работает, если виджет не загрузился.
+			$out .= '<a class="btn-widget-buy" href="' . esc_url( $url ) . '">купить билет</a>';
 		} else {
 			$out .= '<a class="btn-widget-buy" href="' . esc_url( $url ) . '">подробнее</a>';
 		}

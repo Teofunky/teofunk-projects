@@ -57,6 +57,24 @@ class Kozlov_Afisha_Data {
 	private static $rows_cache = array();
 
 	/**
+	 * Ошибка чтения календаря в последнем запросе (для подсказки редактору).
+	 *
+	 * @var string
+	 */
+	private static $last_error = '';
+
+	/**
+	 * Счётчики последней выборки: пропущенные повторяющиеся и с нечитаемой датой.
+	 *
+	 * @var array
+	 */
+	private static $stats = array(
+		'rows'      => 0,
+		'recurring' => 0,
+		'bad_time'  => 0,
+	);
+
+	/**
 	 * Сцены: ключ шорткода => поле Magic Fields и подпись (как на сайте).
 	 *
 	 * @return array
@@ -93,6 +111,9 @@ class Kozlov_Afisha_Data {
 			return isset( $atts[ $key ] ) && is_scalar( $atts[ $key ] ) ? trim( (string) $atts[ $key ] ) : $fallback;
 		};
 
+		// Замечания для редактора: видны только тем, кто может править страницы.
+		$warnings = array();
+
 		$genres = array();
 		foreach ( explode( ',', $get( 'genre', '' ) ) as $genre ) {
 			$genre = self::norm( $genre );
@@ -101,7 +122,7 @@ class Kozlov_Afisha_Data {
 			}
 		}
 
-		$aliases = array(
+		$aliases       = array(
 			'main'         => 'main_scene',
 			'main_scene'   => 'main_scene',
 			'glavnaya'     => 'main_scene',
@@ -110,39 +131,75 @@ class Kozlov_Afisha_Data {
 			'thebeat'      => 'the_beat',
 			'beat'         => 'the_beat',
 			'myasnitskaya' => 'myasnitskaya',
+			'unplugged'    => 'myasnitskaya',
 		);
-		$stages  = array();
+		$stages        = array();
+		$stage_invalid = false;
 		foreach ( explode( ',', $get( 'stage', '' ) ) as $stage ) {
-			$stage = strtolower( trim( str_replace( array( '-', ' ' ), '_', $stage ) ) );
-			if ( isset( $aliases[ $stage ] ) && ! in_array( $aliases[ $stage ], $stages, true ) ) {
-				$stages[] = $aliases[ $stage ];
+			$stage = self::lower( trim( str_replace( array( '-', ' ' ), '_', $stage ) ) );
+			if ( '' === $stage ) {
+				continue;
+			}
+			if ( isset( $aliases[ $stage ] ) ) {
+				if ( ! in_array( $aliases[ $stage ], $stages, true ) ) {
+					$stages[] = $aliases[ $stage ];
+				}
+			} else {
+				$warnings[] = 'Неизвестная сцена «' . $stage . '». Можно: main_scene, mansarda, the_beat, myasnitskaya.';
+				// Опечатка в сцене не должна молча выводить все сцены.
+				$stage_invalid = true;
 			}
 		}
 
-		$when = strtolower( $get( 'when', 'upcoming' ) );
+		$when = self::lower( $get( 'when', 'upcoming' ) );
 		if ( ! in_array( $when, array( 'upcoming', 'today', 'weekend' ), true ) ) {
-			$when = 'upcoming';
+			$warnings[] = 'Неизвестное значение when="' . $when . '". Можно: upcoming, today, weekend. Сейчас выводятся ближайшие концерты.';
+			$when       = 'upcoming';
 		}
 
-		$group = strtolower( $get( 'group', '' ) );
+		$group = self::lower( $get( 'group', '' ) );
+		if ( '' !== $group && ! in_array( $group, array( 'month', 'day', 'none' ), true ) ) {
+			$warnings[] = 'Неизвестное значение group="' . $group . '". Можно: month, day, none.';
+		}
 		if ( ! in_array( $group, array( 'month', 'day', 'none' ), true ) ) {
 			$group = 'upcoming' === $when ? 'month' : 'day';
 		}
 
-		$days  = (int) $get( 'days', '60' );
-		$limit = (int) $get( 'limit', '60' );
+		$days_raw  = $get( 'days', '60' );
+		$limit_raw = $get( 'limit', '60' );
+		if ( ! preg_match( '/^\d{1,3}$/', $days_raw ) || (int) $days_raw < 1 || (int) $days_raw > 366 ) {
+			$warnings[] = 'days="' . $days_raw . '": нужно число от 1 до 366.';
+		}
+		if ( ! preg_match( '/^\d{1,3}$/', $limit_raw ) || (int) $limit_raw < 1 || (int) $limit_raw > 200 ) {
+			$warnings[] = 'limit="' . $limit_raw . '": нужно число от 1 до 200.';
+		}
+		$days  = (int) $days_raw;
+		$limit = (int) $limit_raw;
 
 		return array(
-			'genre' => $genres,
-			'stage' => $stages,
-			'when'  => $when,
-			'free'  => in_array( strtolower( $get( 'free', '0' ) ), array( '1', 'yes', 'true', 'да' ), true ),
-			'days'  => max( 1, min( 366, $days > 0 ? $days : 60 ) ),
-			'limit' => max( 1, min( 200, $limit > 0 ? $limit : 60 ) ),
-			'group' => $group,
-			'empty' => sanitize_text_field( $get( 'empty', '' ) ),
-			'more'  => ! in_array( strtolower( $get( 'more', '1' ) ), array( '0', 'no', 'false', 'нет' ), true ),
+			'genre'         => $genres,
+			'stage'         => $stages,
+			'stage_invalid' => $stage_invalid,
+			'when'          => $when,
+			'free'          => in_array( self::lower( $get( 'free', '0' ) ), array( '1', 'yes', 'true', 'да' ), true ),
+			'days'          => max( 1, min( 366, $days > 0 ? $days : 60 ) ),
+			'limit'         => max( 1, min( 200, $limit > 0 ? $limit : 60 ) ),
+			'group'         => $group,
+			'empty'         => sanitize_text_field( $get( 'empty', '' ) ),
+			'more'          => ! in_array( self::lower( $get( 'more', '1' ) ), array( '0', 'no', 'false', 'нет' ), true ),
+			'warnings'      => $warnings,
 		);
+	}
+
+	/**
+	 * Нижний регистр с учётом кириллицы.
+	 *
+	 * @param string $text Текст.
+	 * @return string
+	 */
+	public static function lower( $text ) {
+		$text = (string) $text;
+		return function_exists( 'mb_strtolower' ) ? mb_strtolower( $text, 'UTF-8' ) : strtolower( $text );
 	}
 
 	/**
@@ -150,7 +207,7 @@ class Kozlov_Afisha_Data {
 	 *
 	 * @param array    $args Нормализованные параметры.
 	 * @param int|null $now  Текущее время (unix), для тестов.
-	 * @return array {items: array[], fallback: string, total: int, from: string, to: string}
+	 * @return array {items: array[], fallback: string, total: int, from: string, to: string, error: string}
 	 */
 	public static function select( array $args, $now = null ) {
 		$now   = null === $now ? time() : (int) $now;
@@ -165,6 +222,7 @@ class Kozlov_Afisha_Data {
 			'total'    => 0,
 			'from'     => $today_ymd,
 			'to'       => $today_ymd,
+			'error'    => '',
 		);
 
 		if ( 'today' === $args['when'] ) {
@@ -175,7 +233,8 @@ class Kozlov_Afisha_Data {
 			$horizon = (int) $args['days'];
 		}
 
-		$all = self::filtered( $args, $now, $horizon );
+		$all             = self::filtered( $args, $now, $horizon );
+		$result['error'] = self::$last_error;
 
 		if ( 'today' === $args['when'] ) {
 			$picked = self::between( $all, $today_ymd, $today_ymd );
@@ -265,6 +324,16 @@ class Kozlov_Afisha_Data {
 	 * @return array
 	 */
 	private static function filtered( array $args, $now, $horizon ) {
+		self::$last_error = '';
+		self::$stats      = array(
+			'rows'      => 0,
+			'recurring' => 0,
+			'bad_time'  => 0,
+		);
+		if ( ! empty( $args['stage_invalid'] ) ) {
+			return array();
+		}
+
 		$club = new DateTimeZone( self::CLUB_TZ );
 		$last = new DateTime( '@' . $now );
 		$last->setTimezone( $club );
@@ -273,7 +342,8 @@ class Kozlov_Afisha_Data {
 
 		// Сырые значения в таблице сдвинуты относительно настоящего UTC на величину пояса события,
 		// поэтому окно SQL берём с запасом в двое суток, а точно отбираем ниже.
-		$rows = self::rows( $now - 2 * self::DAY, $now + ( $horizon + 2 ) * self::DAY );
+		$rows                = self::rows( $now - 2 * self::DAY, $now + ( $horizon + 2 ) * self::DAY );
+		self::$stats['rows'] = count( $rows );
 		if ( empty( $rows ) ) {
 			return array();
 		}
@@ -294,10 +364,16 @@ class Kozlov_Afisha_Data {
 			$seen[ $id ] = true;
 
 			if ( '' !== trim( (string) $row['recurrence_rules'] ) ) {
+				// Повторяющиеся события календаря не выводим (на сайте их нет, счётчик виден в справке).
+				++self::$stats['recurring'];
 				continue;
 			}
 			$times = self::times( $row );
-			if ( null === $times || $times['finish_ts'] < $now || $times['date'] > $last_ymd ) {
+			if ( null === $times ) {
+				++self::$stats['bad_time'];
+				continue;
+			}
+			if ( $times['finish_ts'] < $now || $times['date'] > $last_ymd ) {
 				continue;
 			}
 
@@ -308,7 +384,8 @@ class Kozlov_Afisha_Data {
 
 			$genres = self::genres( $id );
 			$cost   = self::cost( isset( $row['cost'] ) ? $row['cost'] : '' );
-			$free   = $cost['free'] || (bool) array_intersect( array_keys( $genres ), self::FREE_TAGS );
+			// Метка «Вход свободный» в жанрах считается, только если в стоимости нет цены или депозита.
+			$free   = $cost['free'] || ( ! $cost['has_price'] && (bool) array_intersect( array_keys( $genres ), self::FREE_TAGS ) );
 			$stages = self::stage_keys( $id );
 
 			if ( ! empty( $args['genre'] ) && ! array_intersect( $args['genre'], array_keys( $genres ) ) ) {
@@ -361,7 +438,8 @@ class Kozlov_Afisha_Data {
 
 		$key = $from . ':' . $to;
 		if ( isset( self::$rows_cache[ $key ] ) ) {
-			return self::$rows_cache[ $key ];
+			self::$last_error = self::$rows_cache[ $key ]['error'];
+			return self::$rows_cache[ $key ]['rows'];
 		}
 
 		$table = $wpdb->prefix . 'ai1ec_events';
@@ -369,10 +447,18 @@ class Kozlov_Afisha_Data {
 		$sql      = $wpdb->prepare( "SELECT e.`post_id`, e.`start`, e.`end`, e.`timezone_name`, e.`allday`, e.`instant_event`, e.`recurrence_rules`, e.`cost` FROM `{$table}` e INNER JOIN `{$wpdb->posts}` p ON p.`ID` = e.`post_id` WHERE p.`post_type` = %s AND p.`post_status` = 'publish' AND p.`post_password` = '' AND e.`start` >= %d AND e.`start` <= %d ORDER BY e.`start` ASC, e.`post_id` ASC LIMIT %d", self::POST_TYPE, (int) $from, (int) $to, self::MAX_ROWS );
 		$suppress = $wpdb->suppress_errors( true );
 		$rows     = $wpdb->get_results( $sql, ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery
+		$error    = (string) $wpdb->last_error;
 		$wpdb->suppress_errors( $suppress );
 
+		if ( ! is_array( $rows ) && '' === $error ) {
+			$error = 'не удалось прочитать таблицу календаря';
+		}
 		$rows                     = is_array( $rows ) ? $rows : array();
-		self::$rows_cache[ $key ] = $rows;
+		self::$last_error         = $error;
+		self::$rows_cache[ $key ] = array(
+			'rows'  => $rows,
+			'error' => $error,
+		);
 		return $rows;
 	}
 
@@ -564,6 +650,25 @@ class Kozlov_Afisha_Data {
 	}
 
 	/**
+	 * Проверка данных для справки: сколько строк календаря прочитано, сколько концертов выводится,
+	 * сколько пропущено и почему.
+	 *
+	 * @param int $days Дней вперёд.
+	 * @return array {rows, shown, recurring, bad_time, error}
+	 */
+	public static function diagnostics( $days = 60 ) {
+		$args  = self::normalize_args( array() );
+		$items = self::filtered( $args, time(), (int) $days );
+		return array(
+			'rows'      => self::$stats['rows'],
+			'shown'     => count( $items ),
+			'recurring' => self::$stats['recurring'],
+			'bad_time'  => self::$stats['bad_time'],
+			'error'     => self::$last_error,
+		);
+	}
+
+	/**
 	 * Отмеченные сцены (ключи шорткода).
 	 *
 	 * @param int $post_id ID записи.
@@ -603,28 +708,29 @@ class Kozlov_Afisha_Data {
 
 	/**
 	 * Текст стоимости для карточки и признак бесплатного входа.
+	 * Бесплатным считается только текст без цены и депозита: «1500 руб., детям бесплатно» не бесплатно.
 	 *
 	 * @param mixed $raw Значение поля «Стоимость».
-	 * @return array {text: string, free: bool}
+	 * @return array {text: string, free: bool, has_price: bool}
 	 */
 	public static function cost( $raw ) {
-		$value = maybe_unserialize( $raw );
-		$free  = false;
+		$value   = maybe_unserialize( $raw );
+		$is_free = false;
 		if ( is_array( $value ) ) {
-			$free  = ! empty( $value['is_free'] );
-			$value = isset( $value['cost'] ) && is_scalar( $value['cost'] ) ? (string) $value['cost'] : '';
+			$is_free = ! empty( $value['is_free'] );
+			$value   = isset( $value['cost'] ) && is_scalar( $value['cost'] ) ? (string) $value['cost'] : '';
 		}
-		$text = self::plain_text( is_scalar( $value ) ? (string) $value : '' );
-		$text = trim( str_replace( array( "\xC2\xA0", "\xE2\x80\xAF", "\xE2\x80\x89", "\xE2\x80\x8A" ), ' ', $text ) );
-		if ( '' !== $text && ! preg_match( '/депозит/iu', $text ) && preg_match( '/(вход\s*свободн|свободн\S*\s+вход|бесплатн|free\s+entry|вход\s+free)/iu', $text ) ) {
-			$free = true;
-		}
+		$text      = self::plain_text( is_scalar( $value ) ? (string) $value : '' );
+		$text      = trim( str_replace( array( "\xC2\xA0", "\xE2\x80\xAF", "\xE2\x80\x89", "\xE2\x80\x8A" ), ' ', $text ) );
+		$has_price = (bool) preg_match( '/депозит|deposit|\d\s*(руб|₽|р\.|rub)|(?<!\d)\d{3,}/iu', $text );
+		$free      = ! $has_price && ( $is_free || ( '' !== $text && preg_match( '/(вход\s*свободн|свободн\S*\s+вход|бесплатн|free\s+entry|вход\s+free)/iu', $text ) ) );
 		if ( '' === $text && $free ) {
 			$text = 'Вход свободный';
 		}
 		return array(
-			'text' => $text,
-			'free' => $free,
+			'text'      => $text,
+			'free'      => (bool) $free,
+			'has_price' => $has_price,
 		);
 	}
 

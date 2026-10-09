@@ -61,6 +61,7 @@ class Kozlov_Afisha_Help {
 		echo '<div class="wrap"><h1>Страницы афиши</h1>';
 		try {
 			self::usage();
+			self::data_check();
 			self::pages();
 			self::genres();
 		} catch ( Throwable $e ) {
@@ -89,7 +90,26 @@ class Kozlov_Afisha_Help {
 			echo '<tr><td><code>' . esc_html( $code ) . '</code></td><td>' . esc_html( $text ) . '</td></tr>';
 		}
 		echo '</tbody></table>';
-		echo '<p class="description">Параметры можно сочетать. Ещё: <code>group="month|day|none"</code> (группировка), <code>empty="…"</code> (текст, если концертов нет), <code>more="0"</code> (без ссылки «Вся афиша клуба»). Жанр можно писать по-русски или по-английски, регистр не важен. Список обновляется сам: страница не кэшируется целиком, готовый список хранится 5 минут.</p>';
+		echo '<p class="description">Параметры можно сочетать. Ещё: <code>group="month|day|none"</code> (группировка), <code>empty="…"</code> (текст, если концертов нет), <code>more="0"</code> (без ссылки «Вся афиша клуба»). Жанр можно писать по-русски или по-английски, регистр не важен. Готовый список хранится до 5 минут и сбрасывается при сохранении любого анонса. W3 Total Cache такие страницы целиком не кэширует. Ошибки в параметрах и в чтении календаря видны на странице только вошедшим редакторам.</p>';
+		echo '<p class="description"><strong>Перед отключением плагина</strong> переведите страницы с афишей в черновики, иначе на них будет виден текст шорткода.</p>';
+	}
+
+	/**
+	 * Проверка данных календаря.
+	 */
+	private static function data_check() {
+		echo '<h2>Проверка данных</h2>';
+		$d = Kozlov_Afisha_Data::diagnostics( 60 );
+		if ( '' !== $d['error'] ) {
+			echo '<div class="notice notice-error inline"><p>Календарь не читается: ' . esc_html( $d['error'] ) . '. Страницы афиши сейчас пустые.</p></div>';
+			return;
+		}
+		echo '<table class="widefat striped" style="max-width:980px"><tbody>';
+		echo '<tr><td>Строк календаря на ближайшие 60 дней (с запасом)</td><td>' . (int) $d['rows'] . '</td></tr>';
+		echo '<tr><td>Концертов, которые выводятся без фильтров</td><td>' . (int) $d['shown'] . '</td></tr>';
+		echo '<tr><td>Пропущено повторяющихся событий календаря</td><td>' . (int) $d['recurring'] . ( $d['recurring'] > 0 ? ' <strong style="color:#d63638">(они не попадут на страницы афиши)</strong>' : '' ) . '</td></tr>';
+		echo '<tr><td>Пропущено с нечитаемой датой</td><td>' . (int) $d['bad_time'] . '</td></tr>';
+		echo '</tbody></table>';
 	}
 
 	/**
