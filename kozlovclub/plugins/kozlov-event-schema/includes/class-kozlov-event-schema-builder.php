@@ -50,6 +50,9 @@ class Kozlov_Event_Schema_Builder {
 	/** Собственное поле плагина: статус концерта для поисковиков. */
 	const STATUS_META = '_kozlov_event_status';
 
+	/** Собственное поле плагина: прежняя дата перенесённого концерта («Y-m-d H:i» по Москве). */
+	const PREVIOUS_META = '_kozlov_event_previous_start';
+
 	/** Поле Magic Fields с жанрами. */
 	const GENRE_META = 'genre_categories';
 
@@ -124,14 +127,42 @@ class Kozlov_Event_Schema_Builder {
 	/**
 	 * Статусы концерта: значение поля => [подпись, eventStatus].
 	 *
+	 * По правилам Google:
+	 * - отложен (новой даты нет): EventPostponed, в календаре остаётся прежняя дата;
+	 * - перенесён на новую дату: EventRescheduled, в календаре новая дата, прежняя в previousStartDate;
+	 * - отменён: EventCancelled, дата и место остаются.
+	 *
 	 * @return array
 	 */
 	public static function statuses() {
 		return array(
-			''          => array( 'По расписанию', 'https://schema.org/EventScheduled' ),
-			'postponed' => array( 'Перенесён, новая дата неизвестна', 'https://schema.org/EventPostponed' ),
-			'cancelled' => array( 'Отменён', 'https://schema.org/EventCancelled' ),
+			''            => array( 'По расписанию', 'https://schema.org/EventScheduled' ),
+			'postponed'   => array( 'Отложен, новая дата неизвестна', 'https://schema.org/EventPostponed' ),
+			'rescheduled' => array( 'Перенесён на новую дату', 'https://schema.org/EventRescheduled' ),
+			'cancelled'   => array( 'Отменён', 'https://schema.org/EventCancelled' ),
 		);
+	}
+
+	/**
+	 * Прежняя дата перенесённого концерта: «Y-m-d H:i» (по Москве) -> ISO 8601 с +03:00.
+	 *
+	 * @param string $value Значение поля.
+	 * @return string|null
+	 */
+	public static function previous_start_iso( $value ) {
+		$value = is_scalar( $value ) ? trim( (string) $value ) : '';
+		if ( ! preg_match( '/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}$/', $value ) ) {
+			return null;
+		}
+		try {
+			$date = DateTime::createFromFormat( 'Y-m-d H:i', str_replace( 'T', ' ', $value ), new DateTimeZone( self::CLUB_TZ ) );
+		} catch ( Exception $e ) {
+			return null;
+		}
+		if ( ! $date || $date->format( 'Y-m-d H:i' ) !== str_replace( 'T', ' ', $value ) ) {
+			return null;
+		}
+		return $date->format( 'c' );
 	}
 
 	/**
@@ -185,26 +216,28 @@ class Kozlov_Event_Schema_Builder {
 	 */
 	public static function issue_labels() {
 		return array(
-			'no_calendar_row'  => 'Нет даты в календаре: разметка не выводится',
-			'bad_start'        => 'Не читается дата начала: разметка не выводится',
-			'no_title'         => 'Нет заголовка: разметка не выводится',
-			'no_url'           => 'Нет адреса страницы: разметка не выводится',
-			'recurring'        => 'Повторяющееся событие: разметка не выводится',
-			'password'         => 'Защищён паролем: разметка не выводится',
-			'not_published'    => 'Не опубликован: разметка появится после публикации',
-			'ended'            => 'Уже прошёл',
-			'no_stage'         => 'Не отмечена сцена (в разметке будет адрес Маросейка, 9/2)',
-			'multi_stage'      => 'Отмечено несколько сцен (взята первая)',
-			'price_empty'      => 'Не указана стоимость: блок цены не выводится',
-			'price_unknown'    => 'Стоимость не распознана: блок цены не выводится',
-			'paid_no_tickets'  => 'Платный, но нет ссылки Ticketscloud: блок цены не выводится',
-			'no_image'         => 'Нет изображения записи',
-			'small_image'      => 'Ширина изображения меньше 720 px: в разметку не включено',
-			'no_description'   => 'Пустой «Текстовый блок №1»: описание не выводится',
-			'long_end'         => 'Окончание позже чем через 7 дней или раньше начала: endDate не выводится',
-			'no_genres'        => 'Не отмечены жанры: keywords не выводятся',
-			'status_postponed' => 'Отмечен как перенесённый: в разметке EventPostponed, без цены',
-			'status_cancelled' => 'Отмечен как отменённый: в разметке EventCancelled, без цены',
+			'no_calendar_row'    => 'Нет даты в календаре: разметка не выводится',
+			'bad_start'          => 'Не читается дата начала: разметка не выводится',
+			'no_title'           => 'Нет заголовка: разметка не выводится',
+			'no_url'             => 'Нет адреса страницы: разметка не выводится',
+			'recurring'          => 'Повторяющееся событие: разметка не выводится',
+			'password'           => 'Защищён паролем: разметка не выводится',
+			'not_published'      => 'Не опубликован: разметка появится после публикации',
+			'ended'              => 'Уже прошёл',
+			'no_stage'           => 'Не отмечена сцена (в разметке будет адрес Маросейка, 9/2)',
+			'multi_stage'        => 'Отмечено несколько сцен (взята первая)',
+			'price_empty'        => 'Не указана стоимость: блок цены не выводится',
+			'price_unknown'      => 'Стоимость не распознана: блок цены не выводится',
+			'paid_no_tickets'    => 'Платный, но нет ссылки Ticketscloud: блок цены не выводится',
+			'no_image'           => 'Нет изображения записи',
+			'small_image'        => 'Ширина изображения меньше 720 px: в разметку не включено',
+			'no_description'     => 'Пустой «Текстовый блок №1»: описание не выводится',
+			'long_end'           => 'Окончание позже чем через 7 дней или раньше начала: endDate не выводится',
+			'no_genres'          => 'Не отмечены жанры: keywords не выводятся',
+			'status_postponed'   => 'Отмечен как отложенный: в разметке EventPostponed, без цены',
+			'status_rescheduled' => 'Отмечен как перенесённый на новую дату: в разметке EventRescheduled',
+			'status_cancelled'   => 'Отмечен как отменённый: в разметке EventCancelled, без цены',
+			'no_previous_start'  => 'Перенесён, но не указана прежняя дата (или она совпадает с новой): previousStartDate не выводится',
 		);
 	}
 
@@ -420,7 +453,8 @@ class Kozlov_Event_Schema_Builder {
 			'eventStatus'         => $statuses[ $status_key ][1],
 			'eventAttendanceMode' => 'https://schema.org/OfflineEventAttendanceMode',
 			'location'            => array(
-				'@type'   => 'MusicVenue',
+				// Place указан явно, как в документации Google; MusicVenue уточняет вид площадки.
+				'@type'   => array( 'Place', 'MusicVenue' ),
 				'@id'     => $place_id,
 				'name'    => $place_name,
 				'address' => $address,
@@ -432,6 +466,14 @@ class Kozlov_Event_Schema_Builder {
 		}
 		if ( ! empty( $keywords ) ) {
 			$data['keywords'] = implode( ', ', $keywords );
+		}
+		if ( 'rescheduled' === $status_key ) {
+			$previous = self::previous_start_iso( get_post_meta( $post->ID, self::PREVIOUS_META, true ) );
+			if ( null !== $previous && $previous !== $times['start'] ) {
+				$data['previousStartDate'] = $previous;
+			} else {
+				$issues[] = 'no_previous_start';
+			}
 		}
 
 		// Описание.
@@ -463,8 +505,8 @@ class Kozlov_Event_Schema_Builder {
 		$cost          = self::parse_cost( isset( $row['cost'] ) ? $row['cost'] : '' );
 		$info['price'] = $cost['text'];
 		$tickets_link  = trim( (string) get_post_meta( $post->ID, 'ticketscloud_link', true ) );
-		// У отменённого или перенесённого концерта цену не выводим.
-		$price_kind = '' === $status_key ? $cost['kind'] : 'skip';
+		// У отменённого и отложенного концерта цену не выводим; у перенесённого билеты продолжают действовать.
+		$price_kind = in_array( $status_key, array( 'cancelled', 'postponed' ), true ) ? 'skip' : $cost['kind'];
 		switch ( $price_kind ) {
 			case 'skip':
 				break;

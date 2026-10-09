@@ -27,6 +27,8 @@ class Kozlov_Event_Schema_Status {
 
 	const FIELD = 'kozlov_event_schema_status';
 
+	const PREVIOUS_FIELD = 'kozlov_event_schema_previous';
+
 	/**
 	 * Хуки.
 	 */
@@ -56,7 +58,21 @@ class Kozlov_Event_Schema_Status {
 				echo '<option value="' . esc_attr( $value ) . '" ' . selected( $current, $value, false ) . '>' . esc_html( $status[0] ) . '</option>';
 			}
 			echo '</select>';
-			echo '<p class="description">Менять только при отмене или переносе без новой даты. Если у концерта новая дата, исправьте дату в календаре и оставьте «По расписанию».</p>';
+
+			// Прежняя дата: сохранённая, иначе текущая дата из календаря (до того, как её поменяют).
+			$previous = (string) get_post_meta( $post->ID, Kozlov_Event_Schema_Builder::PREVIOUS_META, true );
+			$previous = str_replace( ' ', 'T', $previous );
+			if ( '' === $previous ) {
+				$row   = Kozlov_Event_Schema_Builder::get_row( $post->ID );
+				$times = $row ? Kozlov_Event_Schema_Builder::event_times( $row ) : null;
+				if ( $times && strlen( $times['start'] ) > 10 ) {
+					$previous = substr( $times['start'], 0, 16 );
+				}
+			}
+			echo '<p style="margin:10px 0 4px;"><label for="kozlov-event-schema-previous">Прежняя дата (только для «Перенесён на новую дату»):</label></p>';
+			echo '<input type="datetime-local" id="kozlov-event-schema-previous" name="' . esc_attr( self::PREVIOUS_FIELD ) . '" value="' . esc_attr( $previous ) . '" style="width:100%">';
+
+			echo '<p class="description">«Отложен»: новой даты нет, дату в календаре не меняйте.<br>«Перенесён на новую дату»: выберите этот статус, проверьте прежнюю дату и поставьте новую дату в календаре.<br>«Отменён»: дату не меняйте и анонс не удаляйте.</p>';
 		} catch ( Throwable $e ) {
 			return;
 		}
@@ -95,6 +111,20 @@ class Kozlov_Event_Schema_Status {
 				delete_post_meta( $post_id, Kozlov_Event_Schema_Builder::STATUS_META );
 			} else {
 				update_post_meta( $post_id, Kozlov_Event_Schema_Builder::STATUS_META, $value );
+			}
+
+			// Прежняя дата хранится только у перенесённых на новую дату.
+			$previous = '';
+			if ( 'rescheduled' === $value && isset( $_POST[ self::PREVIOUS_FIELD ] ) ) {
+				$raw = str_replace( 'T', ' ', sanitize_text_field( wp_unslash( $_POST[ self::PREVIOUS_FIELD ] ) ) );
+				if ( null !== Kozlov_Event_Schema_Builder::previous_start_iso( $raw ) ) {
+					$previous = $raw;
+				}
+			}
+			if ( '' === $previous ) {
+				delete_post_meta( $post_id, Kozlov_Event_Schema_Builder::PREVIOUS_META );
+			} else {
+				update_post_meta( $post_id, Kozlov_Event_Schema_Builder::PREVIOUS_META, $previous );
 			}
 		} catch ( Throwable $e ) {
 			return;
