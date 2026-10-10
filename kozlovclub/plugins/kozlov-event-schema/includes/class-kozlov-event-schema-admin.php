@@ -106,7 +106,7 @@ class Kozlov_Event_Schema_Admin {
 	 */
 	private static function render_settings() {
 		$enabled = kozlov_event_schema_is_enabled();
-		echo '<p>Плагин добавляет в &lt;head&gt; страниц будущих концертов один блок JSON-LD (MusicEvent) с датой, сценой, адресом, ценой, жанрами и картинкой. Данные берутся из полей анонса, которые уже заполняют редакторы. Тема и афиша не меняются. Если концерт отменён, отложен или перенесён, отметьте это в блоке «Статус для поисковиков» справа в редакторе анонса.</p>';
+		echo '<p>Плагин добавляет в &lt;head&gt; страниц будущих концертов один блок JSON-LD (MusicEvent) с датой, сценой, адресом, ценой, жанрами, картинкой и исполнителями. Данные берутся из полей анонса, которые уже заполняют редакторы; исполнители из строки вида «На сцену выйдут: Имя Фамилия (инструмент), …». Тема и афиша не меняются. Если концерт отменён, отложен или перенесён, или исполнителей нужно указать вручную, используйте блок «Для поисковиков» справа в редакторе анонса.</p>';
 		echo '<form method="post" action="options.php">';
 		settings_fields( self::GROUP );
 		echo '<table class="form-table" role="presentation"><tr><th scope="row">Разметка на сайте</th><td>';
@@ -253,7 +253,8 @@ class Kozlov_Event_Schema_Admin {
 				'ready'  => $is_ready,
 				'shown'  => $shown,
 			);
-			if ( ! empty( $shown ) ) {
+			// Отсутствие состава само по себе не ошибка (джемы, бранчи): в список «Требуют внимания» не попадает, но считается.
+			if ( array() !== array_diff( $shown, array( 'no_performer' ) ) ) {
 				$attention[] = $row;
 			}
 			$all[] = $row;
@@ -290,7 +291,7 @@ class Kozlov_Event_Schema_Admin {
 	 */
 	private static function render_table( array $rows, array $statuses, array $labels, $show_issues ) {
 		echo '<table class="widefat striped" style="max-width:1200px;"><thead><tr>';
-		echo '<th>Дата</th><th>Концерт</th><th>Статус</th><th>Сцена</th><th>Стоимость</th><th>Разметка</th>';
+		echo '<th>Дата</th><th>Концерт</th><th>Статус</th><th>Сцена</th><th>Стоимость</th><th>Исполнители</th><th>Разметка</th>';
 		if ( $show_issues ) {
 			echo '<th>Что не так</th>';
 		}
@@ -319,6 +320,18 @@ class Kozlov_Event_Schema_Admin {
 			echo '<td>' . esc_html( $status ) . '</td>';
 			echo '<td>' . esc_html( '' !== $info['stage'] ? $info['stage'] : 'не отмечена' ) . '</td>';
 			echo '<td>' . esc_html( $info['price'] ) . '</td>';
+			$sources = array(
+				'manual' => ' (вписаны вручную)',
+				'text'   => '',
+			);
+			if ( 'off' === $info['perf_from'] ) {
+				$performers = 'отключены вручную';
+			} elseif ( '' === $info['performers'] ) {
+				$performers = 'не найдены';
+			} else {
+				$performers = $info['performers'] . ( isset( $sources[ $info['perf_from'] ] ) ? $sources[ $info['perf_from'] ] : '' );
+			}
+			echo '<td>' . esc_html( $performers ) . '</td>';
 			$mark = $row['ready'] ? 'выводится' : 'нет';
 			if ( '' !== $info['schedule'] && 'По расписанию' !== $info['schedule'] ) {
 				$mark .= ' (' . $info['schedule'] . ')';

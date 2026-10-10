@@ -1,9 +1,10 @@
 <?php
 /**
- * Небольшой блок «Статус для поисковиков» в правой колонке редактора анонса.
+ * Небольшой блок «Для поисковиков» в правой колонке редактора анонса.
  *
- * Пишет только собственное скрытое поле _kozlov_event_status и только когда редактор
- * сам выбрал «Перенесён» или «Отменён». Возврат к «По расписанию» поле удаляет.
+ * Пишет только собственные скрытые поля плагина и только когда редактор сам их заполнил:
+ * статус (_kozlov_event_status, прежняя дата _kozlov_event_previous_start)
+ * и исполнителей (_kozlov_event_performers). Пустое значение поле удаляет.
  *
  * @package Kozlov_Event_Schema
  */
@@ -29,6 +30,11 @@ class Kozlov_Event_Schema_Status {
 
 	const PREVIOUS_FIELD = 'kozlov_event_schema_previous';
 
+	const PERFORMERS_FIELD = 'kozlov_event_schema_performers';
+
+	/** Ограничение длины поля исполнителей (знаков). */
+	const PERFORMERS_MAX = 2000;
+
 	/**
 	 * Хуки.
 	 */
@@ -41,7 +47,7 @@ class Kozlov_Event_Schema_Status {
 	 * Регистрирует блок.
 	 */
 	public static function add_box() {
-		add_meta_box( 'kozlov-event-schema-status', 'Статус для поисковиков', array( __CLASS__, 'render' ), Kozlov_Event_Schema_Builder::POST_TYPE, 'side', 'default' );
+		add_meta_box( 'kozlov-event-schema-status', 'Для поисковиков', array( __CLASS__, 'render' ), Kozlov_Event_Schema_Builder::POST_TYPE, 'side', 'default' );
 	}
 
 	/**
@@ -53,6 +59,7 @@ class Kozlov_Event_Schema_Status {
 		try {
 			$current = Kozlov_Event_Schema_Builder::status( $post->ID );
 			wp_nonce_field( self::NONCE_ACTION, self::NONCE_FIELD );
+			echo '<p style="margin:0 0 4px;"><strong>Статус концерта</strong></p>';
 			echo '<select name="' . esc_attr( self::FIELD ) . '" style="width:100%">';
 			foreach ( Kozlov_Event_Schema_Builder::statuses() as $value => $status ) {
 				echo '<option value="' . esc_attr( $value ) . '" ' . selected( $current, $value, false ) . '>' . esc_html( $status[0] ) . '</option>';
@@ -74,6 +81,20 @@ class Kozlov_Event_Schema_Status {
 
 			echo '<p style="color:#b32d2e;font-weight:600;">Статус здесь виден только поисковикам. При отмене, отсрочке или переносе обязательно напишите то же самое в тексте анонса.</p>';
 			echo '<p class="description">«Отложен»: новой даты нет, дату в календаре не меняйте.<br>«Перенесён на новую дату»: выберите этот статус, проверьте прежнюю дату и поставьте новую дату в календаре.<br>«Отменён»: дату не меняйте и анонс не удаляйте.</p>';
+
+			// Исполнители.
+			$manual = (string) get_post_meta( $post->ID, Kozlov_Event_Schema_Builder::PERFORMERS_META, true );
+			echo '<hr><p style="margin:8px 0 4px;"><label for="kozlov-event-schema-performers"><strong>Исполнители</strong></label></p>';
+			echo '<textarea id="kozlov-event-schema-performers" name="' . esc_attr( self::PERFORMERS_FIELD ) . '" rows="4" style="width:100%" placeholder="Обычно не нужно: состав берётся из текста">' . esc_textarea( $manual ) . '</textarea>';
+			if ( '' === trim( $manual ) ) {
+				$auto  = Kozlov_Event_Schema_Builder::performers( $post->ID );
+				$names = array();
+				foreach ( $auto['list'] as $performer ) {
+					$names[] = $performer['name'];
+				}
+				echo '<p class="description">' . ( empty( $names ) ? 'В тексте анонса состав не найден.' : 'Найдено в тексте: ' . esc_html( implode( ', ', $names ) ) . '.' ) . '</p>';
+			}
+			echo '<p class="description">Пусто: состав берётся из строки вида «На сцену выйдут: Имя Фамилия (инструмент), …». Чтобы указать вручную, впишите по одному исполнителю или коллективу на строке. «-»: не указывать исполнителей.</p>';
 		} catch ( Throwable $e ) {
 			return;
 		}
@@ -127,8 +148,39 @@ class Kozlov_Event_Schema_Status {
 			} else {
 				update_post_meta( $post_id, Kozlov_Event_Schema_Builder::PREVIOUS_META, $previous );
 			}
+
+			// Исполнители: поле есть только в новой версии блока; если его нет в запросе, ничего не трогаем.
+			if ( isset( $_POST[ self::PERFORMERS_FIELD ] ) ) {
+				$performers = self::clean_performers( sanitize_textarea_field( wp_unslash( $_POST[ self::PERFORMERS_FIELD ] ) ) );
+				if ( '' === $performers ) {
+					delete_post_meta( $post_id, Kozlov_Event_Schema_Builder::PERFORMERS_META );
+				} else {
+					update_post_meta( $post_id, Kozlov_Event_Schema_Builder::PERFORMERS_META, wp_slash( $performers ) );
+				}
+			}
 		} catch ( Throwable $e ) {
 			return;
 		}
+	}
+
+	/**
+	 * Поле исполнителей: строки без лишних пробелов, без пустых строк, не длиннее PERFORMERS_MAX.
+	 *
+	 * @param string $text Текст из формы (уже без тегов).
+	 * @return string
+	 */
+	public static function clean_performers( $text ) {
+		$lines = array();
+		foreach ( explode( "\n", str_replace( "\r", '', (string) $text ) ) as $line ) {
+			$line = trim( (string) preg_replace( '/\s+/u', ' ', $line ) );
+			if ( '' !== $line ) {
+				$lines[] = $line;
+			}
+		}
+		$text = implode( "\n", $lines );
+		if ( function_exists( 'mb_substr' ) ) {
+			$text = mb_substr( $text, 0, self::PERFORMERS_MAX, 'UTF-8' );
+		}
+		return trim( $text );
 	}
 }

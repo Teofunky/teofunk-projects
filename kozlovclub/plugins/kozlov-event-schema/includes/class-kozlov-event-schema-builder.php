@@ -9,6 +9,9 @@
  * - продажа билетов: поле ticketscloud_link;
  * - жанры: поле Magic Fields genre_categories (значения вида «Джаз|Jazz»);
  * - картинка: изображение записи;
+ * - исполнители: строка состава «На сцену выйдут: Имя (инструмент), …» в текстовых блоках анонса
+ *   или собственное поле плагина _kozlov_event_performers (если редактор вписал вручную);
+ * - начало продаж (offers.validFrom): дата публикации анонса;
  * - отмена или перенос: собственное поле плагина _kozlov_event_status (по умолчанию пусто).
  *
  * Класс только читает данные. Никаких записей в базу.
@@ -55,6 +58,24 @@ class Kozlov_Event_Schema_Builder {
 
 	/** Поле Magic Fields с жанрами. */
 	const GENRE_META = 'genre_categories';
+
+	/** Собственное поле плагина: исполнители, вписанные редактором вручную (по одному на строке; «-» значит не выводить). */
+	const PERFORMERS_META = '_kozlov_event_performers';
+
+	/** Поля Magic Fields с текстом анонса, в которых ищется состав («На сцену выйдут: Имя (инструмент), …»). */
+	const PERFORMER_FIELDS = array( 'textblock_2_description', 'textblock_1_description', 'additional_text_description', 'artist_description' );
+
+	/** Больше исполнителей в разметку не выводим. */
+	const MAX_PERFORMERS = 15;
+
+	/**
+	 * Начало строки состава: «на сцену выйдут:», «в составе:», «примут участие:», «специальный гость:», «ведущий джема:» и т. п.
+	 * Двоеточие обязательно и должно стоять в том же предложении (до 80 знаков после слова).
+	 */
+	const LINEUP_MARKER = '/(?<!\p{L})(?:выйд(?:ут|ет)|прим(?:ут|ет)\s+участие|в\s+состав[еа]|состав|участники|исполнители|сыграют|играют|выступ(?:ят|ают|ит)|гост(?:ь|ья|и)|ведущ(?:ий|ая|ие))(?!\p{L})[^:.!?]{0,80}:/iu';
+
+	/** Признаки коллектива для вписанных вручную исполнителей (тогда тип PerformingGroup, иначе Person). */
+	const GROUP_WORDS = '/(?<!\p{L})(?:трио|квартет|квинтет|секстет|септет|октет|нонет|оркестр|бэнд|бенд|ансамбль|группа|хор|проект|band|trio|quartet|quintet|sextet|orchestra|ensemble|project|choir|collective)(?!\p{L})|[«»"]/iu';
 
 	/** Отметки из списка жанров, которые не являются жанрами и не идут в keywords. */
 	const NOT_KEYWORDS = array( 'Вход свободный' );
@@ -213,6 +234,232 @@ class Kozlov_Event_Schema_Builder {
 	}
 
 	/**
+	 * Исполнители концерта для свойства performer.
+	 *
+	 * Порядок: вписанные редактором вручную (поле плагина), иначе состав из текста анонса.
+	 * «-» в ручном поле: не выводить исполнителей совсем.
+	 *
+	 * @param int $post_id ID записи.
+	 * @return array {source: manual|text|off|'', list: array[]} list: [['@type' => Person|PerformingGroup, 'name' => ...]]
+	 */
+	public static function performers( $post_id ) {
+		$manual = get_post_meta( $post_id, self::PERFORMERS_META, true );
+		$manual = is_scalar( $manual ) ? trim( (string) $manual ) : '';
+		if ( '-' === $manual ) {
+			return array(
+				'source' => 'off',
+				'list'   => array(),
+			);
+		}
+		if ( '' !== $manual ) {
+			$list = self::manual_performers( $manual );
+			if ( ! empty( $list ) ) {
+				return array(
+					'source' => 'manual',
+					'list'   => $list,
+				);
+			}
+		}
+
+		$names = array();
+		foreach ( self::PERFORMER_FIELDS as $field ) {
+			foreach ( self::flat_values( get_post_meta( $post_id, $field, false ) ) as $value ) {
+				foreach ( self::parse_performers( $value ) as $name ) {
+					if ( ! in_array( $name, $names, true ) ) {
+						$names[] = $name;
+					}
+				}
+			}
+		}
+
+		$list = array();
+		foreach ( array_slice( $names, 0, self::MAX_PERFORMERS ) as $name ) {
+			$list[] = array(
+				'@type' => 'Person',
+				'name'  => $name,
+			);
+		}
+		return array(
+			'source' => empty( $list ) ? '' : 'text',
+			'list'   => $list,
+		);
+	}
+
+	/**
+	 * Состав из текста: имена из строки вида «На сцену выйдут: Имя Фамилия (инструмент), …».
+	 *
+	 * Берутся только пары «Имя (роль)» после слова-маркера с двоеточием. Варианты «X или Y» пропускаются.
+	 *
+	 * @param string $html Текст поля (HTML).
+	 * @return string[]
+	 */
+	public static function parse_performers( $html ) {
+		$names = array();
+		foreach ( self::text_lines( $html ) as $line ) {
+			if ( ! preg_match( self::LINEUP_MARKER, $line, $m, PREG_OFFSET_CAPTURE ) ) {
+				continue;
+			}
+			$rest = (string) substr( $line, $m[0][1] + strlen( $m[0][0] ) );
+			if ( ! preg_match_all( '/([^()]*?)\(([^()]{1,160})\)/u', $rest, $pairs, PREG_SET_ORDER ) ) {
+				continue;
+			}
+			foreach ( $pairs as $pair ) {
+				$chunks = preg_split( '/[,;:]|\s[\x{2013}\x{2014}-]\s/u', $pair[1] );
+				$chunk  = is_array( $chunks ) ? trim( (string) end( $chunks ) ) : '';
+				if ( '' === $chunk || preg_match( '/(?<!\p{L})или(?!\p{L})/iu', $chunk ) ) {
+					continue;
+				}
+				$name = self::trailing_name( $chunk );
+				if ( '' !== $name && ! in_array( $name, $names, true ) ) {
+					$names[] = $name;
+				}
+			}
+		}
+		return $names;
+	}
+
+	/**
+	 * Имя в конце фрагмента: подряд идущие слова с заглавной буквы (1-4 слова).
+	 * «и специальный гость концерта Пётр Дольский» -> «Пётр Дольский».
+	 *
+	 * @param string $chunk Фрагмент текста перед скобкой.
+	 * @return string
+	 */
+	public static function trailing_name( $chunk ) {
+		$words = preg_split( '/\s+/u', trim( (string) $chunk ) );
+		if ( ! is_array( $words ) ) {
+			return '';
+		}
+		$taken = array();
+		for ( $i = count( $words ) - 1; $i >= 0; $i-- ) {
+			// Кавычки снимаем регулярным выражением: trim() работает по байтам и портит кириллицу (у «л» и «»» общий байт).
+			$word = (string) preg_replace( '/^[«»"\'\x{201C}\x{201D}\x{201E}]+|[«»"\'\x{201C}\x{201D}\x{201E}]+$/u', '', $words[ $i ] );
+			if ( '' === $word || ! preg_match( '/^\p{Lu}[\p{L}\p{M}\'\x{2019}.\-]*$/u', $word ) ) {
+				break;
+			}
+			array_unshift( $taken, $word );
+		}
+		$count = count( $taken );
+		if ( 0 === $count || $count > 4 ) {
+			return '';
+		}
+		$name = implode( ' ', $taken );
+		$len  = function_exists( 'mb_strlen' ) ? mb_strlen( $name, 'UTF-8' ) : strlen( $name );
+		if ( $len < 2 || $len > 60 ) {
+			return '';
+		}
+		return $name;
+	}
+
+	/**
+	 * Исполнители, вписанные вручную: по одному на строке (или через запятую в одной строке),
+	 * роль в скобках отбрасывается. Коллективы (трио, оркестр, «…») получают тип PerformingGroup.
+	 *
+	 * @param string $text Значение поля.
+	 * @return array[]
+	 */
+	public static function manual_performers( $text ) {
+		$text  = str_replace( "\r", '', (string) $text );
+		$items = false !== strpos( $text, "\n" ) ? explode( "\n", $text ) : explode( ',', $text );
+		$list  = array();
+		$seen  = array();
+		foreach ( $items as $item ) {
+			$name = preg_replace( '/\([^()]*\)/u', '', wp_strip_all_tags( (string) $item ) );
+			$name = trim( (string) preg_replace( '/\s+/u', ' ', (string) $name ), " \t,;" );
+			$len  = function_exists( 'mb_strlen' ) ? mb_strlen( $name, 'UTF-8' ) : strlen( $name );
+			if ( $len < 2 || $len > 100 || in_array( $name, $seen, true ) ) {
+				continue;
+			}
+			$seen[] = $name;
+			$list[] = array(
+				'@type' => preg_match( self::GROUP_WORDS, $name ) ? 'PerformingGroup' : 'Person',
+				'name'  => $name,
+			);
+			if ( count( $list ) >= self::MAX_PERFORMERS ) {
+				break;
+			}
+		}
+		return $list;
+	}
+
+	/**
+	 * Значения поля (одно или несколько, в том числе сериализованные массивы) плоским списком строк.
+	 *
+	 * @param mixed $raw Результат get_post_meta( ..., false ).
+	 * @return string[]
+	 */
+	private static function flat_values( $raw ) {
+		$flat = array();
+		$walk = function ( $value ) use ( &$walk, &$flat ) {
+			$value = maybe_unserialize( $value );
+			if ( is_array( $value ) ) {
+				foreach ( $value as $item ) {
+					$walk( $item );
+				}
+			} elseif ( is_scalar( $value ) && '' !== trim( (string) $value ) ) {
+				$flat[] = (string) $value;
+			}
+		};
+		$walk( $raw );
+		return $flat;
+	}
+
+	/**
+	 * HTML -> строки текста (абзацы и переносы сохраняются).
+	 *
+	 * @param string $html Текст.
+	 * @return string[]
+	 */
+	public static function text_lines( $html ) {
+		$text = self::ru_text( $html );
+		if ( '' === $text ) {
+			return array();
+		}
+		if ( function_exists( 'strip_shortcodes' ) ) {
+			$text = strip_shortcodes( $text );
+		}
+		$broken = preg_replace( '#<(?:br|/p|/div|/li|/h[1-6]|/tr)\b[^>]*>#i', "\n", $text );
+		$text   = null === $broken ? $text : $broken;
+		$text   = wp_strip_all_tags( $text );
+		$text   = html_entity_decode( $text, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+		$text   = str_replace( array( "\xC2\xA0", "\xE2\x80\xAF", "\xE2\x80\x89", "\r" ), array( ' ', ' ', ' ', '' ), $text );
+		$lines  = array();
+		foreach ( explode( "\n", $text ) as $line ) {
+			$line = preg_replace( '/[ \t]+/u', ' ', $line );
+			$line = trim( (string) $line );
+			if ( '' !== $line ) {
+				$lines[] = $line;
+			}
+		}
+		return $lines;
+	}
+
+	/**
+	 * Дата начала продаж для offers.validFrom: дата публикации анонса (по Москве).
+	 * Не выводится, если дата неизвестна или не раньше начала концерта.
+	 *
+	 * @param WP_Post $post      Анонс.
+	 * @param int     $start_utc Начало концерта (unix).
+	 * @return string|null
+	 */
+	public static function valid_from( WP_Post $post, $start_utc ) {
+		$gmt = trim( (string) $post->post_date_gmt );
+		if ( '' === $gmt || 0 === strpos( $gmt, '0000' ) ) {
+			return null;
+		}
+		try {
+			$date = new DateTime( $gmt, new DateTimeZone( 'UTC' ) );
+			if ( $date->getTimestamp() >= (int) $start_utc ) {
+				return null;
+			}
+			$date->setTimezone( new DateTimeZone( self::CLUB_TZ ) );
+		} catch ( Exception $e ) {
+			return null;
+		}
+		return $date->format( 'c' );
+	}
+
+	/**
 	 * Человекочитаемые описания проблем (для страницы проверки).
 	 *
 	 * @return array
@@ -241,6 +488,7 @@ class Kozlov_Event_Schema_Builder {
 			'status_rescheduled' => 'Отмечен как перенесённый на новую дату: в разметке EventRescheduled',
 			'status_cancelled'   => 'Отмечен как отменённый: в разметке EventCancelled. Проверьте, что это написано в тексте анонса',
 			'no_previous_start'  => 'Перенесён, но не указана прежняя дата (или она совпадает с новой): previousStartDate не выводится',
+			'no_performer'       => 'Состав не найден в тексте анонса: исполнители (performer) не выводятся. Их можно вписать в блоке «Для поисковиков» в редакторе анонса',
 		);
 	}
 
@@ -336,11 +584,13 @@ class Kozlov_Event_Schema_Builder {
 		$now    = null === $now ? time() : (int) $now;
 		$issues = array();
 		$info   = array(
-			'start'    => '',
-			'stage'    => '',
-			'price'    => '',
-			'status'   => $post->post_status,
-			'schedule' => '',
+			'start'      => '',
+			'stage'      => '',
+			'price'      => '',
+			'status'     => $post->post_status,
+			'schedule'   => '',
+			'performers' => '',
+			'perf_from'  => '',
 		);
 		$empty  = array(
 			'data'   => null,
@@ -471,6 +721,22 @@ class Kozlov_Event_Schema_Builder {
 		if ( ! empty( $keywords ) ) {
 			$data['keywords'] = implode( ', ', $keywords );
 		}
+		// Исполнители: вписанные вручную или состав из текста анонса.
+		$performers = self::performers( $post->ID );
+		if ( ! empty( $performers['list'] ) ) {
+			$data['performer'] = $performers['list'];
+			$names             = array();
+			foreach ( $performers['list'] as $performer ) {
+				$names[] = $performer['name'];
+			}
+			$info['performers'] = implode( ', ', $names );
+			$info['perf_from']  = $performers['source'];
+		} elseif ( 'off' === $performers['source'] ) {
+			$info['perf_from'] = 'off';
+		} else {
+			$issues[] = 'no_performer';
+		}
+
 		if ( 'rescheduled' === $status_key ) {
 			$previous = self::previous_start_iso( get_post_meta( $post->ID, self::PREVIOUS_META, true ) );
 			if ( null !== $previous && $previous !== $times['start'] ) {
@@ -509,17 +775,18 @@ class Kozlov_Event_Schema_Builder {
 		$cost          = self::parse_cost( isset( $row['cost'] ) ? $row['cost'] : '' );
 		$info['price'] = $cost['text'];
 		$tickets_link  = trim( (string) get_post_meta( $post->ID, 'ticketscloud_link', true ) );
+		$valid_from    = self::valid_from( $post, $times['start_utc'] );
 		// Цена выводится при любом статусе: по правилам Google при отмене, отсрочке и переносе
 		// меняется только eventStatus (и startDate с previousStartDate при переносе), остальные свойства не трогают.
 		switch ( $cost['kind'] ) {
 			case 'free':
 				$data['isAccessibleForFree'] = true;
-				$data['offers']              = self::offer( 0, $url );
+				$data['offers']              = self::offer( 0, $url, $valid_from );
 				break;
 			case 'from':
 			case 'exact':
 				if ( '' !== $tickets_link ) {
-					$data['offers'] = self::offer( $cost['price'], $url );
+					$data['offers'] = self::offer( $cost['price'], $url, $valid_from );
 				} else {
 					$issues[] = 'paid_no_tickets';
 				}
@@ -551,17 +818,22 @@ class Kozlov_Event_Schema_Builder {
 	 * Наличие билетов (availability) не выводим: ссылка Ticketscloud не означает,
 	 * что билеты не распроданы, а неверный InStock хуже, чем отсутствие поля.
 	 *
-	 * @param int    $price Цена в рублях.
-	 * @param string $url   Страница с покупкой.
+	 * @param int         $price      Цена в рублях.
+	 * @param string      $url        Страница с покупкой.
+	 * @param string|null $valid_from Начало продаж (дата публикации анонса) или null.
 	 * @return array
 	 */
-	private static function offer( $price, $url ) {
-		return array(
+	private static function offer( $price, $url, $valid_from = null ) {
+		$offer = array(
 			'@type'         => 'Offer',
 			'price'         => (int) $price,
 			'priceCurrency' => 'RUB',
 			'url'           => $url,
 		);
+		if ( null !== $valid_from ) {
+			$offer['validFrom'] = $valid_from;
+		}
+		return $offer;
 	}
 
 	/**
