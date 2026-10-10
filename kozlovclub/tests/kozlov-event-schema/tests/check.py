@@ -44,6 +44,13 @@ else:
         ok(d['location']['@type'] == ['Place', 'MusicVenue'] and d['location']['@id'].startswith('http://127.0.0.1:8089/#'), f'{k}: venue {d["location"].get("@id")}')
         if 'offers' in d:
             ok('availability' not in d['offers'], f'{k}: availability must be absent')
+            vf = d['offers'].get('validFrom')
+            if k in ('PP', 'CC'):
+                ok(vf is None, f'{k}: validFrom must be absent when published after start, got {vf}')
+            else:
+                ok(vf is not None and re.match(r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\+03:00$', vf) and vf[:10] <= d['startDate'][:10], f'{k}: validFrom {vf}')
+        if k not in ('LP', 'LV', 'LM', 'LJ'):
+            ok('performer' not in d, f'{k}: unexpected performer {d.get("performer")}')
         org = d['organizer']
         ok(org['name'] == 'Клуб Алексея Козлова' and org['url'] == 'http://127.0.0.1:8089/', f'{k}: organizer')
         ok((org.get('@id') == 'http://127.0.0.1:8089/#organization') == (os.environ.get('YOAST') == '1'), f'{k}: organizer @id {org.get("@id")}')
@@ -59,7 +66,7 @@ else:
     ok(A['name'] == 'ДАНИИЛ КРАМЕР И РОМАН МИРОШНИЧЕНКО: «ДИАЛОГ ВИРТУОЗОВ»', 'A name')
     ok(re.match(r'^https?://[\x21-\x7e]+$', A['image'][0]) is not None and '%D0%A1%D0%B0%D1%88%D0%B0' in A['image'][0], 'A image encoded %s' % A['image'])
     ok(A['url'].endswith('/event/case-a/') and A['@id'] == A['url'] + '#event', 'A url')
-    B = g('B'); ok('offers' not in B and B['endDate'] == '2026-10-10T00:30:00+03:00' and B['location']['name'].endswith('The Beat'), 'B deposit/end %s' % B)
+    B = g('B'); ok('offers' not in B and B['endDate'] == '2026-12-10T00:30:00+03:00' and B['location']['name'].endswith('The Beat'), 'B deposit/end %s' % B)
     C = g('C'); ok(C['offers']['price'] == 0 and C.get('isAccessibleForFree') is True and C.get('keywords') == 'Джаз', 'C free/keywords %s' % C.get('keywords'))
     D = g('D'); ok(D['location']['name'] == 'Клуб Алексея Козлова' and D['location']['address']['streetAddress'] == 'ул. Маросейка, 9/2' and D['location']['@id'].endswith('#venue-marosejka') and 'keywords' not in D, 'D no-stage fallback')
     E = g('E'); ok('offers' not in E and E['location']['address']['streetAddress'] == 'ул. Мясницкая, 15', 'E myasnitskaya no tickets')
@@ -86,5 +93,12 @@ else:
     RT = g('RT'); ok(RT['eventStatus'].endswith('EventRescheduled') and 'previousStartDate' not in RT and 'offers' in RT, 'RT rescheduled no prev')
     for k2 in ('A','B','C','D','E','F'):
         ok('previousStartDate' not in g(k2) and g(k2)['eventStatus'].endswith('EventScheduled'), k2 + ' scheduled')
+    P_ = lambda k: [(x['@type'], x['name']) for x in g(k).get('performer', [])]
+    ok(P_('LP') == [('Person', 'Дмитрий Илугдин'), ('Person', 'Михаил Дмитриев'), ('Person', 'Пётр Ившин')], 'LP performer %s' % P_('LP'))
+    ok(g('LP')['offers'].get('validFrom') == '2026-09-01T12:00:00+03:00', 'LP validFrom %s' % g('LP')['offers'].get('validFrom'))
+    ok(P_('LV') == [('Person', 'Николай Сарабьянов'), ('Person', 'Антон Ревнюк'), ('Person', 'Андрей Красильников'), ('Person', 'Roberto Porta'), ('Person', 'Петр Дольский')], 'LV performer %s' % P_('LV'))
+    ok(P_('LM') == [('PerformingGroup', '«Арсенал» Алексея Козлова'), ('Person', 'Анна Королёва'), ('PerformingGroup', 'Трио Павла Ершова')], 'LM manual %s' % P_('LM'))
+    ok('performer' not in g('LO'), 'LO performer off')
+    ok(P_('LJ') == [('Person', 'Егор Балабанов')] and 'offers' not in g('LJ'), 'LJ jam host %s' % P_('LJ'))
     print('ON mode checked', len(results), 'pages')
 print('FAILS:', fails)

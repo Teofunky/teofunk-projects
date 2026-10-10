@@ -11,7 +11,7 @@ function ts_real( $wall, $tz ) { $d = new DateTime( $wall, new DateTimeZone( $tz
 $stages0 = array( 'location_main_scene' => '0', 'location_mansarda' => '0', 'location_the_beat' => '0', 'location_myasnitskaya' => '0', 'small_hall' => '0' );
 $cases = array(
  'A' => array( 'title' => 'ДАНИИЛ КРАМЕР И РОМАН МИРОШНИЧЕНКО: «ДИАЛОГ ВИРТУОЗОВ»', 'stage' => array( 'location_main_scene' ), 'tz' => 'UTC', 'start' => '2026-11-30 20:00', 'end' => '2026-11-30 22:30', 'cost' => '[:ru]от 1500 руб.[:en] 1500 RUR and above', 'tc' => '6abff807772d40451f8ea22a', 'desc' => '<p>Народный артист России&nbsp;Даниил Крамер<br />и «Диалог»</p>', 'img' => 4, 'genres' => array( 'Джаз|Jazz', 'Соул|Soul' ) ),
- 'B' => array( 'title' => '«УРАГАННЫЙ ДЖЕМ» ПАВЛА ТИМОФЕЕВА', 'stage' => array( 'location_the_beat' ), 'tz' => 'UTC', 'start' => '2026-10-09 22:00', 'end' => '2026-10-10 00:30', 'cost' => '[:ru] ДЕПОЗИТ 2 000 РУБ.[:en] DEPOSIT 2 000 RUR', 'tc' => '', 'desc' => 'Би-боп, кул-джаз', 'img' => 4 ),
+ 'B' => array( 'title' => '«УРАГАННЫЙ ДЖЕМ» ПАВЛА ТИМОФЕЕВА', 'stage' => array( 'location_the_beat' ), 'tz' => 'UTC', 'start' => '2026-12-09 22:00', 'end' => '2026-12-10 00:30', 'cost' => '[:ru] ДЕПОЗИТ 2 000 РУБ.[:en] DEPOSIT 2 000 RUR', 'tc' => '', 'desc' => 'Би-боп, кул-джаз', 'img' => 4 ),
  'C' => array( 'title' => 'TRANE ZEN ART', 'stage' => array( 'location_mansarda' ), 'tz' => 'UTC', 'start' => '2026-10-12 20:00', 'end' => '2026-10-12 22:45', 'cost' => '[:ru]Вход свободный[:en]Free entry', 'tc' => '', 'desc' => 'Описание', 'img' => 4, 'genres' => array( 'Джаз|Jazz', 'Вход свободный|Free' ) ),
  'D' => array( 'title' => 'JAZZ BIRDS 2026: 3-Й ДЕНЬ', 'stage' => array(), 'tz' => 'UTC', 'start' => '2026-10-29 10:00', 'end' => '2026-10-29 16:00', 'cost' => '[:ru]Вход свободный', 'tc' => '', 'desc' => 'Конкурс', 'img' => 4 ),
  'E' => array( 'title' => 'RESONANT HANDS', 'stage' => array( 'location_myasnitskaya' ), 'tz' => 'UTC', 'start' => '2026-11-16 20:00', 'end' => '2026-11-16 22:00', 'cost' => '[:ru]от 1000 руб.', 'tc' => '', 'desc' => 'Текст', 'img' => 4 ),
@@ -41,11 +41,17 @@ $cases = array(
  'PP' => array( 'title' => 'ОТЛОЖЕН В ПРОШЛОМ', 'stage' => array( 'location_mansarda' ), 'tz' => 'UTC', 'start' => '2026-10-01 20:00', 'end' => '2026-10-01 22:00', 'cost' => 'от 1200 руб.', 'tc' => 'x', 'desc' => 'Текст', 'img' => 4, 'sched' => 'postponed' ),
  'CC' => array( 'title' => 'ОТМЕНЁН В ПРОШЛОМ', 'stage' => array( 'location_the_beat' ), 'tz' => 'UTC', 'start' => '2026-10-02 20:00', 'end' => '2026-10-02 22:00', 'cost' => 'от 1300 руб.', 'tc' => 'x', 'desc' => 'Текст', 'img' => 4, 'sched' => 'cancelled' ),
  'RX' => array( 'title' => 'ПЕРЕНЕСЁН И ПРОШЁЛ', 'stage' => array( 'location_the_beat' ), 'tz' => 'UTC', 'start' => '2026-10-03 20:00', 'end' => '2026-10-03 22:00', 'cost' => 'от 1300 руб.', 'tc' => 'x', 'desc' => 'Текст', 'img' => 4, 'sched' => 'rescheduled', 'prev' => '2026-09-20 20:00' ),
+ 'LP' => array( 'title' => 'ИЛУГДИН ТРИО: ПЕРЕЗАГРУЗКА', 'stage' => array( 'location_main_scene' ), 'tz' => 'UTC', 'start' => '2026-12-03 20:00', 'end' => '2026-12-03 22:00', 'cost' => 'от 1500 руб.', 'tc' => 'x', 'desc' => '<p>Дмитрий Илугдин – российский пианист (род. 1977).</p>', 'img' => 4, 'tb2' => '<p>На сцену выйдут: <strong>Дмитрий Илугдин</strong> (фортепиано), <strong>Михаил Дмитриев</strong> (контрабас), <strong>Пётр Ившин </strong>(ударные).</p>', 'post_date' => '2026-09-01 12:00:00' ),
+ 'LV' => array( 'title' => 'ВЕЧЕР ПАМЯТИ', 'stage' => array( 'location_main_scene' ), 'tz' => 'UTC', 'start' => '2026-12-04 20:00', 'end' => '2026-12-04 22:00', 'cost' => 'от 1500 руб.', 'tc' => 'x', 'desc' => '<p>В концерте примут участие музыканты, игравшие с ним много лет.<br />На Главную сцену Клуба выйдут: Николай Сарабьянов (гитара), Антон Ревнюк (бас-гитара) Андрей Красильников (саксофон), Эдуард Петрухин или Аркадий Баклагин (барабаны); Roberto Porta (Роберто Порта, Италия, перкуссия) и специальный гость концерта Петр Дольский (бас-гитара).</p><p>Внимание! Состав выступающих может быть изменён при условии сохранения художественной содержательности программы.</p>', 'img' => 4, 'artist' => array( 'Играл с такими мастерами, как Антти Сарпила (кларнет, Финляндия) и Том Фишер (кларнет, США).' ) ),
+ 'LM' => array( 'title' => 'ВРУЧНУЮ', 'stage' => array( 'location_mansarda' ), 'tz' => 'UTC', 'start' => '2026-12-05 20:00', 'end' => '2026-12-05 22:00', 'cost' => 'от 1000 руб.', 'tc' => 'x', 'desc' => '<p>На сцену выйдут: Иван Иванов (рояль).</p>', 'img' => 4, 'perf' => "«Арсенал» Алексея Козлова\nАнна Королёва (саксофон)\n\n  Трио Павла Ершова  " ),
+ 'LO' => array( 'title' => 'ОТКЛЮЧЕНЫ', 'stage' => array( 'location_mansarda' ), 'tz' => 'UTC', 'start' => '2026-12-06 20:00', 'end' => '2026-12-06 22:00', 'cost' => 'от 1000 руб.', 'tc' => 'x', 'desc' => '<p>На сцену выйдут: Иван Иванов (рояль).</p>', 'img' => 4, 'perf' => '-' ),
+ 'LJ' => array( 'title' => 'DOWNTOWNBEAT JAM', 'stage' => array( 'location_the_beat' ), 'tz' => 'UTC', 'start' => '2026-12-07 22:00', 'end' => '2026-12-08 01:00', 'cost' => 'ДЕПОЗИТ 2 000 РУБ.', 'tc' => '', 'desc' => '<p>Внимание! Пожалуйста, бронируйте места на него заранее по телефону +7 (495) 296-12-00 – депозит 2000 рублей на персону.</p><p>Постоянный ведущий джема: Егор Балабанов (духовые инструменты). С анонсами можно ознакомиться в соцсетях.</p>', 'img' => 4 ),
 );
 $map = array();
 foreach ( $cases as $key => $c ) {
 	$args = array( 'post_type' => 'ai1ec_event', 'post_title' => $c['title'], 'post_status' => isset( $c['status'] ) ? $c['status'] : 'publish', 'post_content' => '', 'post_name' => 'case-' . strtolower( $key ) );
 	if ( isset( $c['password'] ) ) { $args['post_password'] = $c['password']; }
+	if ( isset( $c['post_date'] ) ) { $args['post_date'] = $c['post_date']; $args['post_date_gmt'] = get_gmt_from_date( $c['post_date'] ); }
 	$id = wp_insert_post( wp_slash( $args ), true );
 	if ( is_wp_error( $id ) ) { echo "ERR $key\n"; continue; }
 	$meta = $stages0;
@@ -58,6 +64,9 @@ foreach ( $cases as $key => $c ) {
 	if ( isset( $c['genres_rows'] ) ) { foreach ( $c['genres_rows'] as $g ) { add_post_meta( $id, 'genre_categories', $g ); } }
 	if ( isset( $c['sched'] ) ) { update_post_meta( $id, '_kozlov_event_status', $c['sched'] ); }
 	if ( isset( $c['prev'] ) ) { update_post_meta( $id, '_kozlov_event_previous_start', $c['prev'] ); }
+	if ( isset( $c['tb2'] ) ) { update_post_meta( $id, 'textblock_2_description', wp_slash( $c['tb2'] ) ); }
+	if ( isset( $c['artist'] ) ) { foreach ( $c['artist'] as $a ) { add_post_meta( $id, 'artist_description', wp_slash( $a ) ); } }
+	if ( isset( $c['perf'] ) ) { update_post_meta( $id, '_kozlov_event_performers', wp_slash( $c['perf'] ) ); }
 	if ( null !== $c['start'] ) {
 		$st = 'Europe/Moscow' === $c['tz'] || '' === $c['tz'] ? ts_real( $c['start'], 'Europe/Moscow' ) : ts_wall_utc( $c['start'] );
 		$en = 'Europe/Moscow' === $c['tz'] || '' === $c['tz'] ? ts_real( $c['end'], 'Europe/Moscow' ) : ts_wall_utc( $c['end'] );
