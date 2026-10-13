@@ -1,0 +1,63 @@
+--- orig/single.php	2026-10-13 15:25:19.433615543 +0300
++++ new/single.php	2026-10-13 15:25:28.192192286 +0300
+@@ -4,12 +4,20 @@
+ $lang = WPGlobus::Config()->language;
+ 
+ $start = time();
+-$query = "SELECT wp.id, wpei.start, wpei.end, CONCAT('/{$lang}/event/', wp.post_name) as url, wpe.cost, wp.post_status
++
++// Предпросмотр черновика: сам черновик попадает в выборку только при предпросмотре
++// и только для того, кто может его редактировать. Для всех остальных 0, запрос прежний.
++$kz_preview_id = (int) get_queried_object_id();
++if ( ! ( is_preview() && $kz_preview_id && get_post_status( $kz_preview_id ) !== 'publish' && current_user_can( 'edit_post', $kz_preview_id ) ) ) {
++	$kz_preview_id = 0;
++}
++
++$query = "SELECT wp.id, wpei.start, wpei.end, CONCAT('/event/', wp.post_name, '/') as url, wpe.cost, wp.post_status
+ 		FROM wp_ai1ec_event_instances AS wpei
+ 		LEFT JOIN wp_posts AS wp ON wp.id = wpei.post_id
+ 		LEFT JOIN wp_ai1ec_events AS wpe ON wpe.post_id = wpei.post_id
+ 		-- WHERE wp.post_status <> 'inherit'
+-		WHERE wp.post_status = 'publish'
++		WHERE ( wp.post_status = 'publish' OR wp.id = {$kz_preview_id} )
+ 		ORDER BY wpei.start";
+ 
+ $events = $wpdb->get_results($query);
+@@ -172,7 +180,7 @@
+ 									}
+ 
+ 									if (!empty($arResStr)) {
+-										echo '<div class="row_3">' . implode($arResStr, ' | ') , '</div>';
++										echo '<div class="row_3">' . implode(' | ', $arResStr) , '</div>';
+ 									}
+ 									?>
+ 								</div>
+@@ -276,7 +284,7 @@
+                   }
+                 }
+                 // pre($arGenresLang);
+-								$genre_categories_str = implode($arGenresLang, ', ');
++								$genre_categories_str = implode(', ', $arGenresLang);
+ 								// var_dump($genre_categories_str);
+ 								?>
+ 								<?php if (!empty($genre_categories)) { ?>
+--- orig/index.php	2026-10-13 15:25:19.435638401 +0300
++++ new/index.php	2026-10-13 15:25:28.192815526 +0300
+@@ -30,7 +30,7 @@
+   // var_dump($queryFilterDateEnd);
+ }
+ 
+-$query = "SELECT wp.id, wpei.start, wpei.end, CONCAT('/{$lang}/event/', wp.post_name) as url, wpe.cost
++$query = "SELECT wp.id, wpei.start, wpei.end, CONCAT('/event/', wp.post_name, '/') as url, wpe.cost
+     FROM wp_ai1ec_event_instances AS wpei
+     LEFT JOIN wp_posts AS wp ON wp.id = wpei.post_id
+     LEFT JOIN wp_ai1ec_events AS wpe ON wpe.post_id = wpei.post_id
+@@ -173,7 +173,7 @@
+ */ ?>
+ 
+ <div class="content content_home">
+-	<?php $view_tab = !empty($_GET['view']) ? $_GET['view'] : 'cell' ?>
++	<?php $view_tab = ( isset( $_GET['view'] ) && $_GET['view'] === 'line' ) ? 'line' : 'cell' ?>
+ 	<div class="inner content_inner events_wrap view_<?php echo $view_tab ?>">
+ 		<div class="wrap">
+ 

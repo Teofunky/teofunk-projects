@@ -1,0 +1,143 @@
+--- orig/single.php	2026-10-13 15:25:19.433615543 +0300
++++ merged/single.php	2026-10-13 15:34:59.313756649 +0300
+@@ -4,12 +4,22 @@
+ $lang = WPGlobus::Config()->language;
+ 
+ $start = time();
+-$query = "SELECT wp.id, wpei.start, wpei.end, CONCAT('/{$lang}/event/', wp.post_name) as url, wpe.cost, wp.post_status
++
++// Allow only the current event into the preview query, and only for its editor.
++$kz_id = (int) get_queried_object_id();
++$kz_current_id = (
++	$kz_id > 0
++	&& is_preview()
++	&& get_post_status( $kz_id ) !== 'publish'
++	&& current_user_can( 'edit_post', $kz_id )
++) ? $kz_id : 0;
++
++$query = "SELECT wp.id, wpei.start, wpei.end, wpe.cost, wp.post_status
+ 		FROM wp_ai1ec_event_instances AS wpei
+ 		LEFT JOIN wp_posts AS wp ON wp.id = wpei.post_id
+ 		LEFT JOIN wp_ai1ec_events AS wpe ON wpe.post_id = wpei.post_id
+ 		-- WHERE wp.post_status <> 'inherit'
+-		WHERE wp.post_status = 'publish'
++		WHERE ( wp.post_status = 'publish' OR wp.id = {$kz_current_id} )
+ 		ORDER BY wpei.start";
+ 
+ $events = $wpdb->get_results($query);
+@@ -39,12 +49,21 @@
+ 						$post_id = get_the_ID();
+ 						$post_title = get_the_title();
+ 
++						$event = null;
+ 						foreach ($events as $key => $post) {
+ 							if ( $post->id == $post_id ) {
+ 								$event = $post;
+ 							}
+ 						}
+ 
++						// Without an AI1EC instance there is no reliable concert date to display.
++						if (null === $event) {
++							if (is_preview() && current_user_can('edit_post', $post_id)) {
++								echo '<p>Дата мероприятия не найдена в календаре. Сохраните событие и повторите предпросмотр.</p>';
++							}
++							continue;
++						}
++
+ 						$meta = get_post_meta($event->id);
+ 
+ 						$artistList = $meta['artist_list'][0];
+@@ -67,7 +86,7 @@
+ 										$arItem = [
+ 											'id' => $post->id,
+ 											'date' => date('d', $post->start) . ' ' . mb_strtolower(_month(date('n', $post->start), $lang)) . ' ' . date('Y', $post->start),
+-											'url' => $post->url,
++											'url' => get_permalink((int) $post->id),
+ 										];
+ 										$artistOtherEventsIds[] = $arItem;
+ 										// echo '<pre>';
+@@ -81,15 +100,18 @@
+ 							if ( $post->id == $post_id ) {
+ 								// $event = $post;
+ 								if ( $post->start > $start ) {
+-									if ( $published_events[$key - 1]->start > $start ) {
++									if ( isset($published_events[$key - 1]) && $published_events[$key - 1]->start > $start ) {
+ 										$prev_concert = $published_events[$key - 1];
+ 									}
+-									$next_concert = $published_events[$key + 1];
++									if ( isset($published_events[$key + 1]) ) {
++										$next_concert = $published_events[$key + 1];
++									}
+ 								}
+ 							}
+ 						}
+ 
+ 						if ( !empty($prev_concert) ) {
++							$prev_concert->url = get_permalink((int) $prev_concert->id);
+ 							$prev_event_date = array();
+ 							$prev_event_date['date'] = date('d', $prev_concert->start);
+ 							$prev_event_date['month'] = _month( date('n', $prev_concert->start), $lang );
+@@ -99,6 +121,7 @@
+ 						}
+ 
+ 						if ( !empty($next_concert) ) {
++							$next_concert->url = get_permalink((int) $next_concert->id);
+ 							$next_event_date = array();
+ 							$next_event_date['date'] = date('d', $next_concert->start);
+ 							$next_event_date['month'] = _month( date('n', $next_concert->start), $lang );
+@@ -172,7 +195,7 @@
+ 									}
+ 
+ 									if (!empty($arResStr)) {
+-										echo '<div class="row_3">' . implode($arResStr, ' | ') , '</div>';
++										echo '<div class="row_3">' . implode(' | ', $arResStr) , '</div>';
+ 									}
+ 									?>
+ 								</div>
+@@ -276,7 +299,7 @@
+                   }
+                 }
+                 // pre($arGenresLang);
+-								$genre_categories_str = implode($arGenresLang, ', ');
++								$genre_categories_str = implode(', ', $arGenresLang);
+ 								// var_dump($genre_categories_str);
+ 								?>
+ 								<?php if (!empty($genre_categories)) { ?>
+--- orig/index.php	2026-10-13 15:25:19.435638401 +0300
++++ merged/index.php	2026-10-13 15:34:59.313922883 +0300
+@@ -30,7 +30,7 @@
+   // var_dump($queryFilterDateEnd);
+ }
+ 
+-$query = "SELECT wp.id, wpei.start, wpei.end, CONCAT('/{$lang}/event/', wp.post_name) as url, wpe.cost
++$query = "SELECT wp.id, wpei.start, wpei.end, wpe.cost
+     FROM wp_ai1ec_event_instances AS wpei
+     LEFT JOIN wp_posts AS wp ON wp.id = wpei.post_id
+     LEFT JOIN wp_ai1ec_events AS wpe ON wpe.post_id = wpei.post_id
+@@ -173,7 +173,7 @@
+ */ ?>
+ 
+ <div class="content content_home">
+-	<?php $view_tab = !empty($_GET['view']) ? $_GET['view'] : 'cell' ?>
++	<?php $view_tab = ( isset( $_GET['view'] ) && $_GET['view'] === 'line' ) ? 'line' : 'cell' ?>
+ 	<div class="inner content_inner events_wrap view_<?php echo $view_tab ?>">
+ 		<div class="wrap">
+ 
+@@ -209,7 +209,7 @@
+   							'slider_title' 	=> 	$slider_title,
+   							'slider_img' 	=> 	$slider_img,
+                 'slider_user_link' => $slider_user_link,
+-  							'url'			=>	$post->url,
++  							'url'			=>	get_permalink((int) $post->id),
+   							'mansarda'		=>	$slider_mansarda,
+   							'the_beat'		=>	$slider_the_beat,
+   							'main_scene'	=>	$slider_main_scene,
+@@ -396,6 +396,8 @@
+ 				<div class="events view_<?php echo $view_tab ?>">
+ 					<?php foreach ($events as $event) : ?>
+ 						<?php
++						// WordPress / WPGlobus generates the proper permalink for this language.
++						$event->url = get_permalink((int) $event->id);
+ 						$event_date = array();
+ 						$event_date['date'] = date('d', $event->start);
+ 						$event_date['month'] = _month( date('n', $event->start), $lang );
