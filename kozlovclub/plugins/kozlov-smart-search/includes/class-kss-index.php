@@ -406,6 +406,36 @@ if ( ! class_exists( 'KSS_Index' ) ) :
 			return true;
 		}
 
+		/**
+		 * Есть ли в таблице дат календаря колонка окончания (end).
+		 * Проверяется перед запросом: если колонки нет, индекс строится как раньше, без окончания.
+		 */
+		public static function has_end() {
+			global $wpdb;
+			try {
+				$col = $wpdb->get_var( $wpdb->prepare( "SHOW COLUMNS FROM {$wpdb->prefix}ai1ec_event_instances LIKE %s", 'end' ) );
+				return 'end' === $col;
+			} catch ( \Throwable $e ) {
+				kss_log( $e );
+				return false;
+			}
+		}
+
+		/**
+		 * Длительность концерта в минутах по началу и окончанию из календаря.
+		 * Оба значения хранятся в одних и тех же «часах клуба», поэтому разница точная.
+		 * 0: окончание не указано или выглядит ошибкой (раньше начала или дольше трёх суток).
+		 */
+		public static function duration( $start, $end ) {
+			$start = (int) $start;
+			$end   = (int) $end;
+			if ( $start <= 0 || $end <= $start ) {
+				return 0;
+			}
+			$min = (int) round( ( $end - $start ) / 60 );
+			return ( $min > 0 && $min <= 4320 ) ? $min : 0;
+		}
+
 		/** Убирает байты, которые не являются корректным UTF-8. */
 		public static function utf8( $s ) {
 			$s = (string) $s;
@@ -690,6 +720,7 @@ if ( ! class_exists( 'KSS_Index' ) ) :
 				'thumbs'  => 0,
 				'webp'    => 0,
 				'tickets' => 0,
+				'ends'    => 0,
 				'ms'      => 0,
 				'sample'  => array(),
 			);
@@ -697,9 +728,11 @@ if ( ! class_exists( 'KSS_Index' ) ) :
 			$rows = array();
 			if ( self::tables_ok() ) {
 				$stats['tables'] = true;
+				// окончание концерта (1.0.3): читается только если колонка есть, иначе запрос прежний
+				$end_sql         = self::has_end() ? ', i.`end` AS end_ts' : '';
 				$rows            = $wpdb->get_results(
 					$wpdb->prepare(
-						"SELECT i.post_id AS post_id, i.start AS start, p.post_title AS post_title, p.post_name AS post_name, e.cost AS cost
+						"SELECT i.post_id AS post_id, i.start AS start{$end_sql}, p.post_title AS post_title, p.post_name AS post_name, e.cost AS cost
 						 FROM {$wpdb->prefix}ai1ec_event_instances AS i
 						 INNER JOIN {$wpdb->posts} AS p ON p.ID = i.post_id
 						 LEFT JOIN {$wpdb->prefix}ai1ec_events AS e ON e.post_id = i.post_id
@@ -902,6 +935,10 @@ if ( ! class_exists( 'KSS_Index' ) ) :
 					$stats['tickets']++;
 				}
 				$tid = ( isset( $post_tx[ $id ], $text_id[ $post_tx[ $id ] ] ) ) ? $text_id[ $post_tx[ $id ] ] : -1;
+				$dur = isset( $row->end_ts ) ? self::duration( $start, $row->end_ts ) : 0;
+				if ( $dur > 0 ) {
+					$stats['ends']++;
+				}
 
 				$index['ev'][] = array(
 					$title,
@@ -916,6 +953,7 @@ if ( ! class_exists( 'KSS_Index' ) ) :
 					$tid,
 					$p['tc'],
 					$thumb[1],
+					$dur, // 12: длительность в минутах по календарю, 0 если окончание не указано
 				);
 			}
 			$index['genres'] = $genre_names;

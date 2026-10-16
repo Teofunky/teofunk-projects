@@ -181,6 +181,7 @@ if ( ! class_exists( 'KSS_Admin' ) ) :
 						<tbody>
 							<tr><td style="width:300px">Будущих концертов (дат)</td><td><?php echo (int) ( isset( $stats['events'] ) ? $stats['events'] : 0 ); ?></td></tr>
 							<tr><td>Событий</td><td><?php echo (int) ( isset( $stats['posts'] ) ? $stats['posts'] : 0 ); ?></td></tr>
+							<tr><td>С временем окончания</td><td><?php echo (int) ( isset( $stats['ends'] ) ? $stats['ends'] : 0 ); ?></td></tr>
 							<tr><td>С кнопкой «Купить билет»</td><td><?php echo (int) ( isset( $stats['tickets'] ) ? $stats['tickets'] : 0 ); ?></td></tr>
 							<tr><td>С картинкой / из них в WebP</td><td><?php echo (int) ( isset( $stats['thumbs'] ) ? $stats['thumbs'] : 0 ); ?> / <?php echo (int) ( isset( $stats['webp'] ) ? $stats['webp'] : 0 ); ?></td></tr>
 							<tr><td>Страниц сайта</td><td><?php echo (int) ( isset( $stats['pages'] ) ? $stats['pages'] : 0 ); ?></td></tr>
@@ -210,10 +211,15 @@ if ( ! class_exists( 'KSS_Admin' ) ) :
 										}
 									}
 									$btn = array( 'Подробнее', 'Купить билет', 'Регистрация' );
+									$till = '';
+									if ( isset( $e[12] ) && (int) $e[12] > 0 && preg_match( '/^(\d\d):(\d\d)$/', (string) $e[2], $hm ) ) {
+										$mins = ( (int) $hm[1] * 60 + (int) $hm[2] + (int) $e[12] ) % 1440;
+										$till = sprintf( '–%02d:%02d', intdiv( $mins, 60 ), $mins % 60 );
+									}
 									?>
 									<tr>
 										<td><?php echo esc_html( $e[1] ); ?></td>
-										<td><?php echo esc_html( $e[2] ); ?></td>
+										<td><?php echo esc_html( $e[2] . $till ); ?></td>
 										<td><?php echo esc_html( $e[0] ); ?></td>
 										<td><?php echo esc_html( implode( ', ', $names ) ); ?></td>
 										<td><?php echo esc_html( $e[4] ); ?></td>

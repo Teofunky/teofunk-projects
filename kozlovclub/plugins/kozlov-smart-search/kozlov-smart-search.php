@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Kozlov Smart Search
  * Description:       Мгновенный поиск по будущим концертам и страницам сайта. Работает только на чтение: не меняет тему, афишу и данные сайта.
- * Version:           1.0.2
+ * Version:           1.0.3
  * Requires at least: 5.3
  * Requires PHP:      7.2
  * Author:            Клуб Алексея Козлова
@@ -30,7 +30,7 @@ if ( defined( 'KSS_VERSION' ) ) {
 	return;
 }
 
-define( 'KSS_VERSION', '1.0.2' );
+define( 'KSS_VERSION', '1.0.3' );
 define( 'KSS_FILE', __FILE__ );
 define( 'KSS_DIR', dirname( __FILE__ ) . '/' );
 
