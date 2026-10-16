@@ -394,11 +394,27 @@ if ( ! class_exists( 'KSS_Index' ) ) :
 			return (int) date( 'Z', (int) $now );
 		}
 
+		/**
+		 * Сбой базы в только что выполненном запросе. WordPress при SQL-ошибке может вернуть
+		 * пустой результат, неотличимый от «концертов нет», поэтому ошибку проверяем отдельно.
+		 * Исключение уходит в get(): там остаётся прежняя рабочая копия индекса и ставится пауза.
+		 *
+		 * @param string $what Какой запрос проверяется, для журнала.
+		 * @throws RuntimeException При ошибке базы.
+		 */
+		protected static function db_check( $what ) {
+			global $wpdb;
+			if ( isset( $wpdb->last_error ) && '' !== (string) $wpdb->last_error ) {
+				throw new RuntimeException( 'database error in ' . $what . ': ' . $wpdb->last_error );
+			}
+		}
+
 		public static function tables_ok() {
 			global $wpdb;
 			foreach ( array( 'ai1ec_event_instances', 'ai1ec_events' ) as $name ) {
 				$table = $wpdb->prefix . $name;
 				$found = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $table ) ) );
+				self::db_check( 'tables' );
 				if ( $found !== $table ) {
 					return false;
 				}
@@ -412,13 +428,9 @@ if ( ! class_exists( 'KSS_Index' ) ) :
 		 */
 		public static function has_end() {
 			global $wpdb;
-			try {
-				$col = $wpdb->get_var( $wpdb->prepare( "SHOW COLUMNS FROM {$wpdb->prefix}ai1ec_event_instances LIKE %s", 'end' ) );
-				return 'end' === $col;
-			} catch ( \Throwable $e ) {
-				kss_log( $e );
-				return false;
-			}
+			$col = $wpdb->get_var( $wpdb->prepare( "SHOW COLUMNS FROM {$wpdb->prefix}ai1ec_event_instances LIKE %s", 'end' ) );
+			self::db_check( 'columns' ); // сбой базы не принимается за «колонки нет»
+			return 'end' === $col;
 		}
 
 		/**
@@ -743,7 +755,11 @@ if ( ! class_exists( 'KSS_Index' ) ) :
 						self::MAX_EVENTS
 					)
 				);
-				$rows            = is_array( $rows ) ? $rows : array();
+				// SQL-ошибка или не-массив: это сбой, а не пустая афиша. Прежний индекс остаётся в кэше.
+				self::db_check( 'events' );
+				if ( ! is_array( $rows ) ) {
+					throw new RuntimeException( 'events query returned no result set' );
+				}
 			}
 
 			$ids = array();

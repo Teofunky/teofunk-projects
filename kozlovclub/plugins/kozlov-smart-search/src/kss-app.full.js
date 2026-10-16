@@ -1,4 +1,4 @@
-/*! Kozlov Smart Search 1.0.2. Поиск по афише в браузере посетителя. Глобальных переменных не создаёт, jQuery не использует. */
+/*! Kozlov Smart Search 1.0.4. Поиск по афише в браузере посетителя. Глобальных переменных не создаёт, jQuery не использует. */
 (function () {
 'use strict';
 
@@ -169,7 +169,7 @@ function kssEngine() {
   }
 
   function makeVocab(genres) {
-    var seen = {}, out = [];
+    var seen = Object.create(null), out = [];
     function add(words, f) { words.forEach(function (w) { w = norm(w); if (w && !seen[w]) { seen[w] = 1; out.push(mk(w, f)); } }); }
     MONTHS.forEach(function (m) { add(m, 'd'); }); WEEKDAYS.forEach(function (w) { add(w, 'd'); }); add(RELATIVE, 'd'); add(FREE_WORDS, 'p'); add(['депозит'], 'p');
     Object.keys(STAGES).forEach(function (k) { add(STAGES[k].words, 's'); });
@@ -378,10 +378,10 @@ function kssEngine() {
       }
       if (v.pen === 0 && v.k && v.k.length >= 4 && q.length >= 4) {
         if (!C.keys) {
-          C.keys = {};
+          C.keys = Object.create(null);
           for (wi = 0; wi < C.words.length; wi++) { k = pk(C.words[wi]); if (k.length >= 4) (C.keys[k] || (C.keys[k] = [])).push(wi); }
         }
-        var same = C.keys.hasOwnProperty(v.k) ? C.keys[v.k] : null;
+        var same = has(C.keys, v.k) ? C.keys[v.k] : null;
         if (same) for (wi = 0; wi < same.length; wi++) if (/[а-я]/.test(C.words[same[wi]]) !== v.cyr) put(C.post[same[wi]], 44);
       }
     }
@@ -429,7 +429,7 @@ function kssEngine() {
   function byDate(a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : (a.time < b.time ? -1 : a.time > b.time ? 1 : a.n - b.n); }
 
   function groupFound(found) {
-    var groups = {}, order = [];
+    var groups = Object.create(null), order = [];
     found.forEach(function (f) {
       var g = groups[f.it.group];
       if (!g) { g = groups[f.it.group] = { title: f.it.title, score: f.score, hit: f.hit, block: f.block, note: f.note || null, dates: [] }; order.push(g); }
@@ -550,7 +550,7 @@ function kssEngine() {
       });
       cand = cand.filter(function (c) { return c.n === maxN; });
       if (cand.length) {
-        var seenW = {}, words = [];
+        var seenW = Object.create(null), words = [];
         cand.forEach(function (c) { c.words.forEach(function (w) { if (!seenW[w]) { seenW[w] = 1; words.push(w); } }); });
         res.groups = groupFound(cand); res.count = cand.length; res.partial = true; res.words = words;
         if (struct.length) res.dropped = label(struct);
@@ -606,7 +606,7 @@ function kssUI(K, CSS) {
   var filter = { when: null, stage: null, free: false };
   var raw = null, index = null, content = null, loadedAt = 0, skew = 0, textsAsked = false, resynced = false;
   var host = null, shadow = null, root = null, panel = null, statusEl = null, closeBtn = null;
-  var observer = null, layoutQueued = false, listeners = [], buying = false;
+  var observer = null, layoutQueued = false, listeners = [], buying = false, refreshTimer = 0, bgBusy = false;
 
   function setState(s) { state = s; try { cfgEl.setAttribute('data-kss', s); } catch (e) { /* не критично */ } }
   setState('idle');
@@ -629,6 +629,7 @@ function kssUI(K, CSS) {
     try {
       listeners.forEach(function (l) { l[0].removeEventListener(l[1], l[2], l[3]); });
       listeners = [];
+      if (refreshTimer) { clearInterval(refreshTimer); refreshTimer = 0; }
       if (observer) observer.disconnect();
       if (host && host.parentNode) host.parentNode.removeChild(host);
       host = shadow = root = panel = null; isOpen = false;
@@ -656,7 +657,11 @@ function kssUI(K, CSS) {
     // адрес меняется раз в 5 минут: браузер не покажет афишу старше, какой бы срок хранения ни выставил сервер
     var u = url + (url.indexOf('?') < 0 ? '?' : '&') + 'kss_t=' + Math.floor(Date.now() / REFRESH_MS);
     win.fetch(u, { credentials: 'same-origin', headers: headers, cache: fresh ? 'reload' : 'default', signal: ctrl ? ctrl.signal : undefined })
-      .then(function (r) { status = r.status; if (!r.ok) throw new Error('http ' + r.status); return r.json(); })
+      .then(function (r) {
+        status = r.status;
+        if (!r.ok) { var er = new Error('http ' + r.status); er.status = r.status; throw er; }
+        return r.json();
+      })
       .then(function (d) { clearTimeout(timer); cb(null, d); })
       .catch(function (e) {
         clearTimeout(timer);
@@ -668,6 +673,18 @@ function kssUI(K, CSS) {
 
   function validIndex(d) { return !!d && d.v === 1 && Array.isArray(d.ev) && Array.isArray(d.pages); }
 
+  /* 403: поиск выключен в настройках; 404 и 410: маршрута больше нет (плагин выключен или удалён).
+     Это решение сайта, а не временный сбой: интерфейс выключается и в уже открытой вкладке. */
+  function refused(err) { return !!err && (err.status === 403 || err.status === 404 || err.status === 410); }
+
+  /* Открытая вкладка сама сверяется с сайтом раз в 5 минут, пока видна, и сразу при возвращении на неё. */
+  function due() { return state === 'ready' && Date.now() - loadedAt >= REFRESH_MS && (!doc.visibilityState || doc.visibilityState === 'visible'); }
+  function startRefresh() {
+    if (refreshTimer) return;
+    refreshTimer = setInterval(guard(function () { if (due()) loadIndex(true, true); }), 60 * 1000);
+    on(doc, 'visibilitychange', function () { if (due()) loadIndex(true, true); });
+  }
+
   function rebuild() {
     var offset = (typeof raw.off === 'number' && isFinite(raw.off)) ? raw.off * 1000 : undefined;
     var cut = (typeof raw.cut === 'number' && isFinite(raw.cut)) ? raw.cut * 1000 : undefined;
@@ -676,13 +693,18 @@ function kssUI(K, CSS) {
   }
 
   function loadIndex(background, fresh) {
+    if (background) { if (bgBusy) return; bgBusy = true; } // одна фоновая проверка за раз
     if (!background) setState('loading');
     getJSON(cfg.index, guard(function (err, d) {
+      if (background) bgBusy = false;
       if (err || !validIndex(d)) {
-        if (background) return;      // фоновое обновление не удалось: работаем на прежних данных
+        if (refused(err)) { fail(err); return; } // поиск выключен: остаётся штатный поиск темы
+        if (background) return;      // временный сбой фонового обновления: работаем на прежних данных
         fail(err || new Error('bad index'));
         return;
       }
+      // фоновая проверка вернула тот же индекс, а тексты анонсов уже на месте (или не нужны): ничего не меняем
+      if (background && raw && d.built === raw.built && (content || !raw.texts)) { loadedAt = Date.now(); return; }
       raw = d; loadedAt = Date.now();
       // если часы посетителя сильно врут, берём время сервера
       var diff = (typeof d.now === 'number') ? d.now * 1000 - Date.now() : 0;
@@ -690,6 +712,7 @@ function kssUI(K, CSS) {
       if (background) { content = null; textsAsked = false; }
       rebuild();
       setState('ready');
+      startRefresh();
       if (isOpen) render(background);
       loadTexts(fresh);
     }), 0, fresh);
@@ -701,6 +724,7 @@ function kssUI(K, CSS) {
     var built = raw.built;
     setTimeout(function () {
       getJSON(cfg.texts, guard(function (err, d) {
+        if (refused(err)) { fail(err); return; }
         // тексты анонсов необязательны: без них поиск работает по названию, жанру, дате, сцене и цене
         if (err || !d || d.v !== 1 || typeof d.vocab !== 'string' || !Array.isArray(d.docs) || !raw) return;
         if (d.built !== built) {
@@ -882,7 +906,7 @@ function kssUI(K, CSS) {
     var html = '<div class="kss-in">' + preview + '<div class="kss-label">Быстрый выбор</div>' + chipsHtml();
     if (res.short) {
       // пустой запрос без фильтров: ближайшие концерты
-      var seen = {}, near = [];
+      var seen = Object.create(null), near = [];
       index.items.forEach(function (it) { if (near.length < 6 && !seen[it.group]) { seen[it.group] = 1; near.push({ title: it.title, first: it, dates: [it], hit: null, block: 1 }); } });
       html += '<div class="kss-label">Ближайшие концерты</div>' + (near.length ? listHtml(near) : '<p class="kss-none">В афише пока нет будущих концертов.</p>');
     } else if (!res.groups.length && !res.pages.length) {

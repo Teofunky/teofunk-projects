@@ -165,7 +165,7 @@ function kssEngine() {
   }
 
   function makeVocab(genres) {
-    var seen = {}, out = [];
+    var seen = Object.create(null), out = [];
     function add(words, f) { words.forEach(function (w) { w = norm(w); if (w && !seen[w]) { seen[w] = 1; out.push(mk(w, f)); } }); }
     MONTHS.forEach(function (m) { add(m, 'd'); }); WEEKDAYS.forEach(function (w) { add(w, 'd'); }); add(RELATIVE, 'd'); add(FREE_WORDS, 'p'); add(['депозит'], 'p');
     Object.keys(STAGES).forEach(function (k) { add(STAGES[k].words, 's'); });
@@ -374,10 +374,10 @@ function kssEngine() {
       }
       if (v.pen === 0 && v.k && v.k.length >= 4 && q.length >= 4) {
         if (!C.keys) {
-          C.keys = {};
+          C.keys = Object.create(null);
           for (wi = 0; wi < C.words.length; wi++) { k = pk(C.words[wi]); if (k.length >= 4) (C.keys[k] || (C.keys[k] = [])).push(wi); }
         }
-        var same = C.keys.hasOwnProperty(v.k) ? C.keys[v.k] : null;
+        var same = has(C.keys, v.k) ? C.keys[v.k] : null;
         if (same) for (wi = 0; wi < same.length; wi++) if (/[а-я]/.test(C.words[same[wi]]) !== v.cyr) put(C.post[same[wi]], 44);
       }
     }
@@ -425,7 +425,7 @@ function kssEngine() {
   function byDate(a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : (a.time < b.time ? -1 : a.time > b.time ? 1 : a.n - b.n); }
 
   function groupFound(found) {
-    var groups = {}, order = [];
+    var groups = Object.create(null), order = [];
     found.forEach(function (f) {
       var g = groups[f.it.group];
       if (!g) { g = groups[f.it.group] = { title: f.it.title, score: f.score, hit: f.hit, block: f.block, note: f.note || null, dates: [] }; order.push(g); }
@@ -546,7 +546,7 @@ function kssEngine() {
       });
       cand = cand.filter(function (c) { return c.n === maxN; });
       if (cand.length) {
-        var seenW = {}, words = [];
+        var seenW = Object.create(null), words = [];
         cand.forEach(function (c) { c.words.forEach(function (w) { if (!seenW[w]) { seenW[w] = 1; words.push(w); } }); });
         res.groups = groupFound(cand); res.count = cand.length; res.partial = true; res.words = words;
         if (struct.length) res.dropped = label(struct);
