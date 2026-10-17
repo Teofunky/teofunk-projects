@@ -745,6 +745,8 @@
       if (!hroot) return;
       var c = ctx(), active = anyActive();
       var top = hroot.querySelector('.kaf-top'), wait = hroot.querySelector('.kaf-wait'), empty = hroot.querySelector('.kaf-empty'), note = hroot.querySelector('.kaf-note');
+      // отступ под панелью вместо скрытых значков темы: метки «Концерт сегодня | сцена» над карточками не наезжают на панель
+      var kafEl = hroot.querySelector('.kaf'), gap = function (v) { if (kafEl) kafEl.classList.toggle('kaf-gap', v); };
       changes = 0;
       applyLayout();
       updateBar(c);
@@ -756,6 +758,7 @@
         setText('.kaf-nt', 'Фильтры временно недоступны: афиша на странице обновилась. Показаны все концерты.');
         setDisabled(true);
         setText('.kaf-sr', '');
+        gap(false); // значки темы вернулись и сами дают отступ
         return;
       }
       // новые концерты в индексе, которых нет на странице: фильтры работают, но страницу лучше обновить
@@ -767,7 +770,8 @@
         setText('.kaf-wait', 'Подбираем концерты…');
         wait.hidden = !active;
         groups.forEach(function (g) { setHidden(g.cont, active); setHidden(g.month, active); });
-        setHidden(viewtabs, active || isMobile());
+        setHidden(viewtabs, true);
+        gap(true);
         return;
       }
       wait.hidden = true;
@@ -785,9 +789,11 @@
         // при фильтре по датам заголовки месяцев заменяет наш заголовок с датами
         setHidden(g.month, active && (dated || !any));
       });
-      // значки темы над афишей: на телефоне не нужны (вид переключает панель), на компьютере прячутся только при выбранном фильтре
-      setHidden(viewtabs, active || isMobile());
+      // значки темы над афишей «календарь / список / плитка» не показываются, пока работает панель (решение 17.10.2026).
+      // Если панель убирает себя или фильтры отключены из-за расхождения, showAll возвращает их как в теме.
+      setHidden(viewtabs, true);
       top.hidden = !active;
+      gap(top.hidden);
       var searching = active && n === 0 && state.qw.length > 0 && textsState === 1; // ответ может найтись в анонсах
       empty.hidden = !(active && n === 0) || searching;
       if (searching) setText('.kaf-wait', 'Ищем в анонсах…');
