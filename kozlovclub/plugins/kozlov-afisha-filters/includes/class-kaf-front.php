@@ -1,0 +1,78 @@
+<?php
+/**
+ * Вывод на сайте: только на главной странице, только когда панель разрешена текущему посетителю.
+ * Добавляет одну JSON-настройку и один скрипт с defer. Стилей в страницу не добавляет: они внутри Shadow DOM.
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+if ( ! class_exists( 'KAF_Front' ) ) :
+
+	class KAF_Front {
+
+		protected static $on = null;
+
+		public static function init() {
+			add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue' ), 20 );
+			add_action( 'wp_footer', array( __CLASS__, 'config' ), 5 );
+		}
+
+		/** Нужна ли панель на этой странице. Считается один раз за запрос. */
+		protected static function on() {
+			if ( null !== self::$on ) {
+				return self::$on;
+			}
+			self::$on = false;
+			try {
+				if ( is_admin() || is_feed() || ( function_exists( 'is_embed' ) && is_embed() ) || ( function_exists( 'is_customize_preview' ) && is_customize_preview() ) ) {
+					return false;
+				}
+				self::$on = is_front_page() && KAF_Settings::visible_for_current_user();
+			} catch ( \Throwable $e ) {
+				kaf_log( $e );
+				self::$on = false;
+			}
+			return self::$on;
+		}
+
+		public static function enqueue() {
+			try {
+				if ( ! self::on() ) {
+					return;
+				}
+				// в WordPress 6.3+ скрипт получает defer; в более ранних просто грузится в подвале страницы
+				wp_enqueue_script( 'kozlov-afisha-filters', plugins_url( 'assets/kaf-app.js', KAF_FILE ), array(), KAF_VERSION, array( 'in_footer' => true, 'strategy' => 'defer' ) );
+			} catch ( \Throwable $e ) {
+				kaf_log( $e );
+			}
+		}
+
+		public static function config() {
+			try {
+				if ( ! self::on() ) {
+					return;
+				}
+				$cfg = array(
+					'v'       => KAF_VERSION,
+					'index'   => wp_make_link_relative( rest_url( 'kozlov-search/v1/index' ) ),
+					'fonts'   => wp_make_link_relative( plugins_url( 'assets/fonts/', KAF_FILE ) ),
+					'preview' => ( 'preview' === KAF_Settings::mode() || 'admin' === KAF_Settings::kss_mode() ) ? 1 : 0,
+				);
+				// вошедшему администратору нужен nonce: в режиме проверки поиск отдаёт индекс только ему
+				if ( is_user_logged_in() ) {
+					$cfg['nonce'] = wp_create_nonce( 'wp_rest' );
+				}
+				$json = wp_json_encode( $cfg, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES );
+				if ( ! is_string( $json ) ) {
+					return;
+				}
+				echo '<script type="application/json" id="kaf-config">' . $json . "</script>\n"; // phpcs:ignore WordPress.Security.EscapeOutput -- JSON с экранированием тегов и кавычек
+			} catch ( \Throwable $e ) {
+				kaf_log( $e );
+			}
+		}
+	}
+
+endif;
