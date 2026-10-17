@@ -40,7 +40,7 @@ function ka_import_yandex( $post_id, $public_key ) {
 	$done  = (array) get_post_meta( $post_id, 'ka_imported', true );
 	$files = array_values( array_filter( $files, function ( $f ) use ( $done ) { return ! in_array( $f['path'], $done, true ); } ) );
 	$total = count( $files );
-	$files = array_slice( $files, 0, 4 ); // порция: сервер ограничивает время запроса
+	$files = array_slice( $files, 0, 2 ); // порция: сервер ограничивает время запроса
 	$urls  = ka_lines( $post_id, 'ka_gallery' );
 	$ok    = 0;
 	$thumb = null;
@@ -56,6 +56,13 @@ function ka_import_yandex( $post_id, $public_key ) {
 		update_post_meta( $id, '_wp_attachment_image_alt', get_the_title( $post_id ) );
 		$urls[] = wp_get_attachment_url( $id );
 		$done[] = $f['path'];
+		// прогресс сохраняем после КАЖДОГО файла: запрос может оборваться по таймауту сервера
+		update_post_meta( $post_id, 'ka_imported', array_values( array_filter( $done ) ) );
+		update_post_meta( $post_id, 'ka_gallery', implode( "\n", array_unique( $urls ) ) );
+		if ( ! has_post_thumbnail( $post_id ) ) {
+			$mt = wp_get_attachment_metadata( $id );
+			if ( ! empty( $mt['width'] ) && $mt['height'] > $mt['width'] ) { set_post_thumbnail( $post_id, $id ); }
+		}
 		$meta   = wp_get_attachment_metadata( $id );
 		if ( ! $thumb && ! empty( $meta['width'] ) && $meta['height'] > $meta['width'] ) { $thumb = $id; }
 		$ok++;
