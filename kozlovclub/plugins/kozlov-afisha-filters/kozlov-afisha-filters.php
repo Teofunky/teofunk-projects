@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Kozlov Afisha Filters
  * Description:       Панель фильтров афиши на главной странице: Сегодня, Завтра, Выходные, Дата, Жанр, Цена, Сцена. Только прячет и показывает карточки афиши темы: события, тему и базу не меняет. Данные берёт из индекса Kozlov Smart Search.
- * Version:           1.0.1
+ * Version:           1.0.2
  * Requires at least: 5.3
  * Requires PHP:      7.2
  * Author:            Клуб Алексея Козлова
@@ -31,7 +31,7 @@ if ( defined( 'KAF_VERSION' ) ) {
 	return;
 }
 
-define( 'KAF_VERSION', '1.0.1' );
+define( 'KAF_VERSION', '1.0.2' );
 define( 'KAF_FILE', __FILE__ );
 define( 'KAF_DIR', dirname( __FILE__ ) . '/' );
 

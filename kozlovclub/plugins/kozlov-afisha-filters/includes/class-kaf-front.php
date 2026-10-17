@@ -86,6 +86,10 @@ if ( ! class_exists( 'KAF_Front' ) ) :
 					'fonts'   => wp_make_link_relative( plugins_url( 'assets/fonts/', KAF_FILE ) ),
 					'preview' => ( 'preview' === KAF_Settings::mode() || 'admin' === KAF_Settings::kss_mode() ) ? 1 : 0,
 				);
+				// тексты анонсов для поиска по музыкантам: только если в Kozlov Smart Search включён поиск по анонсам
+				if ( class_exists( 'KSS_Settings' ) && method_exists( 'KSS_Settings', 'content' ) && KSS_Settings::content() ) {
+					$cfg['texts'] = wp_make_link_relative( rest_url( 'kozlov-search/v1/texts' ) );
+				}
 				// вошедшему администратору нужен nonce: в режиме проверки поиск отдаёт индекс только ему
 				if ( is_user_logged_in() ) {
 					$cfg['nonce'] = wp_create_nonce( 'wp_rest' );

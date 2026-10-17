@@ -1,5 +1,6 @@
 /* Kozlov Afisha Filters: панель фильтров афиши на главной странице kozlovclub.ru.
-   Ставит панель сразу под слайдером в Shadow DOM, концерты берёт из индекса Kozlov Smart Search.
+   Ставит панель сразу под слайдером в Shadow DOM, концерты берёт из индекса Kozlov Smart Search,
+   поиск по музыкантам и словам из анонсов берёт из его текстов анонсов.
    При выбранном фильтре прячет лишние карточки афиши темы (inline display:none), при сбросе возвращает как было.
    Глобальных переменных не создаёт, jQuery не использует.
    Если индекс не загрузился, панель выключена на сайте или в её коде случилась ошибка, панель убирает себя.
@@ -82,6 +83,8 @@
     var state = { q: '', qw: [], when: null, range: null, budget: null, formats: Object.create(null), genres: Object.create(null), stages: Object.create(null) };
     var cards = [], groups = [], events = [], genreNames = Object.create(null), genreOrder = [];
     var raw = null, loadedAt = 0, skew = 0, off = 3 * 3600, ready = false, dead = false, bgBusy = false, degraded = false, changes = 0;
+    // тексты анонсов: 0 не загружены, 1 загружаются, 2 готовы, 3 недоступны (поиск идёт по названию, жанру и сцене)
+    var texts = null, textsState = 0, textsVer = 0, textCache = Object.create(null);
     var host = null, hroot = null, layer = null, lroot = null, panel = null, pb = null, pf = null, scrim = null;
     var open = null, trigger = null, calMonth = null, vals = [];
     var listeners = [], intervals = [], hiddenList = [], saved = new WeakMap(), lockedOverflow = null, fontsAsked = false, urlTimer = 0, pokeTimer = 0, inputTimer = 0;
@@ -211,6 +214,27 @@
       }
       return false;
     }
+    /* ---------- тексты анонсов: слово запроса ищется точно, началом слова или с другим окончанием, без опечаток (как в Kozlov Smart Search) ---------- */
+    function stemRu(w) {
+      if (w.length < 5) return '';
+      var m = w.match(/^(.{4,}?)(ами|ями|ого|его|ому|ему|ыми|ими|ой|ей|ом|ем|ым|им|ах|ях|ов|ев|ам|ям|ую|юю|ая|яя|ое|ее|ые|ие|а|я|ы|и|у|ю|е|о|ь)$/);
+      return m ? m[1] : '';
+    }
+    function textDocs(w) {
+      if (textCache[w]) return textCache[w];
+      var out = Object.create(null), st = stemRu(w), i, j;
+      textCache[w] = out;
+      if (!texts || w.length < 3 || /^\d/.test(w)) return out;
+      for (i = 0; i < texts.words.length; i++) {
+        var x = texts.words[i];
+        if (x === w || (w.length >= 4 && x.lastIndexOf(w, 0) === 0) || (st && x.lastIndexOf(st, 0) === 0)) {
+          var list = texts.post[i];
+          if (list) for (j = 0; j < list.length; j++) out[list[j]] = true;
+        }
+      }
+      return out;
+    }
+    function inText(w, tid) { return tid >= 0 && !!texts && !!textDocs(w)[tid]; }
     function parseQuery(q) { return norm(q).split(' ').filter(function (w) { return w && (w.length > 1 ? !STOP[w] : /\d/.test(w)); }); }
 
     /* ---------- время: часы клуба. Индекс даёт смещение off и время сервера now ---------- */
@@ -236,7 +260,8 @@
       if (c.N >= e.end) return false; // концерт закончился
       if (skip !== 'when' && !inWhen(e, c, state.when, state.range)) return false;
       if (state.qw.length) {
-        if (e.qk !== state.q) { e.qk = state.q; e.qok = state.qw.every(function (w) { return wordMatch(w, e.toks); }); } // считается один раз на запрос
+        var qk = state.q + '|' + textsVer;
+        if (e.qk !== qk) { e.qk = qk; e.qok = state.qw.every(function (w) { return wordMatch(w, e.toks) || inText(w, e.tid); }); } // считается один раз на запрос
         if (!e.qok) return false;
       }
       if (skip !== 'budget' && !budgetOk(e, state.budget)) return false;
@@ -356,7 +381,8 @@
           i: i, t: e[0], date: e[1], st: st, g: g, p: parsePrice(e[4]), card: card,
           start: night ? Date.UTC(y, mo - 1, dd + 1, 0, 0) : nominal,
           end: nominal + dur * 60000,
-          toks: norm([e[0], names.join(' '), stg].join(' ')).split(' ')
+          toks: norm([e[0], names.join(' '), stg].join(' ')).split(' '),
+          tid: (typeof e[9] === 'number' && e[9] >= 0) ? e[9] : -1 // номер текста анонса
         };
         card.ev = ev;
         g.forEach(function (x) { gcount[x] = (gcount[x] || 0) + 1; genreNames[x] = String(gnames[x]); });
@@ -367,13 +393,14 @@
     }
 
     /* ---------- загрузка индекса ---------- */
-    function getIndex(fresh, cb) {
+    function getIndex(fresh, cb) { getJSON(cfg.index, fresh, cb); }
+    function getJSON(url, fresh, cb) {
       var headers = { 'Accept': 'application/json' };
       if (cfg.nonce) headers['X-WP-Nonce'] = String(cfg.nonce);
       var ctrl = win.AbortController ? new win.AbortController() : null;
       var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, 15000);
-      // тот же адрес, что у Kozlov Smart Search: браузер берёт одну и ту же копию индекса
-      var u = cfg.index + (cfg.index.indexOf('?') < 0 ? '?' : '&') + 'kss_t=' + Math.floor(Date.now() / REFRESH_MS);
+      // те же адреса, что у Kozlov Smart Search: браузер берёт одну и ту же копию индекса и текстов
+      var u = url + (url.indexOf('?') < 0 ? '?' : '&') + 'kss_t=' + Math.floor(Date.now() / REFRESH_MS);
       win.fetch(u, { credentials: 'same-origin', headers: headers, cache: fresh ? 'reload' : 'default', signal: ctrl ? ctrl.signal : undefined })
         .then(function (r) {
           if (!r.ok) { var er = new Error('http ' + r.status); er.status = r.status; throw er; }
@@ -391,6 +418,34 @@
       skew = Math.abs(diff) > 20 * 60 * 1000 ? diff : 0;
       events = buildEvents(d);
       for (var gk in state.genres) if (!genreNames[gk]) delete state.genres[gk]; // жанр из адреса, которого нет в афише
+      if ((texts && texts.built !== d.built) || textsState === 3) dropTexts(); // номера текстов действуют только внутри одной сборки
+      if (state.qw.length) loadTexts(false);
+    }
+    function dropTexts() { texts = null; textsState = 0; textsVer++; textCache = Object.create(null); }
+    /** Тексты анонсов грузятся, когда посетитель берётся за поиск. Они необязательны: без них поиск идёт по названию, жанру и сцене. */
+    function loadTexts(fresh) {
+      if (!cfg.texts || !raw || !raw.texts || textsState === 1 || textsState === 2 || (textsState === 3 && !fresh)) return;
+      textsState = 1;
+      var built = raw.built;
+      getJSON(cfg.texts, fresh, guard(function (err, d) {
+        if (!raw || raw.built !== built) { textsState = 0; if (state.qw.length) loadTexts(false); return; } // индекс успел обновиться
+        if (err || !d || d.v !== 1 || typeof d.vocab !== 'string' || !Array.isArray(d.docs)) { textsState = 3; apply(false); return; }
+        if (d.built !== built) {
+          // тексты из другой сборки (один из ответов взят из кэша браузера): один раз запрашиваем заново
+          textsState = fresh ? 3 : 0;
+          if (fresh) apply(false); else loadTexts(true);
+          return;
+        }
+        var words = d.vocab ? d.vocab.split(' ') : [], post = new Array(words.length);
+        d.docs.forEach(function (deltas, t) {
+          var id = 0;
+          if (Array.isArray(deltas)) deltas.forEach(function (dl) { id += dl; if (id >= 0 && id < words.length) (post[id] || (post[id] = [])).push(t); });
+        });
+        texts = { words: words, post: post, built: built };
+        textsState = 2; textsVer++; textCache = Object.create(null);
+        try { cfgEl.setAttribute('data-kaf-texts', String(words.length)); } catch (e) { /* не критично */ }
+        if (state.qw.length) apply(false);
+      }));
     }
     /** Режим панели приходит в ответе индекса (поле kaf добавляет PHP-часть плагина). Нет поля или режим выключен: панель убирается. */
     function allowed(d) { return d.kaf === 'on' || (d.kaf === 'preview' && !!cfg.preview); }
@@ -548,8 +603,10 @@
       on(hroot, 'keydown', onKey);
       var qIn = hroot.querySelector('.kaf-q');
       if (state.q) qIn.value = state.q;
+      on(qIn, 'focus', function () { loadTexts(false); });
       on(qIn, 'input', function () {
         state.q = qIn.value.trim(); state.qw = parseQuery(state.q);
+        if (state.qw.length) loadTexts(false);
         clearTimeout(inputTimer);
         inputTimer = setTimeout(guard(function () { apply(true); }), 120);
       });
@@ -641,6 +698,7 @@
       setDisabled(false);
       if (!ready) {
         // до загрузки индекса: если фильтры пришли из адреса, афишу сразу прячем, чтобы она не мигала
+        setText('.kaf-wait', 'Подбираем концерты…');
         wait.hidden = !active;
         groups.forEach(function (g) { setHidden(g.cont, active); setHidden(g.month, active); });
         setHidden(viewtabs, active);
@@ -663,7 +721,10 @@
       });
       setHidden(viewtabs, active); // при фильтре переключатель вида показывает панель: он сохраняет выбранные фильтры
       top.hidden = !active;
-      empty.hidden = !(active && n === 0);
+      var searching = active && n === 0 && state.qw.length > 0 && textsState === 1; // ответ может найтись в анонсах
+      empty.hidden = !(active && n === 0) || searching;
+      if (searching) setText('.kaf-wait', 'Ищем в анонсах…');
+      wait.hidden = !searching;
       if (active) {
         var word = plural(n, CONC);
         setText('.kaf-head', dated
