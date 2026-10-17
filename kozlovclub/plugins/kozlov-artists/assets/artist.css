@@ -40,3 +40,8 @@
  .ka-video--main{grid-column:auto}.ka-row__day{font-size:48px;min-width:70px}
  .ka-next__date{font-size:24px}.ka-btn{width:100%}
 }
+
+/* Тема принудительно красит ссылки: фиксируем цвета кнопок и ссылок страницы артиста */
+.ka a.ka-btn,.ka a.ka-btn:visited,.ka a.ka-btn:hover,.ka a.ka-btn:focus{color:#fff!important;background:var(--c)!important;text-decoration:none!important}
+.ka a.ka-btn--white,.ka a.ka-btn--white:visited,.ka a.ka-btn--white:hover,.ka a.ka-btn--white:focus{color:var(--c)!important;background:#fff!important}
+.ka a.ka-row__title,.ka a.ka-row__title:visited{color:var(--ink)!important;text-decoration:none!important}
