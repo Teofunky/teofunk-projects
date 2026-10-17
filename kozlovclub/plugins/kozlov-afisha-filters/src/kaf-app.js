@@ -86,6 +86,8 @@
     var state = { q: '', qw: [], when: null, range: null, budget: null, formats: Object.create(null), genres: Object.create(null), stages: Object.create(null) };
     var cards = [], groups = [], events = [], genreNames = Object.create(null), genreOrder = [];
     var raw = null, loadedAt = 0, skew = 0, off = 3 * 3600, ready = false, dead = false, bgBusy = false, degraded = false, changes = 0;
+    // концерты из индекса, которых нет на странице, и сколько из них новых: страница старше индекса
+    var orphans = [], freshCount = 0;
     // тексты анонсов: 0 не загружены, 1 загружаются, 2 готовы, 3 недоступны (поиск идёт по названию, жанру и сцене)
     var texts = null, textsState = 0, textsVer = 0, textCache = Object.create(null);
     var host = null, hroot = null, layer = null, lroot = null, panel = null, pb = null, pf = null, scrim = null;
@@ -133,11 +135,15 @@
     function saveLayout() { try { win.localStorage.setItem(LAYOUT_KEY, compactPref ? 'compact' : 'large'); } catch (e) { /* без памяти: вид действует до перезагрузки */ } }
     /** Ставит или снимает класс kaf-compact на блоке афиши. Компьютер не затрагивается: класс только на телефоне. */
     function applyLayout() {
-      var onNow = isMobile() && compactPref;
+      // карточки «2 в ряд» есть только у плитки. В виде «списком» кнопки ведут на плитку и не показываются выбранными
+      var line = currentView() === 'line', onNow = isMobile() && compactPref && !line;
       if (eventsWrap && eventsWrap.classList && eventsWrap.classList.contains('kaf-compact') !== onNow) { eventsWrap.classList.toggle('kaf-compact', onNow); changes++; }
       var k = hroot && hroot.querySelector('.kaf');
       if (k) k.classList.toggle('kaf-cmp', onNow);
-      if (hroot) Array.prototype.forEach.call(hroot.querySelectorAll('.kaf-lb'), function (b) { b.setAttribute('aria-pressed', String((b.getAttribute('data-v') === 'compact') === compactPref)); });
+      if (hroot) Array.prototype.forEach.call(hroot.querySelectorAll('.kaf-lb'), function (b) {
+        b.setAttribute('aria-pressed', String(!line && (b.getAttribute('data-v') === 'compact') === compactPref));
+        if (line) b.setAttribute('data-href', urlWith({ view: 'cell' })); else b.removeAttribute('data-href');
+      });
     }
 
     /* ---------- прятать и возвращать элементы темы: только inline display, с запоминанием прежнего значения ---------- */
@@ -289,6 +295,8 @@
       if (skip !== 'stage' && count(state.stages) && !e.st.split('').some(function (s) { return state.stages[s]; })) return false;
       return true;
     }
+    /** Концерты, чьи карточки ещё на странице: по ним считаются числа на кнопках и в окнах. */
+    function live() { return events.filter(function (e) { return e.card.el.isConnected; }); }
     function anyActive() { return !!(state.when || state.budget !== null || count(state.formats) || count(state.genres) || count(state.stages) || state.q); }
 
     function fmtDay(k) { var p = k.split('-'); return +p[2] + ' ' + MG[+p[1] - 1]; }
@@ -380,13 +388,17 @@
     function buildEvents(d) {
       var byKey = Object.create(null), out = [], gcount = Object.create(null);
       genreNames = Object.create(null);
+      orphans = [];
       cards.forEach(function (c) { c.ev = null; if (c.key) (byKey[c.key] || (byKey[c.key] = [])).push(c); });
       var gnames = (d.genres && typeof d.genres === 'object' && !Array.isArray(d.genres)) ? d.genres : {};
       d.ev.forEach(function (e, i) {
         if (!Array.isArray(e) || typeof e[0] !== 'string' || typeof e[1] !== 'string' || !/^\d{4}-\d\d-\d\d$/.test(e[1]) || typeof e[2] !== 'string' || !/^\d\d:\d\d$/.test(e[2]) || typeof e[5] !== 'string') return;
         var key = decode(e[5]).toLowerCase() + '|' + e[1] + '|' + e[2];
         var list = byKey[key];
-        if (!list || !list.length) return; // концерта нет на афише этой страницы
+        if (!list || !list.length) { // концерта нет на афише этой страницы
+          orphans.push({ start: Date.UTC(+e[1].slice(0, 4), +e[1].slice(5, 7) - 1, +e[1].slice(8, 10), +e[2].slice(0, 2), +e[2].slice(3, 5)), date: e[1] });
+          return;
+        }
         var card = list.shift();
         var y = +e[1].slice(0, 4), mo = +e[1].slice(5, 7), dd = +e[1].slice(8, 10), hh = +e[2].slice(0, 2), mi = +e[2].slice(3, 5);
         var nominal = Date.UTC(y, mo - 1, dd, hh, mi);
@@ -483,6 +495,27 @@
       });
       return { matched: matched, bad: bad };
     }
+    /**
+     * Обратная сверка: концерт есть в индексе, ещё не начался, а карточки на странице нет. Значит, страница старше индекса
+     * (концерт добавили после того, как страница попала в кэш). Фильтры при этом работают: предлагаем обновить страницу.
+     * Проверка идёт только для полной афиши главной: с параметрами темы (сцена, день и подобные) афиша намеренно сокращена.
+     * Большое расхождение значит другую область афиши, а не новые концерты: тогда сообщение не показывается.
+     */
+    var URL_OK = /^(view|kaf_.*|utm_.*|yclid|gclid|fbclid|ymclid|_openstat|from|ref)$/i;
+    function fullScope() {
+      try {
+        var ok = true;
+        new URLSearchParams(win.location.search).forEach(function (v, k) { if (!URL_OK.test(k)) ok = false; });
+        return ok;
+      } catch (e) { return false; }
+    }
+    function newConcerts(d) {
+      if (!fullScope()) return 0;
+      var nowMs = (typeof d.now === 'number' && d.now > 1.6e9) ? d.now * 1000 : Date.now(), last = '', keyed = 0;
+      cards.forEach(function (cd) { if (cd.key && cd.el.isConnected) { keyed++; var dt = cd.key.split('|')[1]; if (dt > last) last = dt; } });
+      var n = orphans.filter(function (o) { return o.start > nowMs + 60000 && o.date <= last; }).length;
+      return n <= Math.max(5, Math.round(keyed * 0.05)) ? n : 0;
+    }
     function setDegraded(v) {
       if (v !== degraded && ready) flag(v ? 'degraded' : 'ready');
       degraded = v;
@@ -501,6 +534,7 @@
         if (!cov.matched) { teardown(new Error('no cards matched')); return; } // разметка темы изменилась
         if (cov.bad && !fresh) { load(true, 1); return; } // ещё раз мимо кэша браузера: индекс мог быть старше страницы
         degraded = cov.bad > 0;
+        freshCount = newConcerts(d);
         ready = true;
         flag(degraded ? 'degraded' : 'ready');
         apply(false);
@@ -522,6 +556,7 @@
           var cov = coverage(d);
           if (!cov.matched) { teardown(new Error('no cards matched')); return; }
           setDegraded(cov.bad > 0);
+          freshCount = newConcerts(d);
           apply(false);
         }));
       };
@@ -616,7 +651,7 @@
           '</div>' +
         '</div>' +
         '<p class="kaf-wait" hidden>Подбираем концерты…</p>' +
-        '<div class="kaf-note" role="status" hidden><span>Фильтры временно недоступны: афиша на странице обновилась. Показаны все концерты.</span>' +
+        '<div class="kaf-note" role="status" hidden><span class="kaf-nt"></span>' +
           '<button type="button" class="kaf-btn" data-act="reload">Обновить страницу</button></div>' +
         '<div class="kaf-top" hidden><span class="kaf-vals"></span><div class="kaf-head"></div>' +
           '<div class="kaf-right"><button type="button" class="kaf-reset" data-act="clear" data-v="all">Сбросить<span class="kaf-rw"> фильтры</span>' + ICO.x + '</button>' +
@@ -679,7 +714,7 @@
         var isOn = state.when === b.dataset.v;
         b.classList.toggle('kaf-on', isOn);
         b.setAttribute('aria-pressed', String(isOn));
-        b.querySelector('.kaf-n').textContent = ready ? String(events.filter(function (e) { return matches(e, c, 'when') && inWhen(e, c, b.dataset.v, null); }).length) : '';
+        b.querySelector('.kaf-n').textContent = ready ? String(live().filter(function (e) { return matches(e, c, 'when') && inWhen(e, c, b.dataset.v, null); }).length) : '';
       });
       setDD('date', state.when === 'range' && state.range ? shortRange(state.range) : 'Дата', state.when === 'range', null, state.when === 'range' && state.range ? fmtRange(state.range.from, state.range.to) : '');
       var more = function (n) { return n > 0 ? ' +' + n : ''; };
@@ -718,11 +753,14 @@
         if (open) closePanel(false);
         showAll();
         wait.hidden = true; top.hidden = true; empty.hidden = true; note.hidden = false;
+        setText('.kaf-nt', 'Фильтры временно недоступны: афиша на странице обновилась. Показаны все концерты.');
         setDisabled(true);
         setText('.kaf-sr', '');
         return;
       }
-      note.hidden = true;
+      // новые концерты в индексе, которых нет на странице: фильтры работают, но страницу лучше обновить
+      note.hidden = !(ready && freshCount > 0);
+      if (!note.hidden) setText('.kaf-nt', 'В афише появились новые концерты. Обновите страницу, чтобы они тоже попали в подборку.');
       setDisabled(false);
       if (!ready) {
         // до загрузки индекса: если фильтры пришли из адреса, афишу сразу прячем, чтобы она не мигала
@@ -791,11 +829,11 @@
     function calHTML(c) {
       var y = calMonth[0], m = calMonth[1];
       var first = keyOf(Date.UTC(y, m, 1)), days = new Date(Date.UTC(y, m + 1, 0)).getUTCDate(), lead = isoDow(first) - 1;
-      var last = events.reduce(function (a, e) { return e.date > a ? e.date : a; }, c.today);
+      var last = live().reduce(function (a, e) { return e.date > a ? e.date : a; }, c.today);
       var minM = c.today.slice(0, 7), maxM = last.slice(0, 7), curM = first.slice(0, 7);
       var r = state.when === 'range' ? state.range : null, i, cells = '';
       var perDay = Object.create(null);
-      events.forEach(function (e) { if (matches(e, c, 'when')) perDay[e.date] = (perDay[e.date] || 0) + 1; });
+      live().forEach(function (e) { if (matches(e, c, 'when')) perDay[e.date] = (perDay[e.date] || 0) + 1; });
       WDS.forEach(function (w, j) { cells += '<span class="kaf-dow' + (j >= 5 ? ' kaf-we' : '') + '" aria-hidden="true">' + w + '</span>'; });
       for (i = 0; i < lead; i++) cells += '<span></span>';
       for (var d = 1; d <= days; d++) {
@@ -824,17 +862,17 @@
       if (f === 'date') html = calHTML(c);
       if (f === 'price') {
         html = '<div class="kaf-lbl">Бюджет на человека</div>' + BUDGETS.map(function (b) {
-          var n = events.filter(function (e) { return matches(e, c, 'budget') && budgetOk(e, b); }).length;
+          var n = live().filter(function (e) { return matches(e, c, 'budget') && budgetOk(e, b); }).length;
           return opt('budget', b === null ? '' : String(b), b === null ? 'Любой' : budgetLabel(b), n, state.budget === b, true);
         }).join('') + '<div class="kaf-lbl">Вход</div>' + FORMATS.map(function (fm) {
-          var n = events.filter(function (e) { return matches(e, c, 'format') && e.p.type === fm[0]; }).length;
+          var n = live().filter(function (e) { return matches(e, c, 'format') && e.p.type === fm[0]; }).length;
           return opt('fmt', fm[0], fm[1], n, !!state.formats[fm[0]], false);
         }).join('');
       }
       if (f === 'genre') {
         var on1 = [], off1 = [];
         genreOrder.forEach(function (k) {
-          var n = events.filter(function (e) { return matches(e, c, 'genre') && e.g.indexOf(k) >= 0; }).length, isOn = !!state.genres[k];
+          var n = live().filter(function (e) { return matches(e, c, 'genre') && e.g.indexOf(k) >= 0; }).length, isOn = !!state.genres[k];
           var b = '<button type="button" class="kaf-g" data-act="genre" data-v="' + esc(k) + '" aria-pressed="' + isOn + '"' + (n === 0 && !isOn ? ' disabled' : '') + '>' + esc(genreNames[k]) + ' <span class="kaf-n">' + n + '</span></button>';
           (n > 0 || isOn ? on1 : off1).push(b); // недоступные при остальных фильтрах уходят в конец
         });
@@ -842,14 +880,14 @@
       }
       if (f === 'stage') {
         html = STAGE_ORDER.map(function (k) {
-          var n = events.filter(function (e) { return matches(e, c, 'stage') && e.st.indexOf(k) >= 0; }).length;
+          var n = live().filter(function (e) { return matches(e, c, 'stage') && e.st.indexOf(k) >= 0; }).length;
           return opt('stage', k, STAGES[k].name, n, !!state.stages[k], false, STAGES[k].addr, STAGES[k].color);
         }).join('');
       }
       var st = pb.scrollTop;
       pb.innerHTML = html;
       pb.scrollTop = st;
-      var n = events.filter(function (e) { return matches(e, c, null); }).length;
+      var n = live().filter(function (e) { return matches(e, c, null); }).length;
       pf.innerHTML = '<button type="button" class="kaf-btn" data-act="clear" data-v="' + f + '">Сбросить</button>' +
         '<button type="button" class="kaf-btn kaf-main" data-act="close"' + (n === 0 ? ' disabled' : '') + '>' + (n === 0 ? 'Нет концертов' : 'Показать ' + n + ' ' + plural(n, CONC)) + '</button>';
       if (key) {
@@ -923,7 +961,10 @@
       switch (act) {
         case 'when': state.when = state.when === v ? null : v; state.range = null; if (open) closePanel(false); break;
         case 'reload': try { win.location.reload(); } catch (e) { /* не критично */ } return;
-        case 'layout': compactPref = v === 'compact'; saveLayout(); break;
+        case 'layout':
+          compactPref = v === 'compact'; saveLayout();
+          if (t.getAttribute('data-href')) { try { win.location.href = t.getAttribute('data-href'); } catch (e) { /* не критично */ } return; } // список: переход на плитку с теми же фильтрами
+          break;
         case 'open':
           if (!ready || degraded) return;
           if (open === v) { closePanel(); return; }
