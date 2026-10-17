@@ -6,6 +6,7 @@ function ka_fields() {
 	return array(
 		'ka_keywords' => array( 'Ключевые слова для поиска в афише', 'textarea', 'По одному в строке. Например: Востоков, БДО. Ищутся в названии и описании концерта.' ),
 		'ka_exclude'  => array( 'Исключения', 'textarea', 'По одному в строке. Если слово есть в концерте, он НЕ попадёт к артисту. Например: Дениса Мельникова.' ),
+		'ka_title_only' => array( 'Искать только в названии концерта', 'checkbox', 'Отметьте, если в афише попадаются лишние концерты (слово встречается в описании чужих концертов).' ),
 		'ka_genre'    => array( 'Жанр', 'text', 'Например: биг-бэнд' ),
 		'ka_tags'     => array( 'Теги (через запятую)', 'text', 'Для блока «Вам может понравиться». Из справочника: биг-бэнд, вокал, свинг, фанк, блюз...' ),
 		'ka_founded'  => array( 'Год основания', 'text', '' ),
@@ -45,8 +46,11 @@ function ka_render_metabox( $post ) {
 	echo '<p style="color:#666">Текст «Об оркестре» пишется в основном редакторе выше. Короткий лид (под заголовком) в поле «Отрывок». Главное фото: «Изображение записи» справа.</p>';
 	foreach ( ka_fields() as $key => $f ) {
 		$val = get_post_meta( $post->ID, $key, true );
-		echo '<p><label style="display:block;font-weight:600;margin-bottom:4px" for="' . esc_attr( $key ) . '">' . esc_html( $f[0] ) . '</label>';
-		if ( 'textarea' === $f[1] ) {
+		echo '<p>';
+		if ( 'checkbox' !== $f[1] ) { echo '<label style="display:block;font-weight:600;margin-bottom:4px" for="' . esc_attr( $key ) . '">' . esc_html( $f[0] ) . '</label>'; }
+		if ( 'checkbox' === $f[1] ) {
+			echo '<label><input type="checkbox" id="' . esc_attr( $key ) . '" name="' . esc_attr( $key ) . '" value="1"' . checked( $val, '1', false ) . '> ' . esc_html( $f[0] ) . '</label>';
+		} elseif ( 'textarea' === $f[1] ) {
 			echo '<textarea style="width:100%" rows="3" id="' . esc_attr( $key ) . '" name="' . esc_attr( $key ) . '">' . esc_textarea( $val ) . '</textarea>';
 		} else {
 			echo '<input style="width:100%" type="' . ( 'url' === $f[1] ? 'url' : 'text' ) . '" id="' . esc_attr( $key ) . '" name="' . esc_attr( $key ) . '" value="' . esc_attr( $val ) . '">';
@@ -61,12 +65,13 @@ add_action( 'save_post_kozlov_artist', function ( $post_id ) {
 	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) { return; }
 	if ( ! current_user_can( 'edit_post', $post_id ) ) { return; }
 	foreach ( ka_fields() as $key => $f ) {
+		if ( 'checkbox' === $f[1] ) { update_post_meta( $post_id, $key, isset( $_POST[ $key ] ) ? '1' : '' ); continue; }
 		if ( ! isset( $_POST[ $key ] ) ) { continue; }
 		$raw = wp_unslash( $_POST[ $key ] );
 		$val = 'textarea' === $f[1] ? sanitize_textarea_field( $raw ) : ( 'url' === $f[1] ? esc_url_raw( $raw ) : sanitize_text_field( $raw ) );
 		update_post_meta( $post_id, $key, $val );
 	}
-	delete_transient( 'ka_events_' . $post_id );
+	ka_bump_events_cache();
 } );
 
 /** Строки из многострочного поля */

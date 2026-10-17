@@ -3,35 +3,50 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 /**
  * Будущие концерты артиста из All-in-One Event Calendar.
- * ВАЖНО: структура таблицы {prefix}ai1ec_events (post_id, start, cost, ticket_url) взята
- * из знания о плагине и ЕЩЁ НЕ проверена на сайте клуба. Проверить на тестовой копии.
+ * Берутся ЭКЗЕМПЛЯРЫ событий из {prefix}ai1ec_event_instances (так календарь хранит повторы),
+ * если таблицы нет, запасной вариант: {prefix}ai1ec_events.
+ * Структуру таблиц нужно проверить на тестовой копии сайта.
  *
  * @return array[] id, title, url, ts (unix), cost
  */
 function ka_get_events( $artist_id, $limit = 20 ) {
-	$cache_key = 'ka_events_' . $artist_id;
+	$all = ka_get_all_events( $artist_id );
+	return array_slice( $all, 0, max( 1, (int) $limit ) );
+}
+
+/** Кэшируется ПОЛНЫЙ список (до 50), а не срез: размер среза не влияет на кэш */
+function ka_get_all_events( $artist_id ) {
+	$ver       = (int) get_option( 'ka_events_ver', 1 );
+	$cache_key = 'ka_ev_' . $ver . '_' . (int) $artist_id;
 	$cached    = get_transient( $cache_key );
-	if ( false !== $cached ) { return $cached; }
+	if ( is_array( $cached ) ) { return $cached; }
 
 	global $wpdb;
-	$table = $wpdb->prefix . 'ai1ec_events';
-	if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) !== $table ) {
-		return array();
-	}
+	$ev_table = $wpdb->prefix . 'ai1ec_events';
+	$in_table = $wpdb->prefix . 'ai1ec_event_instances';
+	$has_ev   = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $ev_table ) ) === $ev_table;
+	$has_in   = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $in_table ) ) === $in_table;
+	if ( ! $has_ev ) { return array(); }
 
 	$include = ka_lines( $artist_id, 'ka_keywords' );
 	if ( ! $include ) { return array(); }
-	$exclude = ka_lines( $artist_id, 'ka_exclude' );
+	$exclude    = ka_lines( $artist_id, 'ka_exclude' );
+	$title_only = (bool) get_post_meta( $artist_id, 'ka_title_only', true );
 
-	$where = array();
 	$args  = array();
+	$parts = array();
 	foreach ( $include as $kw ) {
-		$like    = '%' . $wpdb->esc_like( $kw ) . '%';
-		$where[] = '(p.post_title LIKE %s OR p.post_content LIKE %s)';
-		$args[]  = $like;
-		$args[]  = $like;
+		$like = '%' . $wpdb->esc_like( $kw ) . '%';
+		if ( $title_only ) {
+			$parts[] = 'p.post_title LIKE %s';
+			$args[]  = $like;
+		} else {
+			$parts[] = '(p.post_title LIKE %s OR p.post_content LIKE %s)';
+			$args[]  = $like;
+			$args[]  = $like;
+		}
 	}
-	$sql_inc = '(' . implode( ' OR ', $where ) . ')';
+	$sql_inc = '(' . implode( ' OR ', $parts ) . ')';
 
 	$sql_exc = '';
 	foreach ( $exclude as $kw ) {
@@ -41,16 +56,23 @@ function ka_get_events( $artist_id, $limit = 20 ) {
 		$args[]   = $like;
 	}
 
-	$args[] = time() - 3 * HOUR_IN_SECONDS; // концерт, который идёт прямо сейчас, ещё показываем
-	$args[] = (int) $limit;
+	$args[] = time() - 3 * HOUR_IN_SECONDS; // идущий сейчас концерт ещё показываем
+	$args[] = 50;
 
-	$sql = "SELECT p.ID, p.post_title, e.start, e.cost
-	        FROM {$wpdb->posts} p
-	        INNER JOIN {$table} e ON e.post_id = p.ID
+	if ( $has_in ) {
+		$from  = "{$in_table} i INNER JOIN {$wpdb->posts} p ON p.ID = i.post_id INNER JOIN {$ev_table} e ON e.post_id = p.ID";
+		$start = 'i.start';
+	} else {
+		$from  = "{$ev_table} e INNER JOIN {$wpdb->posts} p ON p.ID = e.post_id";
+		$start = 'e.start';
+	}
+
+	$sql = "SELECT p.ID, p.post_title, {$start} AS start_ts, e.cost
+	        FROM {$from}
 	        WHERE p.post_type = 'ai1ec_event' AND p.post_status = 'publish'
 	        AND {$sql_inc}{$sql_exc}
-	        AND e.start >= %d
-	        ORDER BY e.start ASC LIMIT %d";
+	        AND {$start} >= %d
+	        ORDER BY {$start} ASC LIMIT %d";
 
 	$rows = $wpdb->get_results( $wpdb->prepare( $sql, $args ) ); // phpcs:ignore WordPress.DB.PreparedSQL
 	$out  = array();
@@ -59,7 +81,7 @@ function ka_get_events( $artist_id, $limit = 20 ) {
 			'id'    => (int) $r->ID,
 			'title' => $r->post_title,
 			'url'   => get_permalink( $r->ID ),
-			'ts'    => (int) $r->start,
+			'ts'    => (int) $r->start_ts,
 			'cost'  => (string) $r->cost,
 		);
 	}
@@ -67,11 +89,11 @@ function ka_get_events( $artist_id, $limit = 20 ) {
 	return $out;
 }
 
-/** Сбрасываем кэш всех артистов при изменении любого концерта */
-add_action( 'save_post_ai1ec_event', function () {
-	global $wpdb;
-	$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '\_transient\_ka\_events\_%' OR option_name LIKE '\_transient\_timeout\_ka\_events\_%'" ); // phpcs:ignore
-} );
+/** Инвалидация без прямого SQL: меняем версию кэша (работает и с объектным кэшем) */
+function ka_bump_events_cache() { update_option( 'ka_events_ver', time(), false ); }
+add_action( 'save_post_ai1ec_event', 'ka_bump_events_cache' );
+add_action( 'deleted_post', 'ka_bump_events_cache' );
+add_action( 'trashed_post', 'ka_bump_events_cache' );
 
 /** Формат даты по Москве */
 function ka_date( $ts, $fmt ) {

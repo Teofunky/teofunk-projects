@@ -47,5 +47,5 @@ add_action( 'wp_head', function () {
 		);
 	}
 	if ( $events ) { $group['event'] = $events; }
-	echo '<script type="application/ld+json">' . wp_json_encode( array( '@context' => 'https://schema.org' ) + $group, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) . "</script>\n";
+	echo '<script type="application/ld+json">' . wp_json_encode( array( '@context' => 'https://schema.org' ) + $group, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP ) . "</script>\n";
 }, 30 );
