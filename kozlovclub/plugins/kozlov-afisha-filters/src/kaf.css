@@ -58,6 +58,9 @@
 .kaf-v[aria-current="true"]{background:var(--ink);color:#fff}
 .kaf-v svg{width:18px;height:18px;fill:currentColor}
 .kaf-wait{margin:18px 0 0;font-size:14px;color:var(--muted)}
+.kaf-note{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;margin:16px 0 0;font-size:14px;color:var(--muted)}
+.kaf-note .kaf-btn{height:36px;font-size:14px}
+.kaf-q:disabled{background:var(--soft);cursor:default}
 .kaf-empty{display:grid;gap:12px;justify-items:start;padding:0 0 48px;margin-top:-24px;color:var(--muted)}
 .kaf-empty strong{color:var(--ink);font-weight:500;text-transform:uppercase;letter-spacing:.04em}
 

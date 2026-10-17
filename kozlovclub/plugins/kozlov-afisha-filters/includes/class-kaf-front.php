@@ -17,6 +17,32 @@ if ( ! class_exists( 'KAF_Front' ) ) :
 		public static function init() {
 			add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue' ), 20 );
 			add_action( 'wp_footer', array( __CLASS__, 'config' ), 5 );
+			add_filter( 'rest_post_dispatch', array( __CLASS__, 'mark_index' ), 20, 3 );
+		}
+
+		/**
+		 * Добавляет в ответ индекса Kozlov Smart Search поле kaf с режимом панели (off, preview, on).
+		 * Скрипт панели проверяет его при каждой загрузке индекса: если панель выключили в настройках
+		 * или выключили сам плагин (тогда поля нет), уже открытые вкладки убирают панель при следующей фоновой проверке.
+		 * Другие маршруты и ответы с ошибкой не меняются.
+		 */
+		public static function mark_index( $response, $server = null, $request = null ) {
+			try {
+				if ( ! is_object( $request ) || ! method_exists( $request, 'get_route' ) || '/kozlov-search/v1/index' !== (string) $request->get_route() ) {
+					return $response;
+				}
+				if ( ! is_object( $response ) || ! method_exists( $response, 'get_data' ) || ! method_exists( $response, 'set_data' ) || ! method_exists( $response, 'get_status' ) || 200 !== (int) $response->get_status() ) {
+					return $response;
+				}
+				$data = $response->get_data();
+				if ( is_array( $data ) && isset( $data['v'], $data['ev'] ) ) {
+					$data['kaf'] = KAF_Settings::mode();
+					$response->set_data( $data );
+				}
+			} catch ( \Throwable $e ) {
+				kaf_log( $e );
+			}
+			return $response;
 		}
 
 		/** Нужна ли панель на этой странице. Считается один раз за запрос. */

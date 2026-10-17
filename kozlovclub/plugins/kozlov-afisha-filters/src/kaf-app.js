@@ -1,7 +1,9 @@
 /* Kozlov Afisha Filters: панель фильтров афиши на главной странице kozlovclub.ru.
    Ставит панель сразу под слайдером в Shadow DOM, концерты берёт из индекса Kozlov Smart Search.
    При выбранном фильтре прячет лишние карточки афиши темы (inline display:none), при сбросе возвращает как было.
-   Глобальных переменных не создаёт, jQuery не использует. При любой ошибке убирает себя: афиша темы остаётся нетронутой. */
+   Глобальных переменных не создаёт, jQuery не использует.
+   Если индекс не загрузился, панель выключена на сайте или в её коде случилась ошибка, панель убирает себя.
+   Если данные индекса и карточки на странице разошлись, фильтры отключаются и показывается вся афиша. */
 (function () {
   'use strict';
 
@@ -33,19 +35,21 @@
     if (!anchor) { flag('off'); return; }
 
     /* ---------- постоянные ---------- */
+    // словарь без прототипа: ключи вроде constructor или toString в нём не находятся
+    function dict(o) { var r = Object.create(null); for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) r[k] = o[k]; return r; }
     var P = 'kaf_'; // префикс параметров в адресе страницы: голые genre или view могли бы перехватить WordPress и тема
-    var STAGES = {
+    var STAGES = dict({
       g: { name: 'Главная сцена', short: 'Главная', addr: 'Маросейка, 9/2', color: 'var(--st-g)', alias: 'главная сцена главный зал большой зал маросейка' },
       m: { name: 'Мансарда', short: 'Мансарда', addr: 'Маросейка, 9/2', color: 'var(--st-m)', alias: 'мансарда маросейка' },
       u: { name: 'Сцена на Мясницкой, 15', short: 'Мясницкая', addr: 'Мясницкая, 15', color: 'var(--st-u)', alias: 'сцена на мясницкой мясницкая мясницкой unplugged анплаггед анплагд' },
       b: { name: 'The Beat', short: 'The Beat', addr: 'Маросейка, 9/2', color: 'var(--st-b)', alias: 'the beat бит зе бит битс маросейка' }
-    };
+    });
     var STAGE_ORDER = ['g', 'm', 'u', 'b'];
-    var STAGE_SLUG = { g: 'main', m: 'mansarda', u: 'myasnitskaya', b: 'beat' };
+    var STAGE_SLUG = dict({ g: 'main', m: 'mansarda', u: 'myasnitskaya', b: 'beat' });
     // праздники по статье 112 Трудового кодекса: в календаре окрашены как выходные. Переносы выходных не учитываются
-    var HOLI = { '01-01': 'Новогодние каникулы', '01-02': 'Новогодние каникулы', '01-03': 'Новогодние каникулы', '01-04': 'Новогодние каникулы', '01-05': 'Новогодние каникулы', '01-06': 'Новогодние каникулы',
+    var HOLI = dict({ '01-01': 'Новогодние каникулы', '01-02': 'Новогодние каникулы', '01-03': 'Новогодние каникулы', '01-04': 'Новогодние каникулы', '01-05': 'Новогодние каникулы', '01-06': 'Новогодние каникулы',
       '01-07': 'Рождество Христово', '01-08': 'Новогодние каникулы', '02-23': 'День защитника Отечества', '03-08': 'Международный женский день', '05-01': 'Праздник Весны и Труда',
-      '05-09': 'День Победы', '06-12': 'День России', '11-04': 'День народного единства' };
+      '05-09': 'День Победы', '06-12': 'День России', '11-04': 'День народного единства' });
     var MS = ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
     var MG = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
     var MN = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
@@ -53,9 +57,14 @@
     var CONC = ['концерт', 'концерта', 'концертов'];
     var BUDGETS = [null, 1000, 1500, 2000, 3000];
     var FORMATS = [['ticket', 'Билет'], ['deposit', 'Депозит'], ['free', 'Вход свободный']];
-    var FSHORT = { ticket: 'Билет', deposit: 'Депозит', free: 'Бесплатно' };
-    var TITLES = { date: 'Дата', price: 'Цена', genre: 'Жанр', stage: 'Сцена' };
-    var STOP = { 'и': 1, 'в': 1, 'на': 1, 'с': 1, 'во': 1, 'к': 1, 'у': 1 };
+    var FSHORT = dict({ ticket: 'Билет', deposit: 'Депозит', free: 'Бесплатно' });
+    var TITLES = dict({ date: 'Дата', price: 'Цена', genre: 'Жанр', stage: 'Сцена' });
+    var STOP = dict({ 'и': 1, 'в': 1, 'на': 1, 'с': 1, 'во': 1, 'к': 1, 'у': 1 });
+    // месяц и день недели из карточки темы («Окт | 14:00 | Суббота»), по-русски и по-английски
+    var MONTH_IDX = dict({ 'янв': 0, 'фев': 1, 'мар': 2, 'апр': 3, 'мая': 4, 'май': 4, 'июн': 5, 'июл': 6, 'авг': 7, 'сен': 8, 'окт': 9, 'ноя': 10, 'дек': 11,
+      'jan': 0, 'feb': 1, 'mar': 2, 'apr': 3, 'may': 4, 'jun': 5, 'jul': 6, 'aug': 7, 'sep': 8, 'oct': 9, 'nov': 10, 'dec': 11 });
+    var WEEKDAY_IDX = dict({ 'понедельник': 1, 'вторник': 2, 'среда': 3, 'четверг': 4, 'пятница': 5, 'суббота': 6, 'воскресенье': 7,
+      'monday': 1, 'tuesday': 2, 'wednesday': 3, 'thursday': 4, 'friday': 5, 'saturday': 6, 'sunday': 7 });
     var DAY = 86400000, REFRESH_MS = 5 * 60 * 1000, DEFAULT_MIN = 150;
 
     var ICO = {
@@ -70,9 +79,9 @@
     };
 
     /* ---------- состояние ---------- */
-    var state = { q: '', qw: [], when: null, range: null, budget: null, formats: {}, genres: {}, stages: {} };
+    var state = { q: '', qw: [], when: null, range: null, budget: null, formats: Object.create(null), genres: Object.create(null), stages: Object.create(null) };
     var cards = [], groups = [], events = [], genreNames = Object.create(null), genreOrder = [];
-    var raw = null, loadedAt = 0, skew = 0, off = 3 * 3600, ready = false, dead = false, bgBusy = false;
+    var raw = null, loadedAt = 0, skew = 0, off = 3 * 3600, ready = false, dead = false, bgBusy = false, degraded = false, changes = 0;
     var host = null, hroot = null, layer = null, lroot = null, panel = null, pb = null, pf = null, scrim = null;
     var open = null, trigger = null, calMonth = null, vals = [];
     var listeners = [], intervals = [], hiddenList = [], saved = new WeakMap(), lockedOverflow = null, fontsAsked = false, urlTimer = 0, pokeTimer = 0, inputTimer = 0;
@@ -98,6 +107,7 @@
         listeners = [];
         intervals.forEach(function (t) { clearInterval(t); });
         intervals = [];
+        clearTimeout(urlTimer); clearTimeout(pokeTimer); clearTimeout(inputTimer);
         lockBody(false);
         showAll();
         if (host && host.parentNode) host.parentNode.removeChild(host);
@@ -116,6 +126,7 @@
         if (st && st.on) return;
         if (!st) { st = {}; saved.set(el, st); hiddenList.push(el); }
         st.on = true;
+        changes++;
         st.raw = el.getAttribute('style'); // null, если атрибута не было
         st.d = el.style.getPropertyValue('display');
         st.p = el.style.getPropertyPriority('display');
@@ -123,6 +134,7 @@
         st.after = el.getAttribute('style');
       } else if (st && st.on) {
         st.on = false;
+        changes++;
         restoreDisplay(el, st);
       }
     }
@@ -258,12 +270,36 @@
       }
     }
 
-    /* ---------- карточки афиши темы: ключ «slug|день|время», как в сверке Kozlov Smart Search ---------- */
+    /* ---------- карточки афиши темы: ключ «slug|ГГГГ-ММ-ДД|ЧЧ:ММ» ---------- */
     function slugOf(href) {
       try {
         var m = new URL(href, win.location.href).pathname.match(/\/event\/([^\/]+)\/?$/);
         return m ? decode(m[1]).toLowerCase() : '';
       } catch (e) { return ''; }
+    }
+    function monthOf(txt) {
+      var w = String(txt || '').toLowerCase().match(/[a-zа-яё]{3,}/g) || [];
+      for (var i = 0; i < w.length; i++) { var m = MONTH_IDX[w[i].slice(0, 3)]; if (m !== undefined) return m; }
+      return -1;
+    }
+    function weekdayOf(txt) {
+      var w = String(txt || '').toLowerCase().match(/[a-zа-яё]+/g) || [];
+      for (var i = 0; i < w.length; i++) { var d = WEEKDAY_IDX[w[i]]; if (d !== undefined) return d; }
+      return 0;
+    }
+    /** Год в карточке не пишется: берётся год, в котором дата попадает в ближайший год афиши и совпадает день недели. */
+    function cardDate(day, mon, wd) {
+      if (mon < 0) return '';
+      var base = Date.now() + off * 1000, today = Date.UTC(new Date(base).getUTCFullYear(), new Date(base).getUTCMonth(), new Date(base).getUTCDate());
+      var y0 = new Date(base).getUTCFullYear(), found = [];
+      for (var y = y0 - 1; y <= y0 + 1; y++) {
+        var ms = Date.UTC(y, mon, day), dt = new Date(ms);
+        if (dt.getUTCMonth() !== mon || dt.getUTCDate() !== day) continue; // 31 ноября и подобное
+        if (ms < today - 2 * DAY || ms > today + 400 * DAY) continue;
+        if (wd && isoDow(keyOf(ms)) !== wd) continue;
+        found.push(keyOf(ms));
+      }
+      return found.length === 1 || (found.length > 1 && !wd) ? found[0] : ''; // неоднозначно: карточка без ключа
     }
     function collectCards() {
       var month = null;
@@ -278,10 +314,17 @@
           if (!card.classList.contains('event')) continue;
           var a = card.querySelector('a.title'), c = card.querySelector('.cell_1'), r = card.querySelector('.row_1');
           var slug = a ? slugOf(a.getAttribute('href') || '') : '';
-          var day = c ? (c.textContent || '').replace(/\D/g, '') : '';
-          var tm = r ? (r.textContent || '').match(/(\d{1,2}):(\d\d)/) : null;
-          var item = { el: card, grp: grp, ev: null, key: '' };
-          if (slug && day && tm) item.key = slug + '|' + ('0' + day).slice(-2) + '|' + ('0' + tm[1]).slice(-2) + ':' + tm[2];
+          var day = c ? parseInt((c.textContent || '').replace(/\D/g, ''), 10) : 0;
+          var rowTxt = r ? (r.textContent || '') : '';
+          var tm = rowTxt.match(/(\d{1,2}):(\d\d)/);
+          var c2 = card.querySelector('.cell_2'); // в плитке день недели в той же строке, в списке строкой ниже
+          var date = (day && tm) ? cardDate(day, monthOf(rowTxt), weekdayOf(c2 ? c2.textContent : rowTxt)) : '';
+          var item = { el: card, grp: grp, ev: null, key: '', start: 0 };
+          if (slug && date) {
+            var hh = ('0' + tm[1]).slice(-2);
+            item.key = slug + '|' + date + '|' + hh + ':' + tm[2];
+            item.start = Date.UTC(+date.slice(0, 4), +date.slice(5, 7) - 1, +date.slice(8, 10), +hh, +tm[2]); // те же «часы афиши», что start в базе
+          }
           grp.cards.push(item);
           cards.push(item);
         }
@@ -297,7 +340,7 @@
       var gnames = (d.genres && typeof d.genres === 'object' && !Array.isArray(d.genres)) ? d.genres : {};
       d.ev.forEach(function (e, i) {
         if (!Array.isArray(e) || typeof e[0] !== 'string' || typeof e[1] !== 'string' || !/^\d{4}-\d\d-\d\d$/.test(e[1]) || typeof e[2] !== 'string' || !/^\d\d:\d\d$/.test(e[2]) || typeof e[5] !== 'string') return;
-        var key = decode(e[5]).toLowerCase() + '|' + e[1].slice(8, 10) + '|' + e[2];
+        var key = decode(e[5]).toLowerCase() + '|' + e[1] + '|' + e[2];
         var list = byKey[key];
         if (!list || !list.length) return; // концерта нет на афише этой страницы
         var card = list.shift();
@@ -344,25 +387,48 @@
     function accept(d) {
       raw = d; loadedAt = Date.now();
       off = (typeof d.off === 'number' && isFinite(d.off)) ? d.off : off;
-      var diff = (typeof d.now === 'number') ? d.now * 1000 - Date.now() : 0;
+      var diff = (typeof d.now === 'number' && d.now > 1.6e9) ? d.now * 1000 - Date.now() : 0; // время сервера, если оно правдоподобно
       skew = Math.abs(diff) > 20 * 60 * 1000 ? diff : 0;
       events = buildEvents(d);
       for (var gk in state.genres) if (!genreNames[gk]) delete state.genres[gk]; // жанр из адреса, которого нет в афише
     }
-    function firstLoad(attempt) {
-      // повтор идёт мимо кэша браузера: там мог остаться ответ защиты хостинга вместо индекса
-      getIndex(!!attempt, guard(function (err, d) {
+    /** Режим панели приходит в ответе индекса (поле kaf добавляет PHP-часть плагина). Нет поля или режим выключен: панель убирается. */
+    function allowed(d) { return d.kaf === 'on' || (d.kaf === 'preview' && !!cfg.preview); }
+    /**
+     * Сверка карточек страницы с индексом. Индекс содержит концерты, которые ещё не начались к моменту его сборки (как и афиша темы).
+     * Карточка без записи в индексе допустима, только если концерт начался до сборки индекса: тема тоже уберёт её при обновлении страницы.
+     * Остальные карточки без записи значат, что страница и индекс разошлись: фильтровать по таким данным нельзя.
+     */
+    function coverage(d) {
+      var builtMs = (typeof d.built === 'number' ? d.built : 0) * 1000, matched = 0, bad = 0;
+      cards.forEach(function (cd) {
+        if (!cd.el.isConnected) return; // тема могла удалить карточку своим скриптом
+        if (cd.ev) { matched++; return; }
+        if (cd.key && cd.start <= builtMs + 60000) return;
+        bad++;
+      });
+      return { matched: matched, bad: bad };
+    }
+    function setDegraded(v) {
+      if (v !== degraded && ready) flag(v ? 'degraded' : 'ready');
+      degraded = v;
+    }
+    function load(fresh, attempt) {
+      getIndex(fresh, guard(function (err, d) {
         if (err || !validIndex(d)) {
-          if (!refused(err) && !attempt) { setTimeout(guard(function () { firstLoad(1); }), 1000); return; }
+          // повтор идёт мимо кэша браузера: там мог остаться ответ защиты хостинга вместо индекса
+          if (!refused(err) && !attempt) { setTimeout(guard(function () { load(true, 1); }), 1000); return; }
           teardown(err || new Error('bad index'));
           return;
         }
+        if (!allowed(d)) { teardown(new Error('panel is off')); return; }
         accept(d);
-        var withKey = cards.filter(function (c) { return c.key; }).length;
-        // разметка темы изменилась или индекс не совпадает с афишей: панель не включается
-        if (!events.length || events.length < withKey * 0.5) { teardown(new Error('cards matched: ' + events.length + ' of ' + withKey)); return; }
+        var cov = coverage(d);
+        if (!cov.matched) { teardown(new Error('no cards matched')); return; } // разметка темы изменилась
+        if (cov.bad && !fresh) { load(true, 1); return; } // ещё раз мимо кэша браузера: индекс мог быть старше страницы
+        degraded = cov.bad > 0;
         ready = true;
-        flag('ready');
+        flag(degraded ? 'degraded' : 'ready');
         apply(false);
         startRefresh();
       }));
@@ -376,14 +442,20 @@
           bgBusy = false;
           if (refused(err)) { teardown(err); return; }
           if (err || !validIndex(d)) return; // временный сбой: работаем на прежних данных
-          if (raw && d.built === raw.built) { loadedAt = Date.now(); return; }
+          if (!allowed(d)) { teardown(new Error('panel is off')); return; } // панель выключили в настройках
+          if (raw && d.built === raw.built) { loadedAt = Date.now(); tick(); return; }
           accept(d);
+          var cov = coverage(d);
+          if (!cov.matched) { teardown(new Error('no cards matched')); return; }
+          setDegraded(cov.bad > 0);
           apply(false);
         }));
       };
-      intervals.push(setInterval(guard(check), 60 * 1000));
-      on(doc, 'visibilitychange', check);
+      // раз в минуту: проверка индекса и пересчёт по времени (смена суток, закончившиеся концерты)
+      intervals.push(setInterval(guard(function () { check(); tick(); }), 60 * 1000));
+      on(doc, 'visibilitychange', function () { check(); tick(); });
     }
+    function tick() { if (ready && !open && !dead) apply(false); }
 
     /* ---------- адрес страницы ---------- */
     function readUrl() {
@@ -417,7 +489,10 @@
       return win.location.pathname + (qs ? '?' + qs : '') + win.location.hash;
     }
     function writeUrl() {
-      try { win.history.replaceState(win.history.state, '', urlWith(null)); } catch (e) { /* адрес не меняется: фильтры всё равно работают */ }
+      try {
+        var u = urlWith(null);
+        if (u !== win.location.pathname + win.location.search + win.location.hash) win.history.replaceState(win.history.state, '', u);
+      } catch (e) { /* адрес не меняется: фильтры всё равно работают */ }
     }
 
     /* ---------- шрифт окон: Roboto Condensed из папки плагина, регистрируется без CSS на странице ---------- */
@@ -459,6 +534,8 @@
           '</div>' +
         '</div>' +
         '<p class="kaf-wait" hidden>Подбираем концерты…</p>' +
+        '<div class="kaf-note" role="status" hidden><span>Фильтры временно недоступны: афиша на странице обновилась. Показаны все концерты.</span>' +
+          '<button type="button" class="kaf-btn" data-act="reload">Обновить страницу</button></div>' +
         '<div class="kaf-top" hidden><span class="kaf-vals"></span><div class="kaf-head"></div>' +
           '<div class="kaf-right"><button type="button" class="kaf-reset" data-act="clear" data-v="all">Сбросить<span class="kaf-rw"> фильтры</span>' + ICO.x + '</button>' +
           '<nav class="kaf-views" aria-label="Вид афиши"><a class="kaf-v" data-view="line" aria-label="Списком">' + ICO.list + '</a><a class="kaf-v" data-view="cell" aria-label="Плиткой">' + ICO.grid + '</a></nav></div>' +
@@ -538,11 +615,30 @@
       var ew = wrap.parentNode;
       return (ew && ew.classList && ew.classList.contains('view_line')) ? 'line' : 'cell';
     }
+    function setDisabled(dis) {
+      Array.prototype.forEach.call(hroot.querySelectorAll('.kaf-c, .kaf-q'), function (b) { b.disabled = dis; });
+    }
+    function setText(sel, text, html) {
+      var el = hroot.querySelector(sel);
+      if (html) { if (el.innerHTML !== text) el.innerHTML = text; } else if (el.textContent !== text) el.textContent = text;
+    }
     function apply(fromInput) {
       if (!hroot) return;
       var c = ctx(), active = anyActive();
-      var top = hroot.querySelector('.kaf-top'), wait = hroot.querySelector('.kaf-wait'), empty = hroot.querySelector('.kaf-empty');
+      var top = hroot.querySelector('.kaf-top'), wait = hroot.querySelector('.kaf-wait'), empty = hroot.querySelector('.kaf-empty'), note = hroot.querySelector('.kaf-note');
+      changes = 0;
       updateBar(c);
+      if (ready && degraded) {
+        // страница и индекс разошлись: вся афиша как без плагина, фильтры отключены до обновления данных
+        if (open) closePanel(false);
+        showAll();
+        wait.hidden = true; top.hidden = true; empty.hidden = true; note.hidden = false;
+        setDisabled(true);
+        setText('.kaf-sr', '');
+        return;
+      }
+      note.hidden = true;
+      setDisabled(false);
       if (!ready) {
         // до загрузки индекса: если фильтры пришли из адреса, афишу сразу прячем, чтобы она не мигала
         wait.hidden = !active;
@@ -570,27 +666,29 @@
       empty.hidden = !(active && n === 0);
       if (active) {
         var word = plural(n, CONC);
-        hroot.querySelector('.kaf-head').innerHTML = dated
+        setText('.kaf-head', dated
           ? (function (h) { return '<h2 class="kaf-h">' + esc(h[0]) + ' <span class="kaf-nw">' + esc(h[1]) + '<small>' + n + '</small></span></h2>'; })(headingForWhen(c))
-          : '<p class="kaf-found">Найдено <b>' + n + '</b> ' + word + '</p>';
-        hroot.querySelector('.kaf-vals').textContent = (state.q ? ['«' + state.q + '»'] : []).concat(vals).join(' · ');
+          : '<p class="kaf-found">Найдено <b>' + n + '</b> ' + word + '</p>', true);
+        setText('.kaf-vals', (state.q ? ['«' + state.q + '»'] : []).concat(vals).join(' · '));
         var view = currentView();
         Array.prototype.forEach.call(hroot.querySelectorAll('.kaf-v'), function (a) {
           var v = a.getAttribute('data-view');
           a.setAttribute('href', urlWith({ view: v }));
           a.setAttribute('aria-current', String(v === view));
         });
-        hroot.querySelector('.kaf-sr').textContent = 'Найдено ' + n + ' ' + word;
+        setText('.kaf-sr', 'Найдено ' + n + ' ' + word); // читалка экрана объявит число, только если оно изменилось
       } else {
-        hroot.querySelector('.kaf-sr').textContent = '';
+        setText('.kaf-sr', '');
       }
       if (open) renderPanel(c);
       clearTimeout(urlTimer);
       urlTimer = setTimeout(guard(writeUrl), fromInput ? 400 : 0);
-      // ленивая загрузка картинок темы проверяет экран при прокрутке: показанные карточки должны получить фото
-      clearTimeout(pokeTimer);
+      // ленивая загрузка картинок темы проверяет экран при прокрутке: показанные карточки должны получить фото.
       // a3 Lazy Load (Lazy Load XT) слушает прокрутку на document, другие загрузчики на window
-      pokeTimer = setTimeout(function () { try { doc.dispatchEvent(new Event('scroll')); win.dispatchEvent(new Event('scroll')); } catch (e) { /* не критично */ } }, 60);
+      if (changes) {
+        clearTimeout(pokeTimer);
+        pokeTimer = setTimeout(function () { try { doc.dispatchEvent(new Event('scroll')); win.dispatchEvent(new Event('scroll')); } catch (e) { /* не критично */ } }, 60);
+      }
     }
 
     /* ---------- окна ---------- */
@@ -716,9 +814,9 @@
     }
     function clear(f) {
       if ((f === 'date' && state.when === 'range') || f === 'all') { state.when = null; state.range = null; }
-      if (f === 'price' || f === 'all') { state.budget = null; state.formats = {}; }
-      if (f === 'genre' || f === 'all') state.genres = {};
-      if (f === 'stage' || f === 'all') state.stages = {};
+      if (f === 'price' || f === 'all') { state.budget = null; state.formats = Object.create(null); }
+      if (f === 'genre' || f === 'all') state.genres = Object.create(null);
+      if (f === 'stage' || f === 'all') state.stages = Object.create(null);
       if (f === 'all') {
         state.q = ''; state.qw = [];
         var qIn = hroot.querySelector('.kaf-q'); if (qIn) qIn.value = '';
@@ -734,8 +832,9 @@
       var v = t.getAttribute('data-v'), act = t.getAttribute('data-act');
       switch (act) {
         case 'when': state.when = state.when === v ? null : v; state.range = null; if (open) closePanel(false); break;
+        case 'reload': try { win.location.reload(); } catch (e) { /* не критично */ } return;
         case 'open':
-          if (!ready) return;
+          if (!ready || degraded) return;
           if (open === v) { closePanel(); return; }
           if (open) closePanel(false);
           openPanel(v, t);
@@ -793,7 +892,7 @@
       on(win, 'resize', place);
       on(win, 'scroll', function () { if (open && !mq.matches) place(); }, { passive: true });
       if (mq.addEventListener) on(mq, 'change', function () { if (open) closePanel(false); });
-      firstLoad(0);
+      load(false, 0);
     } catch (e) {
       teardown(e);
     }
