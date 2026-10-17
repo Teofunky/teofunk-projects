@@ -20,6 +20,11 @@ while ( have_posts() ) :
 	$title   = get_the_title();
 	?>
 <main class="ka">
+	<nav class="ka-bc" aria-label="Хлебные крошки">
+		<a href="<?php echo esc_url( home_url( '/' ) ); ?>">Главная</a><span>/</span>
+		<a href="<?php echo esc_url( get_post_type_archive_link( 'kozlov_artist' ) ); ?>">Артисты</a><span>/</span>
+		<span class="ka-bc__cur"><?php echo esc_html( $title ); ?></span>
+	</nav>
 	<section class="ka-hero">
 		<div class="ka-hero__text">
 			<span class="ka-eyebrow"><?php echo esc_html( trim( ( $genre ?: 'Артист' ) . ' / ' . $city . ( $founded ? ' · с ' . $founded : '' ) ) ); ?></span>
@@ -41,7 +46,7 @@ while ( have_posts() ) :
 	<?php endif; ?>
 
 	<section id="ka-afisha" class="ka-sec">
-		<h2 class="ka-h2">Афиша <b><?php echo esc_html( $title ); ?></b></h2>
+		<h2 class="ka-h2">Ближайшие <b>концерты и билеты</b></h2>
 		<?php if ( $events ) : ?>
 		<ul class="ka-rows">
 			<?php foreach ( $events as $e ) : ?>
@@ -78,7 +83,7 @@ while ( have_posts() ) :
 
 	<?php if ( $gallery ) : ?>
 	<section class="ka-sec">
-		<h2 class="ka-h2"><?php echo esc_html( $title ); ?> <b>в клубе</b></h2>
+		<h2 class="ka-h2">Фото <b>с концертов</b></h2>
 		<div class="ka-gallery">
 			<?php foreach ( $gallery as $i => $src ) : ?>
 				<img src="<?php echo esc_url( $src ); ?>" alt="<?php echo esc_attr( $title . ', фото ' . ( $i + 1 ) ); ?>" loading="lazy">

@@ -45,3 +45,15 @@
 .ka a.ka-btn,.ka a.ka-btn:visited,.ka a.ka-btn:hover,.ka a.ka-btn:focus{color:#fff!important;background:var(--c)!important;text-decoration:none!important}
 .ka a.ka-btn--white,.ka a.ka-btn--white:visited,.ka a.ka-btn--white:hover,.ka a.ka-btn--white:focus{color:var(--c)!important;background:#fff!important}
 .ka a.ka-row__title,.ka a.ka-row__title:visited{color:var(--ink)!important;text-decoration:none!important}
+
+.ka-bc{max-width:1320px;margin:0 auto;padding:20px 32px 0;display:flex;flex-wrap:wrap;gap:8px;font-size:12px;letter-spacing:1.6px;text-transform:uppercase;color:var(--mut)}
+.ka .ka-bc a,.ka .ka-bc a:visited{color:var(--mut)!important;text-decoration:none!important}
+.ka .ka-bc a:hover{color:var(--c)!important}
+.ka-bc__cur{color:var(--ink)}
+.ka-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:24px}
+.ka-card{display:flex;flex-direction:column;gap:12px;text-decoration:none}
+.ka .ka-card,.ka .ka-card:visited{color:var(--ink)!important;text-decoration:none!important}
+.ka-card img{width:100%;aspect-ratio:4/5;object-fit:cover;display:block;background:var(--bg2)}
+.ka-card__n{font-size:16px;font-weight:500;letter-spacing:.6px;text-transform:uppercase}
+.ka-card__m{font-size:12px;letter-spacing:1.4px;text-transform:uppercase;color:var(--mut)}
+@media (max-width:720px){.ka-bc{padding:16px 20px 0}}
