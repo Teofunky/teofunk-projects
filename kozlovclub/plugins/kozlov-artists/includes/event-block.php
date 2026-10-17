@@ -36,7 +36,7 @@ function ka_event_block_html( $post ) {
 			$html .= '<a href="' . esc_url( $url ) . '">' . get_the_post_thumbnail( $aid, 'thumbnail', array( 'alt' => esc_attr( $name ), 'loading' => 'lazy' ) ) . '</a>';
 		}
 		$html .= '<div><a class="ka-eb__n" href="' . esc_url( $url ) . '">' . esc_html( $name ) . '</a>';
-		$ex = get_the_excerpt( $aid );
+		$ex = wp_strip_all_tags( (string) get_post_field( 'post_excerpt', $aid ) ); // сырой отрывок: фильтры календаря подмешивают в него данные концерта
 		if ( $ex ) { $html .= '<p class="ka-eb__t">' . esc_html( $ex ) . '</p>'; }
 		$html .= '<a class="ka-eb__a" href="' . esc_url( $url ) . '">Афиша, видео и история артиста</a></div></div></aside>';
 	}
