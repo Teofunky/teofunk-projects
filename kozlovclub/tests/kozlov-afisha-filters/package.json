@@ -1,0 +1,14 @@
+{
+  "name": "kozlov-afisha-filters-tests",
+  "version": "1.0.3",
+  "private": true,
+  "description": "Сборка и проверки плагина Kozlov Afisha Filters",
+  "scripts": {
+    "build": "node build.js ../kozlov-afisha-filters 1.0.3",
+    "test": "node kaf-test.js ../kozlov-afisha-filters/assets/kaf-app.js && php harness.php ../kozlov-afisha-filters"
+  },
+  "devDependencies": {
+    "jsdom": "24.1.3",
+    "terser": "5.31.6"
+  }
+}

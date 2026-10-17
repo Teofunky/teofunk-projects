@@ -46,11 +46,11 @@ function reset_front() { $r = new ReflectionProperty( 'KAF_Front', 'on' ); $r->s
 function front_html() { reset_front(); run( 'wp_enqueue_scripts' ); ob_start(); run( 'wp_footer' ); return ob_get_clean(); }
 
 // Kozlov Smart Search как заглушка
-class KSS_Settings { public static $m = 'on'; public static function mode() { return self::$m; } }
+class KSS_Settings { public static $m = 'on'; public static $c = false; public static function mode() { return self::$m; } public static function content() { return self::$c; } }
 define( 'KSS_VERSION', '1.0.4' );
 
 require $dir . '/kozlov-afisha-filters.php';
-ok( defined( 'KAF_VERSION' ) && '1.0.0' === KAF_VERSION, 'версия' );
+ok( defined( 'KAF_VERSION' ) && '1.0.3' === KAF_VERSION, 'версия' );
 ok( isset( $GLOBALS['T']['actions']['plugins_loaded'] ), 'загрузка на plugins_loaded' );
 ok( array( 'kaf_purge_page_cache' ) === $GLOBALS['T']['deact'], 'при выключении плагина сбрасывается кэш страниц' );
 run( 'plugins_loaded' );
@@ -89,12 +89,19 @@ $GLOBALS['T']['admin'] = false; $GLOBALS['T']['logged'] = false;
 $html = front_html();
 ok( 1 === count( $GLOBALS['T']['scripts'] ), 'скрипт подключён' );
 $s = $GLOBALS['T']['scripts'][0];
-ok( 'defer' === $s[3]['strategy'] && true === $s[3]['in_footer'] && '1.0.0' === $s[2], 'скрипт с defer, в подвале, с версией' );
+ok( 'defer' === $s[3]['strategy'] && true === $s[3]['in_footer'] && '1.0.3' === $s[2], 'скрипт с defer, в подвале, с версией' );
 ok( preg_match( '#<script type="application/json" id="kaf-config">(.*)</script>#', $html, $mm ) === 1, 'конфигурация выведена' );
 $cfg = json_decode( $mm[1], true );
 ok( '/wp-json/kozlov-search/v1/index' === $cfg['index'], 'адрес индекса относительный' );
 ok( '/wp-content/plugins/kozlov-afisha-filters/assets/fonts/' === $cfg['fonts'], 'адрес шрифтов' );
 ok( ! isset( $cfg['nonce'] ) && 0 === $cfg['preview'], 'гостю без nonce и не в режиме проверки' );
+ok( ! isset( $cfg['texts'] ), 'поиск по анонсам выключен: адреса текстов нет' );
+KSS_Settings::$c = true;
+$html = front_html();
+preg_match( '#id="kaf-config">(.*)</script>#', $html, $mm );
+$cfg = json_decode( $mm[1], true );
+ok( '/wp-json/kozlov-search/v1/texts' === $cfg['texts'], 'поиск по анонсам включён: адрес текстов передан' );
+KSS_Settings::$c = false;
 $GLOBALS['T']['logged'] = true; $GLOBALS['T']['admin'] = true;
 $GLOBALS['T']['opt']['kaf_settings'] = array( 'mode' => 'preview' );
 $html = front_html();
@@ -149,6 +156,27 @@ call_user_func( cb( 'update_option_kaf_settings' ), array( 'mode' => 'on' ), arr
 ok( 2 === $GLOBALS['T']['flushed'], 'режим не менялся: кэш не трогаем' );
 ok( true === kaf_purge_page_cache() && 3 === $GLOBALS['T']['flushed'], 'сброс при выключении плагина' );
 
+
+// режим панели в ответе индекса Kozlov Smart Search
+class Fake_Resp { public $d; public $st; function __construct( $d, $st ) { $this->d = $d; $this->st = $st; } function get_data() { return $this->d; } function set_data( $d ) { $this->d = $d; } function get_status() { return $this->st; } }
+class Fake_Req { public $r; function __construct( $r ) { $this->r = $r; } function get_route() { return $this->r; } }
+$GLOBALS['T']['opt']['kaf_settings'] = array( 'mode' => 'preview' );
+$idx = array( 'v' => 1, 'built' => 1, 'ev' => array() );
+$r = KAF_Front::mark_index( new Fake_Resp( $idx, 200 ), null, new Fake_Req( '/kozlov-search/v1/index' ) );
+ok( 'preview' === $r->d['kaf'], 'в ответ индекса добавлен режим панели' );
+$r = KAF_Front::mark_index( new Fake_Resp( $idx, 200 ), null, new Fake_Req( '/kozlov-search/v1/texts' ) );
+ok( ! isset( $r->d['kaf'] ), 'другой маршрут поиска не меняется' );
+$r = KAF_Front::mark_index( new Fake_Resp( array( 'code' => 'kss_disabled' ), 403 ), null, new Fake_Req( '/kozlov-search/v1/index' ) );
+ok( ! isset( $r->d['kaf'] ), 'ответ с ошибкой не меняется' );
+$r = KAF_Front::mark_index( new Fake_Resp( $idx, 200 ), null, new Fake_Req( '/wp/v2/posts' ) );
+ok( ! isset( $r->d['kaf'] ), 'чужой маршрут не меняется' );
+$GLOBALS['T']['opt_throw'] = true;
+$r = KAF_Front::mark_index( new Fake_Resp( $idx, 200 ), null, new Fake_Req( '/kozlov-search/v1/index' ) );
+ok( 'off' === $r->d['kaf'], 'ошибка чтения настроек: режим off, ответ не ломается' );
+$GLOBALS['T']['opt_throw'] = false;
+ok( null === KAF_Front::mark_index( null, null, null ), 'пустые аргументы не ломают фильтр' );
+ok( in_array( array( 'KAF_Front', 'mark_index' ), $GLOBALS['T']['actions']['rest_post_dispatch'], true ), 'фильтр ответа REST подключён' );
+
 // аварийное отключение
 $out = shell_exec( 'php -r ' . escapeshellarg( 'define("ABSPATH","/");define("KAF_DISABLE",true);$h=array();function add_action($a,$b,$c=10){global $h;$h[$a]=$b;}function register_deactivation_hook(){}require "' . $dir . '/kozlov-afisha-filters.php";call_user_func($h["plugins_loaded"]);echo class_exists("KAF_Front")?"loaded":"skipped";' ) );
 ok( 'skipped' === trim( $out ), 'KAF_DISABLE: плагин не загружается' );
@@ -156,7 +184,7 @@ ok( 'skipped' === trim( $out ), 'KAF_DISABLE: плагин не загружае
 $out = shell_exec( 'php -r ' . escapeshellarg( 'define("ABSPATH","/");define("KSS_VERSION","1.0.2");class KSS_Settings{static function mode(){return "on";}}function get_option($k,$d=false){return array("mode"=>"on");}function current_user_can(){return true;}require "' . $dir . '/includes/class-kaf-settings.php";var_export(KAF_Settings::visible_for_current_user());' ) );
 ok( 'false' === trim( $out ), 'Kozlov Smart Search 1.0.2: панели нет' );
 $log = is_file( $LOGF ) ? file_get_contents( $LOGF ) : '';
-ok( 2 === substr_count( $log, 'db down' ) && 2 === substr_count( $log, '[kozlov-afisha-filters]' ), 'в журнале только две намеренные ошибки базы' );
+ok( 3 === substr_count( $log, 'db down' ) && 3 === substr_count( $log, '[kozlov-afisha-filters]' ), 'в журнале только намеренные ошибки базы' );
 
 echo "\nphp: $pass passed, $fail failed\n";
 exit( $fail ? 1 : 0 );
