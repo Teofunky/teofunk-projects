@@ -2,14 +2,14 @@
 /**
  * Plugin Name: Kozlov Artists
  * Description: Страницы артистов клуба: автоподбор концертов из афиши (All-in-One Event Calendar), SEO через Yoast, разметка MusicGroup/Event.
- * Version: 0.1.3
+ * Version: 0.1.4
  * Author: Kozlov Club
  * Text Domain: kozlov-artists
  */
 
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-define( 'KA_VERSION', '0.1.3' );
+define( 'KA_VERSION', '0.1.4' );
 define( 'KA_DIR', plugin_dir_path( __FILE__ ) );
 define( 'KA_URL', plugin_dir_url( __FILE__ ) );
 

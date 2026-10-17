@@ -27,10 +27,20 @@ function ka_import_yandex( $post_id, $public_key ) {
 	require_once ABSPATH . 'wp-admin/includes/media.php';
 	require_once ABSPATH . 'wp-admin/includes/image.php';
 	@set_time_limit( 300 ); // phpcs:ignore
+	ignore_user_abort( true );
 
+	// Ссылка вида https://disk.yandex.ru/d/KEY/Папка/Подпапка: ключ отдельно, путь отдельно
+	$start_path = '';
+	if ( preg_match( '~^(https://(?:disk\.yandex\.(?:ru|com)|yadi\.sk)/d/[^/?#]+)(/[^?#]+)?~', $public_key, $m ) ) {
+		$public_key = $m[1];
+		$start_path = isset( $m[2] ) ? rawurldecode( $m[2] ) : '';
+	}
 	$files = array();
-	ka_yd_collect( $public_key, '', $files, 0 );
-	$files = array_slice( $files, 0, 20 );
+	ka_yd_collect( $public_key, $start_path, $files, 0 );
+	$done  = (array) get_post_meta( $post_id, 'ka_imported', true );
+	$files = array_values( array_filter( $files, function ( $f ) use ( $done ) { return ! in_array( $f['path'], $done, true ); } ) );
+	$total = count( $files );
+	$files = array_slice( $files, 0, 4 ); // порция: сервер ограничивает время запроса
 	$urls  = ka_lines( $post_id, 'ka_gallery' );
 	$ok    = 0;
 	$thumb = null;
@@ -45,13 +55,15 @@ function ka_import_yandex( $post_id, $public_key ) {
 		if ( is_wp_error( $id ) ) { @unlink( $tmp ); continue; } // phpcs:ignore
 		update_post_meta( $id, '_wp_attachment_image_alt', get_the_title( $post_id ) );
 		$urls[] = wp_get_attachment_url( $id );
+		$done[] = $f['path'];
 		$meta   = wp_get_attachment_metadata( $id );
 		if ( ! $thumb && ! empty( $meta['width'] ) && $meta['height'] > $meta['width'] ) { $thumb = $id; }
 		$ok++;
 	}
+	update_post_meta( $post_id, 'ka_imported', array_values( array_filter( $done ) ) );
 	if ( $urls ) { update_post_meta( $post_id, 'ka_gallery', implode( "\n", array_unique( $urls ) ) ); }
 	if ( $thumb && ! has_post_thumbnail( $post_id ) ) { set_post_thumbnail( $post_id, $thumb ); }
-	return sprintf( 'Импорт: найдено файлов %d, загружено %d.', count( $files ), $ok );
+	return sprintf( 'Импорт: загружено %d. Осталось файлов: %d. Если осталось больше 0, нажмите «Обновить» ещё раз с той же ссылкой.', $ok, max( 0, $total - $ok ) );
 }
 
 function ka_yd_json( $url ) {
