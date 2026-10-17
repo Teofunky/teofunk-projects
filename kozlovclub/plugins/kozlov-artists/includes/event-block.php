@@ -27,13 +27,14 @@ function ka_artists_for_event( $event_post ) {
 function ka_event_block_html( $post ) {
 	$artists = ka_artists_for_event( $post );
 	if ( ! $artists ) { return ''; }
-	$html = '<style>.ka-eb{margin:32px 0;padding:24px;background:#f6f4f3;font-family:Roboto,sans-serif}.ka-eb__l{font-size:12px;font-weight:500;letter-spacing:2.4px;text-transform:uppercase;color:#f34841}.ka-eb__i{display:flex;gap:20px;align-items:center;margin-top:14px;flex-wrap:wrap}.ka-eb__i img{width:96px;height:96px;object-fit:cover;display:block}.ka-eb__n{font-size:20px;font-weight:500;text-transform:uppercase;color:#020817!important;text-decoration:none!important}.ka-eb__t{margin:6px 0 0;font-size:15px;line-height:1.6;color:#424242}.ka-eb__a{display:inline-block;margin-top:10px;font-size:12px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:#f34841!important;text-decoration:none!important;border-bottom:1px solid #f34841}</style>';
+	$html = '<style>.ka-eb{margin:32px 0;padding:24px;background:#f6f4f3;font-family:Roboto,sans-serif}.ka-eb__l{font-size:12px;font-weight:500;letter-spacing:2.4px;text-transform:uppercase;color:#f34841}.ka-eb__i{display:flex;gap:20px;align-items:center;margin-top:14px;flex-wrap:wrap}.ka-eb__p{display:block;flex:0 0 96px;width:96px;height:96px;background-size:cover;background-position:center;background-color:#e6e6e6}.ka-eb__n{font-size:20px;font-weight:500;text-transform:uppercase;color:#020817!important;text-decoration:none!important}.ka-eb__t{margin:6px 0 0;font-size:15px;line-height:1.6;color:#424242}.ka-eb__a{display:inline-block;margin-top:10px;font-size:12px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:#f34841!important;text-decoration:none!important;border-bottom:1px solid #f34841}</style>';
 	foreach ( $artists as $aid ) {
 		$url  = get_permalink( $aid );
 		$name = get_the_title( $aid );
 		$html .= '<aside class="ka-eb" aria-label="Об артисте"><span class="ka-eb__l">Об артисте</span><div class="ka-eb__i">';
 		if ( has_post_thumbnail( $aid ) ) {
-			$html .= '<a href="' . esc_url( $url ) . '">' . get_the_post_thumbnail( $aid, 'thumbnail', array( 'alt' => esc_attr( $name ), 'loading' => 'lazy' ) ) . '</a>';
+			$img = get_the_post_thumbnail_url( $aid, 'medium' ); // фоном: плагин ленивой загрузки не подменяет такие картинки заглушкой
+			$html .= '<a class="ka-eb__p" href="' . esc_url( $url ) . '" role="img" aria-label="' . esc_attr( $name ) . '" style="background-image:url(' . esc_url( $img ) . ')"></a>';
 		}
 		$html .= '<div><a class="ka-eb__n" href="' . esc_url( $url ) . '">' . esc_html( $name ) . '</a>';
 		$ex = wp_strip_all_tags( (string) get_post_field( 'post_excerpt', $aid ) ); // сырой отрывок: фильтры календаря подмешивают в него данные концерта
@@ -61,5 +62,5 @@ add_action( 'wp_footer', function () {
 	$html = ka_event_block_html( get_queried_object() );
 	if ( ! $html ) { return; }
 	echo '<template id="ka-eb-tpl">' . $html . '</template>';
-	echo '<script>(function(){var t=document.getElementById("ka-eb-tpl");if(!t)return;var h=document.querySelector(".event_page_post_content .description")||document.querySelector(".event_page_post_content")||document.querySelector(".post_content");if(h){h.appendChild(t.content.cloneNode(true));}})();</script>';
+	echo '<script>(function(){var t=document.getElementById("ka-eb-tpl");if(!t)return;var h=document.querySelector(".event_page_post_content .description")||document.querySelector(".event_page_post_content")||document.querySelector(".post_content");if(h){var n=t.content.cloneNode(true);var first=h.querySelector(":scope > .textblock, :scope > .artist_desc");if(first&&h.classList.contains("description")){h.insertBefore(n,h.firstChild);}else{h.appendChild(n);}}})();</script>';
 }, 99 );
