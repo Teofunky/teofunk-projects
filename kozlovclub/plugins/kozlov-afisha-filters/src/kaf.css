@@ -59,6 +59,11 @@
 .kaf-reset svg{width:14px;height:14px;stroke:currentColor;stroke-width:2.2;fill:none}
 .kaf-reset:hover{text-decoration:underline}
 .kaf-views{display:flex;flex:none;gap:2px;padding:2px;border:1px solid var(--line);border-radius:20px;background:#fff}
+/* переключатель «2 в ряд / крупно»: только на телефоне */
+.kaf-lay{display:none;flex:none;gap:2px;padding:2px;height:40px;border:1px solid var(--line);border-radius:20px;background:#fff}
+.kaf-lb{width:34px;height:34px;border:0;border-radius:17px;background:none;display:grid;place-items:center;color:#8a9099;cursor:pointer;padding:0}
+.kaf-lb svg{width:18px;height:18px;fill:currentColor}
+.kaf-lb[aria-pressed="true"]{background:var(--ink);color:#fff}
 .kaf-v{width:36px;height:34px;border-radius:17px;display:grid;place-items:center;color:#a4aab2;text-decoration:none}
 .kaf-v[aria-current="true"]{background:var(--ink);color:#fff}
 .kaf-v svg{width:18px;height:18px;fill:currentColor}
@@ -131,6 +136,13 @@
 
 @media (max-width:719px){
   .kaf-bar{margin-top:16px;gap:10px}
+  .kaf-search{flex:1 1 0;min-width:0}
+  .kaf-lay{display:flex}
+  /* на телефоне значков темы нет: отступ до афиши даёт панель */
+  .kaf{padding-bottom:22px}
+  .kaf-cmp .kaf-top{margin-bottom:0}
+  .kaf-top{margin-bottom:28px}
+  .kaf-views{display:none}
   .kaf-chips{flex:1 1 100%;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:8px}
   .kaf-sep{display:none}
   .kaf-c{grid-column:span 4;min-width:0;justify-content:center;padding:0 8px;gap:4px;font-size:14px}

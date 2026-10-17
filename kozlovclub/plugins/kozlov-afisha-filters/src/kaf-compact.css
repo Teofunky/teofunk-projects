@@ -1,0 +1,25 @@
+/* Kozlov Afisha Filters: компактная афиша на телефоне, по 2 концерта в ряд.
+   Это единственные стили плагина вне Shadow DOM. Они действуют только на карточки темы
+   и только пока на блоке афиши стоит класс kaf-compact, который ставит и снимает скрипт панели.
+   Без панели класса нет, и афиша выглядит как в теме. */
+@media (max-width:719px){
+  .events_wrap.kaf-compact .events.view_cell{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:auto;gap:30px 12px;padding-bottom:30px}
+  .events_wrap.kaf-compact .events.view_cell .event{background:none;box-shadow:none;padding:0;display:flex;flex-direction:column}
+  /* метка «Концерт сегодня | сцена» над фото, как плашка над афишей в TodayTix */
+  .events_wrap.kaf-compact .events.view_cell .event .top_info{position:static;order:-1;margin:0 0 6px;padding-left:12px;font-size:10px;line-height:1.3;letter-spacing:.02em;background-size:6px;color:#646b76;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:26px}
+  .events_wrap.kaf-compact .events.view_cell .event .top_info a{color:inherit}
+  .events_wrap.kaf-compact .events.view_cell .event > .wrap{display:flex;flex-direction:column;flex:1}
+  .events_wrap.kaf-compact .events.view_cell .event .thumbnail{border-radius:8px;overflow:hidden;aspect-ratio:4/3;background:#e6e6e6}
+  .events_wrap.kaf-compact .events.view_cell .event .thumbnail img{display:block;width:100%;height:100%;object-fit:cover}
+  .events_wrap.kaf-compact .events.view_cell .event .desc{padding:0;flex:1;display:flex;flex-direction:column}
+  /* высоту названия тема задаёт скриптом (50px), в компактном виде она по тексту */
+  .events_wrap.kaf-compact .events.view_cell .event .desc .title{height:auto!important;padding:8px 0 6px;font-size:13px;line-height:1.25;letter-spacing:.01em;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;hyphens:auto;-webkit-hyphens:auto;overflow-wrap:anywhere}
+  .events_wrap.kaf-compact .events.view_cell .event .desc .datetime{padding:0;margin-top:auto}
+  .events_wrap.kaf-compact .events.view_cell .event .desc .datetime .cell_1{font-size:26px;margin-right:8px}
+  .events_wrap.kaf-compact .events.view_cell .event .desc .datetime .cell_2{font-size:10.5px;line-height:15px;min-width:0;overflow-wrap:anywhere}
+  /* длинные слова в узкой колонке (телефоны 320–360 px) переносятся, а не вылезают за карточку */
+  .events_wrap.kaf-compact .events.view_cell .event .desc .datetime .cell_2 .row_2{font-size:11px}
+  .events_wrap.kaf-compact .events.view_cell .event .readmore{height:38px;padding:0;margin-top:10px}
+  .events_wrap.kaf-compact .events.view_cell .event .readmore a{line-height:38px;font-size:10.5px;letter-spacing:.08em}
+  .events_wrap.kaf-compact .events.view_cell .event .readmore .btn-widget{height:38px}
+}

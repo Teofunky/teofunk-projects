@@ -9,6 +9,7 @@
   'use strict';
 
   var CSS = __KAF_CSS__;
+  var COMPACT_CSS = __KAF_COMPACT_CSS__; // компактная афиша на телефоне: стили карточек темы под классом kaf-compact
   var doc = document, win = window;
 
   /* запуск после разбора страницы: скрипт подключён с defer, но оптимизаторы иногда переносят скрипты в начало страницы */
@@ -76,7 +77,9 @@
       left: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 6-6 6 6 6"/></svg>',
       right: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>',
       list: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="3"/><rect x="3" y="10.5" width="18" height="3"/><rect x="3" y="17" width="18" height="3"/></svg>',
-      grid: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="8" height="8"/><rect x="13" y="3" width="8" height="8"/><rect x="3" y="13" width="8" height="8"/><rect x="13" y="13" width="8" height="8"/></svg>'
+      grid: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="8" height="8"/><rect x="13" y="3" width="8" height="8"/><rect x="3" y="13" width="8" height="8"/><rect x="13" y="13" width="8" height="8"/></svg>',
+      two: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="8" height="7" rx="1.5"/><rect x="13" y="4" width="8" height="7" rx="1.5"/><rect x="3" y="13" width="8" height="7" rx="1.5"/><rect x="13" y="13" width="8" height="7" rx="1.5"/></svg>',
+      one: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="11" rx="1.5"/><rect x="4" y="16" width="16" height="5" rx="1.5"/></svg>'
     };
 
     /* ---------- состояние ---------- */
@@ -88,6 +91,8 @@
     var host = null, hroot = null, layer = null, lroot = null, panel = null, pb = null, pf = null, scrim = null;
     var open = null, trigger = null, calMonth = null, vals = [];
     var listeners = [], intervals = [], hiddenList = [], saved = new WeakMap(), lockedOverflow = null, fontsAsked = false, urlTimer = 0, pokeTimer = 0, inputTimer = 0;
+    // вид афиши на телефоне: по 2 в ряд (по умолчанию) или крупно. Выбор хранится в браузере посетителя
+    var LAYOUT_KEY = 'kaf_layout', compactPref = readLayout(), compactStyle = null, eventsWrap = wrap.parentNode;
     var mq = win.matchMedia ? win.matchMedia('(max-width: 719px)') : { matches: false };
 
     /* ---------- защита: любая ошибка убирает панель и возвращает афишу ---------- */
@@ -105,20 +110,34 @@
     function teardown(e) {
       if (dead) return;
       dead = true;
-      try {
-        listeners.forEach(function (l) { l[0].removeEventListener(l[1], l[2], l[3]); });
-        listeners = [];
-        intervals.forEach(function (t) { clearInterval(t); });
-        intervals = [];
-        clearTimeout(urlTimer); clearTimeout(pokeTimer); clearTimeout(inputTimer);
-        lockBody(false);
-        showAll();
-        if (host && host.parentNode) host.parentNode.removeChild(host);
-        if (layer && layer.parentNode) layer.parentNode.removeChild(layer);
-        host = hroot = layer = lroot = null;
-      } catch (x) { /* уже нечего убирать */ }
+      // каждый шаг отдельно: сбой одного не должен помешать вернуть афишу
+      var step = function (fn) { try { fn(); } catch (x) { /* следующий шаг всё равно выполняется */ } };
+      step(showAll); // главное: карточки, месяцы и значки темы как были
+      step(function () { if (eventsWrap && eventsWrap.classList) eventsWrap.classList.remove('kaf-compact'); });
+      step(function () { if (compactStyle && compactStyle.parentNode) compactStyle.parentNode.removeChild(compactStyle); });
+      step(function () { lockBody(false); });
+      step(function () { if (host && host.parentNode) host.parentNode.removeChild(host); });
+      step(function () { if (layer && layer.parentNode) layer.parentNode.removeChild(layer); });
+      listeners.forEach(function (l) { step(function () { l[0].removeEventListener(l[1], l[2], l[3]); }); });
+      intervals.forEach(function (t) { step(function () { clearInterval(t); }); });
+      step(function () { clearTimeout(urlTimer); clearTimeout(pokeTimer); clearTimeout(inputTimer); });
+      listeners = []; intervals = [];
+      host = hroot = layer = lroot = null;
       flag('off');
       try { if (cfg.preview && e && win.console) win.console.warn('[kozlov-afisha-filters] панель выключена:', e); } catch (x) { /* не критично */ }
+    }
+
+    /* ---------- вид афиши на телефоне ---------- */
+    function isMobile() { return !!mq.matches; }
+    function readLayout() { try { return win.localStorage.getItem('kaf_layout') !== 'large'; } catch (e) { return true; } }
+    function saveLayout() { try { win.localStorage.setItem(LAYOUT_KEY, compactPref ? 'compact' : 'large'); } catch (e) { /* без памяти: вид действует до перезагрузки */ } }
+    /** Ставит или снимает класс kaf-compact на блоке афиши. Компьютер не затрагивается: класс только на телефоне. */
+    function applyLayout() {
+      var onNow = isMobile() && compactPref;
+      if (eventsWrap && eventsWrap.classList && eventsWrap.classList.contains('kaf-compact') !== onNow) { eventsWrap.classList.toggle('kaf-compact', onNow); changes++; }
+      var k = hroot && hroot.querySelector('.kaf');
+      if (k) k.classList.toggle('kaf-cmp', onNow);
+      if (hroot) Array.prototype.forEach.call(hroot.querySelectorAll('.kaf-lb'), function (b) { b.setAttribute('aria-pressed', String((b.getAttribute('data-v') === 'compact') === compactPref)); });
     }
 
     /* ---------- прятать и возвращать элементы темы: только inline display, с запоминанием прежнего значения ---------- */
@@ -571,6 +590,10 @@
 
     /* ---------- разметка ---------- */
     function mount() {
+      compactStyle = doc.createElement('style');
+      compactStyle.id = 'kaf-compact-css';
+      compactStyle.textContent = COMPACT_CSS;
+      (doc.head || doc.documentElement).appendChild(compactStyle);
       host = doc.createElement('div');
       host.id = 'kaf-filters';
       anchor.parentNode.insertBefore(host, anchor.nextSibling);
@@ -583,6 +606,10 @@
       hroot.innerHTML = '<style>' + CSS + '</style><div class="kaf">' +
         '<div class="kaf-bar">' +
           '<label class="kaf-search">' + ICO.search + '<input class="kaf-q" type="search" placeholder="Артист или концерт" aria-label="Поиск по афише: артист, концерт, жанр или сцена" autocomplete="off" enterkeyhint="search" maxlength="80"></label>' +
+          '<div class="kaf-lay" role="group" aria-label="Вид афиши">' +
+            '<button type="button" class="kaf-lb" data-act="layout" data-v="compact" aria-pressed="false" aria-label="По 2 концерта в ряд" title="По 2 в ряд">' + ICO.two + '</button>' +
+            '<button type="button" class="kaf-lb" data-act="layout" data-v="large" aria-pressed="false" aria-label="Крупные карточки" title="Крупно">' + ICO.one + '</button>' +
+          '</div>' +
           '<div class="kaf-chips" role="group" aria-label="Фильтры афиши">' +
             q('today', 'Сегодня') + q('tomorrow', 'Завтра') + q('weekend', 'Выходные') + '<span class="kaf-sep" aria-hidden="true"></span>' +
             dd('date', 'Дата', ICO.cal) + dd('price', 'Цена') + dd('genre', 'Жанр') + dd('stage', 'Сцена') +
@@ -684,6 +711,7 @@
       var c = ctx(), active = anyActive();
       var top = hroot.querySelector('.kaf-top'), wait = hroot.querySelector('.kaf-wait'), empty = hroot.querySelector('.kaf-empty'), note = hroot.querySelector('.kaf-note');
       changes = 0;
+      applyLayout();
       updateBar(c);
       if (ready && degraded) {
         // страница и индекс разошлись: вся афиша как без плагина, фильтры отключены до обновления данных
@@ -701,7 +729,7 @@
         setText('.kaf-wait', 'Подбираем концерты…');
         wait.hidden = !active;
         groups.forEach(function (g) { setHidden(g.cont, active); setHidden(g.month, active); });
-        setHidden(viewtabs, active);
+        setHidden(viewtabs, active || isMobile());
         return;
       }
       wait.hidden = true;
@@ -719,7 +747,8 @@
         // при фильтре по датам заголовки месяцев заменяет наш заголовок с датами
         setHidden(g.month, active && (dated || !any));
       });
-      setHidden(viewtabs, active); // при фильтре переключатель вида показывает панель: он сохраняет выбранные фильтры
+      // значки темы над афишей: на телефоне не нужны (вид переключает панель), на компьютере прячутся только при выбранном фильтре
+      setHidden(viewtabs, active || isMobile());
       top.hidden = !active;
       var searching = active && n === 0 && state.qw.length > 0 && textsState === 1; // ответ может найтись в анонсах
       empty.hidden = !(active && n === 0) || searching;
@@ -894,6 +923,7 @@
       switch (act) {
         case 'when': state.when = state.when === v ? null : v; state.range = null; if (open) closePanel(false); break;
         case 'reload': try { win.location.reload(); } catch (e) { /* не критично */ } return;
+        case 'layout': compactPref = v === 'compact'; saveLayout(); break;
         case 'open':
           if (!ready || degraded) return;
           if (open === v) { closePanel(); return; }
@@ -952,7 +982,7 @@
       }, true);
       on(win, 'resize', place);
       on(win, 'scroll', function () { if (open && !mq.matches) place(); }, { passive: true });
-      if (mq.addEventListener) on(mq, 'change', function () { if (open) closePanel(false); });
+      if (mq.addEventListener) on(mq, 'change', function () { if (open) closePanel(false); apply(false); }); // поворот экрана: телефонный вид включается и выключается
       load(false, 0);
     } catch (e) {
       teardown(e);
