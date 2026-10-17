@@ -42,7 +42,7 @@ add_action( 'wp_head', function () {
 			'@type'     => 'MusicEvent',
 			'name'      => $e['title'],
 			'url'       => $e['url'],
-			'startDate' => ka_date( $e['ts'], 'c' ),
+			'startDate' => ka_date( $e['ts'], 'Y-m-d\TH:i:s' ) . '+03:00',
 			'performer' => array( '@id' => $group['@id'] ),
 		);
 	}

@@ -56,7 +56,7 @@ function ka_get_all_events( $artist_id ) {
 		$args[]   = $like;
 	}
 
-	$args[] = time() - 3 * HOUR_IN_SECONDS; // идущий сейчас концерт ещё показываем
+	$args[] = ka_now_local() - 3 * HOUR_IN_SECONDS; // идущий сейчас концерт ещё показываем
 	$args[] = 50;
 
 	if ( $has_in ) {
@@ -97,7 +97,14 @@ add_action( 'trashed_post', 'ka_bump_events_cache' );
 
 /** Формат даты по Москве */
 function ka_date( $ts, $fmt ) {
-	return wp_date( $fmt, $ts, new DateTimeZone( 'Europe/Moscow' ) );
+	// Календарь хранит местное (московское) время как «UTC-метку»: показываем без сдвига пояса
+	return wp_date( $fmt, $ts, new DateTimeZone( 'UTC' ) );
+}
+
+/** Московское «сейчас» в той же шкале, что и метки календаря */
+function ka_now_local() {
+	$tz = new DateTimeZone( 'Europe/Moscow' );
+	return time() + $tz->getOffset( new DateTime( 'now', $tz ) );
 }
 
 /** Ссылка на видео -> адрес для iframe */
