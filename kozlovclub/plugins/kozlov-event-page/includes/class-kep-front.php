@@ -137,6 +137,9 @@ class KEP_Front {
 			if ( $d['bad'] ) {
 				return self::fail( $html, 'В анонсе есть встроенный блок, который новая страница не показывает (' . implode( ', ', array_unique( $d['bad'] ) ) . ').' );
 			}
+			if ( $d['unknown'] ) {
+				return self::fail( $html, 'В анонсе есть ' . implode( ', ', array_unique( $d['unknown'] ) ) . ': новая страница его не показывает.' );
+			}
 			if ( $d['kept_img'] < $d['orig_img'] ) {
 				return self::fail( $html, sprintf( 'Потерялась картинка из анонса: перенесено %d из %d.', $d['kept_img'], $d['orig_img'] ) );
 			}

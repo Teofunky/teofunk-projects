@@ -112,6 +112,40 @@ class KEP_Parser {
 			}
 		}
 
+		// Другие даты этого же концерта (блок под шапкой анонса).
+		$d['other_dates'] = array();
+		foreach ( $x->query( './/*[' . self::c( 'event-other-dates-list' ) . ']//a[@href]', $root ) as $a ) {
+			$label = self::text( $a );
+			if ( '' !== $label ) {
+				$d['other_dates'][] = array( 'url' => $a->getAttribute( 'href' ), 'label' => $label );
+			}
+		}
+
+		// Незнакомые блоки в шапке анонса: показать их новая страница не умеет, значит, остаётся старая.
+		$d['unknown'] = array();
+		if ( $x->query( './/*[' . self::c( 'event-other-dates-list' ) . ']//a[@href]', $root )->length !== count( $d['other_dates'] ) ) {
+			$d['unknown'][] = 'ссылка без текста в «Других датах»';
+		}
+		foreach ( $root->childNodes as $el ) {
+			if ( $el instanceof DOMElement && ! self::has_class( $el, array( 'concert_nav', 'intro', 'description' ) ) && self::has_content( $x, $el ) ) {
+				$d['unknown'][] = self::label( $el );
+			}
+		}
+		$intro = self::q1( $x, './/div[' . self::c( 'intro' ) . ']', $root );
+		if ( $intro ) {
+			foreach ( $intro->childNodes as $el ) {
+				if ( $el instanceof DOMElement && ! self::has_class( $el, array( 'info', 'row-block', 'event-other-dates-list', 'anons_thumb' ) ) && self::has_content( $x, $el ) ) {
+					$d['unknown'][] = self::label( $el );
+				}
+			}
+		}
+		foreach ( $x->query( './/div[' . self::c( 'row-block' ) . ']', $root ) as $row ) {
+			$known = $x->query( './/*[' . self::c( 'add_to_calendar' ) . ']//a[@href] | .//*[' . self::c( 'genres-categories' ) . ']//a[@href]', $row )->length;
+			if ( $x->query( './/a[@href]', $row )->length > $known ) {
+				$d['unknown'][] = 'ссылка в строке «Добавить в календарь / Жанры»';
+			}
+		}
+
 		$banner      = self::q1( $x, './/*[' . self::c( 'anons_thumb' ) . ']//img', $root );
 		$d['banner'] = $banner ? array(
 			'src' => self::img_src( $banner ),
@@ -124,6 +158,7 @@ class KEP_Parser {
 		$d['musicians'] = array();
 		$d['videos']    = array();
 		$d['extra']     = array();
+		$d['artists']   = array();
 		$d['flow']      = array();
 		$d['bad']       = array();
 		$d['orig_len']  = 0;
@@ -151,6 +186,19 @@ class KEP_Parser {
 			$d['orig_len']  += self::len( $block->textContent );
 			$d['orig_img']  += $x->query( './/img', $block )->length;
 			$d['orig_link'] += $x->query( './/a[@href]', $block )->length;
+			// Блок «Об артисте» из плагина Kozlov Artists: один или несколько артистов со ссылками на их страницы.
+			if ( false !== strpos( $cls, ' ka-eb ' ) ) {
+				$found = self::ka_artists( $x, $block );
+				if ( $found ) {
+					foreach ( $found as $a ) {
+						$d['artists'][ $a['url'] ] = $a;
+					}
+					$d['kept_len']  += self::len( $block->textContent );
+					$d['kept_img']  += $x->query( './/img', $block )->length;
+					$d['kept_link'] += $x->query( './/a[@href]', $block )->length;
+				}
+				continue;
+			}
 			if ( false === strpos( $cls, ' meta_block ' ) ) {
 				continue;
 			}
@@ -273,9 +321,73 @@ class KEP_Parser {
 			}
 		}
 
-		$d['videos'] = self::unique_videos( $d['videos'] );
-		$d['type']   = self::cta_type( $d );
+		$d['artists'] = array_values( $d['artists'] );
+		$d['videos']  = self::unique_videos( $d['videos'] );
+		$d['type']    = self::cta_type( $d );
 		return $d;
+	}
+
+	/**
+	 * Артисты из блока Kozlov Artists (aside.ka-eb): ссылка, имя, фото, короткое описание.
+	 *
+	 * @param DOMXPath   $x     XPath.
+	 * @param DOMElement $block Блок.
+	 * @return array
+	 */
+	private static function ka_artists( $x, $block ) {
+		$out   = array();
+		$items = $x->query( './/*[' . self::c( 'ka-eb__i' ) . ']', $block );
+		if ( ! $items->length ) {
+			$items = array( $block );
+		}
+		foreach ( $items as $it ) {
+			$name_a = self::q1( $x, './/a[' . self::c( 'ka-eb__n' ) . '][@href]', $it );
+			if ( ! $name_a ) {
+				continue;
+			}
+			$url  = $name_a->getAttribute( 'href' );
+			$name = self::text( $name_a );
+			if ( '' === $url || '' === $name ) {
+				continue;
+			}
+			$photo = '';
+			$p     = self::q1( $x, './/*[' . self::c( 'ka-eb__p' ) . ']', $it );
+			if ( $p && preg_match( '/url\(\s*([\'"]?)(.+?)\1\s*\)/', $p->getAttribute( 'style' ), $m ) ) {
+				$photo = html_entity_decode( $m[2], ENT_QUOTES, 'UTF-8' );
+			}
+			if ( '' === $photo ) {
+				$img   = self::q1( $x, './/img', $it );
+				$photo = $img ? self::img_src( $img ) : '';
+			}
+			$more  = self::q1( $x, './/a[' . self::c( 'ka-eb__a' ) . ']', $it );
+			$out[] = array(
+				'url'   => $url,
+				'name'  => $name,
+				'photo' => $photo,
+				'text'  => self::text( self::q1( $x, './/*[' . self::c( 'ka-eb__t' ) . ']', $it ) ),
+				'more'  => $more ? self::text( $more ) : '',
+			);
+		}
+		return $out;
+	}
+
+	private static function has_class( $el, $names ) {
+		$cls = ' ' . preg_replace( '/\s+/', ' ', $el->getAttribute( 'class' ) ) . ' ';
+		foreach ( $names as $n ) {
+			if ( false !== strpos( $cls, ' ' . $n . ' ' ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static function has_content( $x, $el ) {
+		return '' !== self::text( $el ) || $x->query( './/img | .//a[@href] | .//iframe', $el )->length > 0;
+	}
+
+	private static function label( $el ) {
+		$cls = trim( $el->getAttribute( 'class' ) );
+		return 'блок ' . ( '' !== $cls ? '«' . $cls . '»' : $el->tagName ) . ' в шапке анонса';
 	}
 
 	/**

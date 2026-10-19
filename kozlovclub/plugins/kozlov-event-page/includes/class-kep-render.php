@@ -12,6 +12,7 @@ class KEP_Render {
 	const MONTHS_GEN = array( 1 => 'января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря' );
 	const MONTHS_SHORT = array( 1 => 'янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек' );
 	const WD_SHORT = array( 'понедельник' => 'Пн', 'вторник' => 'Вт', 'среда' => 'Ср', 'четверг' => 'Чт', 'пятница' => 'Пт', 'суббота' => 'Сб', 'воскресенье' => 'Вс' );
+	const WD_BY_N = array( 1 => 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс' );
 
 	/**
 	 * Вся страница.
@@ -64,6 +65,7 @@ class KEP_Render {
 		}
 		$h .= '<button type="button" data-kep-share>' . self::icon( 'share' ) . 'Поделиться</button>';
 		$h .= '</div>';
+		$h .= self::other_dates( $d );
 		$h .= '</aside>';
 
 		// Основная колонка.
@@ -71,6 +73,7 @@ class KEP_Render {
 		$h .= self::intro( $d );
 		$h .= self::video_section( $videos );
 		$h .= self::lineup_section( $d );
+		$h .= self::artists_section( $d );
 		$h .= self::about_section( $d );
 		$h .= self::where_section( $d, $ctx, $s, $time );
 		$h .= '</div>';
@@ -233,6 +236,113 @@ class KEP_Render {
 			$h .= '</span></li>';
 		}
 		return $h . '</ul></section>';
+	}
+
+	/**
+	 * Другие даты этого концерта: плашки «23 окт / Пт · 20:00».
+	 */
+	private static function other_dates( $d ) {
+		if ( empty( $d['other_dates'] ) ) {
+			return '';
+		}
+		$items = array();
+		foreach ( $d['other_dates'] as $i => $o ) {
+			$slug  = preg_match( '#/event/([^/?\#]+)#', $o['url'], $m ) ? rawurldecode( $m[1] ) : '';
+			$e     = '' !== $slug ? KEP_Data::by_slug( $slug ) : null;
+			$ts    = ( $e && '' !== $e['date'] ) ? strtotime( $e['date'] . ' 12:00:00 UTC' ) : 0;
+			$main  = $o['label'];
+			$sub   = '';
+			if ( $ts ) {
+				$main = (int) gmdate( 'j', $ts ) . ' ' . self::MONTHS_SHORT[ (int) gmdate( 'n', $ts ) ];
+				$sub  = self::WD_BY_N[ (int) gmdate( 'N', $ts ) ];
+				if ( '' !== $e['time'] && $e['time'] !== $d['time'] ) {
+					$sub .= ' · ' . self::show_time( $e['time'] );
+				}
+			} else {
+				$main = trim( preg_replace( '/\s+' . gmdate( 'Y' ) . '\s*$/u', '', $main ) );
+			}
+			$items[] = array(
+				'url'  => $o['url'],
+				'main' => $main,
+				'sub'  => $sub,
+				'sort' => $ts ? $ts : PHP_INT_MAX - 1000 + $i,
+			);
+		}
+		usort(
+			$items,
+			function ( $a, $b ) {
+				return $a['sort'] <=> $b['sort'];
+			}
+		);
+		$h = '<nav class="kep-dates" aria-label="Другие даты этого концерта"><span class="kep-dates-l">Другие даты</span><ul class="kep-dates-list">';
+		foreach ( $items as $it ) {
+			$h .= '<li><a class="kep-date" href="' . esc_url( $it['url'] ) . '"><span class="kep-date-m">' . esc_html( $it['main'] ) . '</span>';
+			if ( '' !== $it['sub'] ) {
+				$h .= '<span class="kep-date-s">' . esc_html( $it['sub'] ) . '</span>';
+			}
+			$h .= '</a></li>';
+		}
+		return $h . '</ul></nav>';
+	}
+
+	/**
+	 * Артисты со своими страницами (Kozlov Artists). Один: карточка. Несколько: список, первые три сразу.
+	 */
+	private static function artists_section( $d ) {
+		$list = isset( $d['artists'] ) ? $d['artists'] : array();
+		if ( ! $list ) {
+			return '';
+		}
+		$one = 1 === count( $list );
+		$h   = '<section class="kep-box kep-artists" aria-labelledby="kep-artists-h"><h2 class="kep-h2" id="kep-artists-h">' . ( $one ? 'Об артисте' : 'Артисты вечера' ) . '</h2>';
+		if ( $one ) {
+			$a  = $list[0];
+			$h .= '<a class="kep-ac" href="' . esc_url( $a['url'] ) . '">' . self::artist_photo( $a, 'kep-ac-p' ) . '<span class="kep-ac-t"><span class="kep-ac-n">' . esc_html( $a['name'] ) . '</span>';
+			if ( '' !== $a['text'] ) {
+				$h .= '<span class="kep-ac-d">' . esc_html( $a['text'] ) . '</span>';
+			}
+			$h .= '<span class="kep-ac-more">' . esc_html( '' !== $a['more'] ? $a['more'] : 'Страница артиста' ) . ' <span aria-hidden="true">→</span></span></span></a>';
+			return $h . '</section>';
+		}
+		$first = array_slice( $list, 0, 3 );
+		$rest  = array_slice( $list, 3 );
+		$h    .= self::artist_rows( $first );
+		if ( $rest ) {
+			$n  = count( $rest );
+			$h .= '<details class="kep-ar-more"><summary>' . esc_html( 'Ещё ' . $n . ' ' . self::plural( $n, 'артист', 'артиста', 'артистов' ) ) . '</summary>' . self::artist_rows( $rest ) . '</details>';
+		}
+		return $h . '</section>';
+	}
+
+	private static function artist_rows( $list ) {
+		$h = '<ul class="kep-ar">';
+		foreach ( $list as $a ) {
+			$h .= '<li><a class="kep-ar-a" href="' . esc_url( $a['url'] ) . '">' . self::artist_photo( $a, 'kep-ar-p' ) . '<span class="kep-ar-t"><span class="kep-ar-n">' . esc_html( $a['name'] ) . '</span>';
+			if ( '' !== $a['text'] ) {
+				$h .= '<span class="kep-ar-d">' . esc_html( $a['text'] ) . '</span>';
+			}
+			$h .= '</span><svg class="kep-i kep-ar-go" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg></a></li>';
+		}
+		return $h . '</ul>';
+	}
+
+	private static function artist_photo( $a, $cls ) {
+		if ( '' !== $a['photo'] ) {
+			return '<img class="' . esc_attr( $cls ) . '" src="' . esc_url( $a['photo'] ) . '" alt="" loading="lazy" decoding="async">';
+		}
+		return '<span class="' . esc_attr( $cls ) . ' kep-ava" aria-hidden="true">' . esc_html( self::initials( $a['name'] ) ) . '</span>';
+	}
+
+	public static function plural( $n, $one, $few, $many ) {
+		$n10  = $n % 10;
+		$n100 = $n % 100;
+		if ( 1 === $n10 && 11 !== $n100 ) {
+			return $one;
+		}
+		if ( $n10 >= 2 && $n10 <= 4 && ( $n100 < 12 || $n100 > 14 ) ) {
+			return $few;
+		}
+		return $many;
 	}
 
 	private static function about_section( $d ) {

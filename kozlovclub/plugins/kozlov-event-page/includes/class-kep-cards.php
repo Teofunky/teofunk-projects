@@ -96,13 +96,13 @@ class KEP_Cards {
 			if ( ! $done || ! is_string( $out ) || '' === $out ) {
 				return $html;
 			}
+			// Программа сразу под названием, как подзаголовок. У однострочного названия дата остаётся на своём месте:
+			// 10 + 20 (название) + 16 (программа) + 4 (отступ до даты) = 50 px, ровно высота, которую тема даёт названию.
 			$css = '<style id="kep-cards">'
-				. '.events.view_cell .event .desc .kep-sub{display:block;margin:-6px 0 0;height:18px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:13px;line-height:18px;font-weight:400;text-transform:none;letter-spacing:normal;color:#6b6f76}'
-				. '.events.view_cell .event .desc:has(.kep-sub){padding-bottom:13px}'
-				// Тема жёстко ставит названию 50 px, длинное название вылезает вниз. С программой высота по тексту, чтобы не наезжало.
-				. '.events.view_cell .event .desc:has(.kep-sub) .title.set_height{height:auto!important;min-height:50px}'
+				. '.events.view_cell .event .desc .kep-sub{display:block;height:16px;margin:0 0 4px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:13px;line-height:16px;font-weight:400;text-transform:none;letter-spacing:normal;color:#6b6f76}'
+				. '.events.view_cell .event .desc:has(.kep-sub) .title.set_height{height:auto!important;min-height:0;padding-bottom:0}'
 				. '.events.view_line .event .desc .kep-sub{display:none}'
-				. '@media (max-width:688px){.events.view_cell .event .desc .kep-sub{margin:-8px 0 0;padding:0 10px}.events.view_cell .event .desc:has(.kep-sub){padding-bottom:0}}'
+				. '@media (max-width:688px){.events.view_cell .event .desc .kep-sub{padding:0 10px}}'
 				. '.kz-sub{display:block;text-transform:none}'
 				. '</style>';
 			$pos = stripos( $out, '</head>' );
