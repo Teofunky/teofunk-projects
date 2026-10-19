@@ -1,0 +1,58 @@
+/* Kozlov Event Page: админка. */
+.kep-a { display: flex; flex-direction: column; gap: 8px; }
+.kep-a p { margin: 0; }
+.kep-a-status { padding: 8px 10px; border-left: 4px solid #8c8f94; background: #f6f7f7; font-size: 13px; line-height: 1.45; }
+.kep-a-status--on { border-left-color: #00a32a; background: #edfaef; }
+.kep-a-status--half { border-left-color: #dba617; background: #fcf9e8; }
+.kep-a-label { margin-top: 6px !important; font-weight: 600; }
+.kep-a-frame { position: relative; aspect-ratio: 16 / 10; overflow: hidden; background: #f0f0f1; border: 1px solid #dcdcde; display: flex; align-items: center; justify-content: center; color: #646970; }
+.kep-a-frame img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.kep-a-check { font-size: 12px; line-height: 1.45; padding-left: 18px; position: relative; }
+.kep-a-check::before { position: absolute; left: 0; top: 0; font-weight: 700; }
+.kep-a-check--ok { color: #007017; }
+.kep-a-check--ok::before { content: "✓"; }
+.kep-a-check--warn { color: #8a6300; }
+.kep-a-check--warn::before { content: "!"; left: 4px; }
+.kep-a-check--bad { color: #b32d2e; }
+.kep-a-check--bad::before { content: "×"; left: 2px; }
+.kep-a-btns { display: flex; align-items: center; gap: 12px; }
+.kep-a-btns [hidden] { display: none; }
+.kep-a-remove { color: #b32d2e !important; }
+.kep-a-help summary { cursor: pointer; color: #2271b1; }
+.kep-a-help ul { margin: 6px 0 0 16px; list-style: disc; }
+.kep-a-help li { margin: 0 0 4px; }
+.kep-a-suggest .button-link { text-align: left; }
+.kep-a-saved { min-height: 18px; font-size: 12px; color: #646970; }
+.kep-a-saved.is-ok { color: #007017; }
+.kep-a-saved.is-bad { color: #b32d2e; }
+.kep-a-links { font-size: 12px; }
+
+.column-kep { width: 120px; }
+.kep-a-col { display: inline-flex; align-items: center; gap: 8px; }
+.kep-a-thumb { width: 64px !important; height: 40px !important; object-fit: cover; display: block; border-radius: 2px; }
+.kep-a-col--none { color: #b32d2e; }
+
+.kep-admin-lead { max-width: 760px; font-size: 14px; }
+.kep-admin-mode { max-width: 760px; padding: 10px 12px; background: #fff; border: 1px solid #dcdcde; }
+.kep-progress { max-width: 760px; margin: 18px 0 12px; }
+.kep-progress-t { margin-bottom: 6px; font-size: 14px; }
+.kep-progress-bar { height: 10px; background: #dcdcde; border-radius: 5px; overflow: hidden; }
+.kep-progress-bar span { display: block; height: 100%; background: #00a32a; }
+.kep-tabs { display: flex; gap: 4px; margin: 12px 0; }
+.kep-tabs a { padding: 6px 12px; border: 1px solid #c3c4c7; background: #f6f7f7; text-decoration: none; color: #1d2327; border-radius: 3px; }
+.kep-tabs a.is-on { background: #1d2327; border-color: #1d2327; color: #fff; }
+.kep-table { max-width: 1100px; }
+.kep-table td { vertical-align: middle; }
+.kep-td-date { white-space: nowrap; }
+.kep-td-title a { font-weight: 600; }
+.kep-td-act { text-align: right; white-space: nowrap; }
+.kep-soon { display: inline-block; padding: 1px 6px; background: #d63638; color: #fff; border-radius: 3px; font-size: 11px; }
+.kep-none { color: #b32d2e; }
+.kep-settings { max-width: 900px; }
+.kep-modes { margin: 8px 0 4px; display: flex; flex-direction: column; gap: 8px; }
+.kep-modes legend { font-weight: 600; margin-bottom: 6px; }
+.kep-mode { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; background: #fff; border: 1px solid #dcdcde; cursor: pointer; }
+.kep-mode input { margin-top: 3px; }
+.kep-mode > span { display: flex; flex-direction: column; gap: 2px; }
+.kep-mode > span span { color: #50575e; }
+.kep-admin-err { margin-top: 24px; color: #8a6300; }

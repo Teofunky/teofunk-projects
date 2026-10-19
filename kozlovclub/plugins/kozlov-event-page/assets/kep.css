@@ -1,0 +1,293 @@
+/* Kozlov Event Page: новая страница концерта.
+   Всё внутри .kep, классы с префиксом kep-. Тема не затрагивается.
+   Ширины: до 1024 px телефон и планшет (как в теме), от 1025 px компьютер. */
+
+.kep, .kep-fixed {
+	--kep-ink: #424242;
+	--kep-mute: #6e6e6e;
+	--kep-line: #e5e5e5;
+	--kep-bg: #f2f2f2;
+	--kep-card: #fff;
+	--kep-accent: #dd3029;
+	--kep-accent-hover: #c2261f;
+	--kep-off: #ebebeb;
+	--kep-ava: #e3dfda;
+}
+.kep {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	padding-block: 0 24px;
+	background: var(--kep-bg);
+	box-shadow: 0 0 0 100vmax var(--kep-bg);
+	clip-path: inset(0 -100vmax);
+	color: var(--kep-ink);
+	font-family: Roboto, system-ui, -apple-system, "Segoe UI", sans-serif;
+	font-size: 15px;
+	line-height: 1.5;
+	text-align: left;
+}
+
+/* Сброс стилей темы внутри блока. */
+.kep.kep h1, .kep.kep h2, .kep.kep h3, .kep.kep p, .kep.kep ul, .kep.kep ol,
+.kep.kep figure, .kep.kep blockquote, .kep.kep footer, .kep.kep li {
+	margin: 0;
+	padding: 0;
+	text-align: left;
+	text-indent: 0;
+	border: 0;
+	background: none;
+	font-family: inherit;
+	letter-spacing: normal;
+	text-transform: none;
+	color: inherit;
+	box-shadow: none;
+}
+.kep.kep ul, .kep.kep ol { list-style: none; }
+.kep.kep img { display: block; max-width: 100%; height: auto; margin: 0; padding: 0; border: 0; box-shadow: none; }
+.kep.kep a, .kep-fixed.kep-fixed a { color: inherit; text-decoration: none; }
+.kep.kep button, .kep-fixed.kep-fixed button { font-family: inherit; }
+.kep *, .kep *::before, .kep *::after, .kep-fixed *, .kep-fixed *::before, .kep-fixed *::after { box-sizing: border-box; }
+.kep .kep-i, .kep-fixed .kep-i { flex: none; width: 18px; height: 18px; }
+.kep a:focus-visible, .kep button:focus-visible, .kep-fixed a:focus-visible { outline: 2px solid var(--kep-ink); outline-offset: 2px; }
+.kep-fixed { font-family: Roboto, system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 15px; line-height: 1.5; color: var(--kep-ink); }
+
+/* Хлебные крошки. */
+.kep .kep-crumbs { display: flex; align-items: center; gap: 8px; min-height: 40px; font-size: 13px; color: var(--kep-mute); }
+.kep .kep-crumbs a { display: inline-flex; align-items: center; gap: 2px; min-height: 40px; color: var(--kep-mute); font-weight: 500; letter-spacing: .12em; text-transform: uppercase; font-size: 11px; }
+.kep .kep-crumbs a:hover { color: var(--kep-ink); }
+.kep .kep-crumbs-sep, .kep .kep-crumbs-here { display: none; }
+
+/* Сетка. */
+.kep .kep-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+.kep .kep-main { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+
+/* Фото. */
+.kep.kep .kep-hero { position: relative; overflow: hidden; background: #2a2622; }
+.kep.kep .kep-hero-img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; }
+.kep.kep .kep-hero-img--banner { aspect-ratio: auto; object-fit: contain; }
+.kep .kep-hero-empty { display: block; aspect-ratio: 16 / 10; }
+.kep.kep .kep-watch {
+	position: absolute; left: 12px; bottom: 14px;
+	display: inline-flex; align-items: center; gap: 8px;
+	min-height: 40px; padding: 0 14px 0 6px; border-radius: 20px;
+	background: rgba(255, 255, 255, .94); color: var(--kep-ink);
+	font-size: 13px; font-weight: 500;
+}
+.kep .kep-watch-dot { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; background: var(--kep-accent); color: #fff; }
+.kep .kep-watch-dot .kep-i { width: 12px; height: 12px; }
+
+/* Карточка: дата, название, цена, кнопка. */
+.kep .kep-card { display: flex; flex-direction: column; gap: 12px; padding: 16px 16px 20px; background: var(--kep-card); min-width: 0; }
+.kep .kep-when { display: flex; align-items: center; gap: 12px; }
+.kep .kep-day { font-size: 44px; line-height: 1; font-weight: 500; font-variant-numeric: tabular-nums; }
+.kep .kep-when-rows { display: flex; flex-direction: column; gap: 3px; font-size: 12px; line-height: 1.15; font-weight: 500; letter-spacing: .06em; text-transform: uppercase; }
+.kep .kep-r1 { font-size: 14px; letter-spacing: .04em; }
+.kep .kep-r3 { color: var(--kep-accent); }
+.kep .kep-badge { display: inline-block; margin-left: 6px; padding: 3px 6px; background: var(--kep-accent); color: #fff; font-size: 10px; letter-spacing: .12em; vertical-align: 1px; }
+.kep .kep-badge[hidden] { display: none; }
+.kep.kep .kep-title { font-size: 26px; line-height: 1.15; font-weight: 500; letter-spacing: .04em; text-transform: uppercase; text-wrap: balance; overflow-wrap: anywhere; }
+.kep.kep .kep-program { margin-top: -4px; font-size: 17px; line-height: 1.35; }
+.kep.kep .kep-genres { display: flex; flex-wrap: wrap; gap: 8px; }
+.kep.kep .kep-genres a {
+	display: inline-flex; align-items: center; min-height: 44px; padding: 0 14px;
+	border: 1px solid #e0e0e0; color: var(--kep-accent);
+	font-size: 11px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase;
+}
+.kep.kep .kep-genres a:hover { border-color: var(--kep-accent); }
+
+.kep .kep-buy { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
+.kep .kep-price { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 4px 12px; }
+.kep .kep-price-v { font-size: 20px; line-height: 1.1; font-weight: 500; letter-spacing: .03em; text-transform: uppercase; color: var(--kep-accent); font-variant-numeric: tabular-nums; }
+.kep .kep-price-v--ink { color: var(--kep-ink); }
+.kep .kep-price-n { font-size: 12px; color: var(--kep-mute); }
+
+.kep.kep .kep-cta, .kep-fixed.kep-fixed .kep-cta {
+	display: flex; align-items: center; justify-content: center; gap: 10px;
+	min-height: 52px; padding: 0 16px; border: 0; border-radius: 0;
+	background: var(--kep-accent); color: #fff;
+	font-size: 13px; font-weight: 500; letter-spacing: .2em; text-transform: uppercase; text-align: center;
+	cursor: pointer; transition: background .15s;
+}
+.kep.kep a.kep-cta:hover, .kep .kep-cta-wrap:hover .kep-cta, .kep-fixed.kep-fixed a.kep-cta:hover, .kep-fixed .kep-cta-wrap:hover .kep-cta { background: var(--kep-accent-hover); color: #fff; }
+.kep.kep .kep-cta--ghost, .kep-fixed.kep-fixed .kep-cta--ghost { background: transparent; color: var(--kep-ink); box-shadow: inset 0 0 0 1.5px var(--kep-ink); }
+.kep.kep a.kep-cta--ghost:hover { background: var(--kep-ink); color: #fff; }
+.kep.kep .kep-cta--off { background: var(--kep-off); color: #5a5a5a; cursor: default; }
+.kep .kep-cta-wrap, .kep-fixed .kep-cta-wrap { position: relative; }
+.kep .kep-cta-wrap:focus-within, .kep-fixed .kep-cta-wrap:focus-within { outline: 2px solid var(--kep-ink); outline-offset: 2px; }
+.kep.kep .kep-tc, .kep-fixed.kep-fixed .kep-tc {
+	position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; padding: 0;
+	border: 0; opacity: 0; cursor: pointer; font-size: 13px;
+}
+.kep .kep-buy-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.kep .kep-phone { font-size: 16px; font-weight: 500; font-variant-numeric: tabular-nums; user-select: all; }
+.kep.kep .kep-link { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; font-size: 13px; font-weight: 500; text-decoration: underline; text-underline-offset: 3px; }
+.kep.kep .kep-buy-note { font-size: 14px; color: #5a5a5a; }
+.kep.kep .kep-past { font-size: 18px; font-weight: 500; letter-spacing: .03em; text-transform: uppercase; }
+.kep .kep-card-links { display: none; }
+
+/* Блоки основной колонки. */
+.kep .kep-box { display: flex; flex-direction: column; gap: 14px; padding: 22px 16px; background: var(--kep-card); min-width: 0; }
+.kep.kep .kep-h2 { font-size: 13px; line-height: 1; font-weight: 500; letter-spacing: .16em; text-transform: uppercase; }
+.kep.kep .kep-lead { font-size: 16px; line-height: 1.5; max-width: 40em; }
+.kep.kep .kep-quote { display: flex; flex-direction: column; gap: 10px; padding-top: 16px; border-top: 1px solid #eee; }
+.kep .kep-intro .kep-lead + .kep-quote { margin-top: 2px; }
+.kep .kep-intro > .kep-quote:first-child { padding-top: 0; border-top: 0; }
+.kep .kep-quote .kep-i { width: 28px; height: 28px; color: var(--kep-accent); }
+.kep.kep .kep-quote p { font-size: 17px; line-height: 1.5; font-style: italic; max-width: 38em; }
+.kep.kep .kep-quote footer { font-size: 12px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--kep-mute); }
+
+.kep .kep-rail { display: flex; gap: 12px; overflow-x: auto; margin-right: -16px; padding-right: 16px; scroll-snap-type: x mandatory; }
+.kep.kep .kep-video {
+	position: relative; flex: none; width: 300px; max-width: 82%; aspect-ratio: 16 / 9;
+	margin: 0; padding: 0; border: 0; background: #0e1430; cursor: pointer; overflow: hidden; scroll-snap-align: start;
+}
+.kep.kep .kep-video img { width: 100%; height: 100%; object-fit: cover; }
+.kep.kep .kep-video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.kep .kep-video-play {
+	position: absolute; left: 50%; top: 50%; width: 56px; height: 56px; margin: -28px 0 0 -28px;
+	display: flex; align-items: center; justify-content: center; border-radius: 50%;
+	background: var(--kep-accent); color: #fff; transition: transform .15s;
+}
+.kep .kep-video:hover .kep-video-play { transform: scale(1.06); }
+
+.kep.kep .kep-lineup li { display: flex; align-items: center; gap: 12px; min-height: 64px; border-bottom: 1px solid #eee; }
+.kep.kep .kep-lineup li:last-child { border-bottom: 0; }
+.kep.kep .kep-ava {
+	flex: none; width: 44px; height: 44px; border-radius: 50%; object-fit: cover; object-position: 50% 20%;
+	display: flex; align-items: center; justify-content: center; background: var(--kep-ava);
+	font-size: 13px; font-weight: 500; color: #5a5a5a;
+}
+.kep .kep-lineup-t { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.kep .kep-lineup-n { font-weight: 500; }
+.kep .kep-lineup-r { font-size: 13px; color: var(--kep-mute); }
+
+.kep .kep-clamp { position: relative; display: flex; flex-direction: column; gap: 14px; max-width: 42em; }
+.kep.kep .kep-clamp p { font-size: 15px; line-height: 1.6; }
+.kep.kep .kep-clamp a { color: var(--kep-accent); text-decoration: underline; text-underline-offset: 2px; }
+.kep .kep-clamp.is-clamped { max-height: 330px; overflow: hidden; }
+.kep .kep-clamp.is-clamped::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 90px; background: linear-gradient(rgba(255, 255, 255, 0), #fff); }
+.kep .kep-artist { display: flex; gap: 14px; align-items: flex-start; }
+.kep.kep .kep-artist-img { flex: none; width: 72px; height: 72px; border-radius: 50%; object-fit: cover; object-position: 50% 20%; }
+.kep .kep-artist-t { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.kep.kep .kep-more-btn {
+	align-self: flex-start; min-height: 44px; margin: 0; padding: 0; border: 0; background: none;
+	color: var(--kep-ink); font-size: 14px; font-weight: 500; text-decoration: underline; text-underline-offset: 3px; cursor: pointer;
+}
+.kep .kep-more-btn[hidden] { display: none; }
+
+.kep .kep-where-rows { display: flex; flex-direction: column; gap: 14px; }
+.kep .kep-where-row { display: flex; gap: 12px; align-items: flex-start; }
+.kep .kep-where-row .kep-i { margin-top: 2px; }
+.kep .kep-where-row div { display: flex; flex-direction: column; gap: 2px; }
+.kep .kep-where-row strong { font-weight: 500; }
+.kep .kep-where-row span { font-size: 14px; color: var(--kep-mute); }
+.kep .kep-where-btns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.kep.kep .kep-btn {
+	display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 44px; margin: 0; padding: 0 10px;
+	border: 1px solid #dadada; background: none; color: var(--kep-ink); font-size: 12px; font-weight: 500; cursor: pointer;
+}
+.kep.kep .kep-btn:hover { border-color: var(--kep-ink); }
+.kep.kep .kep-note { font-size: 12px; line-height: 1.45; color: var(--kep-mute); }
+
+/* Ещё в этот вечер. */
+.kep .kep-more { display: flex; flex-direction: column; gap: 14px; padding: 22px 0 22px 16px; background: var(--kep-card); }
+.kep .kep-more-head { display: flex; align-items: baseline; justify-content: space-between; padding-right: 16px; }
+.kep.kep .kep-more-head a { font-size: 13px; color: var(--kep-mute); }
+.kep .kep-more-rail { display: flex; gap: 12px; overflow-x: auto; padding-right: 16px; scroll-snap-type: x mandatory; }
+.kep.kep .kep-more-card { flex: none; width: 168px; display: flex; flex-direction: column; gap: 6px; scroll-snap-align: start; }
+.kep.kep .kep-more-card img, .kep .kep-more-noimg { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; background: var(--kep-ava); }
+.kep .kep-more-when { font-size: 11px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--kep-mute); }
+.kep .kep-more-title { font-size: 14px; line-height: 1.2; font-weight: 500; letter-spacing: .03em; text-transform: uppercase; overflow-wrap: anywhere; }
+.kep .kep-more-price { font-size: 13px; font-weight: 500; text-transform: uppercase; color: var(--kep-accent); }
+
+/* Нижняя панель покупки (телефон). */
+.kep-fixed .kep-bar {
+	position: fixed; left: 0; right: 0; bottom: 0; z-index: 100;
+	display: flex; align-items: center; gap: 14px;
+	padding: 12px max(16px, env(safe-area-inset-right, 0px)) calc(12px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+	background: #fff; border-top: 1px solid var(--kep-line); box-shadow: 0 -6px 18px rgba(0, 0, 0, .06);
+	transform: translateY(110%); visibility: hidden; transition: transform .2s ease, visibility 0s linear .2s;
+}
+.kep-fixed .kep-bar.is-on { transform: none; visibility: visible; transition: transform .2s ease; }
+.kep-fixed .kep-bar-t { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.kep-fixed .kep-bar-p { font-size: 17px; line-height: 1.1; font-weight: 500; letter-spacing: .03em; text-transform: uppercase; color: var(--kep-accent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kep-fixed .kep-bar-d { font-size: 12px; color: var(--kep-mute); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kep-fixed .kep-bar-cta { flex: none; width: 184px; }
+.kep-fixed.kep-fixed .kep-bar .kep-cta { letter-spacing: .14em; }
+
+.kep-fixed .kep-toast {
+	position: fixed; left: 50%; bottom: 96px; z-index: 101; transform: translateX(-50%);
+	padding: 10px 16px; background: #222; color: #fff; font-size: 14px; border-radius: 4px; max-width: calc(100% - 32px);
+}
+.kep-fixed .kep-toast[hidden] { display: none; }
+
+body.kep-page .go-to-home-mb { display: none !important; }
+
+/* Телефон и планшет: блоки на всю ширину экрана, как в теме (у .inner отступ 16 px). */
+@media (max-width: 1024px) {
+	.kep { margin-left: -16px; margin-right: -16px; }
+	.kep .kep-crumbs { padding: 0 16px; background: var(--kep-card); border-bottom: 1px solid var(--kep-line); }
+	.kep .kep-hero + .kep-card { margin-top: -8px; }
+	.kep .kep-only-mobile { display: flex; }
+}
+
+@media (max-width: 380px) {
+	.kep-fixed .kep-bar-cta { width: 150px; }
+	.kep-fixed.kep-fixed .kep-bar .kep-cta { letter-spacing: .08em; padding: 0 8px; }
+	.kep.kep .kep-title { font-size: 23px; }
+}
+
+/* Компьютер: две колонки, карточка покупки справа и едет вместе со страницей. */
+@media (min-width: 1025px) {
+	.kep { gap: 16px; padding-block: 8px 48px; font-size: 16px; }
+	.kep .kep-crumbs-sep, .kep .kep-crumbs-here { display: inline; }
+	.kep .kep-crumbs .kep-i { display: none; }
+	.kep .kep-grid { grid-template-columns: minmax(0, 1fr) 368px; column-gap: 40px; row-gap: 16px; align-items: start; }
+	.kep .kep-hero { grid-column: 1; grid-row: 1; }
+	.kep .kep-main { grid-column: 1; grid-row: 2; gap: 16px; }
+	.kep .kep-card {
+		grid-column: 2; grid-row: 1 / span 2; position: sticky; top: 24px;
+		padding: 28px; gap: 16px; box-shadow: 0 1px 0 var(--kep-line);
+	}
+	body.admin-bar .kep .kep-card { top: 56px; }
+	.kep .kep-day { font-size: 52px; }
+	.kep.kep .kep-title { font-size: 28px; }
+	.kep.kep .kep-program { margin-top: -8px; font-size: 18px; }
+	.kep.kep .kep-genres a { min-height: 36px; }
+	.kep .kep-price { flex-direction: column; align-items: flex-start; gap: 6px; }
+	.kep .kep-price-v { font-size: 24px; }
+	.kep .kep-price-n { font-size: 13px; }
+	.kep.kep .kep-cta { min-height: 56px; }
+	.kep .kep-card-links { display: flex; justify-content: center; gap: 24px; }
+	.kep.kep .kep-card-links a, .kep.kep .kep-card-links button {
+		display: inline-flex; align-items: center; gap: 6px; min-height: 36px; margin: 0; padding: 0; border: 0; background: none;
+		color: var(--kep-ink); font-size: 13px; font-weight: 500; cursor: pointer;
+	}
+	.kep.kep .kep-card-links a:hover, .kep.kep .kep-card-links button:hover { text-decoration: underline; text-underline-offset: 3px; }
+	.kep .kep-box { padding: 32px; gap: 18px; }
+	.kep.kep .kep-lead { font-size: 19px; }
+	.kep.kep .kep-quote p { font-size: 19px; }
+	.kep .kep-rail { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-right: 0; padding-right: 0; overflow: visible; }
+	.kep.kep .kep-video { width: auto; max-width: none; }
+	.kep .kep-lineup { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 24px; }
+	.kep.kep .kep-lineup li:nth-last-child(2):nth-child(odd) { border-bottom: 0; }
+	.kep.kep .kep-clamp p { font-size: 16px; }
+	.kep .kep-clamp.is-clamped { max-height: none; overflow: visible; }
+	.kep .kep-clamp.is-clamped::after { display: none; }
+	.kep .kep-where-rows { flex-direction: row; gap: 24px; }
+	.kep .kep-where-rows > * { flex: 1; }
+	.kep .kep-where-btns { display: flex; gap: 12px; }
+	.kep.kep .kep-btn { padding: 0 18px; font-size: 13px; }
+	.kep .kep-only-mobile { display: none; }
+	.kep .kep-more { padding: 32px 0 0; background: none; }
+	.kep .kep-more-head { padding-right: 0; }
+	.kep .kep-more-rail { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; padding-right: 0; overflow: visible; }
+	.kep.kep .kep-more-card { width: auto; }
+	.kep-fixed .kep-bar { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.kep-fixed .kep-bar, .kep .kep-video-play, .kep.kep .kep-cta { transition: none; }
+}
