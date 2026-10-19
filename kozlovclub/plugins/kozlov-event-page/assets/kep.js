@@ -56,7 +56,7 @@
 		});
 	});
 
-	// Длинный текст «О концерте» на телефоне сворачивается. Текст весь в коде страницы.
+	// Длинный текст «О концерте» сворачивается. Текст весь в коде страницы (для поиска он виден целиком).
 	each('.kep-clamp', function (box) {
 		var btn = root.querySelector('[aria-controls="' + box.id + '"]');
 		box.classList.add('is-clamped');
@@ -73,6 +73,11 @@
 			var open = box.classList.toggle('is-clamped') === false;
 			btn.setAttribute('aria-expanded', open ? 'true' : 'false');
 			btn.textContent = open ? 'Свернуть' : 'Читать полностью';
+			// После «Свернуть» вернуть к началу блока, а не оставлять посреди следующих разделов.
+			var sec = box.closest ? box.closest('section') : null;
+			if (!open && sec && sec.getBoundingClientRect().top < 0) {
+				sec.scrollIntoView({ block: 'start' });
+			}
 		});
 	});
 
