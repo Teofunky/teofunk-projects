@@ -213,6 +213,15 @@ class KEP_Data {
 	}
 
 	/**
+	 * Сбросить кэш главной (там карточки с программами).
+	 */
+	public static function flush_home() {
+		if ( function_exists( 'w3tc_flush_url' ) ) {
+			w3tc_flush_url( home_url( '/' ) );
+		}
+	}
+
+	/**
 	 * Сбросить весь кэш страниц (при смене режима).
 	 */
 	public static function flush_all() {

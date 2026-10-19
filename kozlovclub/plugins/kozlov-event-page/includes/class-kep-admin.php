@@ -200,6 +200,7 @@ class KEP_Admin {
 		} else {
 			update_post_meta( $post_id, KEP_META_PROGRAM, $value );
 		}
+		KEP_Data::flush_home(); // программа видна и на карточке в афише
 		return true;
 	}
 
