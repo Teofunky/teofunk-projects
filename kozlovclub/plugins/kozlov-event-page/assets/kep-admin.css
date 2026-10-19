@@ -56,3 +56,8 @@
 .kep-mode > span { display: flex; flex-direction: column; gap: 2px; }
 .kep-mode > span span { color: #50575e; }
 .kep-admin-err { margin-top: 24px; color: #8a6300; }
+.kep-check { max-width: 900px; padding: 10px 12px; border-left: 4px solid #8c8f94; background: #fff; }
+.kep-check--ok { border-left-color: #00a32a; }
+.kep-check--warn { border-left-color: #dba617; }
+.kep-check--bad { border-left-color: #d63638; background: #fcf0f1; }
+.kep-check-time { color: #646970; margin-left: 6px; }

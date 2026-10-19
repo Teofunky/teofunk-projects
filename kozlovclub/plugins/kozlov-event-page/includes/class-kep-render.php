@@ -26,7 +26,7 @@ class KEP_Render {
 		$videos = $d['videos'];
 
 		$badge_date = 'past' === $d['type'] ? '' : $ctx['date'];
-		$h          = '<div class="kep" id="kep" data-date="' . esc_attr( $badge_date ) . '" data-type="' . esc_attr( $d['type'] ) . '">';
+		$h          = '<div class="kep" id="kep" data-date="' . esc_attr( $badge_date ) . '" data-time="' . esc_attr( $d['time'] ) . '" data-type="' . esc_attr( $d['type'] ) . '">';
 		$h .= '<nav class="kep-crumbs" aria-label="Навигация"><a href="' . esc_url( home_url( '/' ) ) . '">' . self::icon( 'back' ) . '<span>Афиша</span></a><span class="kep-crumbs-sep" aria-hidden="true">/</span><span class="kep-crumbs-here" aria-current="page">' . esc_html( $d['title'] ) . '</span></nav>';
 		$h .= '<div class="kep-grid">';
 
@@ -53,7 +53,7 @@ class KEP_Render {
 		if ( $d['genres'] ) {
 			$h .= '<ul class="kep-genres" aria-label="Жанры">';
 			foreach ( $d['genres'] as $g ) {
-				$h .= '<li><a href="' . esc_url( $g['url'] ) . '">' . esc_html( $g['name'] ) . '</a></li>';
+				$h .= '<li><a href="' . esc_url( self::genre_url( $g['url'] ) ) . '">' . esc_html( $g['name'] ) . '</a></li>';
 			}
 			$h .= '</ul>';
 		}
@@ -176,17 +176,19 @@ class KEP_Render {
 	}
 
 	private static function intro( $d ) {
-		if ( '' === $d['lead'] && ! $d['quote'] ) {
+		if ( '' === $d['lead'] && ! $d['quotes'] ) {
 			return '';
 		}
 		$h = '<section class="kep-box kep-intro">';
 		if ( '' !== $d['lead'] ) {
 			$h .= '<p class="kep-lead">' . wp_kses_post( '' !== $d['lead_html'] ? $d['lead_html'] : $d['lead'] ) . '</p>';
 		}
-		if ( $d['quote'] ) {
-			$h .= '<blockquote class="kep-quote">' . self::icon( 'quote' ) . '<p>' . esc_html( $d['quote']['text'] ) . '</p>';
-			if ( '' !== $d['quote']['author'] ) {
-				$h .= '<footer>' . esc_html( $d['quote']['author'] ) . '</footer>';
+		foreach ( $d['quotes'] as $q ) {
+			$rich = $q['html'] !== wp_strip_all_tags( $q['html'] );
+			$h   .= '<blockquote class="kep-quote">' . self::icon( 'quote' ) . '<p>' . ( $rich ? wp_kses_post( $q['html'] ) : esc_html( $q['text'] ) ) . '</p>';
+			if ( '' !== $q['author'] ) {
+				$arich = $q['author_html'] !== wp_strip_all_tags( $q['author_html'] );
+				$h    .= '<footer>' . ( $arich ? wp_kses_post( $q['author_html'] ) : esc_html( $q['author'] ) ) . '</footer>';
 			}
 			$h .= '</blockquote>';
 		}
@@ -238,8 +240,8 @@ class KEP_Render {
 		foreach ( $d['flow'] as $f ) {
 			if ( 'p' === $f['t'] ) {
 				$p = $d['paras'][ $f['i'] ];
-				if ( 'text' !== $p['kind'] && ! ( 'lineup' === $p['kind'] && ! $d['lineup'] ) ) {
-					continue;
+				if ( 'text' !== $p['kind'] ) {
+					continue; // первый абзац, состав списком и служебные строки выводятся в своих местах
 				}
 				$body .= ( 'p' === $p['tag'] ) ? '<p>' . wp_kses_post( $p['html'] ) . '</p>' : wp_kses_post( $p['html'] );
 			} elseif ( 'm' === $f['t'] ) {
@@ -288,11 +290,11 @@ class KEP_Render {
 		$notes = array();
 		foreach ( $d['paras'] as $p ) {
 			if ( 'note' === $p['kind'] ) {
-				$notes[] = $p['text'];
+				$notes[] = wp_kses_post( $p['html'] );
 			}
 		}
 		if ( $notes ) {
-			$h .= '<p class="kep-note">' . esc_html( implode( ' ', $notes ) ) . '</p>';
+			$h .= '<p class="kep-note">' . implode( ' ', $notes ) . '</p>';
 		}
 		return $h . '</section>';
 	}
@@ -337,6 +339,38 @@ class KEP_Render {
 	}
 
 	/* ---------- текст ---------- */
+
+	/**
+	 * Адрес страницы жанра от WordPress. Тема пишет ?genre=jazz; если у таксономии
+	 * есть красивые адреса (/genre/jazz/), берём их. Иначе оставляем как было.
+	 */
+	public static function genre_url( $url ) {
+		static $tax = null;
+		$q = array();
+		wp_parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $q );
+		if ( 1 !== count( $q ) ) {
+			return $url;
+		}
+		$var  = key( $q );
+		$slug = sanitize_title( (string) current( $q ) );
+		if ( null === $tax ) {
+			$tax = array();
+			foreach ( get_taxonomies( array(), 'objects' ) as $t ) {
+				if ( ! empty( $t->query_var ) ) {
+					$tax[ $t->query_var ] = $t->name;
+				}
+			}
+		}
+		if ( '' === $slug || ! isset( $tax[ $var ] ) ) {
+			return $url;
+		}
+		$term = get_term_by( 'slug', $slug, $tax[ $var ] );
+		if ( ! $term ) {
+			return $url;
+		}
+		$link = get_term_link( $term );
+		return is_wp_error( $link ) ? $url : $link;
+	}
 
 	public static function price( $raw ) {
 		$p = KEP_Parser::clean( $raw );

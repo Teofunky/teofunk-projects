@@ -137,6 +137,12 @@ class KEP_Front {
 			if ( $d['bad'] ) {
 				return self::fail( $html, 'В анонсе есть встроенный блок, который новая страница не показывает (' . implode( ', ', array_unique( $d['bad'] ) ) . ').' );
 			}
+			if ( $d['kept_img'] < $d['orig_img'] ) {
+				return self::fail( $html, sprintf( 'Потерялась картинка из анонса: перенесено %d из %d.', $d['kept_img'], $d['orig_img'] ) );
+			}
+			if ( $d['kept_link'] < $d['orig_link'] ) {
+				return self::fail( $html, sprintf( 'Потерялась ссылка из анонса: перенесено %d из %d.', $d['kept_link'], $d['orig_link'] ) );
+			}
 			if ( $d['orig_len'] > 0 && $d['kept_len'] < 0.9 * $d['orig_len'] ) {
 				return self::fail( $html, sprintf( 'Часть текста анонса не распознана: перенесено %d из %d знаков.', $d['kept_len'], $d['orig_len'] ) );
 			}

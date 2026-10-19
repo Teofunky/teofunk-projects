@@ -62,6 +62,7 @@ class KEP_Settings {
 	 * Остальные настройки сохраняются.
 	 */
 	public static function activate() {
+		update_option( 'kep_version', KEP_VERSION, true );
 		$saved = get_option( self::OPTION, false );
 		if ( false === $saved || ! is_array( $saved ) ) {
 			add_option( self::OPTION, self::defaults(), '', false );
@@ -71,6 +72,37 @@ class KEP_Settings {
 			$saved['mode'] = 'editors';
 			update_option( self::OPTION, $saved, false );
 		}
+	}
+
+	/**
+	 * Обновление плагина без активации (загрузка новой версии поверх старой):
+	 * режим «Для всех» временно меняется на «Только редакторы», в админке появляется
+	 * уведомление с кнопкой вернуть прежний режим.
+	 */
+	public static function maybe_upgrade() {
+		$v = (string) get_option( 'kep_version', '' );
+		if ( KEP_VERSION === $v ) {
+			return;
+		}
+		update_option( 'kep_version', KEP_VERSION, true );
+		$saved = get_option( self::OPTION, false );
+		if ( ! is_array( $saved ) ) {
+			return; // первая установка: настройки создаст активация
+		}
+		$prev = isset( $saved['mode'] ) ? $saved['mode'] : 'editors';
+		if ( 'all' === $prev ) { // «Выключено» и так безопасно, его не трогаем
+			$saved['mode'] = 'editors';
+			update_option( self::OPTION, $saved, false );
+			KEP_Data::flush_all();
+		}
+		set_transient(
+			'kep_updated',
+			array(
+				'from' => '' === $v ? 'старой версии' : $v,
+				'prev' => $prev,
+			),
+			30 * DAY_IN_SECONDS
+		);
 	}
 
 	/**

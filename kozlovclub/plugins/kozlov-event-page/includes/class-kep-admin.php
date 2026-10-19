@@ -26,6 +26,10 @@ class KEP_Admin {
 		add_action( 'update_option_' . KEP_Settings::OPTION, array( __CLASS__, 'settings_changed' ), 10, 2 );
 		add_action( 'add_option_' . KEP_Settings::OPTION, array( __CLASS__, 'settings_added' ), 10, 2 );
 		add_filter( 'plugin_action_links_' . plugin_basename( KEP_FILE ), array( __CLASS__, 'action_links' ) );
+		add_action( 'admin_notices', array( __CLASS__, 'update_notice' ) );
+		add_action( 'admin_post_kep_restore_mode', array( __CLASS__, 'restore_mode' ) );
+		add_action( 'admin_post_kep_dismiss_update', array( __CLASS__, 'dismiss_update' ) );
+		add_action( 'admin_post_kep_cache_check', array( __CLASS__, 'cache_check_action' ) );
 	}
 
 	public static function page_url( $args = array() ) {
@@ -374,6 +378,182 @@ class KEP_Admin {
 		return $rows;
 	}
 
+	/* ---------- после обновления ---------- */
+
+	private static function mode_name( $mode ) {
+		$names = array( 'off' => 'Выключено', 'editors' => 'Только редакторы', 'all' => 'Для всех' );
+		return isset( $names[ $mode ] ) ? $names[ $mode ] : $mode;
+	}
+
+	public static function update_notice() {
+		$u = get_transient( 'kep_updated' );
+		if ( ! is_array( $u ) || ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+		echo '<div class="notice notice-info kep-update-notice"><p><strong>Kozlov Event Page обновлён до ' . esc_html( KEP_VERSION ) . '.</strong> ';
+		if ( 'all' === $u['prev'] ) {
+			$restore = wp_nonce_url( admin_url( 'admin-post.php?action=kep_restore_mode' ), 'kep_restore_mode' );
+			$dismiss = wp_nonce_url( admin_url( 'admin-post.php?action=kep_dismiss_update' ), 'kep_dismiss_update' );
+			echo 'На время проверки включён режим «Только редакторы» (был «' . esc_html( self::mode_name( $u['prev'] ) ) . '»). Гости пока видят старые страницы концертов.</p>';
+			echo '<p><a class="button button-primary" href="' . esc_url( $restore ) . '">Вернуть «' . esc_html( self::mode_name( $u['prev'] ) ) . '»</a> <a class="button" href="' . esc_url( self::page_url() . '#kep-check' ) . '">Сначала проверить</a> <a href="' . esc_url( $dismiss ) . '">Оставить «Только редакторы»</a></p></div>';
+			return;
+		}
+		echo 'Режим не менялся.</p></div>';
+		delete_transient( 'kep_updated' );
+	}
+
+	public static function restore_mode() {
+		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'kep_restore_mode' ) ) {
+			wp_die( 'Нет прав.' );
+		}
+		$u = get_transient( 'kep_updated' );
+		if ( is_array( $u ) && in_array( $u['prev'], array( 'off', 'editors', 'all' ), true ) ) {
+			$s         = KEP_Settings::get();
+			$s['mode'] = $u['prev'];
+			update_option( KEP_Settings::OPTION, $s, false );
+		}
+		delete_transient( 'kep_updated' );
+		wp_safe_redirect( self::page_url() );
+		exit;
+	}
+
+	public static function dismiss_update() {
+		if ( ! current_user_can( 'manage_options' ) || ! check_admin_referer( 'kep_dismiss_update' ) ) {
+			wp_die( 'Нет прав.' );
+		}
+		delete_transient( 'kep_updated' );
+		wp_safe_redirect( wp_get_referer() ? wp_get_referer() : self::page_url() );
+		exit;
+	}
+
+	/* ---------- проверка «что видит гость» ---------- */
+
+	/**
+	 * Сервер открывает концерт с заглавным фото как гость (без входа), дважды:
+	 * второй ответ показывает то, что отдаёт кэш.
+	 *
+	 * @return array level, text, url
+	 */
+	public static function cache_check() {
+		$ids = get_posts(
+			array(
+				'post_type'      => KEP_POST_TYPE,
+				'post_status'    => 'publish',
+				'meta_key'       => KEP_META_HERO, // phpcs:ignore WordPress.DB.SlowDBQuery
+				'posts_per_page' => 6,
+				'orderby'        => 'modified',
+				'order'          => 'DESC',
+				'fields'         => 'ids',
+			)
+		);
+		$ids = array_values( array_filter( array_map( 'intval', $ids ), array( 'KEP_Data', 'hero_id' ) ) );
+		if ( ! $ids ) {
+			return array( 'level' => 'warn', 'text' => 'Нет ни одного концерта с заглавным фото. Загрузите фото к любому концерту и проверьте снова.', 'url' => '' );
+		}
+		// Концерт, на котором новая страница недавно не собралась, проверять последним.
+		$last = get_option( 'kep_last_error' );
+		if ( is_array( $last ) && ! empty( $last['post_id'] ) && count( $ids ) > 1 ) {
+			$bad = (int) $last['post_id'];
+			$ids = array_merge( array_values( array_diff( $ids, array( $bad ) ) ), in_array( $bad, $ids, true ) ? array( $bad ) : array() );
+		}
+		$mode     = KEP_Settings::get( 'mode' );
+		$url      = '';
+		$fallback = 0;
+		foreach ( array_slice( $ids, 0, 3 ) as $id ) {
+			$url  = get_permalink( $id );
+			$body = self::guest_fetch( $url );
+			if ( is_wp_error( $body ) ) {
+				return array( 'level' => 'warn', 'text' => 'Сервер не смог открыть страницу концерта: ' . $body->get_error_message() . '. Проверьте вручную в окне инкогнито.', 'url' => $url );
+			}
+			if ( null === $body ) {
+				return array( 'level' => 'warn', 'text' => 'Хостинг не пустил проверку (защита от ботов). Проверьте вручную в окне инкогнито.', 'url' => $url );
+			}
+			$is_new = false !== strpos( $body, 'id="kep"' );
+			$tried  = ! $is_new && false !== strpos( $body, 'kep-off' ); // плагин пробовал, но анонс остался в старом виде
+			if ( 'all' === $mode ) {
+				if ( $is_new ) {
+					return array( 'level' => 'ok', 'text' => 'Всё правильно: гости видят новую страницу.', 'url' => $url );
+				}
+				if ( $tried ) {
+					$fallback++;
+				}
+				continue; // этот концерт мог остаться старым из-за своего анонса: проверить следующий
+			}
+			if ( $is_new || $tried ) {
+				return array( 'level' => 'bad', 'text' => 'Внимание: гости видят новую страницу, хотя режим «' . self::mode_name( $mode ) . '». Кэш отдаёт гостям версию для редакторов. Сбросьте кэш страниц и включите в W3 Total Cache «Не кэшировать страницы для вошедших».', 'url' => $url );
+			}
+			return array( 'level' => 'ok', 'text' => 'Всё правильно: гости видят старую страницу, новую видят только редакторы.', 'url' => $url );
+		}
+		if ( $fallback ) {
+			return array( 'level' => 'warn', 'text' => 'Новый вид для гостей включён, но проверенные концерты остались в старом: в их анонсах есть блоки, которые новая страница не показывает (причина в строке «Последний сбой» ниже). Загрузите фото к другому концерту и проверьте снова.', 'url' => $url );
+		}
+		return array( 'level' => 'bad', 'text' => 'Гости пока видят старую страницу. Сбросьте кэш страниц и проверьте снова.', 'url' => $url );
+	}
+
+	/**
+	 * Открыть страницу как гость: без входа и cookie админки. Дважды, чтобы
+	 * второй ответ пришёл уже из кэша страниц, если он есть.
+	 *
+	 * @param string $url Адрес.
+	 * @return string|WP_Error|null Тело страницы; null, если не пустила защита хостинга.
+	 */
+	private static function guest_fetch( $url ) {
+		$cookies = array();
+		$clean   = 0;
+		$body    = '';
+		for ( $i = 0; $i < 4 && $clean < 2; $i++ ) {
+			$r = wp_remote_get(
+				$url,
+				array(
+					'timeout'     => 15,
+					'redirection' => 3,
+					'cookies'     => $cookies,
+					'user-agent'  => 'Mozilla/5.0 (Kozlov Event Page guest check)',
+				)
+			);
+			if ( is_wp_error( $r ) ) {
+				return $r;
+			}
+			$body = (string) wp_remote_retrieve_body( $r );
+			if ( false !== strpos( $body, 'begetok' ) ) {
+				if ( $cookies ) {
+					return null;
+				}
+				$cookies = array( 'beget' => 'begetok' ); // защита хостинга Beget от ботов
+				continue;
+			}
+			$clean++;
+		}
+		return $body;
+	}
+
+	public static function cache_check_action() {
+		if ( ! current_user_can( 'edit_posts' ) || ! check_admin_referer( 'kep_cache_check' ) ) {
+			wp_die( 'Нет прав.' );
+		}
+		$res         = self::cache_check();
+		$res['time'] = time();
+		set_transient( 'kep_cache_check_' . get_current_user_id(), $res, HOUR_IN_SECONDS );
+		wp_safe_redirect( self::page_url() . '#kep-check' );
+		exit;
+	}
+
+	private static function check_section() {
+		echo '<h2 id="kep-check">Что видит гость</h2><p class="kep-admin-lead">Сервер откроет концерт с заглавным фото без входа в админку, как обычный посетитель, и проверит, какую страницу отдаёт сайт с учётом кэша.</p>';
+		$res = get_transient( 'kep_cache_check_' . get_current_user_id() );
+		if ( is_array( $res ) ) {
+			echo '<p class="kep-check kep-check--' . esc_attr( $res['level'] ) . '">' . esc_html( $res['text'] );
+			if ( ! empty( $res['url'] ) ) {
+				echo ' <a href="' . esc_url( $res['url'] ) . '" target="_blank" rel="noopener">Концерт</a>';
+			}
+			echo ' <span class="kep-check-time">' . esc_html( wp_date( 'j.m H:i', $res['time'] ) ) . '</span></p>';
+		}
+		echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '"><input type="hidden" name="action" value="kep_cache_check">';
+		wp_nonce_field( 'kep_cache_check' );
+		submit_button( 'Проверить', 'secondary', 'kep-check-btn', false );
+		echo '</form>';
+	}
+
 	public static function page() {
 		$rows     = self::rows();
 		$s        = KEP_Settings::get();
@@ -450,16 +630,18 @@ class KEP_Admin {
 			echo '</tbody></table>';
 		}
 
+		self::check_section();
+		$err = get_option( 'kep_last_error' );
+		if ( is_array( $err ) && ! empty( $err['time'] ) && $err['time'] > time() - 7 * DAY_IN_SECONDS ) {
+			echo '<p class="kep-admin-err">Последний сбой ' . esc_html( wp_date( 'j.m H:i', $err['time'] ) ) . ': ' . esc_html( $err['why'] );
+			if ( ! empty( $err['post_id'] ) ) {
+				echo ' (<a href="' . esc_url( get_permalink( (int) $err['post_id'] ) ) . '">концерт</a>)';
+			}
+			echo '. Этот концерт показан в старом виде, ничего не потеряно.</p>';
+		}
+
 		if ( $is_admin ) {
 			self::settings_form( $s, $modes );
-			$err = get_option( 'kep_last_error' );
-			if ( is_array( $err ) && ! empty( $err['time'] ) && $err['time'] > time() - 7 * DAY_IN_SECONDS ) {
-				echo '<p class="kep-admin-err">Последний сбой ' . esc_html( wp_date( 'j.m H:i', $err['time'] ) ) . ': ' . esc_html( $err['why'] );
-				if ( ! empty( $err['post_id'] ) ) {
-					echo ' (<a href="' . esc_url( get_permalink( (int) $err['post_id'] ) ) . '">концерт</a>)';
-				}
-				echo '. Посетители видели старую страницу.</p>';
-			}
 		}
 		echo '</div>';
 	}

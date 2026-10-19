@@ -119,6 +119,7 @@ class KEP_Parser {
 		) : null;
 
 		$d['quote']     = null;
+		$d['quotes']    = array();
 		$d['paras']     = array();
 		$d['musicians'] = array();
 		$d['videos']    = array();
@@ -127,6 +128,10 @@ class KEP_Parser {
 		$d['bad']       = array();
 		$d['orig_len']  = 0;
 		$d['kept_len']  = 0;
+		$d['orig_img']  = 0;
+		$d['kept_img']  = 0;
+		$d['orig_link'] = 0;
+		$d['kept_link'] = 0;
 		$seen_artist    = false;
 
 		foreach ( $desc->childNodes as $block ) {
@@ -141,8 +146,11 @@ class KEP_Parser {
 			if ( preg_match( '/ (bottom_block|concert_nav|buy_button|share_panel) /', $cls ) ) {
 				continue;
 			}
-			// Всё остальное считается содержимым анонса, которое нельзя потерять.
-			$d['orig_len'] += self::len( $block->textContent );
+			// Всё остальное считается содержимым анонса, которое нельзя потерять:
+			// текст, картинки и ссылки считаются до разбора и после.
+			$d['orig_len']  += self::len( $block->textContent );
+			$d['orig_img']  += $x->query( './/img', $block )->length;
+			$d['orig_link'] += $x->query( './/a[@href]', $block )->length;
 			if ( false === strpos( $cls, ' meta_block ' ) ) {
 				continue;
 			}
@@ -166,13 +174,23 @@ class KEP_Parser {
 			}
 
 			if ( false !== strpos( $cls, ' quote ' ) ) {
-				$text = self::text( self::q1( $x, './/*[' . self::c( 'desc' ) . ']', $block ) );
-				if ( mb_strlen( $text, 'UTF-8' ) > 10 && ! $d['quote'] ) {
-					$d['quote'] = array(
-						'text'   => self::utrim( $text, '\s«»"“”„' ),
-						'author' => self::text( self::q1( $x, './/*[' . self::c( 'author' ) . ']', $block ) ),
+				$desc_el   = self::q1( $x, './/*[' . self::c( 'desc' ) . ']', $block );
+				$author_el = self::q1( $x, './/*[' . self::c( 'author' ) . ']', $block );
+				$text      = self::text( $desc_el );
+				if ( mb_strlen( $text, 'UTF-8' ) > 3 ) {
+					$q = array(
+						'text'        => self::utrim( $text, '\s«»"“”„' ),
+						'html'        => $desc_el ? self::inner( $desc_el ) : '',
+						'author'      => self::text( $author_el ),
+						'author_html' => $author_el ? self::inner( $author_el ) : '',
 					);
-					$d['kept_len'] += self::len( $block->textContent );
+					$d['quotes'][] = $q;
+					if ( ! $d['quote'] ) {
+						$d['quote'] = $q;
+					}
+					$d['kept_len']  += self::len( $block->textContent );
+					$d['kept_img']  += self::count_img( $q['html'] . $q['author_html'] );
+					$d['kept_link'] += self::count_link( $q['html'] . $q['author_html'] );
 				}
 				continue;
 			}
@@ -186,6 +204,8 @@ class KEP_Parser {
 					continue;
 				}
 				$d['kept_len']   += self::len( $plain );
+				$d['kept_img']   += ( $img ? 1 : 0 ) + self::count_img( $html );
+				$d['kept_link']  += self::count_link( $html );
 				$d['flow'][]      = array( 't' => 'm', 'i' => count( $d['musicians'] ) );
 				$d['musicians'][] = array(
 					'img'  => $img ? self::img_src( $img ) : '',
@@ -200,7 +220,12 @@ class KEP_Parser {
 				foreach ( self::paragraphs( $block ) as $p ) {
 					$p['before_artist'] = ! $seen_artist;
 					$p['kind']          = self::kind( $p['text'] );
+					if ( 'lineup' === $p['kind'] && ( self::count_link( $p['html'] ) || self::count_img( $p['html'] ) ) ) {
+						$p['kind'] = 'text'; // со ссылками и картинками выводим как есть, чтобы ничего не потерять
+					}
 					$d['kept_len']     += self::len( $p['text'] );
+					$d['kept_img']     += self::count_img( $p['html'] );
+					$d['kept_link']    += self::count_link( $p['html'] );
 					$d['flow'][]        = array( 't' => 'p', 'i' => count( $d['paras'] ) );
 					$d['paras'][]       = $p;
 				}
@@ -210,10 +235,13 @@ class KEP_Parser {
 				continue;
 			}
 			$plain = self::text( $block );
-			if ( '' !== $plain ) {
-				$d['kept_len'] += self::len( $plain );
-				$d['flow'][]  = array( 't' => 'x', 'i' => count( $d['extra'] ) );
-				$d['extra'][] = self::inner( $block );
+			$inner = self::inner( $block );
+			if ( '' !== $plain || self::count_img( $inner ) ) {
+				$d['kept_len']  += self::len( $plain );
+				$d['kept_img']  += self::count_img( $inner );
+				$d['kept_link'] += self::count_link( $inner );
+				$d['flow'][]     = array( 't' => 'x', 'i' => count( $d['extra'] ) );
+				$d['extra'][]    = $inner;
 			}
 		}
 
@@ -232,12 +260,16 @@ class KEP_Parser {
 
 		// Состав из строки «На сцену выйдут: …».
 		$d['lineup'] = array();
-		foreach ( $d['paras'] as $p ) {
-			if ( 'lineup' === $p['kind'] ) {
-				$d['lineup'] = self::lineup( $p['text'] );
-				if ( $d['lineup'] ) {
-					break;
-				}
+		foreach ( $d['paras'] as $i => $p ) {
+			if ( 'lineup' !== $p['kind'] ) {
+				continue;
+			}
+			$list = $d['lineup'] ? array() : self::lineup( $p['text'] );
+			if ( $list ) {
+				$d['lineup']              = $list;
+				$d['paras'][ $i ]['kind'] = 'lineup_used';
+			} else {
+				$d['paras'][ $i ]['kind'] = 'text';
 			}
 		}
 
@@ -403,7 +435,7 @@ class KEP_Parser {
 		$buffer = '';
 		$flush  = function () use ( &$buffer, &$out ) {
 			$text = self::clean( wp_strip_all_tags( $buffer ) );
-			if ( '' !== $text ) {
+			if ( '' !== $text || false !== stripos( $buffer, '<img' ) ) {
 				$out[] = array( 'html' => trim( $buffer ), 'text' => $text, 'tag' => 'p' );
 			}
 			$buffer = '';
@@ -413,7 +445,7 @@ class KEP_Parser {
 				$flush();
 				$tag  = strtolower( $n->nodeName );
 				$text = self::text( $n );
-				if ( '' === $text ) {
+				if ( '' === $text && ! $n->getElementsByTagName( 'img' )->length ) {
 					continue;
 				}
 				if ( 'div' === $tag || 'p' === $tag || 'blockquote' === $tag ) {
@@ -536,6 +568,14 @@ class KEP_Parser {
 	 */
 	public static function utrim( $s, $chars ) {
 		return (string) preg_replace( '/^[' . $chars . ']+|[' . $chars . ']+$/u', '', (string) $s );
+	}
+
+	public static function count_img( $html ) {
+		return preg_match_all( '/<img\b/i', (string) $html );
+	}
+
+	public static function count_link( $html ) {
+		return preg_match_all( '/<a\b[^>]*\bhref\s*=/i', (string) $html );
 	}
 
 	/**

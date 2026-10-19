@@ -20,6 +20,11 @@
 		var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 		var diff = Math.round((ev - today) / 864e5);
 		var label = diff === 0 ? 'Сегодня' : (diff === 1 ? 'Завтра' : '');
+		// Ночной концерт (23:59 в афише) начинается в полночь после указанного дня.
+		if (root.getAttribute('data-time') === '23:59') {
+			var mins = now.getHours() * 60 + now.getMinutes();
+			label = diff === 0 ? 'Сегодня ночью' : (diff === 1 ? 'Завтра ночью' : (diff === -1 && mins < 150 ? 'Идёт сейчас' : ''));
+		}
 		if (label) {
 			each('.kep-badge', function (b) { b.textContent = label; b.hidden = false; });
 		}
