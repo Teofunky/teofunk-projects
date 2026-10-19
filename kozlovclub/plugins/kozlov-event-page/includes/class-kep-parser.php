@@ -92,7 +92,10 @@ class KEP_Parser {
 			return null;
 		}
 
-		$btn     = self::q1( $x, './/*[@tc-event]', $info );
+		$btn = self::q1( $x, './/*[@tc-event]', $info );
+		if ( ! $btn ) {
+			$btn = self::q1( $x, './/*[@tc-event]', $root );
+		}
 		$d['tc'] = ( $btn && '' !== trim( $btn->getAttribute( 'tc-event' ) ) ) ? array(
 			'id'    => trim( $btn->getAttribute( 'tc-event' ) ),
 			'class' => trim( $btn->getAttribute( 'class' ) ),
@@ -121,24 +124,37 @@ class KEP_Parser {
 		$d['videos']    = array();
 		$d['extra']     = array();
 		$d['flow']      = array();
+		$d['bad']       = array();
+		$d['orig_len']  = 0;
+		$d['kept_len']  = 0;
 		$seen_artist    = false;
 
 		foreach ( $desc->childNodes as $block ) {
+			if ( $block instanceof DOMText ) {
+				$d['orig_len'] += self::len( $block->textContent );
+				continue;
+			}
 			if ( ! ( $block instanceof DOMElement ) ) {
 				continue;
 			}
 			$cls = ' ' . preg_replace( '/\s+/', ' ', $block->getAttribute( 'class' ) ) . ' ';
+			if ( preg_match( '/ (bottom_block|concert_nav|buy_button|share_panel) /', $cls ) ) {
+				continue;
+			}
+			// Всё остальное считается содержимым анонса, которое нельзя потерять.
+			$d['orig_len'] += self::len( $block->textContent );
 			if ( false === strpos( $cls, ' meta_block ' ) ) {
 				continue;
 			}
-			if ( false !== strpos( $cls, ' buy_button ' ) || false !== strpos( $cls, ' share_panel ' ) ) {
-				continue;
-			}
-			// Видео из любого блока.
+			// Видео из любого блока. Встраивание, которое не видео (карта, виджет), не переносим.
 			foreach ( $x->query( './/iframe', $block ) as $f ) {
-				$v = self::video( $f->getAttribute( 'src' ) ? $f->getAttribute( 'src' ) : $f->getAttribute( 'data-src' ) );
+				$src = $f->getAttribute( 'src' ) ? $f->getAttribute( 'src' ) : $f->getAttribute( 'data-src' );
+				$v   = self::video( $src );
 				if ( $v ) {
 					$d['videos'][] = $v;
+				} else {
+					$host       = wp_parse_url( (string) $src, PHP_URL_HOST );
+					$d['bad'][] = $host ? $host : 'встроенный блок';
 				}
 			}
 			$iframes = array();
@@ -156,6 +172,7 @@ class KEP_Parser {
 						'text'   => self::utrim( $text, '\s«»"“”„' ),
 						'author' => self::text( self::q1( $x, './/*[' . self::c( 'author' ) . ']', $block ) ),
 					);
+					$d['kept_len'] += self::len( $block->textContent );
 				}
 				continue;
 			}
@@ -168,6 +185,7 @@ class KEP_Parser {
 				if ( '' === $plain && ! $img ) {
 					continue;
 				}
+				$d['kept_len']   += self::len( $plain );
 				$d['flow'][]      = array( 't' => 'm', 'i' => count( $d['musicians'] ) );
 				$d['musicians'][] = array(
 					'img'  => $img ? self::img_src( $img ) : '',
@@ -182,6 +200,7 @@ class KEP_Parser {
 				foreach ( self::paragraphs( $block ) as $p ) {
 					$p['before_artist'] = ! $seen_artist;
 					$p['kind']          = self::kind( $p['text'] );
+					$d['kept_len']     += self::len( $p['text'] );
 					$d['flow'][]        = array( 't' => 'p', 'i' => count( $d['paras'] ) );
 					$d['paras'][]       = $p;
 				}
@@ -192,17 +211,20 @@ class KEP_Parser {
 			}
 			$plain = self::text( $block );
 			if ( '' !== $plain ) {
+				$d['kept_len'] += self::len( $plain );
 				$d['flow'][]  = array( 't' => 'x', 'i' => count( $d['extra'] ) );
 				$d['extra'][] = self::inner( $block );
 			}
 		}
 
 		// Короткое описание: первый обычный абзац до блоков о музыкантах.
-		$d['lead'] = '';
+		$d['lead']      = '';
+		$d['lead_html'] = '';
 		foreach ( $d['paras'] as $i => $p ) {
 			$len = mb_strlen( $p['text'], 'UTF-8' );
-			if ( 'text' === $p['kind'] && $p['before_artist'] && $len >= 30 && $len <= 420 ) {
+			if ( 'text' === $p['kind'] && 'p' === $p['tag'] && $p['before_artist'] && $len >= 30 && $len <= 420 ) {
 				$d['lead']                  = $p['text'];
+				$d['lead_html']             = $p['html'];
 				$d['paras'][ $i ]['kind'] = 'lead';
 				break;
 			}
@@ -514,6 +536,13 @@ class KEP_Parser {
 	 */
 	public static function utrim( $s, $chars ) {
 		return (string) preg_replace( '/^[' . $chars . ']+|[' . $chars . ']+$/u', '', (string) $s );
+	}
+
+	/**
+	 * Длина текста без пробелов: для сравнения «было» и «перенесено».
+	 */
+	public static function len( $s ) {
+		return mb_strlen( (string) preg_replace( '/\s+/u', '', self::clean( $s ) ), 'UTF-8' );
 	}
 
 	private static function lower( $s ) {

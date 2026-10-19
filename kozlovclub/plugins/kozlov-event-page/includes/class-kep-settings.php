@@ -58,11 +58,18 @@ class KEP_Settings {
 	}
 
 	/**
-	 * При активации: настройки по умолчанию, режим «Для редакторов».
+	 * При активации, в том числе повторной: безопасный режим «Только редакторы».
+	 * Остальные настройки сохраняются.
 	 */
 	public static function activate() {
-		if ( false === get_option( self::OPTION, false ) ) {
+		$saved = get_option( self::OPTION, false );
+		if ( false === $saved || ! is_array( $saved ) ) {
 			add_option( self::OPTION, self::defaults(), '', false );
+			return;
+		}
+		if ( ! isset( $saved['mode'] ) || 'editors' !== $saved['mode'] ) {
+			$saved['mode'] = 'editors';
+			update_option( self::OPTION, $saved, false );
 		}
 	}
 

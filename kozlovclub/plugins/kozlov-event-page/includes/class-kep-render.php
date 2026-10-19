@@ -25,7 +25,8 @@ class KEP_Render {
 		$time   = self::show_time( $d['time'] );
 		$videos = $d['videos'];
 
-		$h  = '<div class="kep" id="kep" data-date="' . esc_attr( $ctx['date'] ) . '" data-type="' . esc_attr( $d['type'] ) . '">';
+		$badge_date = 'past' === $d['type'] ? '' : $ctx['date'];
+		$h          = '<div class="kep" id="kep" data-date="' . esc_attr( $badge_date ) . '" data-type="' . esc_attr( $d['type'] ) . '">';
 		$h .= '<nav class="kep-crumbs" aria-label="Навигация"><a href="' . esc_url( home_url( '/' ) ) . '">' . self::icon( 'back' ) . '<span>Афиша</span></a><span class="kep-crumbs-sep" aria-hidden="true">/</span><span class="kep-crumbs-here" aria-current="page">' . esc_html( $d['title'] ) . '</span></nav>';
 		$h .= '<div class="kep-grid">';
 
@@ -39,7 +40,7 @@ class KEP_Render {
 		// Карточка покупки.
 		$h .= '<aside class="kep-card" aria-label="Дата и билеты">';
 		$h .= '<div class="kep-when"><span class="kep-day">' . esc_html( $d['day'] ) . '</span><span class="kep-when-rows">';
-		$h .= '<span class="kep-r1">' . esc_html( self::row1( $d['row1'], $time ) ) . '</span>';
+		$h .= '<span class="kep-r1">' . esc_html( self::row1( $d, $ctx, $time ) ) . '</span>';
 		$h .= '<span class="kep-r2">' . esc_html( $d['weekday'] ) . ' <span class="kep-badge" hidden></span></span>';
 		if ( '' !== $d['stage'] ) {
 			$h .= '<span class="kep-r3">' . esc_html( $d['stage'] ) . '</span>';
@@ -133,19 +134,18 @@ class KEP_Render {
 				$h .= self::tc_button( $d['tc'], 'Купить билет', $compact ? '' : 'kep-buy-main' );
 				break;
 			case 'deposit':
-				$h .= '<div class="kep-price"><span class="kep-price-v">' . esc_html( $price ) . '</span></div>';
-				$h .= '<a class="kep-cta" href="' . esc_attr( $tel ) . '">' . self::icon( 'phone' ) . 'Забронировать стол</a>';
-				$h .= '<div class="kep-buy-row"><span class="kep-phone">' . esc_html( $phone ) . '</span>';
-				$tour = KEP_Settings::tour( $ctx['code'] );
+			case 'free':
+				$label = ( 'free' === $d['type'] && '' === $price ) ? 'Вход свободный' : $price;
+				$h    .= '<div class="kep-price"><span class="kep-price-v">' . esc_html( $label ) . '</span></div>';
+				$h    .= '<a class="kep-cta" href="' . esc_attr( $tel ) . '">' . self::icon( 'phone' ) . 'Забронировать стол</a>';
+				$h    .= '<div class="kep-buy-row"><span class="kep-phone">' . esc_html( $phone ) . '</span>';
+				$tour  = KEP_Settings::tour( $ctx['code'] );
 				if ( '' !== $tour ) {
 					$h .= '<a class="kep-link" href="' . esc_url( $tour ) . '" target="_blank" rel="noopener">' . self::icon( 'cube' ) . 'Зал в 3D</a>';
 				}
 				$h .= '</div>';
-				break;
-			case 'free':
-				$h .= '<div class="kep-price"><span class="kep-price-v">' . esc_html( '' !== $price ? $price : 'Вход свободный' ) . '</span></div>';
-				if ( '' !== $d['calendar'] ) {
-					$h .= '<a class="kep-cta kep-cta--ghost" href="' . esc_url( $d['calendar'] ) . '">' . self::icon( 'cal' ) . 'Добавить в календарь</a>';
+				if ( 'free' === $d['type'] && '' !== $d['calendar'] ) {
+					$h .= '<a class="kep-link kep-link--cal" href="' . esc_url( $d['calendar'] ) . '">' . self::icon( 'cal' ) . 'Добавить в календарь</a>';
 				}
 				break;
 			case 'soon':
@@ -181,7 +181,7 @@ class KEP_Render {
 		}
 		$h = '<section class="kep-box kep-intro">';
 		if ( '' !== $d['lead'] ) {
-			$h .= '<p class="kep-lead">' . esc_html( $d['lead'] ) . '</p>';
+			$h .= '<p class="kep-lead">' . wp_kses_post( '' !== $d['lead_html'] ? $d['lead_html'] : $d['lead'] ) . '</p>';
 		}
 		if ( $d['quote'] ) {
 			$h .= '<blockquote class="kep-quote">' . self::icon( 'quote' ) . '<p>' . esc_html( $d['quote']['text'] ) . '</p>';
@@ -266,7 +266,8 @@ class KEP_Render {
 		$h     = '<section class="kep-box kep-where" aria-labelledby="kep-where-h"><h2 class="kep-h2" id="kep-where-h">Когда и где</h2><div class="kep-where-rows">';
 		$h    .= '<div class="kep-where-row">' . self::icon( 'cal' ) . '<div><strong>' . esc_html( self::when_text( $d, $ctx, $time ) ) . '</strong></div></div>';
 		$stage = $d['stage'];
-		$line  = trim( $stage . ( '' !== $stage && '' !== $place['addr'] ? ', ' : '' ) . $place['addr'] );
+		$addr  = self::same_street( $stage, $place['addr'] ) ? '' : $place['addr'];
+		$line  = trim( $stage . ( '' !== $stage && '' !== $addr ? ', ' : '' ) . $addr );
 		$h    .= '<div class="kep-where-row">' . self::icon( 'pin' ) . '<div><strong>' . esc_html( $line ) . '</strong>';
 		if ( '' !== $place['metro'] ) {
 			$h .= '<span>' . esc_html( $place['metro'] ) . '</span>';
@@ -323,14 +324,11 @@ class KEP_Render {
 				$right = self::tc_button( $d['tc'], 'Купить билет', 'kep-bar-cta' );
 				break;
 			case 'deposit':
-				$right = '<a class="kep-cta kep-bar-cta" href="' . esc_attr( 'tel:' . preg_replace( '/[^\d+]/', '', $s['phone'] ) ) . '">Забронировать</a>';
-				break;
 			case 'free':
-				if ( '' === $d['calendar'] ) {
-					return '';
+				if ( 'free' === $d['type'] && '' === $price ) {
+					$left = '<span class="kep-bar-t"><span class="kep-bar-p">Вход свободный</span><span class="kep-bar-d">' . esc_html( $sub ) . '</span></span>';
 				}
-				$left  = '<span class="kep-bar-t"><span class="kep-bar-p">' . esc_html( '' !== $price ? $price : 'Вход свободный' ) . '</span><span class="kep-bar-d">' . esc_html( $sub ) . '</span></span>';
-				$right = '<a class="kep-cta kep-cta--ghost kep-bar-cta" href="' . esc_url( $d['calendar'] ) . '">В календарь</a>';
+				$right = '<a class="kep-cta kep-bar-cta" href="' . esc_attr( 'tel:' . preg_replace( '/[^\d+]/', '', $s['phone'] ) ) . '">Забронировать</a>';
 				break;
 			default:
 				return '';
@@ -394,11 +392,35 @@ class KEP_Render {
 		return '23:59' === $t ? '00:00' : $t;
 	}
 
-	private static function row1( $row1, $time ) {
+	private static function row1( $d, $ctx, $time ) {
 		if ( '' === $time ) {
-			return $row1;
+			return $d['row1'];
 		}
-		return preg_replace( '/\d{1,2}:\d{2}/', $time, $row1, 1 );
+		$label = $time;
+		if ( '23:59' === $d['time'] ) {
+			$next  = self::next_day( $ctx['date'] );
+			$label = '00:00, ночь' . ( $next ? ' на ' . (int) gmdate( 'j', $next ) : '' );
+		}
+		return preg_replace( '/\d{1,2}:\d{2}/', $label, $d['row1'], 1 );
+	}
+
+	private static function next_day( $date ) {
+		$ts = '' !== (string) $date ? strtotime( $date . ' 12:00:00 UTC' ) : 0;
+		return $ts ? $ts + DAY_IN_SECONDS : 0;
+	}
+
+	/**
+	 * Есть ли улица из адреса уже в названии сцены («Сцена на Мясницкой, 15»).
+	 */
+	public static function same_street( $stage, $addr ) {
+		if ( '' === (string) $stage || '' === (string) $addr ) {
+			return false;
+		}
+		if ( ! preg_match( '/([А-Яа-яЁё]{5,})/u', preg_replace( '/^\s*(ул\.|улица)\s*/u', '', $addr ), $m ) ) {
+			return false;
+		}
+		$stem = mb_substr( mb_strtolower( $m[1], 'UTF-8' ), 0, 6, 'UTF-8' );
+		return false !== mb_strpos( mb_strtolower( $stage, 'UTF-8' ), $stem, 0, 'UTF-8' );
 	}
 
 	private static function when_text( $d, $ctx, $time ) {
@@ -420,6 +442,10 @@ class KEP_Render {
 		$wd = mb_strtolower( $d['weekday'], 'UTF-8' );
 		$wd = isset( self::WD_SHORT[ $wd ] ) ? self::WD_SHORT[ $wd ] . ', ' : '';
 		$ts = '' !== $ctx['date'] ? strtotime( $ctx['date'] . ' 12:00:00 UTC' ) : 0;
+		if ( '23:59' === $d['time'] && $ts ) {
+			$next = $ts + DAY_IN_SECONDS;
+			return 'Ночь на ' . (int) gmdate( 'j', $next ) . ' ' . self::MONTHS_SHORT[ (int) gmdate( 'n', $next ) ] . ' · 00:00';
+		}
 		$dm = $ts ? (int) gmdate( 'j', $ts ) . ' ' . self::MONTHS_SHORT[ (int) gmdate( 'n', $ts ) ] : $d['day'];
 		return $wd . $dm . ( '' !== $time ? ' · ' . $time : '' );
 	}

@@ -51,13 +51,61 @@ class KEP_Front {
 			return;
 		}
 		$post_id = (int) get_queried_object_id();
-		if ( ! $post_id || ! self::should_render( $post_id ) ) {
+		if ( ! $post_id ) {
+			return;
+		}
+		// Вошедшим страница собирается под них (режим «Только редакторы», ?kep=old/new):
+		// такую страницу нельзя класть в общий кэш, иначе её увидят гости.
+		if ( is_user_logged_in() ) {
+			self::no_cache();
+		}
+		if ( ! self::should_render( $post_id ) ) {
 			return;
 		}
 		self::$post_id = $post_id;
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'assets' ), 20 );
 		add_filter( 'body_class', array( __CLASS__, 'body_class' ) );
+		self::social_image( KEP_Data::hero_id( $post_id ) );
 		ob_start( array( __CLASS__, 'filter_html' ) );
+	}
+
+	/**
+	 * Запрет кэширования этой страницы (W3 Total Cache и другие кэши уважают DONOTCACHEPAGE).
+	 */
+	private static function no_cache() {
+		if ( ! defined( 'DONOTCACHEPAGE' ) ) {
+			define( 'DONOTCACHEPAGE', true );
+		}
+		if ( ! headers_sent() ) {
+			nocache_headers();
+		}
+	}
+
+	/**
+	 * Заглавное фото становится картинкой для соцсетей в Yoast (первой в списке).
+	 *
+	 * @param int $hero ID фото.
+	 */
+	private static function social_image( $hero ) {
+		if ( ! $hero ) {
+			return;
+		}
+		add_filter(
+			'wpseo_add_opengraph_images',
+			function ( $container ) use ( $hero ) {
+				if ( is_object( $container ) && method_exists( $container, 'add_image_by_id' ) ) {
+					$container->add_image_by_id( $hero );
+				}
+				return $container;
+			}
+		);
+		add_filter(
+			'wpseo_twitter_image',
+			function ( $url ) use ( $hero ) {
+				$img = wp_get_attachment_image_url( $hero, 'large' );
+				return $img ? $img : $url;
+			}
+		);
 	}
 
 	public static function assets() {
@@ -85,6 +133,15 @@ class KEP_Front {
 			$d = KEP_Parser::parse( $frag['html'] );
 			if ( ! $d ) {
 				return self::fail( $html, 'Разметка концерта не распознана.' );
+			}
+			if ( $d['bad'] ) {
+				return self::fail( $html, 'В анонсе есть встроенный блок, который новая страница не показывает (' . implode( ', ', array_unique( $d['bad'] ) ) . ').' );
+			}
+			if ( $d['orig_len'] > 0 && $d['kept_len'] < 0.9 * $d['orig_len'] ) {
+				return self::fail( $html, sprintf( 'Часть текста анонса не распознана: перенесено %d из %d знаков.', $d['kept_len'], $d['orig_len'] ) );
+			}
+			if ( 'past' !== $d['type'] && false !== strpos( $frag['html'], 'tc-event=' ) && empty( $d['tc'] ) ) {
+				return self::fail( $html, 'Кнопка Ticketscloud есть в анонсе, но не распознана.' );
 			}
 			$post_id = self::$post_id;
 			$slug    = (string) get_post_field( 'post_name', $post_id );

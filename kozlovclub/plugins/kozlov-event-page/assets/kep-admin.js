@@ -20,6 +20,8 @@
 	var saved = q('[data-kep-saved]');
 	var mediaFrame = null;
 	var timer = null;
+	var queue = Promise.resolve();
+	var programSeq = 0;
 
 	// Те же правила, что в PHP (KEP_Data::check_size).
 	function localCheck(w, h) {
@@ -74,7 +76,18 @@
 		removeBtn.hidden = !data.hero;
 	}
 
-	function send(field, value) {
+	// Сохранения идут строго по очереди: старый ответ не перезапишет новое значение.
+	function send(field, value, seq) {
+		queue = queue.then(function () {
+			if (field === 'program' && seq && seq !== programSeq) {
+				return null;
+			}
+			return post(field, value);
+		});
+		return queue;
+	}
+
+	function post(field, value) {
 		var fd = new FormData();
 		fd.append('action', 'kep_save');
 		fd.append('post_id', postId);
@@ -141,7 +154,8 @@
 		clearTimeout(timer);
 		saved.className = 'kep-a-saved';
 		saved.textContent = '';
-		timer = setTimeout(function () { send('program', program.value); }, 700);
+		var seq = ++programSeq;
+		timer = setTimeout(function () { send('program', program.value, seq); }, 700);
 	});
 
 	if (suggest) {
@@ -149,7 +163,7 @@
 			e.preventDefault();
 			program.value = suggest.getAttribute('data-kep-suggest');
 			clearTimeout(timer);
-			send('program', program.value);
+			send('program', program.value, ++programSeq);
 		});
 	}
 }());
