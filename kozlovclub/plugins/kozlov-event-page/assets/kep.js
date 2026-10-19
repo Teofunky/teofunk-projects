@@ -90,6 +90,70 @@
 		io.observe(buy);
 	}
 
+	// Компьютер: карточка покупки прилипает сразу под шапкой темы. Шапка фиксированная
+	// и меняет высоту при прокрутке, поэтому отступ меряется по факту, а не числом в CSS.
+	var card = root.querySelector('.kep-card');
+	var desk = window.matchMedia ? window.matchMedia('(min-width: 1025px)') : null;
+	var frame = 0;
+	function coveredTop(x) {
+		var y = 0;
+		for (var round = 0; round < 6 && document.elementsFromPoint; round++) {
+			var list = document.elementsFromPoint(x, y + 1);
+			var next = y;
+			for (var i = 0; i < list.length; i++) {
+				var el = list[i];
+				if (root.contains(el) || (fixed && fixed.contains(el))) {
+					continue;
+				}
+				var pinned = null;
+				for (var a = el; a && a !== document.body && a !== document.documentElement; a = a.parentElement) {
+					var pos = window.getComputedStyle(a).position;
+					if (pos === 'fixed' || pos === 'sticky') {
+						pinned = a;
+						break;
+					}
+				}
+				if (!pinned) {
+					break; // дальше по списку только обычное содержимое страницы под шапкой
+				}
+				var b = pinned.getBoundingClientRect().bottom;
+				if (b > next && b < window.innerHeight / 2) {
+					next = b;
+				}
+			}
+			if (next <= y) {
+				break;
+			}
+			y = Math.ceil(next);
+		}
+		return y;
+	}
+	function placeCard() {
+		frame = 0;
+		if (!desk || !desk.matches) {
+			card.style.top = '';
+			card.classList.remove('is-free');
+			return;
+		}
+		var r = card.getBoundingClientRect();
+		var top = coveredTop(Math.round(r.left + r.width / 2)) + 16;
+		card.style.top = top + 'px';
+		// Карточка выше свободного места: пусть едет вместе со страницей, иначе низ с кнопкой не увидеть.
+		card.classList.toggle('is-free', card.offsetHeight + top + 16 > window.innerHeight);
+	}
+	function placeSoon() {
+		if (!frame) {
+			frame = window.requestAnimationFrame(placeCard);
+		}
+	}
+	if (card) {
+		placeCard();
+		window.addEventListener('scroll', placeSoon, { passive: true });
+		window.addEventListener('resize', placeSoon);
+		window.addEventListener('load', placeSoon);
+		document.addEventListener('transitionend', placeSoon, true);
+	}
+
 	// Поделиться: системное меню телефона или копирование ссылки.
 	var toast = fixed ? fixed.querySelector('.kep-toast') : null;
 	var timer;
