@@ -213,6 +213,46 @@ class KEP_Data {
 	}
 
 	/**
+	 * Артисты концерта из плагина Kozlov Artists, если он установлен.
+	 * На сайте тема не выводит текст записи, поэтому блок «Об артисте» Kozlov Artists вставляет скриптом
+	 * уже в браузере: в готовом HTML его нет, данные берутся прямо из плагина.
+	 *
+	 * @param int $post_id ID концерта.
+	 * @return array Список: url, name, photo, text, more.
+	 */
+	public static function ka_artists( $post_id ) {
+		$post = get_post( $post_id );
+		if ( ! $post ) {
+			return array();
+		}
+		try {
+			if ( function_exists( 'ka_event_artists' ) ) {
+				$list = ka_event_artists( $post );
+				return is_array( $list ) ? array_values( $list ) : array();
+			}
+			if ( ! function_exists( 'ka_artists_for_event' ) ) {
+				return array();
+			}
+			$out = array();
+			foreach ( (array) ka_artists_for_event( $post ) as $aid ) {
+				$aid = (int) $aid;
+				$out[] = array(
+					'url'   => (string) get_permalink( $aid ),
+					'name'  => (string) get_the_title( $aid ),
+					'photo' => has_post_thumbnail( $aid ) ? (string) get_the_post_thumbnail_url( $aid, 'medium' ) : '',
+					'text'  => trim( wp_strip_all_tags( (string) get_post_field( 'post_excerpt', $aid ) ) ),
+					'more'  => 'Афиша, видео и история артиста',
+				);
+			}
+			return $out;
+		} catch ( Exception $e ) {
+			return array();
+		} catch ( Error $e ) {
+			return array();
+		}
+	}
+
+	/**
 	 * Сбросить кэш главной (там карточки с программами).
 	 */
 	public static function flush_home() {

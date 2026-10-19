@@ -177,6 +177,9 @@ class KEP_Parser {
 			if ( ! ( $block instanceof DOMElement ) ) {
 				continue;
 			}
+			if ( in_array( strtolower( $block->tagName ), array( 'style', 'script', 'template', 'noscript' ), true ) ) {
+				continue; // стили и скрипты других плагинов: не содержимое анонса
+			}
 			$cls = ' ' . preg_replace( '/\s+/', ' ', $block->getAttribute( 'class' ) ) . ' ';
 			if ( preg_match( '/ (bottom_block|concert_nav|buy_button|share_panel) /', $cls ) ) {
 				continue;

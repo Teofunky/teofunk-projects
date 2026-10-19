@@ -153,6 +153,9 @@ class KEP_Front {
 				return self::fail( $html, 'Кнопка Ticketscloud есть в анонсе, но не распознана.' );
 			}
 			$post_id = self::$post_id;
+			if ( empty( $d['artists'] ) ) {
+				$d['artists'] = KEP_Data::ka_artists( $post_id );
+			}
 			$slug    = (string) get_post_field( 'post_name', $post_id );
 			$entry   = KEP_Data::by_slug( $slug );
 			$date    = $entry ? $entry['date'] : KEP_Parser::infer_date( $d['day'], $d['month'], $d['upcoming'], current_time( 'timestamp' ) );

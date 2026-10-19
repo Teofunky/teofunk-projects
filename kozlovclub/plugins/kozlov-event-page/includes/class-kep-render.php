@@ -65,7 +65,7 @@ class KEP_Render {
 		}
 		$h .= '<button type="button" data-kep-share>' . self::icon( 'share' ) . 'Поделиться</button>';
 		$h .= '</div>';
-		$h .= self::other_dates( $d );
+		$h .= self::other_dates( $d, $ctx );
 		$h .= '</aside>';
 
 		// Основная колонка.
@@ -239,34 +239,37 @@ class KEP_Render {
 	}
 
 	/**
-	 * Другие даты этого концерта: плашки «23 окт / Пт · 20:00».
+	 * Даты этого концерта как маленький календарь: день недели, число, месяц.
+	 * Текущая дата в ряду выделена, остальные ведут на свои страницы. Прошедшие не показываются.
 	 */
-	private static function other_dates( $d ) {
+	private static function other_dates( $d, $ctx ) {
 		if ( empty( $d['other_dates'] ) ) {
 			return '';
 		}
+		$today = strtotime( gmdate( 'Y-m-d', current_time( 'timestamp' ) ) . ' 12:00:00 UTC' );
 		$items = array();
 		foreach ( $d['other_dates'] as $i => $o ) {
-			$slug  = preg_match( '#/event/([^/?\#]+)#', $o['url'], $m ) ? rawurldecode( $m[1] ) : '';
-			$e     = '' !== $slug ? KEP_Data::by_slug( $slug ) : null;
-			$ts    = ( $e && '' !== $e['date'] ) ? strtotime( $e['date'] . ' 12:00:00 UTC' ) : 0;
-			$main  = $o['label'];
-			$sub   = '';
-			if ( $ts ) {
-				$main = (int) gmdate( 'j', $ts ) . ' ' . self::MONTHS_SHORT[ (int) gmdate( 'n', $ts ) ];
-				$sub  = self::WD_BY_N[ (int) gmdate( 'N', $ts ) ];
-				if ( '' !== $e['time'] && $e['time'] !== $d['time'] ) {
-					$sub .= ' · ' . self::show_time( $e['time'] );
-				}
-			} else {
-				$main = trim( preg_replace( '/\s+' . gmdate( 'Y' ) . '\s*$/u', '', $main ) );
+			$slug = preg_match( '#/event/([^/?\#]+)#', $o['url'], $m ) ? rawurldecode( $m[1] ) : '';
+			$e    = '' !== $slug ? KEP_Data::by_slug( $slug ) : null;
+			$ts   = ( $e && '' !== $e['date'] ) ? strtotime( $e['date'] . ' 12:00:00 UTC' ) : self::label_ts( $o['label'] );
+			if ( $ts && $ts < $today ) {
+				continue;
 			}
 			$items[] = array(
 				'url'  => $o['url'],
-				'main' => $main,
-				'sub'  => $sub,
+				'ts'   => $ts,
+				'time' => ( $e && '' !== $e['time'] && $e['time'] !== $d['time'] ) ? self::show_time( $e['time'] ) : '',
+				'text' => $o['label'],
+				'cur'  => false,
 				'sort' => $ts ? $ts : PHP_INT_MAX - 1000 + $i,
 			);
+		}
+		if ( ! $items ) {
+			return '';
+		}
+		$cur_ts = '' !== (string) $ctx['date'] ? strtotime( $ctx['date'] . ' 12:00:00 UTC' ) : 0;
+		if ( $cur_ts ) {
+			$items[] = array( 'url' => '', 'ts' => $cur_ts, 'time' => '', 'text' => '', 'cur' => true, 'sort' => $cur_ts );
 		}
 		usort(
 			$items,
@@ -274,15 +277,37 @@ class KEP_Render {
 				return $a['sort'] <=> $b['sort'];
 			}
 		);
-		$h = '<nav class="kep-dates" aria-label="Другие даты этого концерта"><span class="kep-dates-l">Другие даты</span><ul class="kep-dates-list">';
+		$h = '<nav class="kep-dates" aria-label="Даты этого концерта"><span class="kep-dates-l">' . ( $cur_ts ? 'Даты концерта' : 'Другие даты' ) . '</span><ul class="kep-dates-list">';
 		foreach ( $items as $it ) {
-			$h .= '<li><a class="kep-date" href="' . esc_url( $it['url'] ) . '"><span class="kep-date-m">' . esc_html( $it['main'] ) . '</span>';
-			if ( '' !== $it['sub'] ) {
-				$h .= '<span class="kep-date-s">' . esc_html( $it['sub'] ) . '</span>';
+			if ( $it['ts'] ) {
+				$inner = '<span class="kep-date-w">' . esc_html( self::WD_BY_N[ (int) gmdate( 'N', $it['ts'] ) ] ) . '</span>'
+					. '<span class="kep-date-d">' . (int) gmdate( 'j', $it['ts'] ) . '</span>'
+					. '<span class="kep-date-m">' . esc_html( self::MONTHS_SHORT[ (int) gmdate( 'n', $it['ts'] ) ] . ( '' !== $it['time'] ? ' · ' . $it['time'] : '' ) ) . '</span>';
+				$label = (int) gmdate( 'j', $it['ts'] ) . ' ' . self::MONTHS_GEN[ (int) gmdate( 'n', $it['ts'] ) ];
+			} else {
+				$inner = '<span class="kep-date-d kep-date-d--text">' . esc_html( $it['text'] ) . '</span>';
+				$label = $it['text'];
 			}
-			$h .= '</a></li>';
+			if ( $it['cur'] ) {
+				$h .= '<li><span class="kep-date is-cur" aria-current="date" title="' . esc_attr( 'Вы смотрите ' . $label ) . '">' . $inner . '</span></li>';
+			} else {
+				$h .= '<li><a class="kep-date" href="' . esc_url( $it['url'] ) . '" aria-label="' . esc_attr( $label . ( '' !== $it['time'] ? ', ' . $it['time'] : '' ) ) . '">' . $inner . '</a></li>';
+			}
 		}
 		return $h . '</ul></nav>';
+	}
+
+	/**
+	 * Дата из подписи темы «23 окт 2026».
+	 */
+	private static function label_ts( $label ) {
+		if ( ! preg_match( '/(\d{1,2})\s+([а-яё]{3})[а-яё]*\.?\s+(\d{4})/ui', (string) $label, $m ) ) {
+			return 0;
+		}
+		$mon = mb_strtolower( $m[2], 'UTF-8' );
+		$mon = 'май' === $mon ? 'мая' : $mon;
+		$n   = array_search( $mon, self::MONTHS_SHORT, true );
+		return $n ? (int) strtotime( sprintf( '%04d-%02d-%02d 12:00:00 UTC', (int) $m[3], (int) $n, (int) $m[1] ) ) : 0;
 	}
 
 	/**
