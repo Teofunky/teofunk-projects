@@ -61,3 +61,13 @@
 .kep-check--warn { border-left-color: #dba617; }
 .kep-check--bad { border-left-color: #d63638; background: #fcf0f1; }
 .kep-check-time { color: #646970; margin-left: 6px; }
+
+/* Поля «Коротко о концерте» и «Важно знать». */
+.kep-t-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px 24px; margin-top: 4px; }
+.kep-t-f { display: flex; flex-direction: column; gap: 6px; }
+.kep-t-l { font-weight: 600; font-size: 14px; }
+.kep-t-l span { display: block; font-weight: 400; font-size: 12px; color: #646970; margin-top: 2px; }
+.kep-t-f textarea { width: 100%; min-height: 110px; font-size: 14px; line-height: 1.5; }
+.kep-t-h { margin: 0; font-size: 12px; line-height: 1.45; color: #646970; }
+.kep-t-foot { margin: 12px 0 0; font-size: 12px; color: #646970; }
+.kep-t-foot .kep-a-saved { display: inline; margin-left: 6px; }

@@ -426,8 +426,15 @@ class KEP_Parser {
 	 * @return string
 	 */
 	public static function kind( $text ) {
-		if ( preg_match( '/(В анонсе использован|Внимание!\s*Состав|Состав коллектива может быть изм|Состав (может|могут) быть изм)/iu', $text ) ) {
+		if ( preg_match( '/(В анонсе использован|^\s*Фото( для анонса)?\s*:|оставляет за собой право|Внимание!\s*Состав|Состав коллектива может быть изм|Состав (может|могут) быть изм)/iu', $text ) ) {
 			return 'note';
+		}
+		// Практические сноски (адрес, вход, депозит, бронь): на новой странице они у кнопки покупки, а не первым абзацем.
+		if ( mb_strlen( $text, 'UTF-8' ) <= 320 && (
+			preg_match( '/^\s*(Внимание|Обратите внимание|Важно)\s*[!:.]/iu', $text )
+			|| preg_match( '/(депозит|бронирован|забронир|вход через|находится по адресу|дресс-код)/iu', $text )
+		) ) {
+			return 'notice';
 		}
 		if ( preg_match( '/(выйд[уеё]т|выступ[ая]т)[^:.]{0,40}:/iu', $text ) || preg_match( '/^\s*(В составе|Состав)\s*:/iu', $text ) ) {
 			return 'lineup';
@@ -683,6 +690,99 @@ class KEP_Parser {
 	 */
 	public static function utrim( $s, $chars ) {
 		return (string) preg_replace( '/^[' . $chars . ']+|[' . $chars . ']+$/u', '', (string) $s );
+	}
+
+	/**
+	 * Текст для сравнения «то же самое или нет»: только буквы и цифры в нижнем регистре.
+	 */
+	public static function norm( $s ) {
+		$s = html_entity_decode( wp_strip_all_tags( (string) $s ), ENT_QUOTES, 'UTF-8' );
+		return (string) preg_replace( '/[^\p{L}\p{N}]+/u', '', mb_strtolower( $s, 'UTF-8' ) );
+	}
+
+	/**
+	 * Слова текста (буквы и цифры, нижний регистр) без повторов.
+	 */
+	public static function words( $s ) {
+		$s = mb_strtolower( html_entity_decode( wp_strip_all_tags( (string) $s ), ENT_QUOTES, 'UTF-8' ), 'UTF-8' );
+		preg_match_all( '/[\p{L}\p{N}]+/u', $s, $m );
+		return array_values( array_unique( $m[0] ) );
+	}
+
+	/**
+	 * Одно и то же сказано разными словами? Доля слов короткого текста, которые есть в длинном.
+	 */
+	public static function same_text( $a, $b, $min = 0.8 ) {
+		$wa = self::words( $a );
+		$wb = self::words( $b );
+		$n  = min( count( $wa ), count( $wb ) );
+		if ( $n < 3 ) {
+			return '' !== self::norm( $a ) && self::norm( $a ) === self::norm( $b );
+		}
+		return count( array_intersect( $wa, $wb ) ) / $n >= $min;
+	}
+
+	/**
+	 * Сноска из текста анонса: без «Внимание!» в начале (блок и так называется «Важно знать») и без цвета из редактора.
+	 */
+	public static function notice_html( $html ) {
+		$h = wp_kses( (string) $html, KEP_Data::INLINE_TAGS );
+		$h = preg_replace( '/^((?:\s*<(?:strong|b|em|i)>)*)\s*(?:Внимание|Обратите внимание|Важно)\s*[!:.]+\s*/iu', '$1', $h );
+		$h = preg_replace( '#<(strong|b|em|i)>\s*</\1>#u', '', $h );
+		$h = trim( preg_replace( '/^(\s*<br\s*\/?>)+/iu', '', $h ) );
+		// Целиком жирная сноска: рамка и так выделяет, жирный не нужен.
+		if ( preg_match( '#^<(strong|b)>(.*)</\1>$#su', $h, $m ) && false === strpos( $m[2], '<' . $m[1] . '>' ) ) {
+			$h = trim( $m[2] );
+		}
+		return self::decaps( $h );
+	}
+
+	/**
+	 * Сноска, набранная заглавными: в обычный регистр, чтобы читалась.
+	 * С заглавной остаются начало предложения, слова в «кавычках», латиница и слово после «ул.», «м.» и т. п.
+	 */
+	public static function decaps( $h ) {
+		$plain = wp_strip_all_tags( $h );
+		preg_match_all( '/\p{Lu}/u', $plain, $up );
+		preg_match_all( '/\p{L}/u', $plain, $all );
+		if ( count( $all[0] ) < 8 || count( $up[0] ) / count( $all[0] ) < 0.6 ) {
+			return $h;
+		}
+		$st    = array( 'start' => true, 'cap' => false, 'quote' => false, 'prev' => '' );
+		$parts = preg_split( '/(<[^>]+>)/u', $h, -1, PREG_SPLIT_DELIM_CAPTURE );
+		foreach ( $parts as $k => $part ) {
+			if ( '' === $part || '<' === $part[0] ) {
+				continue;
+			}
+			$parts[ $k ] = preg_replace_callback(
+				'/[\p{L}]+|[^\p{L}]+/u',
+				function ( $m ) use ( &$st ) {
+					$t = $m[0];
+					if ( ! preg_match( '/\p{L}/u', $t ) ) {
+						if ( preg_match( '/[.!?]/u', $t ) && ! in_array( $st['prev'], array( 'ул', 'пер', 'м', 'руб', 'д', 'стр', 'пр', 'пл' ), true ) ) {
+							$st['start'] = true;
+						}
+						if ( false !== mb_strpos( $t, '«', 0, 'UTF-8' ) ) {
+							$st['quote'] = true;
+						}
+						return $t;
+					}
+					$low = mb_strtolower( $t, 'UTF-8' );
+					$out = $t;
+					if ( mb_strtoupper( $t, 'UTF-8' ) === $t ) {
+						$title = $st['start'] || $st['cap'] || $st['quote'] || preg_match( '/^[a-z]/', $low );
+						$out   = $title ? mb_strtoupper( mb_substr( $low, 0, 1, 'UTF-8' ), 'UTF-8' ) . mb_substr( $low, 1, null, 'UTF-8' ) : $low;
+					}
+					$st['cap']   = in_array( $low, array( 'ул', 'улица', 'улице', 'улицы', 'пер', 'переулок', 'м', 'метро', 'пл', 'площадь', 'проспект', 'пр', 'бульвар' ), true );
+					$st['start'] = false;
+					$st['quote'] = false;
+					$st['prev']  = $low;
+					return $out;
+				},
+				$part
+			);
+		}
+		return implode( '', $parts );
 	}
 
 	public static function count_img( $html ) {

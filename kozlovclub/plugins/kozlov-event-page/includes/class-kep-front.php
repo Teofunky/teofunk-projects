@@ -60,6 +60,11 @@ class KEP_Front {
 			self::no_cache();
 		}
 		if ( ! self::should_render( $post_id ) ) {
+			// Старая страница: тексты из полей «Коротко о концерте» и «Важно знать» тоже должны быть видны.
+			if ( '' !== KEP_Data::lead( $post_id ) || KEP_Data::notes( $post_id ) ) {
+				self::$post_id = $post_id;
+				ob_start( array( __CLASS__, 'filter_old' ) );
+			}
 			return;
 		}
 		self::$post_id = $post_id;
@@ -156,6 +161,7 @@ class KEP_Front {
 			if ( empty( $d['artists'] ) ) {
 				$d['artists'] = KEP_Data::ka_artists( $post_id );
 			}
+			$d = self::apply_fields( $d, $post_id );
 			$slug    = (string) get_post_field( 'post_name', $post_id );
 			$entry   = KEP_Data::by_slug( $slug );
 			$date    = $entry ? $entry['date'] : KEP_Parser::infer_date( $d['day'], $d['month'], $d['upcoming'], current_time( 'timestamp' ) );
@@ -181,13 +187,109 @@ class KEP_Front {
 	}
 
 	/**
+	 * Поля редактора поверх разобранного анонса: текст сверху и сноски.
+	 * Если тот же текст остался и в анонсе, он не повторяется.
+	 *
+	 * @param array $d       Данные анонса.
+	 * @param int   $post_id ID записи.
+	 * @return array
+	 */
+	public static function apply_fields( $d, $post_id ) {
+		$lead  = KEP_Data::lead( $post_id );
+		$notes = KEP_Data::notes( $post_id );
+		if ( '' !== $lead ) {
+			$ln = KEP_Parser::norm( $lead );
+			foreach ( $d['paras'] as $i => $p ) {
+				if ( 'lead' === $p['kind'] ) {
+					$d['paras'][ $i ]['kind'] = 'text';
+				}
+				$pn = KEP_Parser::norm( $p['text'] );
+				if ( in_array( $d['paras'][ $i ]['kind'], array( 'text', 'notice' ), true ) && strlen( $pn ) > 20 && false !== strpos( $ln, $pn ) ) {
+					$d['paras'][ $i ]['kind'] = 'dup'; // этот абзац уже стоит сверху
+				}
+			}
+			$d['lead']      = wp_strip_all_tags( $lead );
+			$d['lead_html'] = $lead;
+			$d['lead_rich'] = true;
+		}
+		$d['notices'] = $notes;
+		foreach ( $d['paras'] as $i => $p ) {
+			if ( 'notice' !== $p['kind'] ) {
+				continue;
+			}
+			$html = KEP_Parser::notice_html( $p['html'] );
+			$dup  = '' === KEP_Parser::norm( $html );
+			foreach ( $d['notices'] as $have ) {
+				if ( KEP_Parser::same_text( $have, $html ) ) {
+					$dup = true; // та же сноска уже есть в поле «Важно знать»
+				}
+			}
+			if ( ! $dup ) {
+				$d['notices'][] = $html;
+			}
+		}
+		return $d;
+	}
+
+	/**
+	 * Старая страница: тексты из полей редактора вставляются в начало описания,
+	 * если такого текста там ещё нет. Иначе после переноса сносок в поле они пропали бы со старой страницы.
+	 *
+	 * @param string $html Страница.
+	 * @return string
+	 */
+	public static function filter_old( $html ) {
+		try {
+			return self::inject_old( $html, self::$post_id );
+		} catch ( Exception $e ) {
+			return $html;
+		} catch ( Error $e ) {
+			return $html;
+		}
+	}
+
+	public static function inject_old( $html, $post_id ) {
+		if ( ! is_string( $html ) || ! $post_id ) {
+			return $html;
+		}
+		$lead  = KEP_Data::lead( $post_id );
+		$notes = KEP_Data::notes( $post_id );
+		if ( '' === $lead && ! $notes ) {
+			return $html;
+		}
+		$frag = KEP_Parser::find_fragment( $html );
+		if ( ! $frag || ! preg_match( '/<div\b[^>]*\bclass\s*=\s*["\'][^"\']*\bdescription\b[^"\']*["\'][^>]*>/i', $frag['html'], $m, PREG_OFFSET_CAPTURE ) ) {
+			return $html;
+		}
+		$desc  = KEP_Parser::words( substr( $frag['html'], $m[0][1] ) );
+		$known = function ( $s ) use ( $desc ) {
+			$w = KEP_Parser::words( $s );
+			return $w && count( array_intersect( $w, $desc ) ) / count( $w ) >= 0.8;
+		};
+		$extra = '';
+		foreach ( $notes as $n ) {
+			if ( ! $known( $n ) ) {
+				$extra .= '<p class="kep-old-note"><strong style="color:#f24841">' . $n . '</strong></p>';
+			}
+		}
+		if ( '' !== $lead && ! $known( $lead ) ) {
+			$extra .= $lead;
+		}
+		if ( '' === $extra ) {
+			return $html;
+		}
+		$at = $frag['start'] + $m[0][1] + strlen( $m[0][0] );
+		return substr_replace( $html, '<div class="kep-old-extra textblock">' . $extra . '</div>', $at, 0 );
+	}
+
+	/**
 	 * Вернуть страницу как есть и запомнить причину для админки.
 	 */
 	private static function fail( $html, $why ) {
 		$last = get_option( 'kep_last_error' );
 		$same = is_array( $last ) && isset( $last['post_id'], $last['time'] ) && (int) $last['post_id'] === self::$post_id && $last['time'] > time() - 600;
 		if ( $same ) {
-			return str_replace( 'kep-page', 'kep-off', $html );
+			return self::inject_old( str_replace( 'kep-page', 'kep-off', $html ), self::$post_id );
 		}
 		update_option(
 			'kep_last_error',
@@ -199,7 +301,7 @@ class KEP_Front {
 			false
 		);
 		$html = str_replace( 'kep-page', 'kep-off', $html );
-		return $html;
+		return self::inject_old( $html, self::$post_id );
 	}
 
 	/**

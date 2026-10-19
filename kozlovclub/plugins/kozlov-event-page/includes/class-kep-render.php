@@ -59,6 +59,7 @@ class KEP_Render {
 			$h .= '</ul>';
 		}
 		$h .= '<div class="kep-buy" id="kep-buy">' . self::buy( $d, $ctx, $s, false ) . '</div>';
+		$h .= self::notices( $d );
 		$h .= '<div class="kep-card-links">';
 		if ( '' !== $d['calendar'] && 'past' !== $d['type'] ) {
 			$h .= '<a href="' . esc_url( $d['calendar'] ) . '">' . self::icon( 'cal' ) . 'В календарь</a>';
@@ -183,7 +184,9 @@ class KEP_Render {
 			return '';
 		}
 		$h = '<section class="kep-box kep-intro">';
-		if ( '' !== $d['lead'] ) {
+		if ( ! empty( $d['lead_rich'] ) ) {
+			$h .= '<div class="kep-lead">' . wp_kses_post( $d['lead_html'] ) . '</div>'; // из поля «Коротко о концерте»
+		} elseif ( '' !== $d['lead'] ) {
 			$h .= '<p class="kep-lead">' . wp_kses_post( '' !== $d['lead_html'] ? $d['lead_html'] : $d['lead'] ) . '</p>';
 		}
 		foreach ( $d['quotes'] as $q ) {
@@ -236,6 +239,20 @@ class KEP_Render {
 			$h .= '</span></li>';
 		}
 		return $h . '</ul></section>';
+	}
+
+	/**
+	 * «Важно знать»: адрес и вход, депозит, бронь. Сразу под кнопкой покупки, где решают, идти ли.
+	 */
+	private static function notices( $d ) {
+		if ( empty( $d['notices'] ) ) {
+			return '';
+		}
+		$h = '<div class="kep-notices" role="note" aria-label="Важно знать"><span class="kep-notices-l">Важно знать</span><ul>';
+		foreach ( $d['notices'] as $n ) {
+			$h .= '<li>' . wp_kses( $n, KEP_Data::INLINE_TAGS ) . '</li>';
+		}
+		return $h . '</ul></div>';
 	}
 
 	/**

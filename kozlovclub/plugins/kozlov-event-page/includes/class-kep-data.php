@@ -37,6 +37,66 @@ class KEP_Data {
 		return trim( (string) get_post_meta( $post_id, KEP_META_PROGRAM, true ) );
 	}
 
+	/** Разрешённая разметка в тексте сверху и в сносках: жирный, курсив, ссылки, перенос строки. */
+	const INLINE_TAGS = array(
+		'strong' => array(),
+		'b'      => array(),
+		'em'     => array(),
+		'i'      => array(),
+		'br'     => array(),
+		'a'      => array( 'href' => true, 'target' => true, 'rel' => true ),
+	);
+
+	/**
+	 * Очистить строку текста для поля «Коротко о концерте» или «Важно знать».
+	 *
+	 * @param string $s Текст.
+	 * @return string
+	 */
+	public static function inline( $s ) {
+		$s = wp_kses( (string) $s, self::INLINE_TAGS );
+		return trim( preg_replace( '/[ \t]+/u', ' ', $s ) );
+	}
+
+	/**
+	 * «Коротко о концерте»: текст для верха страницы, абзацы через пустую строку.
+	 *
+	 * @param int $post_id ID записи.
+	 * @return string HTML из абзацев <p>.
+	 */
+	public static function lead( $post_id ) {
+		$raw = trim( (string) get_post_meta( $post_id, KEP_META_LEAD, true ) );
+		if ( '' === $raw ) {
+			return '';
+		}
+		$out = '';
+		foreach ( preg_split( '/\n\s*\n/u', str_replace( "\r", '', $raw ) ) as $para ) {
+			$para = self::inline( nl2br( trim( $para ), false ) );
+			if ( '' !== $para ) {
+				$out .= '<p>' . $para . '</p>';
+			}
+		}
+		return $out;
+	}
+
+	/**
+	 * «Важно знать»: сноски по одной на строку (депозит, бронь, вход, адрес).
+	 *
+	 * @param int $post_id ID записи.
+	 * @return string[] HTML строк.
+	 */
+	public static function notes( $post_id ) {
+		$raw = trim( (string) get_post_meta( $post_id, KEP_META_NOTES, true ) );
+		$out = array();
+		foreach ( preg_split( '/\n/u', str_replace( "\r", '', $raw ) ) as $line ) {
+			$line = self::inline( $line );
+			if ( '' !== $line ) {
+				$out[] = $line;
+			}
+		}
+		return array_slice( $out, 0, 8 );
+	}
+
 	/**
 	 * Проверка фото: размер и пропорции. Те же правила, что в подсказке в админке.
 	 *

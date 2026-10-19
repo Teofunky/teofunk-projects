@@ -40,6 +40,34 @@ class KEP_Admin {
 
 	public static function add_box() {
 		add_meta_box( 'kep-box-wrap', 'Новая страница концерта', array( __CLASS__, 'box' ), KEP_POST_TYPE, 'side', 'high' );
+		add_meta_box( 'kep-texts-wrap', 'Новая страница: текст сверху и «Важно знать»', array( __CLASS__, 'texts_box' ), KEP_POST_TYPE, 'normal', 'high' );
+	}
+
+	/**
+	 * Два отдельных поля вместо «первого абзаца» и сносок внутри «Текстового поля 1».
+	 *
+	 * @param WP_Post $post Запись.
+	 */
+	public static function texts_box( $post ) {
+		$lead  = (string) get_post_meta( $post->ID, KEP_META_LEAD, true );
+		$notes = (string) get_post_meta( $post->ID, KEP_META_NOTES, true );
+		?>
+		<div id="kep-texts" class="kep-t" data-post="<?php echo esc_attr( $post->ID ); ?>" data-nonce="<?php echo esc_attr( wp_create_nonce( 'kep_box_' . $post->ID ) ); ?>">
+			<div class="kep-t-grid">
+				<div class="kep-t-f">
+					<label class="kep-t-l" for="kep-lead">Коротко о концерте <span>первый текст на новой странице, перед видео</span></label>
+					<textarea id="kep-lead" name="kep_lead" rows="5" maxlength="700" data-kep-field="lead" placeholder="1–3 предложения: кто выступает, что за программа, почему стоит прийти."><?php echo esc_textarea( $lead ); ?></textarea>
+					<p class="kep-t-h"><span data-kep-count="lead"><?php echo (int) mb_strlen( $lead, 'UTF-8' ); ?></span> знаков, лучше до 300. Пусто: сверху встанет первый абзац текста анонса. Если этот же текст остался в «Текстовом поле 1», на новой странице он не повторится.</p>
+				</div>
+				<div class="kep-t-f">
+					<label class="kep-t-l" for="kep-notes">Важно знать <span>адрес и вход, депозит, бронь: по одной сноске на строку</span></label>
+					<textarea id="kep-notes" name="kep_notes" rows="5" maxlength="1200" data-kep-field="notes" placeholder="Сцена «Unplugged»: ул. Мясницкая, 15, вход через Lions Head Pub"><?php echo esc_textarea( $notes ); ?></textarea>
+					<p class="kep-t-h">Показываются в рамке «Важно знать» под кнопкой покупки. Сноски, которые уже написаны в тексте анонса («Внимание!…», депозит, бронь, вход), плагин находит сам. Лучше перенести их сюда: текст анонса останется только о концерте.</p>
+				</div>
+			</div>
+			<p class="kep-t-foot">Можно <b>жирный</b> и ссылки. Оба поля видны и на старой странице, вверху описания, если такого текста там ещё нет. <span class="kep-a-saved" data-kep-saved aria-live="polite">Сохраняется сразу.</span></p>
+		</div>
+		<?php
 	}
 
 	/**
@@ -168,6 +196,12 @@ class KEP_Admin {
 		if ( isset( $_POST['kep_program'] ) ) {
 			$changed = self::set_program( $post_id, sanitize_text_field( wp_unslash( $_POST['kep_program'] ) ) ) || $changed;
 		}
+		if ( isset( $_POST['kep_lead'] ) ) {
+			$changed = self::set_text( $post_id, KEP_META_LEAD, wp_unslash( $_POST['kep_lead'] ), 700 ) || $changed; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+		}
+		if ( isset( $_POST['kep_notes'] ) ) {
+			$changed = self::set_text( $post_id, KEP_META_NOTES, wp_unslash( $_POST['kep_notes'] ), 1200 ) || $changed; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+		}
 		if ( $changed ) {
 			KEP_Data::flush_post( $post_id );
 		}
@@ -187,6 +221,24 @@ class KEP_Admin {
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * Текстовое поле: жирный, курсив и ссылки, переносы строк сохраняются.
+	 */
+	private static function set_text( $post_id, $key, $value, $max ) {
+		$value = trim( str_replace( "\r", '', wp_kses( (string) $value, KEP_Data::INLINE_TAGS ) ) );
+		$value = mb_substr( $value, 0, $max, 'UTF-8' );
+		$old   = (string) get_post_meta( $post_id, $key, true );
+		if ( $old === $value ) {
+			return false;
+		}
+		if ( '' === $value ) {
+			delete_post_meta( $post_id, $key );
+		} else {
+			update_post_meta( $post_id, $key, wp_slash( $value ) );
+		}
+		return true;
 	}
 
 	private static function set_program( $post_id, $value ) {
@@ -225,6 +277,10 @@ class KEP_Admin {
 			self::set_hero( $post_id, $id );
 		} elseif ( 'program' === $field ) {
 			self::set_program( $post_id, sanitize_text_field( $value ) );
+		} elseif ( 'lead' === $field ) {
+			self::set_text( $post_id, KEP_META_LEAD, $value, 700 );
+		} elseif ( 'notes' === $field ) {
+			self::set_text( $post_id, KEP_META_NOTES, $value, 1200 );
 		} else {
 			wp_send_json_error( array( 'message' => 'неизвестное поле' ), 400 );
 		}

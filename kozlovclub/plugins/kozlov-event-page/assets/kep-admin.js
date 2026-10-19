@@ -3,12 +3,14 @@
 	'use strict';
 
 	var box = document.getElementById('kep-box');
-	if (!box) {
+	var texts = document.getElementById('kep-texts');
+	if (!box && !texts) {
 		return;
 	}
-	var postId = box.getAttribute('data-post');
-	var nonce = box.getAttribute('data-nonce');
-	var q = function (s) { return box.querySelector(s); };
+	var host = box || texts;
+	var postId = host.getAttribute('data-post');
+	var nonce = host.getAttribute('data-nonce');
+	var q = function (s) { return box ? box.querySelector(s) : null; };
 	var status = q('[data-kep-status]');
 	var frameEl = q('[data-kep-frame]');
 	var check = q('[data-kep-check]');
@@ -21,7 +23,13 @@
 	var mediaFrame = null;
 	var timer = null;
 	var queue = Promise.resolve();
-	var programSeq = 0;
+	var seqs = {};
+	var textSaved = texts ? texts.querySelector('[data-kep-saved]') : null;
+	var DONE = {
+		program: 'Название программы сохранено.',
+		lead: 'Текст сверху сохранён.',
+		notes: 'Сноски сохранены.'
+	};
 
 	// Те же правила, что в PHP (KEP_Data::check_size).
 	function localCheck(w, h) {
@@ -67,6 +75,9 @@
 	}
 
 	function apply(data) {
+		if (!box) {
+			return;
+		}
 		status.className = 'kep-a-status kep-a-status--' + data.status.level;
 		status.textContent = data.status.text;
 		setFrame(data.img);
@@ -79,8 +90,8 @@
 	// Сохранения идут строго по очереди: старый ответ не перезапишет новое значение.
 	function send(field, value, seq) {
 		queue = queue.then(function () {
-			if (field === 'program' && seq && seq !== programSeq) {
-				return null;
+			if (seq && seq !== seqs[field]) {
+				return null; // пока ждали, введено новое значение: сохранится оно
 			}
 			return post(field, value);
 		});
@@ -88,14 +99,15 @@
 	}
 
 	function post(field, value) {
+		var out = (field === 'lead' || field === 'notes') ? textSaved : saved;
 		var fd = new FormData();
 		fd.append('action', 'kep_save');
 		fd.append('post_id', postId);
 		fd.append('nonce', nonce);
 		fd.append('field', field);
 		fd.append('value', value);
-		saved.className = 'kep-a-saved';
-		saved.textContent = 'Сохраняю…';
+		out.className = 'kep-a-saved';
+		out.textContent = 'Сохраняю…';
 		return fetch(window.ajaxurl, { method: 'POST', credentials: 'same-origin', body: fd })
 			.then(function (r) { return r.json(); })
 			.then(function (res) {
@@ -103,15 +115,38 @@
 					throw new Error(res && res.data && res.data.message ? res.data.message : 'ошибка сервера');
 				}
 				apply(res.data);
-				saved.className = 'kep-a-saved is-ok';
-				saved.textContent = field === 'hero'
+				out.className = 'kep-a-saved is-ok';
+				out.textContent = field === 'hero'
 					? (res.data.hero ? 'Фото сохранено.' : 'Фото убрано, страница снова старая.')
-					: 'Название программы сохранено.';
+					: DONE[field];
 			})
 			.catch(function (e) {
-				saved.className = 'kep-a-saved is-bad';
-				saved.textContent = 'Не сохранилось (' + e.message + '). Обновите страницу и попробуйте ещё раз.';
+				out.className = 'kep-a-saved is-bad';
+				out.textContent = 'Не сохранилось (' + e.message + '). Обновите страницу и попробуйте ещё раз.';
 			});
+	}
+
+	// Поля «Коротко о концерте» и «Важно знать»: сохраняются через секунду после последней правки.
+	if (texts) {
+		Array.prototype.forEach.call(texts.querySelectorAll('[data-kep-field]'), function (el) {
+			var field = el.getAttribute('data-kep-field');
+			var counter = texts.querySelector('[data-kep-count="' + field + '"]');
+			var t = null;
+			el.addEventListener('input', function () {
+				if (counter) {
+					counter.textContent = String(el.value.length);
+				}
+				clearTimeout(t);
+				textSaved.className = 'kep-a-saved';
+				textSaved.textContent = '';
+				var seq = seqs[field] = (seqs[field] || 0) + 1;
+				t = setTimeout(function () { send(field, el.value, seq); }, 900);
+			});
+		});
+	}
+
+	if (!box) {
+		return;
 	}
 
 	pick.addEventListener('click', function (e) {
@@ -154,7 +189,7 @@
 		clearTimeout(timer);
 		saved.className = 'kep-a-saved';
 		saved.textContent = '';
-		var seq = ++programSeq;
+		var seq = seqs.program = (seqs.program || 0) + 1;
 		timer = setTimeout(function () { send('program', program.value, seq); }, 700);
 	});
 
@@ -163,7 +198,8 @@
 			e.preventDefault();
 			program.value = suggest.getAttribute('data-kep-suggest');
 			clearTimeout(timer);
-			send('program', program.value, ++programSeq);
+			seqs.program = (seqs.program || 0) + 1;
+			send('program', program.value, seqs.program);
 		});
 	}
 }());
