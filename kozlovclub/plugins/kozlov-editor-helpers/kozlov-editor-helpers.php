@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name: Kozlov Editor Helpers
- * Description: Помощь редакторам афиши. Когда в анонсе вписывают код события Ticketscloud, поле «Ticketscloud ID» заполняется стандартным значением. Работает только в админке, тему, Magic Fields и данные концертов не меняет.
- * Version: 1.0.2
+ * Description: Помощь редакторам афиши: автоподстановка Ticketscloud ID при вводе кода события и часовой пояс UTC по умолчанию в новых событиях. Работает только в админке, тему, Magic Fields, календарь и данные концертов не меняет.
+ * Version: 1.1.0
  * Requires at least: 5.0
  * Requires PHP: 7.0
  * Author: Kozlov Club
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'KEH_VERSION', '1.0.2' );
+define( 'KEH_VERSION', '1.1.0' );
 define( 'KEH_FILE', __FILE__ );
 
 final class KEH_Plugin {
@@ -28,6 +28,9 @@ final class KEH_Plugin {
 
 	/** @var bool */
 	private static $print_config = false;
+
+	/** @var bool */
+	private static $is_new = false;
 
 	public static function init() {
 		if ( ! is_admin() ) {
@@ -46,6 +49,7 @@ final class KEH_Plugin {
 	public static function defaults() {
 		return array(
 			'enabled' => 1,
+			'tz_utc'  => 1,
 			'tc_id'   => self::DEFAULT_TC_ID,
 		);
 	}
@@ -114,6 +118,7 @@ final class KEH_Plugin {
 		}
 
 		$out['enabled'] = empty( $input['enabled'] ) ? 0 : 1;
+		$out['tz_utc']  = empty( $input['tz_utc'] ) ? 0 : 1;
 
 		$raw = isset( $input['tc_id'] ) ? trim( wp_unslash( (string) $input['tc_id'] ) ) : '';
 		if ( '' === $raw ) {
@@ -230,6 +235,52 @@ final class KEH_Plugin {
 		return $out;
 	}
 
+	/** Только чтение: пояс сайта и пояса будущих опубликованных концертов. */
+	private static function diagnose_tz() {
+		global $wpdb;
+		$site = (string) get_option( 'timezone_string' );
+		if ( '' === $site ) {
+			$off  = (float) get_option( 'gmt_offset' );
+			$site = 'UTC' . ( $off >= 0 ? '+' : '' ) . $off;
+		}
+		$out    = array( 'site' => $site, 'counts' => null, 'wrong' => array() );
+		$events = self::events_table();
+		if ( ! $events ) {
+			return $out;
+		}
+		$types = self::post_types();
+		$in    = implode( ',', array_fill( 0, count( $types ), '%s' ) );
+		$now   = time();
+
+		$suppress = $wpdb->suppress_errors( true ); // если в таблице нет колонки пояса, просто покажем «не найдено»
+		$counts   = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT e.timezone_name AS tz, COUNT(*) AS n
+				FROM `{$events}` e JOIN {$wpdb->posts} p ON p.ID = e.post_id
+				WHERE p.post_type IN ({$in}) AND p.post_status = 'publish' AND e.start > %d
+				GROUP BY e.timezone_name ORDER BY n DESC",
+				array_merge( $types, array( $now ) )
+			),
+			ARRAY_A
+		);
+		$wrong    = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT p.ID AS id, p.post_title AS title, e.start AS start, e.timezone_name AS tz
+				FROM `{$events}` e JOIN {$wpdb->posts} p ON p.ID = e.post_id
+				WHERE p.post_type IN ({$in}) AND p.post_status = 'publish' AND e.start > %d
+					AND ( e.timezone_name IS NULL OR e.timezone_name <> 'UTC' )
+				ORDER BY e.start LIMIT 30",
+				array_merge( $types, array( $now ) )
+			),
+			ARRAY_A
+		);
+		$wpdb->suppress_errors( $suppress );
+
+		$out['counts'] = is_array( $counts ) ? $counts : null;
+		$out['wrong']  = is_array( $wrong ) ? $wrong : array();
+		return $out;
+	}
+
 	public static function render_page() {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
@@ -263,6 +314,16 @@ final class KEH_Plugin {
 							</p>
 						</td>
 					</tr>
+					<tr>
+						<th scope="row">Часовой пояс</th>
+						<td>
+							<label>
+								<input type="checkbox" name="<?php echo esc_attr( self::OPTION ); ?>[tz_utc]" value="1" <?php checked( 1, (int) $s['tz_utc'] ); ?> />
+								В новом событии сразу выбирать UTC (пустая строка под «UTC» в списке поясов)
+							</label>
+							<p class="description">В уже созданных событиях с другим поясом редактор увидит предупреждение и кнопку «Поставить UTC». Сам пояс там не меняется.</p>
+						</td>
+					</tr>
 				</table>
 				<?php submit_button(); ?>
 			</form>
@@ -272,8 +333,41 @@ final class KEH_Plugin {
 				<li>Редактор вписывает код события в поле «<?php echo esc_html( $f['code'] ); ?>», а поле «<?php echo esc_html( $f['id'] ); ?>» пустое: оно заполняется значением выше. Значение видно и его можно изменить вручную.</li>
 				<li>Редактор стирает код события: ID, который плагин сам подставил в этом сеансе, убирается. ID, который был раньше, не трогается: под полем появляется предупреждение и кнопка «Очистить ID».</li>
 				<li>ID подставляется только в однозначную пару полей (та же группа Magic Fields). Если пара неоднозначна, плагин ничего не делает.</li>
-				<li>При открытии анонса ничего не меняется. Срабатывает только на действие редактора с полем кода. Сохраняет как обычно Magic Fields, плагин сам в базу концертов не пишет.</li>
+				<li>При открытии анонса ID не меняется. Срабатывает только на действие редактора с полем кода. Сохраняет как обычно Magic Fields, плагин сам в базу концертов не пишет.</li>
+				<li>Часовой пояс: в новом событии в списке сразу выбрано UTC, как если бы редактор выбрал его сам. Сохраняет календарь штатно. В существующих событиях пояс не меняется без нажатия «Поставить UTC».</li>
 			</ul>
+
+			<h2>Часовой пояс</h2>
+			<?php $tz = self::diagnose_tz(); ?>
+			<p>Пояс сайта (Настройки → Общие): <code><?php echo esc_html( $tz['site'] ); ?></code>. Календарь берёт его по умолчанию для новых событий, поэтому без плагина там стоит не UTC. Менять пояс сайта не нужно: от него зависят даты записей и другие плагины.</p>
+			<?php if ( null === $tz['counts'] ) : ?>
+				<p>Таблица событий календаря не найдена, проверить пояса будущих концертов нельзя.</p>
+			<?php else : ?>
+				<table class="widefat striped" style="max-width:780px">
+					<thead><tr><th>Пояс у будущих концертов</th><th>Концертов</th></tr></thead>
+					<tbody>
+					<?php foreach ( $tz['counts'] as $r ) : ?>
+						<tr>
+							<td><code><?php echo esc_html( '' === (string) $r['tz'] ? '(пусто)' : $r['tz'] ); ?></code><?php echo 'UTC' === $r['tz'] ? ' <strong>правильно</strong>' : ''; ?></td>
+							<td><?php echo (int) $r['n']; ?></td>
+						</tr>
+					<?php endforeach; ?>
+					<?php if ( empty( $tz['counts'] ) ) : ?>
+						<tr><td colspan="2">Будущих опубликованных концертов нет.</td></tr>
+					<?php endif; ?>
+					</tbody>
+				</table>
+				<?php if ( empty( $tz['wrong'] ) ) : ?>
+					<p><strong>Все будущие концерты в UTC.</strong></p>
+				<?php else : ?>
+					<p>Будущие концерты не в UTC: на сайте их время показывается со сдвигом. Откройте, нажмите «Поставить UTC», проверьте время и сохраните.</p>
+					<ul style="list-style:disc;padding-left:20px">
+					<?php foreach ( $tz['wrong'] as $e ) : ?>
+						<li><a href="<?php echo esc_url( get_edit_post_link( (int) $e['id'] ) ); ?>"><?php echo esc_html( $e['title'] ); ?></a>: пояс <code><?php echo esc_html( $e['tz'] ); ?></code>, на сайте сейчас <?php echo esc_html( gmdate( 'd.m.Y H:i', (int) $e['start'] ) ); ?></li>
+					<?php endforeach; ?>
+					</ul>
+				<?php endif; ?>
+			<?php endif; ?>
 
 			<h2>Проверка полей</h2>
 			<?php if ( null === $rows ) : ?>
@@ -371,12 +465,17 @@ final class KEH_Plugin {
 		return $screen && in_array( $screen->post_type, self::post_types(), true );
 	}
 
+	private static function tc_active( $s ) {
+		return ! empty( $s['enabled'] ) && '' !== $s['tc_id'];
+	}
+
 	public static function enqueue( $hook ) {
 		$s = self::settings();
-		if ( empty( $s['enabled'] ) || '' === $s['tc_id'] || ! self::is_event_editor( $hook ) ) {
+		if ( ( ! self::tc_active( $s ) && empty( $s['tz_utc'] ) ) || ! self::is_event_editor( $hook ) ) {
 			return;
 		}
 		self::$print_config = true;
+		self::$is_new       = ( 'post-new.php' === $hook );
 		wp_enqueue_script(
 			'keh-editor',
 			plugins_url( 'assets/keh-editor.js', KEH_FILE ),
@@ -393,10 +492,13 @@ final class KEH_Plugin {
 		$s   = self::settings();
 		$f   = self::fields();
 		$cfg = array(
-			'codeField'   => $f['code'],
-			'idField'     => $f['id'],
-			'defaultId'   => $s['tc_id'],
-			'settingsUrl' => current_user_can( 'manage_options' ) ? admin_url( 'options-general.php?page=' . self::PAGE ) : '',
+			'tc' => self::tc_active( $s ) ? array(
+				'codeField'   => $f['code'],
+				'idField'     => $f['id'],
+				'defaultId'   => $s['tc_id'],
+				'settingsUrl' => current_user_can( 'manage_options' ) ? admin_url( 'options-general.php?page=' . self::PAGE ) : '',
+			) : null,
+			'tz' => empty( $s['tz_utc'] ) ? null : array( 'isNew' => self::$is_new ),
 		);
 		echo '<script type="application/json" id="keh-config">' . wp_json_encode( $cfg, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ) . '</script>' . "\n";
 	}
