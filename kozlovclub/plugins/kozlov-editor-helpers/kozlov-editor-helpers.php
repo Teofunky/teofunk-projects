@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Kozlov Editor Helpers
  * Description: Помощь редакторам афиши. Когда в анонсе вписывают код события Ticketscloud, поле «Ticketscloud ID» заполняется стандартным значением. Работает только в админке, тему, Magic Fields и данные концертов не меняет.
- * Version: 1.0.0
+ * Version: 1.0.1
  * Requires at least: 5.0
  * Requires PHP: 7.0
  * Author: Kozlov Club
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'KEH_VERSION', '1.0.0' );
+define( 'KEH_VERSION', '1.0.1' );
 define( 'KEH_FILE', __FILE__ );
 
 final class KEH_Plugin {
@@ -137,6 +137,20 @@ final class KEH_Plugin {
 		return is_array( $rows ) ? $rows : array();
 	}
 
+	/** Только чтение: какие значения ID уже сохранены у анонсов (до 5 самых частых). */
+	private static function diagnose_values() {
+		global $wpdb;
+		$f    = self::fields();
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT meta_value AS v, COUNT(*) AS n FROM {$wpdb->postmeta} WHERE meta_key = %s GROUP BY meta_value ORDER BY n DESC LIMIT 5",
+				$f['id']
+			),
+			ARRAY_A
+		);
+		return is_array( $rows ) ? $rows : array();
+	}
+
 	public static function render_page() {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return;
@@ -177,7 +191,8 @@ final class KEH_Plugin {
 			<h2>Как работает</h2>
 			<ul style="list-style:disc;padding-left:20px;max-width:780px">
 				<li>Редактор вписывает код события в поле «<?php echo esc_html( $f['code'] ); ?>», а поле «<?php echo esc_html( $f['id'] ); ?>» пустое: оно заполняется значением выше. Значение видно и его можно изменить вручную.</li>
-				<li>Редактор стирает код события, а в ID стоит стандартное значение: ID тоже очищается, чтобы у бесплатных и депозитных концертов не пропал их блок.</li>
+				<li>Редактор стирает код события: ID, который плагин сам подставил в этом сеансе, убирается. ID, который был раньше, не трогается: под полем появляется предупреждение и кнопка «Очистить ID».</li>
+				<li>ID подставляется только в однозначную пару полей (та же группа Magic Fields). Если пара неоднозначна, плагин ничего не делает.</li>
 				<li>При открытии анонса ничего не меняется. Срабатывает только на действие редактора с полем кода. Сохраняет как обычно Magic Fields, плагин сам в базу концертов не пишет.</li>
 			</ul>
 
@@ -209,6 +224,26 @@ final class KEH_Plugin {
 					</tbody>
 				</table>
 				<p class="description">Нормально: оба поля найдены, тип <code>textbox</code>, тип записи <code>ai1ec_event</code>.</p>
+			<?php endif; ?>
+
+			<h2>Значения ID, уже сохранённые в анонсах</h2>
+			<?php $vals = self::diagnose_values(); ?>
+			<?php if ( empty( $vals ) ) : ?>
+				<p>Сохранённых значений нет.</p>
+			<?php else : ?>
+				<table class="widefat striped" style="max-width:780px">
+					<thead><tr><th>Значение</th><th>Анонсов</th><th></th></tr></thead>
+					<tbody>
+					<?php foreach ( $vals as $v ) : ?>
+						<tr>
+							<td><code style="word-break:break-all"><?php echo '' === (string) $v['v'] ? '(пусто)' : esc_html( $v['v'] ); ?></code></td>
+							<td><?php echo (int) $v['n']; ?></td>
+							<td><?php echo ( (string) $v['v'] === $s['tc_id'] ) ? '<strong>совпадает с настройкой</strong>' : ''; ?></td>
+						</tr>
+					<?php endforeach; ?>
+					</tbody>
+				</table>
+				<p class="description">Нормально: почти все анонсы с ID хранят одно значение, и оно совпадает с настройкой. Если значений несколько, не включайте подстановку, пока не разберёмся.</p>
 			<?php endif; ?>
 		</div>
 		<?php

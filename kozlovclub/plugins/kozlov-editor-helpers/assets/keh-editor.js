@@ -1,4 +1,4 @@
-/* Kozlov Editor Helpers 1.0.0: автоподстановка Ticketscloud ID в редакторе анонса.
+/* Kozlov Editor Helpers 1.0.1: автоподстановка Ticketscloud ID в редакторе анонса.
  * Без jQuery и глобальных переменных. Любая ошибка гасится: редактор работает как раньше. */
 (function () {
 	'use strict';
@@ -25,38 +25,56 @@
 		return m ? { field: m[1], group: m[2], index: m[3] } : null;
 	}
 
-	function byName(field, group, index) {
-		return document.querySelector('[name="magicfields[' + field + '][' + group + '][' + index + ']"]');
-	}
-
-	// Пара для кода: ID с тем же номером группы и поля, затем первый ID в этой группе, затем первый ID вообще.
-	function partnerId(c, p) {
-		var el = byName(c.idField, p.group, p.index) || byName(c.idField, p.group, '1');
-		if (el) { return el; }
-		var all = document.querySelectorAll('[name^="magicfields[' + c.idField + ']["]');
+	// Поля одной группы Magic Fields. Перебор вместо селекторов с квадратными скобками в имени.
+	function inGroup(field, group) {
+		var all = document.querySelectorAll('input[name^="magicfields"], textarea[name^="magicfields"]');
+		var out = [];
 		for (var i = 0; i < all.length; i++) {
 			var q = parse(all[i]);
-			if (q && q.group === p.group) { return all[i]; }
+			if (q && q.field === field && q.group === group) { out.push({ el: all[i], index: q.index }); }
 		}
-		return all.length ? all[0] : null;
+		return out;
 	}
 
-	function note(idEl, text, c) {
+	// Только однозначная пара: тот же номер группы и поля,
+	// либо в группе ровно одно поле кода и ровно одно поле ID. Иначе ничего не трогаем.
+	function partnerId(c, p) {
+		var ids = inGroup(c.idField, p.group);
+		for (var i = 0; i < ids.length; i++) {
+			if (ids[i].index === p.index) { return ids[i].el; }
+		}
+		var codes = inGroup(c.codeField, p.group);
+		return (ids.length === 1 && codes.length === 1) ? ids[0].el : null;
+	}
+
+	function clearNote(idEl) {
+		var box = idEl.parentNode;
+		var n = box ? box.querySelector('.keh-note') : null;
+		if (n) { n.parentNode.removeChild(n); }
+	}
+
+	function note(idEl, text, c, opts) {
 		var box = idEl.parentNode;
 		if (!box) { return; }
-		var n = box.querySelector('.keh-note');
-		if (!text) {
-			if (n) { n.parentNode.removeChild(n); }
-			return;
-		}
-		if (!n) {
-			n = document.createElement('div');
-			n.className = 'keh-note';
-			n.style.cssText = 'margin:4px 0 0;font-size:12px;line-height:1.4;color:#2271b1;';
-			box.appendChild(n);
-		}
+		clearNote(idEl);
+		var n = document.createElement('div');
+		n.className = 'keh-note';
+		n.style.cssText = 'margin:4px 0 0;font-size:12px;line-height:1.4;color:' + (opts && opts.warn ? '#b32d2e' : '#2271b1') + ';';
 		n.textContent = text;
-		if (c.settingsUrl) {
+		if (opts && opts.clearButton) {
+			n.appendChild(document.createTextNode(' '));
+			var b = document.createElement('button');
+			b.type = 'button';
+			b.className = 'button-link keh-clear';
+			b.textContent = 'Очистить ID';
+			b.addEventListener('click', function () {
+				idEl.value = '';
+				idEl.removeAttribute('data-keh-auto');
+				clearNote(idEl);
+			});
+			n.appendChild(b);
+		}
+		if (opts && opts.settingsLink && c.settingsUrl) {
 			n.appendChild(document.createTextNode(' '));
 			var a = document.createElement('a');
 			a.href = c.settingsUrl;
@@ -65,6 +83,7 @@
 			a.textContent = 'Изменить стандартное';
 			n.appendChild(a);
 		}
+		box.appendChild(n);
 	}
 
 	function onCodeChange(c, codeEl, p) {
@@ -73,14 +92,26 @@
 		var code = (codeEl.value || '').trim();
 		var id = (idEl.value || '').trim();
 
-		if (code !== '' && id === '') {
-			idEl.value = c.defaultId;
-			idEl.setAttribute('data-keh-auto', '1');
-			note(idEl, 'Ticketscloud ID подставлен автоматически, его можно изменить.', c);
-		} else if (code === '' && id === c.defaultId) {
+		if (code !== '') {
+			if (id === '') {
+				idEl.value = c.defaultId;
+				idEl.setAttribute('data-keh-auto', '1');
+				note(idEl, 'Ticketscloud ID подставлен автоматически, его можно изменить.', c, { settingsLink: true });
+			} else if (idEl.getAttribute('data-keh-auto') !== '1') {
+				clearNote(idEl); // код вернули: предупреждение больше не нужно
+			}
+			return;
+		}
+
+		// Код стёрт.
+		if (idEl.getAttribute('data-keh-auto') === '1' && id === c.defaultId) {
+			// Значение подставил сам плагин в этом сеансе: убираем его.
 			idEl.value = '';
 			idEl.removeAttribute('data-keh-auto');
-			note(idEl, 'Код события удалён, поэтому ID тоже очищен.', c);
+			note(idEl, 'Код события удалён, подставленный ID убран.', c);
+		} else if (id !== '') {
+			// Значение было до нас: не трогаем, только предупреждаем.
+			note(idEl, 'Код события пуст, а ID заполнен: у бесплатного или депозитного концерта может не показаться его блок.', c, { warn: true, clearButton: true });
 		}
 	}
 
@@ -94,9 +125,9 @@
 			if (p.field === c.codeField) {
 				onCodeChange(c, t, p);
 			} else if (p.field === c.idField) {
-				// Редактор сам правит ID: подсказка больше не нужна.
+				// Редактор сам правит ID: значение уже не «наше», подсказка не нужна.
 				t.removeAttribute('data-keh-auto');
-				note(t, '', c);
+				clearNote(t);
 			}
 		} catch (e) { /* молча: штатная работа редактора важнее */ }
 	}
