@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Kozlov Jazzeta — Jazz Newspaper
  * Description: Independent daily jazz newspaper with JSON issues, archive and social summaries. No theme modifications.
- * Version: 0.1.0
+ * Version: 0.2.0
  * Requires PHP: 7.4
  * License: GPL-2.0-or-later
  */
@@ -12,12 +12,16 @@ final class Kozlov_Jazzeta {
     const CPT = 'jz_issue';
     const META = '_jz_issue_json';
     const REST = 'kozlov-jazzeta/v1';
+    private static $explicit_publish = false;
 
     public static function init() {
         add_action('init', [__CLASS__, 'register']);
         add_action('admin_menu', [__CLASS__, 'admin_menu']);
         add_action('rest_api_init', [__CLASS__, 'rest_routes']);
         add_shortcode('kozlov_jazzeta', [__CLASS__, 'shortcode']);
+        add_action('admin_post_jz_publish_issue', [__CLASS__, 'handle_publish']);
+        add_action('admin_enqueue_scripts', [__CLASS__, 'admin_assets']);
+        add_filter('wp_insert_post_data', [__CLASS__, 'guard_publishing'], 10, 2);
     }
 
     public static function register() {
@@ -31,6 +35,8 @@ final class Kozlov_Jazzeta {
     }
 
     public static function admin_menu() {
+        add_submenu_page('edit.php?post_type='.self::CPT, 'Редакция Джазеты', 'Редакция / публикация', 'publish_posts', 'jz-review', [__CLASS__, 'review_screen']);
+        add_submenu_page('edit.php?post_type='.self::CPT, 'Источники Джазеты', 'Каталог источников', 'edit_others_posts', 'jz-sources', [__CLASS__, 'sources_screen']);
         add_submenu_page('edit.php?post_type='.self::CPT, 'Импорт выпуска', 'Импорт JSON', 'edit_others_posts', 'jz-import', [__CLASS__, 'import_screen']);
     }
 
@@ -88,8 +94,8 @@ final class Kozlov_Jazzeta {
         $ids=array_column($clean,'id');
         if(count($ids)!==count(array_unique($ids))) { return new WP_Error('jz_duplicate_id','Повторяются ID новостей.',['status'=>400]); }
         $social_ids=$doc['social']['article_ids']??array_slice($ids,0,5);
-        if(!is_array($social_ids) || count($social_ids)!==5 || count(array_unique($social_ids))!==5 || array_diff($social_ids,$ids)) {
-            return new WP_Error('jz_social','Нужно 5 неповторяющихся ID для соцсетей.',['status'=>400]);
+        if(!is_array($social_ids) || count($social_ids)!==min(5,$n) || count(array_unique($social_ids))!==min(5,$n) || array_diff($social_ids,$ids)) {
+            return new WP_Error('jz_social','Нужно 4 разных ID для номера из 4 новостей, иначе — 5.',['status'=>400]);
         }
         $status=self::safe_text($doc['issue']['status']??'draft',20);
         // Publishing needs an editorial decision. A flag in the JSON alone does not bypass source hygiene checks.
@@ -102,7 +108,7 @@ final class Kozlov_Jazzeta {
            'status'=>in_array($status,['approved','draft','demo'],true)?$status:'draft',
            'edition_label'=>self::safe_text($doc['issue']['edition_label']??'',180),
            'editor_note'=>self::safe_text($doc['issue']['editor_note']??'',1500)],
-        'articles'=>$clean,'social'=>['count'=>5,'article_ids'=>array_values($social_ids)]];
+        'articles'=>$clean,'social'=>['count'=>count($social_ids),'article_ids'=>array_values($social_ids)]];
     }
 
     public static function import($raw) {
@@ -110,14 +116,20 @@ final class Kozlov_Jazzeta {
         if(strlen($raw)>150000) return new WP_Error('jz_big','JSON больше 150 KB.',['status'=>413]);
         $doc=json_decode($raw,true,128);
         if(json_last_error()!==JSON_ERROR_NONE) return new WP_Error('jz_invalid_json','JSON: '.json_last_error_msg(),['status'=>400]);
+        // Always import as an unpublished editorial draft, regardless of JSON status.
+        // A generated JSON file is never treated as editorial authorization.
+        if (is_array($doc) && isset($doc['issue']) && is_array($doc['issue'])) $doc['issue']['status']='draft';
         $clean=self::validate($doc);
         if(is_wp_error($clean))return $clean;
         $date=$clean['issue']['date'];
-        $status=($clean['issue']['status']==='approved')?'publish':'draft';
+        $status='draft';
         $existing=get_posts(['post_type'=>self::CPT,'name'=>'jz-'.$date,'post_status'=>'any','numberposts'=>1,'fields'=>'ids']);
         $fields=['post_type'=>self::CPT,'post_title'=>'Джазета — '.date_i18n('d.m.Y',strtotime($date)),
           'post_name'=>'jz-'.$date,'post_status'=>$status,'post_content'=>''];
-        if($existing) $fields['ID']=(int)$existing[0];
+        if ($existing) {
+            if (get_post_status((int)$existing[0]) === 'publish') return new WP_Error('jz_already_published','Нельзя автоматически переписать опубликованный номер.',['status'=>409]);
+            $fields['ID']=(int)$existing[0];
+        }
         $id=wp_insert_post(wp_slash($fields), true);
         if(is_wp_error($id))return $id;
         update_post_meta($id,self::META,wp_json_encode($clean,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
@@ -127,11 +139,11 @@ final class Kozlov_Jazzeta {
 
     public static function import_screen() {
         if(!current_user_can('edit_others_posts'))wp_die('Недостаточно прав.');
-        echo '<div class="wrap"><h1>ДЖАЗЕТА — импорт выпуска</h1><p>Вставьте JSON подготовленного выпуска. Статус <code>demo</code> или <code>draft</code> оставит его неопубликованным. Для публикации нужен <code>approved</code> и проверенные материалы. Рекомендуем сначала проверить выпуск на тестовом сайте.</p>';
+        echo '<div class="wrap"><h1>ДЖАЗЕТА — импорт выпуска</h1><p>Любой JSON импортируется <strong>только как черновик</strong>. Для выпуска газеты откройте <strong>Редакция / публикация</strong> и подтвердите номер вручную. Входящий <code>approved</code> не публикует номер.</p>';
         if(isset($_POST['jz_import']) && check_admin_referer('jz-import-action')) {
             $raw=isset($_POST['jz_json']) && is_string($_POST['jz_json'])?wp_unslash($_POST['jz_json']):'';
             $result=self::import($raw);
-            echo is_wp_error($result)?'<div class="notice notice-error"><p>'.esc_html($result->get_error_message()).'</p></div>':'<div class="notice notice-success"><p>Выпуск '.esc_html($result['date']).' импортирован, статус: '.esc_html($result['post_status']).'.</p></div>';
+            echo is_wp_error($result)?'<div class="notice notice-error"><p>'.esc_html($result->get_error_message()).'</p></div>':'<div class="notice notice-success"><p>Черновик '.esc_html($result['date']).' сохранён. <a href="'.esc_url(admin_url('edit.php?post_type='.self::CPT.'&page=jz-review&jz_review='.$result['post_id'])).'">Проверить выпуск</a>.</p></div>';
         }
         echo '<form method="post">';wp_nonce_field('jz-import-action');
         echo '<textarea name="jz_json" rows="20" spellcheck="false" style="font-family:monospace;width:100%;max-width:1000px" placeholder="{ ... }"></textarea><p><button class="button button-primary" name="jz_import" value="1">Импортировать / обновить</button></p></form><p>Для отображения добавьте на отдельную страницу шорткод: <code>[kozlov_jazzeta]</code>. Для внешнего импорта доступен защищённый WordPress REST API.</p></div>';
@@ -146,6 +158,111 @@ final class Kozlov_Jazzeta {
             $issue=self::get_latest(); if(!$issue)return new WP_Error('jz_empty','Нет опубликованных выпусков.',['status'=>404]);
             return rest_ensure_response($issue);
         },'permission_callback'=>'__return_true']);
+    }
+
+
+    /** Guard standard edit screens, Quick Edit and bulk actions against bypassing review. */
+    public static function guard_publishing($data, $postarr) {
+        if (isset($data['post_type']) && $data['post_type'] === self::CPT
+            && isset($data['post_status']) && $data['post_status'] === 'publish'
+            && !self::$explicit_publish) {
+            // Keep a previously approved issue published during metadata/title edits.
+            $id = isset($postarr['ID']) ? absint($postarr['ID']) : 0;
+            if (!$id || get_post_status($id) !== 'publish') $data['post_status']='draft';
+        }
+        return $data;
+    }
+
+    public static function admin_assets() {
+        $page=isset($_GET['page']) ? sanitize_key(wp_unslash($_GET['page'])) : '';
+        if ($page==='jz-review') {
+            wp_enqueue_style('kozlov-jazzeta',plugins_url('assets/jazzeta.css',__FILE__),[],'0.2.0');
+            wp_add_inline_style('kozlov-jazzeta','.jz-newspaper{max-width:1120px;margin:25px 0 20px;box-shadow:0 6px 22px #0002;} .jz-editor-toolbar{background:#fff;padding:18px;border:1px solid #ccc;max-width:1084px;margin:15px 0;} .jz-editor-toolbar .jz-warning{color:#92300f;}');
+        }
+    }
+
+    public static function publication_check($post_id) {
+        $post=get_post($post_id);
+        if (!$post || $post->post_type !== self::CPT) return new WP_Error('jz_missing','Выпуск не найден.');
+        if ($post->post_status !== 'draft') return new WP_Error('jz_state','Публиковать можно только черновик.');
+        $doc=json_decode(get_post_meta($post_id,self::META,true),true);
+        $validated=self::validate($doc);
+        if (is_wp_error($validated)) return $validated;
+        if ($validated['issue']['date'] > wp_date('Y-m-d', null, new DateTimeZone('Europe/Moscow')))
+            return new WP_Error('jz_future','Нельзя публиковать будущий номер.');
+        foreach ($validated['articles'] as $a) {
+            if (empty($a['verified'])) return new WP_Error('jz_unverified','Новость «'.$a['title'].'» не отмечена как проверенная.');
+        }
+        return $validated;
+    }
+
+    public static function handle_publish() {
+        if (!current_user_can('publish_posts')) wp_die('Недостаточно прав.',403);
+        $id=isset($_POST['jz_issue_id']) ? absint($_POST['jz_issue_id']) : 0;
+        check_admin_referer('jz-publish-'.$id);
+        if (!$id || !current_user_can('edit_post',$id)) wp_die('Нет доступа к выпуску.',403);
+        $check=self::publication_check($id);
+        if (is_wp_error($check)) {
+            wp_die(esc_html($check->get_error_message()),'Публикация остановлена', ['response'=>400,'back_link'=>true]);
+        }
+        self::$explicit_publish=true;
+        $result=wp_update_post(['ID'=>$id,'post_status'=>'publish'],true);
+        self::$explicit_publish=false;
+        if (is_wp_error($result)) wp_die(esc_html($result->get_error_message()));
+        $check['issue']['status']='approved';
+        update_post_meta($id,self::META,wp_json_encode($check,JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES));
+        update_post_meta($id,'_jz_published_by',get_current_user_id());
+        update_post_meta($id,'_jz_published_at',current_time('mysql'));
+        wp_safe_redirect(admin_url('edit.php?post_type='.self::CPT.'&page=jz-review&jz_review='.$id.'&jz_published=1'));
+        exit;
+    }
+
+    public static function review_screen() {
+        if(!current_user_can('publish_posts')) wp_die('Недостаточно прав.');
+        $id=isset($_GET['jz_review']) ? absint($_GET['jz_review']) : 0;
+        $posts=get_posts(['post_type'=>self::CPT,'post_status'=>['draft','publish'],'posts_per_page'=>30,'meta_key'=>'_jz_issue_date','orderby'=>'meta_value','order'=>'DESC']);
+        echo '<div class="wrap"><h1>ДЖАЗЕТА — редакционная проверка</h1>';
+        if (!empty($_GET['jz_published'])) echo '<div class="notice notice-success"><p>Выпуск опубликован. Предыдущие номера остаются в архиве.</p></div>';
+        echo '<p>Система импорта только готовит черновики. Публикация — исключительно после вашего нажатия кнопки.</p>';
+        echo '<div class="jz-editor-toolbar"><strong>Выпуски:</strong> ';
+        foreach($posts as $p) {
+            $url=admin_url('edit.php?post_type='.self::CPT.'&page=jz-review&jz_review='.$p->ID);
+            echo '<a style="display:inline-block;margin:5px" href="'.esc_url($url).'">'.esc_html(get_post_meta($p->ID,'_jz_issue_date',true)).' ['.esc_html($p->post_status==='publish'?'опубликован':'черновик').']</a> ';
+        }
+        echo '</div>';
+        if (!$id && $posts) $id=$posts[0]->ID;
+        if (!$id) {echo '<p>Выпусков пока нет. <a href="'.esc_url(admin_url('edit.php?post_type='.self::CPT.'&page=jz-import')).'">Импортировать первый JSON</a>.</p></div>';return;}
+        $post=get_post($id);
+        if (!$post || $post->post_type!==self::CPT) {echo '<p>Выпуск не найден.</p></div>';return;}
+        $doc=json_decode(get_post_meta($id,self::META,true),true);
+        if(!is_array($doc) || empty($doc['articles'])) {echo '<p>Неверный JSON выпуска.</p></div>';return;}
+        $check=self::publication_check($id);
+        $published=$post->post_status==='publish';
+        echo '<div class="jz-editor-toolbar"><p><strong>Дата:</strong> '.esc_html($doc['issue']['date']).' &nbsp; <strong>Материалов:</strong> '.count($doc['articles']).' &nbsp; <strong>Статус:</strong> '.esc_html($published?'ОПУБЛИКОВАН':'ЧЕРНОВИК').'</p>';
+        if (!$published) {
+            if (is_wp_error($check)) echo '<p class="jz-warning"><strong>Публикация заблокирована:</strong> '.esc_html($check->get_error_message()).'</p>';
+            else echo '<p>Все материалы имеют отметку проверки в JSON. Это не заменяет вашу проверку фактов и ссылок перед публикацией.</p>';
+            echo '<p><strong>Перед публикацией:</strong> прочитайте заметки, откройте ссылки, проверьте даты, цитаты и изображения. Если надо исправить, загрузите обновлённый JSON.</p>';
+            echo '<form method="post" action="'.esc_url(admin_url('admin-post.php')).'"><input type="hidden" name="action" value="jz_publish_issue"><input type="hidden" name="jz_issue_id" value="'.esc_attr($id).'">';
+            wp_nonce_field('jz-publish-'.$id);
+            echo '<button class="button button-primary button-hero" type="submit"'.(is_wp_error($check)?' disabled':'').'>Проверил номер — опубликовать выпуск</button></form>';
+        }
+        echo '</div>';
+        echo self::render_issue($doc);
+        echo '</div>';
+    }
+
+    public static function sources_screen() {
+        if(!current_user_can('edit_others_posts'))wp_die('Недостаточно прав.');
+        $path=plugin_dir_path(__FILE__).'sources.json';
+        $catalog=is_readable($path)?json_decode(file_get_contents($path),true):[];
+        echo '<div class="wrap"><h1>ДЖАЗЕТА — источники</h1><p>Каталог задан редакцией. Наличие сайта в каталоге не означает разрешение на копирование статей или автоматическую доступность RSS. Проверяйте первоисточники.</p>';
+        echo '<p><strong>В каталоге '.esc_html((string)count($catalog)).' источников: 17 зарубежных, 8 российских и 5 лейблов.</strong></p>';
+        echo '<table class="widefat striped"><thead><tr><th>Название</th><th>Раздел</th><th>Приоритет</th><th>Роль</th></tr></thead><tbody>';
+        foreach($catalog as $src) {
+            echo '<tr><td><a href="'.esc_url($src['url']).'" target="_blank" rel="noopener noreferrer">'.esc_html($src['name']).' ↗</a></td><td>'.esc_html($src['region']).'</td><td>'.esc_html($src['priority']).'</td><td>'.esc_html($src['role']).'</td></tr>';
+        }
+        echo '</tbody></table></div>';
     }
 
     private static function get_latest($date='') {
@@ -171,7 +288,7 @@ final class Kozlov_Jazzeta {
         echo '<div class="jz-grid">';foreach($a as $story) {
             echo '<article class="jz-story"><small>'.esc_html($story['region']).' / '.esc_html($story['section']).'</small><h3>'.esc_html($story['title']).'</h3><p>'.esc_html($story['summary']).'</p><details><summary>Подробнее и источники</summary><div class="jz-full"><p>'.esc_html($story['body']).'</p>'.self::source_links($story).'</div></details></article>';
         } echo '</div></section>';
-        echo '<section id="jz-social" class="jz-block"><h2>Джаз за 60 секунд</h2><p>Пять новостей — по одному предложению.</p><div class="jz-social">';
+        echo '<section id="jz-social" class="jz-block"><h2>Джаз за 60 секунд</h2><p>'.count($doc['social']['article_ids']).' новости — по одному предложению.</p><div class="jz-social">';
         foreach($doc['social']['article_ids'] as $index=>$aid){foreach($doc['articles'] as $story)if($story['id']===$aid){echo '<div class="jz-social-card"><b>ДЖАЗЕТА / '.esc_html(str_pad((string)($index+1),2,'0',STR_PAD_LEFT)).'</b><p>'.esc_html($story['social']).'</p><small>'.esc_html($story['region']).'</small></div>';break;}}
         echo '</div></section><section id="jz-archive" class="jz-block"><h2>Подшивка номеров</h2><div class="jz-archive-list">';
         $archives=get_posts(['post_type'=>self::CPT,'post_status'=>'publish','posts_per_page'=>-1,'meta_key'=>'_jz_issue_date','orderby'=>'meta_value','order'=>'DESC']);
@@ -192,7 +309,7 @@ final class Kozlov_Jazzeta {
         if($date && !preg_match('/^\d{4}-\d{2}-\d{2}$/',$date))$date='';
         $doc=self::get_latest($date);
         if(!$doc)return '<p>Ни одного опубликованного выпуска пока нет.</p>';
-        wp_enqueue_style('kozlov-jazzeta',plugins_url('assets/jazzeta.css',__FILE__),[], '0.1.0');
+        wp_enqueue_style('kozlov-jazzeta',plugins_url('assets/jazzeta.css',__FILE__),[], '0.2.0');
         return self::render_issue($doc);
     }
 }

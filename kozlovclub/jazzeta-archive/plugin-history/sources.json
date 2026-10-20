@@ -1,0 +1,242 @@
+[
+  {
+    "name": "DownBeat",
+    "url": "https://downbeat.com",
+    "region": "Зарубежные СМИ",
+    "priority": "A",
+    "role": "Новости, интервью, рецензии; перепроверять у музыканта или лейбла",
+    "rss_verified": false
+  },
+  {
+    "name": "JazzTimes",
+    "url": "https://jazztimes.com",
+    "region": "Зарубежные СМИ",
+    "priority": "A",
+    "role": "Новости и рецензии",
+    "rss_verified": false
+  },
+  {
+    "name": "All About Jazz",
+    "url": "https://allaboutjazz.com",
+    "region": "Зарубежные СМИ",
+    "priority": "A",
+    "role": "Новости, обзоры, календарь, рецензии",
+    "rss_verified": false
+  },
+  {
+    "name": "Jazz Journal",
+    "url": "https://jazzjournal.co.uk",
+    "region": "Зарубежные СМИ",
+    "priority": "B",
+    "role": "Рецензии, аналитика",
+    "rss_verified": false
+  },
+  {
+    "name": "UK Jazz News",
+    "url": "https://ukjazznews.com",
+    "region": "Зарубежные СМИ",
+    "priority": "A",
+    "role": "Британская и международная джазовая сцена",
+    "rss_verified": false
+  },
+  {
+    "name": "JazzTrail",
+    "url": "https://jazztrail.net",
+    "region": "Зарубежные СМИ",
+    "priority": "B",
+    "role": "Обзоры новых альбомов",
+    "rss_verified": false
+  },
+  {
+    "name": "The Jazz Mann",
+    "url": "https://thejazzmann.com",
+    "region": "Зарубежные СМИ",
+    "priority": "B",
+    "role": "Рецензии, концерты, интервью",
+    "rss_verified": false
+  },
+  {
+    "name": "WBGO",
+    "url": "https://wbgo.org",
+    "region": "Зарубежные СМИ",
+    "priority": "A",
+    "role": "Американские джазовые новости, интервью",
+    "rss_verified": false
+  },
+  {
+    "name": "Jazz24",
+    "url": "https://jazz24.org",
+    "region": "Зарубежные СМИ",
+    "priority": "B",
+    "role": "Радио и новости, музыкальный контекст",
+    "rss_verified": false
+  },
+  {
+    "name": "Jazz thing",
+    "url": "https://jazzthing.de",
+    "region": "Зарубежные СМИ",
+    "priority": "B",
+    "role": "Немецкая джазовая сцена; доступность проверять отдельно",
+    "rss_verified": false
+  },
+  {
+    "name": "Stereogum — Ugly Beauty",
+    "url": "https://stereogum.com/category/columns/ugly-beauty",
+    "region": "Зарубежные СМИ",
+    "priority": "C",
+    "role": "Обзорный ежемесячный материал, не ежедневные новости",
+    "rss_verified": false
+  },
+  {
+    "name": "Jazzfuel — Releases",
+    "url": "https://jazzfuel.com/jazz-releases/",
+    "region": "Зарубежные СМИ",
+    "priority": "B",
+    "role": "PR-анонсы релизов; сверять с музыкантами и лейблами",
+    "rss_verified": false
+  },
+  {
+    "name": "Jazzwise",
+    "url": "https://www.jazzwise.com",
+    "region": "Зарубежные СМИ",
+    "priority": "A",
+    "role": "Новости и рецензии",
+    "rss_verified": false
+  },
+  {
+    "name": "JAZZIZ Discovery",
+    "url": "https://jazzizdiscovery.com",
+    "region": "Зарубежные СМИ",
+    "priority": "B",
+    "role": "Новости, интервью, альбомы",
+    "rss_verified": false
+  },
+  {
+    "name": "JAZZ.FM91",
+    "url": "https://jazz.fm",
+    "region": "Зарубежные СМИ",
+    "priority": "A",
+    "role": "Новостные материалы и интервью",
+    "rss_verified": false
+  },
+  {
+    "name": "Bandcamp Daily: Jazz",
+    "url": "https://daily.bandcamp.com/genres/jazz",
+    "region": "Зарубежные СМИ",
+    "priority": "B",
+    "role": "Альбомы, новые исполнители, подборки",
+    "rss_verified": false
+  },
+  {
+    "name": "Pitchfork",
+    "url": "https://pitchfork.com",
+    "region": "Зарубежные СМИ",
+    "priority": "C",
+    "role": "Выборочные релизы джаза и соседних жанров",
+    "rss_verified": false
+  },
+  {
+    "name": "Джаз.Ру",
+    "url": "https://www.jazz.ru",
+    "region": "Российские СМИ",
+    "priority": "A",
+    "role": "Российская сцена, события, релизы",
+    "rss_verified": false
+  },
+  {
+    "name": "JazzPeople",
+    "url": "https://jazzpeople.ru",
+    "region": "Российские СМИ",
+    "priority": "A",
+    "role": "Российские альбомы, интервью, фестивали",
+    "rss_verified": false
+  },
+  {
+    "name": "Jazzmap",
+    "url": "https://jazzmap.ru",
+    "region": "Российские СМИ",
+    "priority": "B",
+    "role": "Афиша и новости Москвы, проверять дату события",
+    "rss_verified": false
+  },
+  {
+    "name": "Jazzist",
+    "url": "https://jazzist.ru",
+    "region": "Российские СМИ",
+    "priority": "B",
+    "role": "Рецензии и релизы; пометка связи с издателем где необходимо",
+    "rss_verified": false
+  },
+  {
+    "name": "Радио JAZZ — релизы",
+    "url": "https://radiojazzfm.ru/releases",
+    "region": "Российские СМИ",
+    "priority": "B",
+    "role": "Релизы, музыкальные новости; проверять дату записи и события",
+    "rss_verified": false
+  },
+  {
+    "name": "InterMedia",
+    "url": "https://intermedia.ru",
+    "region": "Российские СМИ",
+    "priority": "B",
+    "role": "Широкая музыкальная повестка, выборочно",
+    "rss_verified": false
+  },
+  {
+    "name": "Афиша",
+    "url": "https://afisha.ru",
+    "region": "Российские СМИ",
+    "priority": "C",
+    "role": "Крупные музыкальные события и редкие джазовые публикации",
+    "rss_verified": false
+  },
+  {
+    "name": "Igor Butman Music Group",
+    "url": "https://ibmg.ru",
+    "region": "Российские СМИ",
+    "priority": "B",
+    "role": "Первичные анонсы проекта, фестивалей и релизов",
+    "rss_verified": false
+  },
+  {
+    "name": "Blue Note Records",
+    "url": "https://bluenote.com",
+    "region": "Лейблы",
+    "priority": "A",
+    "role": "Первоисточник новых релизов",
+    "rss_verified": false
+  },
+  {
+    "name": "ACT Music",
+    "url": "https://actmusic.com",
+    "region": "Лейблы",
+    "priority": "A",
+    "role": "Первоисточник новых релизов",
+    "rss_verified": false
+  },
+  {
+    "name": "Edition Records",
+    "url": "https://editionrecords.com",
+    "region": "Лейблы",
+    "priority": "A",
+    "role": "Первоисточник новых релизов",
+    "rss_verified": false
+  },
+  {
+    "name": "Gondwana Records",
+    "url": "https://gondwanarecords.com",
+    "region": "Лейблы",
+    "priority": "A",
+    "role": "Первоисточник новых релизов",
+    "rss_verified": false
+  },
+  {
+    "name": "Mack Avenue",
+    "url": "https://mackavenue.com",
+    "region": "Лейблы",
+    "priority": "A",
+    "role": "Первоисточник новых релизов",
+    "rss_verified": false
+  }
+]
