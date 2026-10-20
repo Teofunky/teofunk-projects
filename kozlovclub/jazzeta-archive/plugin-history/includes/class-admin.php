@@ -3,11 +3,11 @@ namespace Kozlov\Standard;
 if (!defined('ABSPATH')) { exit; }
 final class Admin {
     private static $permit=null;
-    public static function can_publish() { $security=(array)get_option('es_security',[]); return current_user_can('es_publish') && current_user_can('es_edit') && get_current_user_id()===(int)($security['publisher_id']??0); }
+    public static function can_publish() { return Runtime::owner(); }
     public static function init() {
         add_action('admin_menu',[self::class,'menu']);
         add_action('admin_enqueue_scripts',[self::class,'assets']);
-        add_action('admin_post_es_action',[self::class,'handle']);
+        add_action('admin_post_es_action',Runtime::guard([self::class,'handle']));
     }
     public static function menu() {
         add_menu_page(Settings::name(),Settings::name(),'es_edit','es-newsroom',[self::class,'screen'],'dashicons-media-document',29);
@@ -30,6 +30,7 @@ final class Admin {
     private static function value($key,$fallback='') { return isset($_POST[$key]) && is_scalar($_POST[$key])?wp_unslash((string)$_POST[$key]):$fallback; }
     private static function lines($v) { return array_values(array_filter(array_map('trim',preg_split('/\R/',(string)$v)),static function($x){return $x!=='';})); }
     public static function handle() {
+        if (Runtime::mode()==='paused') { wp_die('Газета остановлена.','',['response'=>503]); }
         if (($_SERVER['REQUEST_METHOD']??'')!=='POST') { wp_die('Требуется POST.','',['response'=>405]); }
         $op=sanitize_key(self::value('operation')); $id=absint(self::value('issue_id')); $version=absint(self::value('version'));
         $cap=in_array($op,['publish','withdraw'],true)?'es_publish':($op==='import'?'es_import':($op==='migrate'?'manage_options':'es_edit'));

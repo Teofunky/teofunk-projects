@@ -2,9 +2,10 @@
 namespace Kozlov\Standard;
 if (!defined('ABSPATH')) { exit; }
 final class DB {
+    private static $in_transaction=false;
     public static function table($name) { global $wpdb; return $wpdb->prefix . 'es_' . $name; }
     public static function activate($network_wide = false) {
-        if ($network_wide || is_multisite()) { wp_die('0.3.0 предназначена для одиночной установки WordPress. Multisite пока не поддерживается.'); }
+        if ($network_wide || is_multisite()) { wp_die('0.3.2 предназначена для одиночной установки WordPress. Multisite пока не поддерживается.'); }
         global $wpdb;
         if (version_compare(PHP_VERSION, '7.4', '<') || version_compare(get_bloginfo('version'), '6.4', '<')) { wp_die('Требуются PHP 7.4+ и WordPress 6.4+.'); }
         if (get_page_by_path(Front::BASE,OBJECT,['page','post'])) { wp_die('Адрес /' . esc_html(Front::BASE) . '/ уже занят страницей. Существующая страница не изменена.'); }
@@ -87,11 +88,13 @@ final class DB {
         add_role('es_editor','Газета — редактор',['read'=>true,'es_edit'=>true]);
         $admin=get_role('administrator');
         if ($admin) { foreach (['es_edit','es_import','es_publish'] as $cap) { $admin->add_cap($cap); } }
+        add_option('es_runtime',['mode'=>'closed','changed_by'=>get_current_user_id(),'changed_at'=>gmdate('c')],'',false);
         add_option('es_security',['publisher_id'=>get_current_user_id()],'',false);
         update_option('es_db_version', ES_VERSION, false);
         Front::rules(); flush_rewrite_rules(false);
     }
     public static function deactivate() {
+        update_option('es_runtime',['mode'=>'closed','changed_by'=>get_current_user_id(),'changed_at'=>gmdate('c')],false);
         global $wp_rewrite;
         foreach (array_keys($wp_rewrite->extra_rules_top) as $rule) {
             if (strpos($rule, '^' . Front::BASE) === 0) { unset($wp_rewrite->extra_rules_top[$rule]); }
@@ -99,9 +102,9 @@ final class DB {
         flush_rewrite_rules(false);
         // No schedules, external jobs or data deletion. Grants are plugin-specific and inert while disabled.
     }
-    public static function begin() { global $wpdb; self::must($wpdb->query('START TRANSACTION')); }
-    public static function commit() { global $wpdb; self::must($wpdb->query('COMMIT')); }
-    public static function rollback() { global $wpdb; $wpdb->query('ROLLBACK'); }
+    public static function begin() { global $wpdb; self::must($wpdb->query('START TRANSACTION')); self::$in_transaction=true; }
+    public static function commit() { global $wpdb; self::must($wpdb->query('COMMIT')); self::$in_transaction=false; }
+    public static function rollback() { global $wpdb; if (self::$in_transaction) { $wpdb->query('ROLLBACK'); self::$in_transaction=false; } }
     public static function must($result) { if ($result === false) { throw new \RuntimeException('Ошибка записи в БД. Операция отменена; повторите после проверки журнала сервера.'); } return $result; }
     public static function json($value) {
         $json=wp_json_encode($value, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);

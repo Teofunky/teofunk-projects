@@ -39,3 +39,6 @@ body.night{--bg:#101715;--paper:#e8e1d1;--ink:#181e1b;--old:#d9d1be}body.night .
 .chrome-brand{min-width:0}.chrome-controls{flex-shrink:0}.hero h2,.story h3,.reading h1{overflow-wrap:anywhere}.socialmast{font-size:clamp(20px,2.3vw,27px)}
 @media(max-width:520px){.socialmast{font-size:clamp(20px,7vw,30px)}}
 @media(max-width:360px){.chrome-brand .chrome-symbol{display:none}.chrome-brand{gap:0;max-width:140px}.chrome-controls button{padding:7px}}
+
+/* A brand can be a single long word; wrap it without clipping or changing article data. */
+.masthead .mast-title{overflow-wrap:anywhere;letter-spacing:-.045em;line-height:.95}.masthead .overline,.masthead .mini-line,.footer .footbrand{overflow-wrap:anywhere}.masthead .strap-text{min-width:0;overflow-wrap:anywhere}.masthead .strap:before,.masthead .strap:after{flex-shrink:0}

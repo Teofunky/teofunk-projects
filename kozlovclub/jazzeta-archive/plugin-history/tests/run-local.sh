@@ -17,4 +17,6 @@ export ES_TEST_STATE="$ES_TEST_OUTPUT/test-state.json"
 trap 'rm -f -- "$ES_TEST_STATE"' EXIT
 "$ES_TEST_PHP" "$ES_TEST_DIR/integration.php"
 node "$ES_TEST_DIR/browser.cjs"
+node "$ES_TEST_DIR/audit-browser.cjs"
+node "$ES_TEST_DIR/safety-browser.cjs"
 "$ES_TEST_PHP" "$ES_TEST_DIR/advanced.php"

@@ -3,29 +3,14 @@ namespace Kozlov\Standard;
 if (!defined('ABSPATH')) { exit; }
 final class Front {
     const BASE='gazeta';
-    public static function init() {
-        add_action('init',[self::class,'rules']);
-        add_filter('query_vars',static function($v){return array_merge($v,['es_view','es_key','es_page']);});
-        add_action('template_redirect',[self::class,'route'],0);
-        add_action('parse_request',static function($wp){if (!empty($wp->query_vars['es_view'])&&!defined('DONOTCACHEPAGE')) { define('DONOTCACHEPAGE',true); }});
-        add_filter('robots_txt',static function($txt,$public){return $public?$txt."\nSitemap: ".self::url('sitemap.xml')."\n":$txt;},10,2);
-        add_shortcode('kozlov_jazzeta',static function(){return '<p class="es-entry"><a href="'.esc_url(self::url()).'">Читать «'.esc_html(Settings::name()).'» →</a></p>';});
-    }
-    public static function rules() {
-        $b='^'.self::BASE;
-        add_rewrite_rule($b.'/?$','index.php?es_view=latest','top');
-        add_rewrite_rule($b.'/issue/([0-9]{4}-[0-9]{2}-[0-9]{2})/?$','index.php?es_view=issue&es_key=$matches[1]','top');
-        add_rewrite_rule($b.'/material/([a-z0-9_-]{1,160})/?$','index.php?es_view=article&es_key=$matches[1]','top');
-        add_rewrite_rule($b.'/archive/?$','index.php?es_view=archive&es_page=1','top');
-        add_rewrite_rule($b.'/archive/page/([1-9][0-9]*)/?$','index.php?es_view=archive&es_page=$matches[1]','top');
-        add_rewrite_rule($b.'/preview/([0-9]+)/?$','index.php?es_view=preview&es_key=$matches[1]','top');
-        add_rewrite_rule($b.'/sitemap\.xml$','index.php?es_view=sitemap','top');
-        add_rewrite_rule($b.'/sitemap-(issues|articles)-([1-9][0-9]*)\.xml$','index.php?es_view=sitemap_part&es_key=$matches[1]&es_page=$matches[2]','top');
-    }
+    public static function init() { add_action('template_redirect',Runtime::guard([self::class,'route']),0); }
+    public static function rules() { Runtime::rules(); }
     public static function url($path='') {
+        // Keep internal callers from 0.3.0 compatible while generating only short canonical URLs.
+        if (preg_match('/^issue\/(\d{4}-\d{2}-\d{2})\/?$/D',$path,$m)) { $path=$m[1]; }
         if (get_option('permalink_structure')) { return home_url('/'.self::BASE.'/'.($path?(substr($path,-4)==='.xml'?$path:trim($path,'/').'/'):'')); }
         $q=['es_view'=>'latest']; $p=explode('/',trim($path,'/'));
-        if (($p[0]??'')==='issue') { $q=['es_view'=>'issue','es_key'=>$p[1]]; }
+        if (preg_match('/^\d{4}-\d{2}-\d{2}$/D',$path)) { $q=['es_view'=>'issue','es_key'=>$path]; }
         if (($p[0]??'')==='material') { $q=['es_view'=>'article','es_key'=>$p[1]]; }
         if (($p[0]??'')==='preview') { $q=['es_view'=>'preview','es_key'=>$p[1]]; }
         if (($p[0]??'')==='archive') { $q=['es_view'=>'archive','es_page'=>$p[2]??1]; }
@@ -40,7 +25,8 @@ final class Front {
     }
     public static function route() {
         $view=get_query_var('es_view'); if (!$view) { return; }
-        if (!in_array($view,['latest','issue','article','archive','preview','sitemap','sitemap_part'],true)) { self::error_page(404); }
+        if (!Runtime::can_read()) { Runtime::deny(404); }
+        if (!in_array($view,['latest','issue','legacy_issue','article','archive','preview','sitemap','sitemap_part'],true)) { self::error_page(404); }
         if (!in_array($_SERVER['REQUEST_METHOD']??'GET',['GET','HEAD'],true)) { header('Allow: GET, HEAD'); self::error_page(405); }
         if ($view==='sitemap'||$view==='sitemap_part') { self::sitemap($view); }
         global $wpdb; $key=(string)get_query_var('es_key'); $page=max(1,min(1000000,(int)get_query_var('es_page',1))); $issue=null; $doc=null; $article=null; $archive=null; $preview=$view==='preview';
@@ -54,21 +40,31 @@ final class Front {
             if ($selected) { foreach ($doc['articles'] as $a) { if ($a['slug']===$selected) { $article=$a; break; } } if (!$article) { self::error_page(404); } }
             nocache_headers(); header('Cache-Control: private, no-store, max-age=0'); header('X-Robots-Tag: noindex, nofollow, noarchive'); header('Referrer-Policy: no-referrer');
         } elseif ($view==='latest') { $issue=self::latest(); }
-        elseif ($view==='issue') { $issue=$wpdb->get_row($wpdb->prepare('SELECT * FROM '.DB::table('issues')." WHERE edition_date=%s AND state='published'",$key),ARRAY_A); if (!$issue) { self::error_page(404); } }
+        elseif ($view==='issue'||$view==='legacy_issue') {
+            if (!Validation::date($key)) { self::error_page(404); }
+            $issue=$wpdb->get_row($wpdb->prepare('SELECT * FROM '.DB::table('issues')." WHERE edition_date=%s AND state='published'",$key),ARRAY_A); if (!$issue) { self::error_page(404); }
+            if ($view==='legacy_issue') {
+                if (Runtime::mode()==='public') { header('Cache-Control: no-cache, max-age=0, must-revalidate'); } else { Runtime::private_headers(); }
+                if (!wp_safe_redirect(self::url($issue['edition_date']),301,'Kozlov Jazzeta')) { self::error_page(500); }
+                exit;
+            }
+        }
         elseif ($view==='article') {
             $r=$wpdb->get_row($wpdb->prepare('SELECT a.public_json,a.issue_id FROM '.DB::table('articles').' a JOIN '.DB::table('issues')." i ON i.id=a.issue_id WHERE a.slug=%s AND i.state='published' AND a.public_json IS NOT NULL",$key),ARRAY_A);
             if (!$r) { self::error_page(404); } $issue=Repository::issue($r['issue_id']); $article=json_decode($r['public_json'],true);
         } elseif ($view==='archive') { $archive=Repository::listing($page,true); if ($page>max(1,$archive['pages'])) { self::error_page(404); } }
         if ($issue&&!$doc) { $doc=json_decode($issue['public_json'],true); }
-        if (!$preview) { header('Cache-Control: no-cache, max-age=0, must-revalidate'); header('Referrer-Policy: strict-origin-when-cross-origin'); }
+        if (!$preview&&Runtime::mode()==='public') { header('Cache-Control: no-cache, max-age=0, must-revalidate'); header('Referrer-Policy: strict-origin-when-cross-origin'); }
         status_header(200); header('Content-Type: text/html; charset=UTF-8'); header('X-Content-Type-Options: nosniff'); header('X-Frame-Options: SAMEORIGIN');
         $canonical=$article?self::url('material/'.$article['slug']):($issue?self::url('issue/'.$issue['edition_date']):self::url($view==='archive'?($page>1?'archive/page/'.$page:'archive'):''));
         $brand=Settings::name();
         $title=$article?$article['headline'].' — '.$brand:($view==='archive'?'Подшивка — страница '.$page.' — '.$brand:($issue?$brand.' · № '.$issue['number'].' · '.$issue['edition_date']:$brand.' — газета о музыке'));
         $description=$article?$article['lead']:($doc&&$doc['articles']?'В выпуске: '.implode(' · ',array_column(array_slice($doc['articles'],0,3),'headline')):'Газета Клуба Алексея Козлова о джазе, блюзе и музыкальной культуре.');
         $description=wp_html_excerpt(wp_strip_all_tags($description),220,'…');
-        $noindex=$preview || !get_option('blog_public') || (!$issue&&$view!=='archive');
-        $schema=self::structured($issue,$article,$canonical,$preview);
+        $private_view=$preview||Runtime::mode()!=='public';
+        if ($private_view) { Runtime::private_headers(); }
+        $noindex=$private_view || !get_option('blog_public') || (!$issue&&$view!=='archive');
+        $schema=self::structured($issue,$article,$canonical,$private_view);
         require ES_DIR.'templates/newspaper.php'; exit;
     }
     public static function story_url($a,$preview,$issue) { return $preview?add_query_arg('article',$a['slug'],self::preview_url($issue['id'])):self::url('material/'.$a['slug']); }
@@ -88,7 +84,7 @@ final class Front {
         echo '<!doctype html><html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>Страница недоступна — '.esc_html(Settings::name()).'</title><main><h1>Страница недоступна</h1><p>Материал не опубликован, снят с публикации или адрес неверен.</p><a href="'.esc_url(self::url()).'">К газете</a></main></html>'; exit;
     }
     private static function sitemap($view) {
-        if (!get_option('blog_public')) { self::error_page(404); }
+        if (Runtime::mode()!=='public'||!get_option('blog_public')) { self::error_page(404); }
         global $wpdb; $i=DB::table('issues'); $a=DB::table('articles');
         $counts=['issues'=>(int)$wpdb->get_var("SELECT COUNT(*) FROM $i WHERE state='published'"),'articles'=>(int)$wpdb->get_var("SELECT COUNT(*) FROM $a a JOIN $i i ON i.id=a.issue_id WHERE i.state='published' AND a.public_json IS NOT NULL")];
         header('Content-Type: application/xml; charset=UTF-8'); header('X-Content-Type-Options: nosniff'); header('Cache-Control: no-cache, max-age=0'); status_header(200);

@@ -17,6 +17,7 @@ final class Repository {
     }
     public static function hash($article) { return hash('sha256',DB::json($article)); }
     private static function begin() {
+        if (Runtime::mode()==='paused') { throw new \RuntimeException('Газета остановлена.',503); }
         global $wpdb; DB::begin();
         // The row is created on activation. INSERT IGNORE here would take a shared
         // duplicate-key lock: two writers then upgrading to FOR UPDATE can deadlock.

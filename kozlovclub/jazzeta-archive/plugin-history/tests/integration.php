@@ -10,7 +10,8 @@ function ok($value,$name) { global $passed; if (!$value) { fwrite(STDERR,"FAIL: 
 function err($value,$status=null) { return is_wp_error($value)&&($status===null||($value->get_error_data()['status']??null)===$status); }
 require __DIR__.'/fixtures.php';
 
-wp_set_current_user(1); DB::activate();
+wp_set_current_user(1); delete_option('es_runtime_fault'); delete_option('es_runtime'); \Kozlov\Standard\Runtime::load(); DB::activate();
+ok(\Kozlov\Standard\Runtime::mode()==='closed','new activation defaults to closed editorial mode');
 global $wpdb;
 foreach (['imports','relations','identities','article_sources','publications','events','revisions','articles','issues','state'] as $t) { $wpdb->query('TRUNCATE TABLE '.DB::table($t)); }
 $wpdb->query('INSERT INTO '.DB::table('state')." (name,value) VALUES ('number',0),('catalog',1),('write',0)");
