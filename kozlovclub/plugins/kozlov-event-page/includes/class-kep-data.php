@@ -322,6 +322,45 @@ class KEP_Data {
 	}
 
 	/**
+	 * Сбросить кэш страниц афиши, где видна программа концерта: главная, архив мероприятий,
+	 * страницы его жанров и рубрик (красивый адрес и вариант ?жанр=…). Весь кэш сайта не трогается.
+	 *
+	 * @param int $post_id ID концерта.
+	 */
+	public static function flush_listings( $post_id ) {
+		self::flush_home();
+		if ( ! function_exists( 'w3tc_flush_url' ) ) {
+			return;
+		}
+		$urls = array();
+		$arch = get_post_type_archive_link( KEP_POST_TYPE );
+		if ( $arch ) {
+			$urls[] = $arch;
+		}
+		foreach ( get_object_taxonomies( KEP_POST_TYPE, 'objects' ) as $tax ) {
+			if ( empty( $tax->public ) ) {
+				continue;
+			}
+			$terms = wp_get_post_terms( $post_id, $tax->name );
+			if ( is_wp_error( $terms ) ) {
+				continue;
+			}
+			foreach ( $terms as $t ) {
+				$link = get_term_link( $t );
+				if ( ! is_wp_error( $link ) ) {
+					$urls[] = $link;
+				}
+				if ( ! empty( $tax->query_var ) ) {
+					$urls[] = add_query_arg( $tax->query_var, $t->slug, home_url( '/' ) );
+				}
+			}
+		}
+		foreach ( array_slice( array_values( array_unique( $urls ) ), 0, 40 ) as $u ) {
+			w3tc_flush_url( $u );
+		}
+	}
+
+	/**
 	 * Сбросить весь кэш страниц (при смене режима).
 	 */
 	public static function flush_all() {

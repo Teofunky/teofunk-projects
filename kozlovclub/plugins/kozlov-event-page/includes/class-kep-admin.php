@@ -252,7 +252,7 @@ class KEP_Admin {
 		} else {
 			update_post_meta( $post_id, KEP_META_PROGRAM, $value );
 		}
-		KEP_Data::flush_home(); // программа видна и на карточке в афише
+		KEP_Data::flush_listings( $post_id ); // программа видна и на карточках афиши: главная, жанры, архив
 		return true;
 	}
 

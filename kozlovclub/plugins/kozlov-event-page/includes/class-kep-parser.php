@@ -755,24 +755,60 @@ class KEP_Parser {
 		return false !== mb_strpos( $low, $stem, 0, 'UTF-8' );
 	}
 
+	/** Слова-связки сносок, которые не несут сведений: на них «новое» в сноске не считается. */
+	const FILLER = array( 'внимание', 'внимания', 'обратите', 'важно', 'концерт', 'концерты', 'проходит', 'пройдет', 'пройдёт', 'состоится', 'находится', 'расположена', 'расположен', 'сцена', 'сцене', 'сцену', 'адрес', 'адресу', 'клуб', 'клуба' );
+
 	/**
-	 * Сноска говорит то же, что текст сцены из настроек? Тогда показывается только текст сцены.
-	 * Совпадают слова, или сноска про ту же улицу и в ней нет других сведений (депозит, бронь, дресс-код, возраст).
+	 * Основы значимых слов: без связок из FILLER и коротких слов из букв («на», «по», «ул»),
+	 * окончания отрезаны («Мясницкая» и «Мясницкой» → «мясницк»). Цифры остаются целиком.
+	 *
+	 * @param string $s Текст.
+	 * @return string[]
+	 */
+	public static function stems( $s ) {
+		$out = array();
+		foreach ( self::words( $s ) as $w ) {
+			$n = mb_strlen( $w, 'UTF-8' );
+			if ( in_array( $w, self::FILLER, true ) || ( $n <= 2 && ! preg_match( '/\d/u', $w ) ) ) {
+				continue;
+			}
+			$out[] = $n <= 4 ? $w : mb_substr( $w, 0, max( 4, $n - 2 ), 'UTF-8' );
+		}
+		return array_values( array_unique( $out ) );
+	}
+
+	/**
+	 * Сказано ли в сноске только то, что уже есть в другом тексте. Новых значимых слов в ней
+	 * не больше одного и не больше четверти: так «вход через паб Lions Head» совпадает с «вход через
+	 * Lions Head Pub», а сноска с дополнительной инструкцией («вход со двора через арку») остаётся.
+	 *
+	 * @param string $note Сноска.
+	 * @param string $by   Текст, с которым сравниваем.
+	 * @return bool
+	 */
+	public static function covered( $note, $by ) {
+		$a = self::stems( $note );
+		if ( ! $a ) {
+			return false; // одни связки: не трогаем
+		}
+		$new = array_diff( $a, self::stems( $by ) );
+		foreach ( $new as $w ) {
+			if ( preg_match( '/\d/u', $w ) ) {
+				return false; // новое число (возраст, цена, этаж, время) всегда сведения
+			}
+		}
+		return count( $new ) <= 1 && count( $new ) <= 0.25 * count( $a );
+	}
+
+	/**
+	 * Сноска повторяет текст сцены из настроек? Тогда показывается только текст сцены.
 	 *
 	 * @param string $html  Сноска.
 	 * @param array  $place Из KEP_Settings::stage_note().
 	 * @return bool
 	 */
 	public static function same_place( $html, $place ) {
-		$full = trim( $place['title'] . ' ' . $place['text'] );
-		if ( self::same_text( $html, $full ) || ( '' !== $place['text'] && self::same_text( $html, $place['text'] ) ) ) {
-			return true;
-		}
-		if ( ! self::mentions_street( $html, $place['addr'] ) ) {
-			return false;
-		}
-		$low = mb_strtolower( wp_strip_all_tags( (string) $html ), 'UTF-8' );
-		return ! preg_match( '/(депозит|брон|дресс|возраст|\d\s*\+|дет[иея]|билет|стол|оплат|руб)/u', $low );
+		return self::covered( $html, trim( $place['title'] . ' ' . $place['text'] ) );
 	}
 
 	/**

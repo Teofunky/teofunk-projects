@@ -282,4 +282,22 @@ class KEP_Settings {
 		}
 		return false;
 	}
+
+	/**
+	 * Добавлять ли текст сцены на страницы: режим не «Выключено» и текст задан хоть для одной сцены.
+	 *
+	 * @return bool
+	 */
+	public static function stage_notes_on() {
+		return 'off' !== self::get( 'mode' ) && self::has_stage_notes();
+	}
+
+	/**
+	 * Деактивация: сбросить кэш страниц, чтобы гости сразу получили страницы темы без плагина.
+	 */
+	public static function deactivate() {
+		if ( class_exists( 'KEP_Data' ) ) {
+			KEP_Data::flush_all();
+		}
+	}
 }

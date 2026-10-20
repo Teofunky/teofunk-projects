@@ -64,7 +64,9 @@ class KEP_Front {
 		}
 		if ( ! self::should_render( $post_id ) ) {
 			// Старая страница: тексты из полей «Коротко о концерте», «Важно знать» и текст сцены тоже должны быть видны.
-			if ( '' !== KEP_Data::lead( $post_id ) || KEP_Data::notes( $post_id ) || KEP_Settings::has_stage_notes() ) {
+			// Текст сцены не добавляется в режиме «Выключено». Тексты полей добавляются всегда:
+			// редактор мог перенести сноску из анонса в поле, без вставки она пропала бы со страницы.
+			if ( '' !== KEP_Data::lead( $post_id ) || KEP_Data::notes( $post_id ) || KEP_Settings::stage_notes_on() ) {
 				self::$post_id = $post_id;
 				ob_start( array( __CLASS__, 'filter_old' ) );
 			}
@@ -228,8 +230,8 @@ class KEP_Front {
 			$html = KEP_Parser::notice_html( $p['html'] );
 			$dup  = '' === KEP_Parser::norm( $html );
 			foreach ( $d['notices'] as $have ) {
-				if ( KEP_Parser::same_text( $have, $html ) ) {
-					$dup = true; // та же сноска уже есть в поле «Важно знать»
+				if ( KEP_Parser::covered( $html, $have ) ) {
+					$dup = true; // всё из этой сноски уже есть в поле «Важно знать»
 				}
 			}
 			if ( ! $dup ) {
@@ -270,13 +272,34 @@ class KEP_Front {
 		if ( ! is_string( $html ) || ! $post_id ) {
 			return $html;
 		}
-		$lead  = KEP_Data::lead( $post_id );
-		$notes = KEP_Data::notes( $post_id );
-		if ( '' === $lead && ! $notes && ! KEP_Settings::has_stage_notes() ) {
+		$lead     = KEP_Data::lead( $post_id );
+		$notes    = KEP_Data::notes( $post_id );
+		$stage_on = KEP_Settings::stage_notes_on();
+		if ( '' === $lead && ! $notes && ! $stage_on ) {
 			return $html;
 		}
 		$frag = KEP_Parser::find_fragment( $html );
-		if ( ! $frag || ! preg_match( '/<div\b[^>]*\bclass\s*=\s*["\'][^"\']*\bdescription\b[^"\']*["\'][^>]*>/i', $frag['html'], $m, PREG_OFFSET_CAPTURE ) ) {
+		if ( ! $frag ) {
+			return $html;
+		}
+		// Текст сцены: только у будущих концертов. Сцена берётся из строки темы, индекс Smart Search
+		// открывается, только если строки нет.
+		$place = null;
+		if ( $stage_on && ( preg_match( '/<div\b[^>]*\bclass\s*=\s*["\'][^"\']*\binfo\b[^"\']*\bupcoming\b/i', $frag['html'] ) || preg_match( '/<div\b[^>]*\bclass\s*=\s*["\'][^"\']*\bupcoming\b[^"\']*\binfo\b/i', $frag['html'] ) ) ) {
+			$code = '';
+			if ( preg_match( '/\bclass\s*=\s*["\'][^"\']*\brow_3\b[^"\']*["\'][^>]*>([^<]*)</i', $frag['html'], $r ) ) {
+				$code = KEP_Settings::stage_code( html_entity_decode( $r[1], ENT_QUOTES, 'UTF-8' ) );
+			}
+			if ( '' === $code ) {
+				$entry = KEP_Data::by_slug( (string) get_post_field( 'post_name', $post_id ) );
+				$code  = ( $entry && '' !== $entry['stage'] ) ? $entry['stage'] : '';
+			}
+			$place = KEP_Settings::stage_note( $code );
+		}
+		if ( '' === $lead && ! $notes && ! $place ) {
+			return $html; // у этой сцены текста нет: дальше не разбираем
+		}
+		if ( ! preg_match( '/<div\b[^>]*\bclass\s*=\s*["\'][^"\']*\bdescription\b[^"\']*["\'][^>]*>/i', $frag['html'], $m, PREG_OFFSET_CAPTURE ) ) {
 			return $html;
 		}
 		$block    = KEP_Parser::div_at( $frag['html'], $m[0][1], strlen( $m[0][0] ) );
@@ -287,17 +310,7 @@ class KEP_Front {
 			return $w && count( array_intersect( $w, $desc ) ) / count( $w ) >= 0.8;
 		};
 		$extra = '';
-		// Текст сцены: только у будущих концертов и если адреса этой улицы в описании ещё нет.
-		$place = null;
-		if ( preg_match( '/<div\b[^>]*\bclass\s*=\s*["\'][^"\']*\binfo\b[^"\']*\bupcoming\b/i', $frag['html'] ) || preg_match( '/<div\b[^>]*\bclass\s*=\s*["\'][^"\']*\bupcoming\b[^"\']*\binfo\b/i', $frag['html'] ) ) {
-			$slug  = (string) get_post_field( 'post_name', $post_id );
-			$entry = KEP_Data::by_slug( $slug );
-			$code  = ( $entry && '' !== $entry['stage'] ) ? $entry['stage'] : '';
-			if ( '' === $code && preg_match( '/\bclass\s*=\s*["\'][^"\']*\brow_3\b[^"\']*["\'][^>]*>([^<]*)</i', $frag['html'], $r ) ) {
-				$code = KEP_Settings::stage_code( html_entity_decode( $r[1], ENT_QUOTES, 'UTF-8' ) );
-			}
-			$place = KEP_Settings::stage_note( $code );
-		}
+		// Если улица сцены в описании уже упомянута, текст сцены не добавляется.
 		if ( $place ) {
 			$line = '' !== $place['text'] ? $place['text'] : $place['title'];
 			if ( ! $known( $line ) && ! KEP_Parser::mentions_street( $desc_raw, $place['addr'] ) ) {
