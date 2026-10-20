@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Kozlov Editor Helpers
  * Description: Помощь редакторам афиши. Когда в анонсе вписывают код события Ticketscloud, поле «Ticketscloud ID» заполняется стандартным значением. Работает только в админке, тему, Magic Fields и данные концертов не меняет.
- * Version: 1.0.1
+ * Version: 1.0.2
  * Requires at least: 5.0
  * Requires PHP: 7.0
  * Author: Kozlov Club
@@ -14,14 +14,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'KEH_VERSION', '1.0.1' );
+define( 'KEH_VERSION', '1.0.2' );
 define( 'KEH_FILE', __FILE__ );
 
 final class KEH_Plugin {
 
 	const OPTION        = 'keh_settings';
 	const PAGE          = 'kozlov-editor-helpers';
-	const DEFAULT_TC_ID = 'eyJhbGciOiJIUzI1NiIsImlzcyI6InRpY2tldHNjbG91ZC5ydSIsInR5cCI6IkpXVCJ9';
+	// Полный токен виджета клуба: тот же, что тема выводит в шапке сайта (window.ticketscloudid).
+	const DEFAULT_TC_ID = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiIsImlzcyI6InRpY2tldHNjbG91ZC5ydSJ9.eyJwIjoiNWNlZmE4MTUxMzFjMGQwMDBmOWU5YmI1In0.UO8dYRJNhMsXTk2fspJJuF_yGo4LggOkQadFqtsXZWc';
+	// Значение по умолчанию в 1.0.0–1.0.1: только заголовок токена.
+	const OLD_DEFAULT_TC_ID = 'eyJhbGciOiJIUzI1NiIsImlzcyI6InRpY2tldHNjbG91ZC5ydSIsInR5cCI6IkpXVCJ9';
 
 	/** @var bool */
 	private static $print_config = false;
@@ -30,6 +33,7 @@ final class KEH_Plugin {
 		if ( ! is_admin() ) {
 			return; // На публичных страницах плагин не делает ничего.
 		}
+		add_action( 'admin_init', array( __CLASS__, 'maybe_upgrade' ), 5 );
 		add_action( 'admin_init', array( __CLASS__, 'register_settings' ) );
 		add_action( 'admin_menu', array( __CLASS__, 'add_menu' ) );
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue' ) );
@@ -52,6 +56,27 @@ final class KEH_Plugin {
 			$saved = array();
 		}
 		return array_merge( self::defaults(), array_intersect_key( $saved, self::defaults() ) );
+	}
+
+	/** Если в настройке осталось старое короткое значение по умолчанию, меняем его на полный токен. Пишет только свою настройку. */
+	public static function maybe_upgrade() {
+		$o = get_option( self::OPTION );
+		if ( is_array( $o ) && isset( $o['tc_id'] ) && self::OLD_DEFAULT_TC_ID === $o['tc_id'] ) {
+			$o['tc_id'] = self::DEFAULT_TC_ID;
+			update_option( self::OPTION, $o );
+		}
+	}
+
+	/** Организатор из токена Ticketscloud (поле p в середине JWT). null, если токен без этой части. */
+	public static function organizer( $token ) {
+		$parts = explode( '.', (string) $token );
+		if ( count( $parts ) < 2 ) {
+			return null;
+		}
+		$b64  = strtr( $parts[1], '-_', '+/' );
+		$json = base64_decode( $b64 . str_repeat( '=', ( 4 - strlen( $b64 ) % 4 ) % 4 ), true );
+		$data = $json ? json_decode( $json, true ) : null;
+		return ( is_array( $data ) && isset( $data['p'] ) && is_string( $data['p'] ) ) ? $data['p'] : null;
 	}
 
 	/** Имена полей Magic Fields. Совпадают с ключами в wp_postmeta. */
@@ -137,18 +162,72 @@ final class KEH_Plugin {
 		return is_array( $rows ) ? $rows : array();
 	}
 
-	/** Только чтение: какие значения ID уже сохранены у анонсов (до 5 самых частых). */
+	private static function events_table() {
+		global $wpdb;
+		$t = $wpdb->prefix . 'ai1ec_events';
+		return ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $t ) ) === $t ) ? $t : null;
+	}
+
+	/** Только чтение: какие значения ID сохранены у анонсов, всего и у будущих опубликованных. */
 	private static function diagnose_values() {
 		global $wpdb;
-		$f    = self::fields();
-		$rows = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT meta_value AS v, COUNT(*) AS n FROM {$wpdb->postmeta} WHERE meta_key = %s GROUP BY meta_value ORDER BY n DESC LIMIT 5",
+		$f      = self::fields();
+		$events = self::events_table();
+		if ( $events ) {
+			$sql = $wpdb->prepare(
+				"SELECT m.meta_value AS v, COUNT(*) AS n,
+					SUM(CASE WHEN p.post_status = 'publish' AND e.start > %d THEN 1 ELSE 0 END) AS future
+				FROM {$wpdb->postmeta} m
+				LEFT JOIN {$wpdb->posts} p ON p.ID = m.post_id
+				LEFT JOIN `{$events}` e ON e.post_id = m.post_id
+				WHERE m.meta_key = %s
+				GROUP BY m.meta_value ORDER BY n DESC LIMIT 8",
+				time(),
 				$f['id']
-			),
-			ARRAY_A
-		);
+			);
+		} else {
+			$sql = $wpdb->prepare(
+				"SELECT meta_value AS v, COUNT(*) AS n, NULL AS future FROM {$wpdb->postmeta} WHERE meta_key = %s GROUP BY meta_value ORDER BY n DESC LIMIT 8",
+				$f['id']
+			);
+		}
+		$rows = $wpdb->get_results( $sql, ARRAY_A );
 		return is_array( $rows ) ? $rows : array();
+	}
+
+	/** Только чтение: будущие опубликованные концерты, у которых в ID токен другого организатора. */
+	private static function future_other_org( $vals, $settings_org ) {
+		global $wpdb;
+		$events = self::events_table();
+		if ( ! $events || null === $settings_org ) {
+			return array();
+		}
+		$f   = self::fields();
+		$out = array();
+		foreach ( $vals as $v ) {
+			$org = self::organizer( $v['v'] );
+			if ( null === $org || $org === $settings_org || (int) $v['future'] < 1 ) {
+				continue;
+			}
+			$rows = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT p.ID AS id, p.post_title AS title, e.start AS start
+					FROM {$wpdb->postmeta} m
+					JOIN {$wpdb->posts} p ON p.ID = m.post_id
+					JOIN `{$events}` e ON e.post_id = m.post_id
+					WHERE m.meta_key = %s AND m.meta_value = %s AND p.post_status = 'publish' AND e.start > %d
+					ORDER BY e.start LIMIT 20",
+					$f['id'],
+					$v['v'],
+					time()
+				),
+				ARRAY_A
+			);
+			if ( is_array( $rows ) ) {
+				$out = array_merge( $out, $rows );
+			}
+		}
+		return $out;
 	}
 
 	public static function render_page() {
@@ -179,7 +258,7 @@ final class KEH_Plugin {
 						<td>
 							<input type="text" id="keh-tc-id" class="large-text code" name="<?php echo esc_attr( self::OPTION ); ?>[tc_id]" value="<?php echo esc_attr( $s['tc_id'] ); ?>" />
 							<p class="description">
-								Если Ticketscloud поменяет значение, впишите новое и сохраните. Уже сохранённые концерты не меняются.
+								Стандартное значение: полный токен виджета клуба, тот же, что стоит в шапке сайта. Если Ticketscloud его поменяет, впишите новое и сохраните. Уже сохранённые концерты не меняются.
 								<button type="button" class="button-link" onclick="document.getElementById('keh-tc-id').value=this.getAttribute('data-v');" data-v="<?php echo esc_attr( self::DEFAULT_TC_ID ); ?>">Вернуть стандартное</button>
 							</p>
 						</td>
@@ -227,23 +306,56 @@ final class KEH_Plugin {
 			<?php endif; ?>
 
 			<h2>Значения ID, уже сохранённые в анонсах</h2>
-			<?php $vals = self::diagnose_values(); ?>
+			<?php
+			$vals         = self::diagnose_values();
+			$settings_org = self::organizer( $s['tc_id'] );
+			?>
 			<?php if ( empty( $vals ) ) : ?>
 				<p>Сохранённых значений нет.</p>
 			<?php else : ?>
-				<table class="widefat striped" style="max-width:780px">
-					<thead><tr><th>Значение</th><th>Анонсов</th><th></th></tr></thead>
+				<table class="widefat striped" style="max-width:980px">
+					<thead><tr><th>Значение</th><th>Что это</th><th>Всего</th><th>Будущих</th><th></th></tr></thead>
 					<tbody>
 					<?php foreach ( $vals as $v ) : ?>
+						<?php
+						$val = (string) $v['v'];
+						$org = self::organizer( $val );
+						if ( '' === $val ) {
+							$what = 'пусто: без продажи';
+						} elseif ( null === $org ) {
+							$what = 'неполный токен (только заголовок)';
+						} elseif ( $org === $settings_org ) {
+							$what = 'организатор ' . esc_html( substr( $org, 0, 8 ) ) . '…, как в настройке';
+						} else {
+							$what = '<strong style="color:#b32d2e">другой организатор ' . esc_html( substr( $org, 0, 8 ) ) . '…</strong>';
+						}
+						?>
 						<tr>
-							<td><code style="word-break:break-all"><?php echo '' === (string) $v['v'] ? '(пусто)' : esc_html( $v['v'] ); ?></code></td>
+							<td><code style="word-break:break-all;font-size:11px"><?php echo '' === $val ? '(пусто)' : esc_html( $val ); ?></code></td>
+							<td><?php echo $what; // Собрано выше из экранированных частей. ?></td>
 							<td><?php echo (int) $v['n']; ?></td>
-							<td><?php echo ( (string) $v['v'] === $s['tc_id'] ) ? '<strong>совпадает с настройкой</strong>' : ''; ?></td>
+							<td><?php echo null === $v['future'] ? '—' : (int) $v['future']; ?></td>
+							<td><?php echo ( $val === $s['tc_id'] ) ? '<strong>совпадает с настройкой</strong>' : ''; ?></td>
 						</tr>
 					<?php endforeach; ?>
 					</tbody>
 				</table>
-				<p class="description">Нормально: почти все анонсы с ID хранят одно значение, и оно совпадает с настройкой. Если значений несколько, не включайте подстановку, пока не разберёмся.</p>
+				<p class="description">Для кнопки «Купить» тема берёт общий токен из шапки сайта, а поле в анонсе служит флажком «показать кнопку». Поэтому разные значения в старых анонсах продаже не мешают. Важна только строка «другой организатор» у будущих концертов: см. ниже.</p>
+
+				<h2>Будущие концерты с токеном другого организатора</h2>
+				<?php $other = self::future_other_org( $vals, $settings_org ); ?>
+				<?php if ( null === self::events_table() ) : ?>
+					<p>Таблица событий календаря не найдена, проверить нельзя.</p>
+				<?php elseif ( empty( $other ) ) : ?>
+					<p><strong>Нет.</strong> Все такие анонсы в прошлом, делать ничего не нужно.</p>
+				<?php else : ?>
+					<p>Эти концерты могут продаваться через другой аккаунт Ticketscloud. Проверьте кнопку «Купить» на их страницах.</p>
+					<ul style="list-style:disc;padding-left:20px">
+					<?php foreach ( $other as $e ) : ?>
+						<li><a href="<?php echo esc_url( get_edit_post_link( (int) $e['id'] ) ); ?>"><?php echo esc_html( $e['title'] ); ?></a>, <?php echo esc_html( gmdate( 'd.m.Y H:i', (int) $e['start'] ) ); ?></li>
+					<?php endforeach; ?>
+					</ul>
+				<?php endif; ?>
 			<?php endif; ?>
 		</div>
 		<?php

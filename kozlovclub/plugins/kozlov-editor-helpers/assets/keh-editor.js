@@ -1,4 +1,4 @@
-/* Kozlov Editor Helpers 1.0.1: автоподстановка Ticketscloud ID в редакторе анонса.
+/* Kozlov Editor Helpers 1.0.2: автоподстановка Ticketscloud ID в редакторе анонса.
  * Без jQuery и глобальных переменных. Любая ошибка гасится: редактор работает как раньше. */
 (function () {
 	'use strict';
