@@ -44,7 +44,12 @@ class KEP_Render {
 		$h .= '<span class="kep-r1">' . esc_html( self::row1( $d, $ctx, $time ) ) . '</span>';
 		$h .= '<span class="kep-r2">' . esc_html( $d['weekday'] ) . ' <span class="kep-badge" hidden></span></span>';
 		if ( '' !== $d['stage'] ) {
-			$h .= '<span class="kep-r3">' . esc_html( $d['stage'] ) . '</span>';
+			$map = KEP_Settings::map_url( $ctx['code'] );
+			if ( '' !== $map && '' !== $ctx['code'] ) {
+				$h .= '<a class="kep-r3" href="' . esc_url( $map ) . '" target="_blank" rel="noopener" title="Открыть на карте">' . esc_html( $d['stage'] ) . '</a>';
+			} else {
+				$h .= '<span class="kep-r3">' . esc_html( $d['stage'] ) . '</span>';
+			}
 		}
 		$h .= '</span></div>';
 		$h .= '<h1 class="kep-title">' . esc_html( $d['title'] ) . '</h1>';
@@ -243,16 +248,35 @@ class KEP_Render {
 
 	/**
 	 * «Важно знать»: адрес и вход, депозит, бронь. Сразу под кнопкой покупки, где решают, идти ли.
+	 * Текст сцены из настроек (другой адрес) идёт первым: заголовок жирным, текст, ссылка на карту.
 	 */
 	private static function notices( $d ) {
-		if ( empty( $d['notices'] ) ) {
+		$place = isset( $d['place_note'] ) ? $d['place_note'] : null;
+		if ( empty( $d['notices'] ) && ! $place ) {
 			return '';
 		}
-		$h = '<div class="kep-notices" role="note" aria-label="Важно знать"><span class="kep-notices-l">Важно знать</span><ul>';
-		foreach ( $d['notices'] as $n ) {
-			$h .= '<li>' . wp_kses( $n, KEP_Data::INLINE_TAGS ) . '</li>';
+		$h = '<div class="kep-notices' . ( $place ? ' kep-notices--place' : '' ) . '" role="note" aria-label="Важно знать"><span class="kep-notices-l">' . self::icon( 'info' ) . 'Важно знать</span>';
+		if ( $place ) {
+			$h .= '<div class="kep-place">' . self::icon( 'pin' ) . '<div class="kep-place-t">';
+			if ( '' !== $place['title'] ) {
+				$h .= '<strong class="kep-place-h">' . esc_html( $place['title'] ) . '</strong>';
+			}
+			if ( '' !== $place['text'] ) {
+				$h .= '<span class="kep-place-x">' . wp_kses( $place['text'], KEP_Data::INLINE_TAGS ) . '</span>';
+			}
+			if ( '' !== $place['map'] ) {
+				$h .= '<a class="kep-place-map" href="' . esc_url( $place['map'] ) . '" target="_blank" rel="noopener"><span class="kep-place-u">Открыть на карте</span><span class="kep-place-go" aria-hidden="true">→</span></a>';
+			}
+			$h .= '</div></div>';
 		}
-		return $h . '</ul></div>';
+		if ( ! empty( $d['notices'] ) ) {
+			$h .= '<ul class="kep-notices-ul">';
+			foreach ( $d['notices'] as $n ) {
+				$h .= '<li>' . wp_kses( $n, KEP_Data::INLINE_TAGS ) . '</li>';
+			}
+			$h .= '</ul>';
+		}
+		return $h . '</div>';
 	}
 
 	/**
@@ -427,8 +451,9 @@ class KEP_Render {
 			$h .= '<span>' . esc_html( $place['metro'] ) . '</span>';
 		}
 		$h .= '</div></div></div><div class="kep-where-btns">';
-		if ( '' !== $place['addr'] ) {
-			$h .= '<a class="kep-btn" href="' . esc_url( 'https://yandex.ru/maps/?text=' . rawurlencode( 'Москва, ' . $place['addr'] ) ) . '" target="_blank" rel="noopener">' . self::icon( 'route' ) . 'Маршрут</a>';
+		$map = KEP_Settings::map_url( $ctx['code'] );
+		if ( '' !== $map ) {
+			$h .= '<a class="kep-btn" href="' . esc_url( $map ) . '" target="_blank" rel="noopener">' . self::icon( 'route' ) . 'Маршрут</a>';
 		}
 		$tour = KEP_Settings::tour( $ctx['code'] );
 		if ( '' !== $tour ) {
@@ -602,11 +627,7 @@ class KEP_Render {
 		if ( '' === (string) $stage || '' === (string) $addr ) {
 			return false;
 		}
-		if ( ! preg_match( '/([А-Яа-яЁё]{5,})/u', preg_replace( '/^\s*(ул\.|улица)\s*/u', '', $addr ), $m ) ) {
-			return false;
-		}
-		$stem = mb_substr( mb_strtolower( $m[1], 'UTF-8' ), 0, 6, 'UTF-8' );
-		return false !== mb_strpos( mb_strtolower( $stage, 'UTF-8' ), $stem, 0, 'UTF-8' );
+		return KEP_Parser::mentions_street( $stage, $addr );
 	}
 
 	private static function when_text( $d, $ctx, $time ) {
@@ -649,6 +670,7 @@ class KEP_Render {
 			'cube'  => '<path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z"/><path d="M4 7.5l8 4.5 8-4.5M12 12v9"/>',
 			'pin'   => '<path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
 			'route' => '<path d="M3 11l18-8-8 18-2-8z"/>',
+			'info'  => '<circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.6v.1"/>',
 			'quote' => '<path d="M4 18v-6c0-4 2-6.5 6-7l.6 2c-2.2.7-3.1 2-3.2 4H11v7zm9 0v-6c0-4 2-6.5 6-7l.6 2c-2.2.7-3.1 2-3.2 4H20v7z" fill="currentColor" stroke="none"/>',
 		);
 		if ( ! isset( $p[ $name ] ) ) {

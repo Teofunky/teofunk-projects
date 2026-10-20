@@ -1,6 +1,6 @@
 <?php
 /**
- * Настройки плагина: режим, телефон, подпись к цене, 3D-тур и адреса сцен.
+ * Настройки плагина: режим, телефон, подпись к цене, 3D-тур, адреса и карты сцен, «Важно знать» по сцене.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -31,6 +31,18 @@ class KEP_Settings {
 			'metro_main' => 'м. Китай-город, Лубянка, Кузнецкий мост',
 			'addr_u'     => 'ул. Мясницкая, 15',
 			'metro_u'    => '',
+			'map_main'   => '',
+			'map_u'      => '',
+			// «Важно знать» по сцене: t — заголовок жирным, x — текст. Пусто: ничего не добавляется.
+			'stage_notes' => array(
+				'g' => array( 't' => '', 'x' => '' ),
+				'm' => array( 't' => '', 'x' => '' ),
+				'b' => array( 't' => '', 'x' => '' ),
+				'u' => array(
+					't' => 'Концерт не на Маросейке',
+					'x' => 'Сцена «Unplugged» находится по адресу ул. Мясницкая, 15 (вход через Lions Head Pub)',
+				),
+			),
 		);
 	}
 
@@ -48,6 +60,14 @@ class KEP_Settings {
 		}
 		$all         = array_merge( $defaults, $saved );
 		$all['tour'] = array_merge( $defaults['tour'], isset( $saved['tour'] ) && is_array( $saved['tour'] ) ? $saved['tour'] : array() );
+		$notes       = isset( $saved['stage_notes'] ) && is_array( $saved['stage_notes'] ) ? $saved['stage_notes'] : array();
+		foreach ( $defaults['stage_notes'] as $code => $def ) {
+			$one                         = isset( $notes[ $code ] ) && is_array( $notes[ $code ] ) ? $notes[ $code ] : array();
+			$all['stage_notes'][ $code ] = array(
+				't' => isset( $one['t'] ) ? (string) $one['t'] : $def['t'],
+				'x' => isset( $one['x'] ) ? (string) $one['x'] : $def['x'],
+			);
+		}
 		if ( ! in_array( $all['mode'], array( 'off', 'editors', 'all' ), true ) ) {
 			$all['mode'] = 'editors';
 		}
@@ -128,6 +148,22 @@ class KEP_Settings {
 				$out['tour'][ $code ] = isset( $in['tour'][ $code ] ) ? esc_url_raw( trim( wp_unslash( $in['tour'][ $code ] ) ) ) : '';
 			}
 		}
+		foreach ( array( 'map_main', 'map_u' ) as $k ) {
+			if ( isset( $in[ $k ] ) ) {
+				$out[ $k ] = esc_url_raw( trim( wp_unslash( $in[ $k ] ) ) );
+			}
+		}
+		if ( isset( $in['stage_notes'] ) && is_array( $in['stage_notes'] ) ) {
+			foreach ( array_keys( self::stages() ) as $code ) {
+				$one = isset( $in['stage_notes'][ $code ] ) && is_array( $in['stage_notes'][ $code ] ) ? $in['stage_notes'][ $code ] : array();
+				$t   = isset( $one['t'] ) ? sanitize_text_field( wp_unslash( $one['t'] ) ) : '';
+				$x   = isset( $one['x'] ) ? KEP_Data::inline( str_replace( array( "\r", "\n" ), ' ', wp_unslash( $one['x'] ) ) ) : '';
+				$out['stage_notes'][ $code ] = array(
+					't' => mb_substr( $t, 0, 80, 'UTF-8' ),
+					'x' => mb_substr( $x, 0, 400, 'UTF-8' ),
+				);
+			}
+		}
 		return $out;
 	}
 
@@ -191,5 +227,59 @@ class KEP_Settings {
 	public static function tour( $code ) {
 		$t = self::get( 'tour' );
 		return ( $code && ! empty( $t[ $code ] ) ) ? $t[ $code ] : '';
+	}
+
+	/**
+	 * Ссылка на карту для сцены: своя из настроек или поиск адреса в Яндекс Картах.
+	 *
+	 * @param string $code Код сцены.
+	 * @return string
+	 */
+	public static function map_url( $code ) {
+		$s   = self::get();
+		$own = 'u' === $code ? $s['map_u'] : $s['map_main'];
+		if ( '' !== (string) $own ) {
+			return $own;
+		}
+		$place = self::place( $code );
+		return '' !== $place['addr'] ? 'https://yandex.ru/maps/?text=' . rawurlencode( 'Москва, ' . $place['addr'] ) : '';
+	}
+
+	/**
+	 * «Важно знать» для сцены: заголовок, текст, карта. null, если для сцены ничего не задано.
+	 *
+	 * @param string $code Код сцены.
+	 * @return array{title:string,text:string,map:string}|null
+	 */
+	public static function stage_note( $code ) {
+		$all = self::get( 'stage_notes' );
+		if ( '' === (string) $code || ! isset( $all[ $code ] ) ) {
+			return null;
+		}
+		$t = trim( (string) $all[ $code ]['t'] );
+		$x = trim( (string) $all[ $code ]['x'] );
+		if ( '' === $t && '' === $x ) {
+			return null;
+		}
+		return array(
+			'title' => $t,
+			'text'  => $x,
+			'map'   => self::map_url( $code ),
+			'addr'  => self::place( $code )['addr'],
+		);
+	}
+
+	/**
+	 * Задан ли текст «Важно знать» хоть для одной сцены.
+	 *
+	 * @return bool
+	 */
+	public static function has_stage_notes() {
+		foreach ( array_keys( self::stages() ) as $code ) {
+			if ( self::stage_note( $code ) ) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

@@ -79,11 +79,36 @@
 .kep .kep-watch-dot .kep-i { width: 12px; height: 12px; }
 
 /* «Важно знать»: сноски под кнопкой покупки. */
-.kep .kep-notices { display: flex; flex-direction: column; gap: 6px; padding: 12px 14px; background: #f7f5f2; border-left: 3px solid var(--kep-accent); }
-.kep .kep-notices-l { font-size: 11px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; color: var(--kep-accent); }
-.kep.kep .kep-notices ul { display: flex; flex-direction: column; gap: 6px; }
-.kep.kep .kep-notices li { font-size: 14px; line-height: 1.45; color: var(--kep-ink); }
-.kep.kep .kep-notices a { color: var(--kep-accent); text-decoration: underline; text-underline-offset: 2px; }
+/* «Важно знать»: тёплая подложка в цвет бренда и полоса слева. Текст тёмный и крупнее,
+   красный только у подписи и ссылок, в оттенке с контрастом от 4,5:1 к подложке. */
+.kep .kep-notices {
+	--kep-n-bg: #fdf1ef; --kep-n-red: #c2261f; --kep-n-ink: #2b2b2b;
+	display: flex; flex-direction: column; gap: 10px; padding: 14px 16px 16px;
+	background: var(--kep-n-bg); border-left: 4px solid var(--kep-accent);
+}
+.kep .kep-notices-l { display: flex; align-items: center; gap: 6px; font-size: 12px; line-height: 1.2; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--kep-n-red); }
+.kep .kep-notices-l .kep-i { width: 16px; height: 16px; stroke-width: 2.2; }
+.kep .kep-place { display: flex; gap: 10px; align-items: flex-start; }
+.kep .kep-place > .kep-i { width: 22px; height: 22px; margin-top: 1px; color: var(--kep-n-red); stroke-width: 2; }
+.kep .kep-place-t { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.kep .kep-place-h { font-size: 17px; line-height: 1.3; font-weight: 700; color: #1f1f1f; }
+.kep .kep-place-x { font-size: 15px; line-height: 1.45; color: var(--kep-n-ink); }
+.kep.kep a.kep-place-map { align-self: flex-start; display: inline-flex; align-items: center; gap: 5px; min-height: 32px; margin-top: 1px; font-size: 14px; font-weight: 500; color: var(--kep-n-red); }
+.kep .kep-place-u { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.kep.kep a.kep-place-map:hover .kep-place-u { text-decoration-thickness: 2px; }
+.kep.kep .kep-notices-ul { display: flex; flex-direction: column; gap: 8px; }
+.kep.kep .kep-place + .kep-notices-ul { padding-top: 10px; border-top: 1px solid rgba(194, 38, 31, .18); }
+.kep.kep .kep-notices li { position: relative; padding-left: 14px; font-size: 15px; line-height: 1.45; color: var(--kep-n-ink); }
+.kep.kep .kep-notices li::before { content: ""; position: absolute; left: 0; top: .62em; width: 5px; height: 5px; background: var(--kep-accent); }
+.kep.kep .kep-notices li:only-child { padding-left: 0; }
+.kep.kep .kep-notices li:only-child::before { display: none; }
+/* Под блоком сцены сноски стоят по линии его текста, точка под булавкой. */
+.kep.kep .kep-notices--place li, .kep.kep .kep-notices--place li:only-child { padding-left: 32px; }
+.kep.kep .kep-notices--place li::before, .kep.kep .kep-notices--place li:only-child::before { display: block; left: 8.5px; }
+.kep.kep .kep-notices li a, .kep.kep .kep-place-x a { color: var(--kep-n-red); text-decoration: underline; text-underline-offset: 2px; }
+/* Сцена в карточке ведёт на карту. */
+.kep.kep a.kep-r3 { align-self: flex-start; color: var(--kep-accent); text-decoration: underline; text-decoration-color: rgba(221, 48, 41, .35); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.kep.kep a.kep-r3:hover { text-decoration-color: currentColor; }
 .kep .kep-lead > p + p { margin-top: 12px; }
 
 /* Даты концерта: маленький календарь. Текущая дата залита, остальные ссылки; на телефоне листаются вбок. */

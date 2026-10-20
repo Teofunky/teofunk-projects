@@ -61,8 +61,8 @@ class KEP_Admin {
 				</div>
 				<div class="kep-t-f">
 					<label class="kep-t-l" for="kep-notes">Важно знать <span>адрес и вход, депозит, бронь: по одной сноске на строку</span></label>
-					<textarea id="kep-notes" name="kep_notes" rows="5" maxlength="1200" data-kep-field="notes" placeholder="Сцена «Unplugged»: ул. Мясницкая, 15, вход через Lions Head Pub"><?php echo esc_textarea( $notes ); ?></textarea>
-					<p class="kep-t-h">Показываются в рамке «Важно знать» под кнопкой покупки. Сноски, которые уже написаны в тексте анонса («Внимание!…», депозит, бронь, вход), плагин находит сам. Лучше перенести их сюда: текст анонса останется только о концерте.</p>
+					<textarea id="kep-notes" name="kep_notes" rows="5" maxlength="1200" data-kep-field="notes" placeholder="Депозит 2 000 руб. на человека, бронь по телефону"><?php echo esc_textarea( $notes ); ?></textarea>
+					<p class="kep-t-h">Показываются в рамке «Важно знать» под кнопкой покупки. Адрес сцены на Мясницкой писать не нужно: плагин добавит его сам по сцене концерта. Сноски, которые уже написаны в тексте анонса («Внимание!…», депозит, бронь, вход), плагин находит сам. Лучше перенести их сюда: текст анонса останется только о концерте.</p>
 				</div>
 			</div>
 			<p class="kep-t-foot">Можно <b>жирный</b> и ссылки. Оба поля видны и на старой странице, вверху описания, если такого текста там ещё нет. <span class="kep-a-saved" data-kep-saved aria-live="polite">Сохраняется сразу.</span></p>
@@ -379,6 +379,11 @@ class KEP_Admin {
 		if ( $om !== $nm ) {
 			KEP_Data::flush_all();
 			set_transient( 'kep_mode_changed', 1, 60 );
+			return;
+		}
+		// Другие настройки тоже видны на страницах (телефон, адреса, «Важно знать» по сцене): кэш сбросить.
+		if ( wp_json_encode( $old ) !== wp_json_encode( $new ) ) {
+			KEP_Data::flush_all();
 		}
 	}
 
@@ -722,14 +727,24 @@ class KEP_Admin {
 		self::field( 'Метро: Маросейка', $name . '[metro_main]', $s['metro_main'] );
 		self::field( 'Адрес: Мясницкая', $name . '[addr_u]', $s['addr_u'] );
 		self::field( 'Метро: Мясницкая', $name . '[metro_u]', $s['metro_u'], 'Пусто: строки с метро нет.' );
+		self::field( 'Карта: Маросейка', $name . '[map_main]', $s['map_main'], 'Ссылка на точку или организацию в Яндекс Картах. Пусто: поиск адреса. Нужна для кнопки «Маршрут» и ссылок на карту.', 'url' );
+		self::field( 'Карта: Мясницкая', $name . '[map_u]', $s['map_u'], 'Например, ссылка на Lions Head Pub в Яндекс Картах. Пусто: поиск адреса.', 'url' );
+		echo '</tbody></table>';
+		echo '<h3 id="kep-stage-notes">«Важно знать» по сцене</h3><p class="kep-admin-lead">Текст сам встаёт первым в «Важно знать» у всех будущих концертов сцены, в том числе уже набранных: заголовок жирным, под ним текст и ссылка на карту. Редакторам писать его в анонсе не нужно. Если такая сноска уже есть в анонсе или в поле «Важно знать», она не повторится. На старой странице текст появится вверху описания, если адреса этой улицы в описании нет. Оба поля пустые: ничего не добавляется.</p>';
+		echo '<table class="form-table" role="presentation"><tbody>';
+		foreach ( KEP_Settings::stages() as $code => $stage ) {
+			$note = $s['stage_notes'][ $code ];
+			self::field( $stage . ': заголовок', $name . '[stage_notes][' . $code . '][t]', $note['t'], 'u' === $code ? 'Коротко и о главном: человек должен понять, что ехать не на Маросейку.' : '' );
+			self::field( $stage . ': текст', $name . '[stage_notes][' . $code . '][x]', $note['x'], 'u' === $code ? 'Можно жирный и ссылку.' : '', 'text', 'large-text' );
+		}
 		echo '</tbody></table>';
 		submit_button( 'Сохранить настройки' );
 		echo '</form>';
 	}
 
-	private static function field( $label, $name, $value, $help = '', $type = 'text' ) {
+	private static function field( $label, $name, $value, $help = '', $type = 'text', $class = 'regular-text' ) {
 		$id = 'kep-f-' . md5( $name );
-		echo '<tr><th scope="row"><label for="' . esc_attr( $id ) . '">' . esc_html( $label ) . '</label></th><td><input type="' . esc_attr( $type ) . '" id="' . esc_attr( $id ) . '" name="' . esc_attr( $name ) . '" value="' . esc_attr( $value ) . '" class="regular-text">';
+		echo '<tr><th scope="row"><label for="' . esc_attr( $id ) . '">' . esc_html( $label ) . '</label></th><td><input type="' . esc_attr( $type ) . '" id="' . esc_attr( $id ) . '" name="' . esc_attr( $name ) . '" value="' . esc_attr( $value ) . '" class="' . esc_attr( $class ) . '">';
 		if ( '' !== $help ) {
 			echo '<p class="description">' . esc_html( $help ) . '</p>';
 		}

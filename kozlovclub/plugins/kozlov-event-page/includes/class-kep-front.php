@@ -13,6 +13,9 @@ class KEP_Front {
 	/** @var int */
 	private static $post_id = 0;
 
+	/** @var bool Собирается новая страница (а не старая с добавленными текстами). */
+	private static $is_new = false;
+
 	public static function init() {
 		add_action( 'template_redirect', array( __CLASS__, 'maybe_start' ), 1 );
 		add_action( 'admin_bar_menu', array( __CLASS__, 'admin_bar' ), 90 );
@@ -60,14 +63,15 @@ class KEP_Front {
 			self::no_cache();
 		}
 		if ( ! self::should_render( $post_id ) ) {
-			// Старая страница: тексты из полей «Коротко о концерте» и «Важно знать» тоже должны быть видны.
-			if ( '' !== KEP_Data::lead( $post_id ) || KEP_Data::notes( $post_id ) ) {
+			// Старая страница: тексты из полей «Коротко о концерте», «Важно знать» и текст сцены тоже должны быть видны.
+			if ( '' !== KEP_Data::lead( $post_id ) || KEP_Data::notes( $post_id ) || KEP_Settings::has_stage_notes() ) {
 				self::$post_id = $post_id;
 				ob_start( array( __CLASS__, 'filter_old' ) );
 			}
 			return;
 		}
 		self::$post_id = $post_id;
+		self::$is_new  = true;
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'assets' ), 20 );
 		add_filter( 'body_class', array( __CLASS__, 'body_class' ) );
 		self::social_image( KEP_Data::hero_id( $post_id ) );
@@ -161,12 +165,12 @@ class KEP_Front {
 			if ( empty( $d['artists'] ) ) {
 				$d['artists'] = KEP_Data::ka_artists( $post_id );
 			}
-			$d = self::apply_fields( $d, $post_id );
-			$slug    = (string) get_post_field( 'post_name', $post_id );
-			$entry   = KEP_Data::by_slug( $slug );
-			$date    = $entry ? $entry['date'] : KEP_Parser::infer_date( $d['day'], $d['month'], $d['upcoming'], current_time( 'timestamp' ) );
-			$code    = ( $entry && '' !== $entry['stage'] ) ? $entry['stage'] : KEP_Settings::stage_code( $d['stage'] );
-			$ctx     = array(
+			$slug  = (string) get_post_field( 'post_name', $post_id );
+			$entry = KEP_Data::by_slug( $slug );
+			$date  = $entry ? $entry['date'] : KEP_Parser::infer_date( $d['day'], $d['month'], $d['upcoming'], current_time( 'timestamp' ) );
+			$code  = ( $entry && '' !== $entry['stage'] ) ? $entry['stage'] : KEP_Settings::stage_code( $d['stage'] );
+			$d     = self::apply_fields( $d, $post_id, $code );
+			$ctx   = array(
 				'post_id' => $post_id,
 				'hero_id' => KEP_Data::hero_id( $post_id ),
 				'program' => KEP_Data::program( $post_id ),
@@ -190,11 +194,15 @@ class KEP_Front {
 	 * Поля редактора поверх разобранного анонса: текст сверху и сноски.
 	 * Если тот же текст остался и в анонсе, он не повторяется.
 	 *
-	 * @param array $d       Данные анонса.
-	 * @param int   $post_id ID записи.
+	 * Текст сцены из настроек («Сцена на Мясницкой» и т. п.) идёт первым, отдельным блоком;
+	 * сноски из анонса и поля, которые говорят то же самое, убираются.
+	 *
+	 * @param array  $d       Данные анонса.
+	 * @param int    $post_id ID записи.
+	 * @param string $code    Код сцены.
 	 * @return array
 	 */
-	public static function apply_fields( $d, $post_id ) {
+	public static function apply_fields( $d, $post_id, $code = '' ) {
 		$lead  = KEP_Data::lead( $post_id );
 		$notes = KEP_Data::notes( $post_id );
 		if ( '' !== $lead ) {
@@ -228,6 +236,16 @@ class KEP_Front {
 				$d['notices'][] = $html;
 			}
 		}
+		$d['place_note'] = 'past' === $d['type'] ? null : KEP_Settings::stage_note( $code );
+		if ( $d['place_note'] ) {
+			$keep = array();
+			foreach ( $d['notices'] as $n ) {
+				if ( ! KEP_Parser::same_place( $n, $d['place_note'] ) ) {
+					$keep[] = $n;
+				}
+			}
+			$d['notices'] = $keep;
+		}
 		return $d;
 	}
 
@@ -254,20 +272,42 @@ class KEP_Front {
 		}
 		$lead  = KEP_Data::lead( $post_id );
 		$notes = KEP_Data::notes( $post_id );
-		if ( '' === $lead && ! $notes ) {
+		if ( '' === $lead && ! $notes && ! KEP_Settings::has_stage_notes() ) {
 			return $html;
 		}
 		$frag = KEP_Parser::find_fragment( $html );
 		if ( ! $frag || ! preg_match( '/<div\b[^>]*\bclass\s*=\s*["\'][^"\']*\bdescription\b[^"\']*["\'][^>]*>/i', $frag['html'], $m, PREG_OFFSET_CAPTURE ) ) {
 			return $html;
 		}
-		$desc  = KEP_Parser::words( substr( $frag['html'], $m[0][1] ) );
-		$known = function ( $s ) use ( $desc ) {
+		$block    = KEP_Parser::div_at( $frag['html'], $m[0][1], strlen( $m[0][0] ) );
+		$desc_raw = $block ? $block['html'] : substr( $frag['html'], $m[0][1] );
+		$desc     = KEP_Parser::words( $desc_raw );
+		$known    = function ( $s ) use ( $desc ) {
 			$w = KEP_Parser::words( $s );
 			return $w && count( array_intersect( $w, $desc ) ) / count( $w ) >= 0.8;
 		};
 		$extra = '';
+		// Текст сцены: только у будущих концертов и если адреса этой улицы в описании ещё нет.
+		$place = null;
+		if ( preg_match( '/<div\b[^>]*\bclass\s*=\s*["\'][^"\']*\binfo\b[^"\']*\bupcoming\b/i', $frag['html'] ) || preg_match( '/<div\b[^>]*\bclass\s*=\s*["\'][^"\']*\bupcoming\b[^"\']*\binfo\b/i', $frag['html'] ) ) {
+			$slug  = (string) get_post_field( 'post_name', $post_id );
+			$entry = KEP_Data::by_slug( $slug );
+			$code  = ( $entry && '' !== $entry['stage'] ) ? $entry['stage'] : '';
+			if ( '' === $code && preg_match( '/\bclass\s*=\s*["\'][^"\']*\brow_3\b[^"\']*["\'][^>]*>([^<]*)</i', $frag['html'], $r ) ) {
+				$code = KEP_Settings::stage_code( html_entity_decode( $r[1], ENT_QUOTES, 'UTF-8' ) );
+			}
+			$place = KEP_Settings::stage_note( $code );
+		}
+		if ( $place ) {
+			$line = '' !== $place['text'] ? $place['text'] : $place['title'];
+			if ( ! $known( $line ) && ! KEP_Parser::mentions_street( $desc_raw, $place['addr'] ) ) {
+				$extra .= '<p class="kep-old-note"><strong style="color:#f24841">' . wp_kses( $line, KEP_Data::INLINE_TAGS ) . '</strong></p>';
+			}
+		}
 		foreach ( $notes as $n ) {
+			if ( $place && KEP_Parser::same_place( $n, $place ) ) {
+				continue; // то же сказано текстом сцены
+			}
 			if ( ! $known( $n ) ) {
 				$extra .= '<p class="kep-old-note"><strong style="color:#f24841">' . $n . '</strong></p>';
 			}
@@ -286,6 +326,7 @@ class KEP_Front {
 	 * Вернуть страницу как есть и запомнить причину для админки.
 	 */
 	private static function fail( $html, $why ) {
+		self::$is_new = false;
 		$last = get_option( 'kep_last_error' );
 		$same = is_array( $last ) && isset( $last['post_id'], $last['time'] ) && (int) $last['post_id'] === self::$post_id && $last['time'] > time() - 600;
 		if ( $same ) {
@@ -317,7 +358,7 @@ class KEP_Front {
 		if ( ! $post_id || ! current_user_can( 'edit_post', $post_id ) ) {
 			return;
 		}
-		$is_new = self::$post_id === $post_id;
+		$is_new = self::$is_new && self::$post_id === $post_id;
 		$url    = get_permalink( $post_id );
 		$bar->add_node(
 			array(

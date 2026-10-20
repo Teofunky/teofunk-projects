@@ -30,8 +30,19 @@ class KEP_Parser {
 		if ( ! preg_match( '/<div\b[^>]*\bclass\s*=\s*["\'][^"\']*\bevent_page_post_content\b[^"\']*["\'][^>]*>/i', $html, $m, PREG_OFFSET_CAPTURE ) ) {
 			return null;
 		}
-		$start = $m[0][1];
-		$pos   = $start + strlen( $m[0][0] );
+		return self::div_at( $html, $m[0][1], strlen( $m[0][0] ) );
+	}
+
+	/**
+	 * Блок div целиком по месту его открывающего тега.
+	 *
+	 * @param string $html     Страница.
+	 * @param int    $start    Где начинается <div ...>.
+	 * @param int    $open_len Длина открывающего тега.
+	 * @return array|null start, length, html
+	 */
+	public static function div_at( $html, $start, $open_len ) {
+		$pos   = $start + $open_len;
 		$depth = 1;
 		while ( $depth > 0 && preg_match( '/<(\/?)div\b[^>]*>/i', $html, $t, PREG_OFFSET_CAPTURE, $pos ) ) {
 			$depth += ( '/' === $t[1][0] ) ? -1 : 1;
@@ -720,6 +731,48 @@ class KEP_Parser {
 			return '' !== self::norm( $a ) && self::norm( $a ) === self::norm( $b );
 		}
 		return count( array_intersect( $wa, $wb ) ) / $n >= $min;
+	}
+
+	/**
+	 * Улица из адреса как начало слова: «ул. Мясницкая, 15» → «мясниц». Пусто, если улицы не найти.
+	 */
+	public static function street_stem( $addr ) {
+		if ( ! preg_match( '/([А-Яа-яЁё]{5,})/u', (string) preg_replace( '/^\s*(ул\.|улица)\s*/u', '', (string) $addr ), $m ) ) {
+			return '';
+		}
+		return mb_substr( mb_strtolower( $m[1], 'UTF-8' ), 0, 6, 'UTF-8' );
+	}
+
+	/**
+	 * Есть ли в тексте улица из адреса.
+	 */
+	public static function mentions_street( $text, $addr ) {
+		$stem = self::street_stem( $addr );
+		if ( '' === $stem ) {
+			return false;
+		}
+		$low = mb_strtolower( html_entity_decode( wp_strip_all_tags( (string) $text ), ENT_QUOTES, 'UTF-8' ), 'UTF-8' );
+		return false !== mb_strpos( $low, $stem, 0, 'UTF-8' );
+	}
+
+	/**
+	 * Сноска говорит то же, что текст сцены из настроек? Тогда показывается только текст сцены.
+	 * Совпадают слова, или сноска про ту же улицу и в ней нет других сведений (депозит, бронь, дресс-код, возраст).
+	 *
+	 * @param string $html  Сноска.
+	 * @param array  $place Из KEP_Settings::stage_note().
+	 * @return bool
+	 */
+	public static function same_place( $html, $place ) {
+		$full = trim( $place['title'] . ' ' . $place['text'] );
+		if ( self::same_text( $html, $full ) || ( '' !== $place['text'] && self::same_text( $html, $place['text'] ) ) ) {
+			return true;
+		}
+		if ( ! self::mentions_street( $html, $place['addr'] ) ) {
+			return false;
+		}
+		$low = mb_strtolower( wp_strip_all_tags( (string) $html ), 'UTF-8' );
+		return ! preg_match( '/(депозит|брон|дресс|возраст|\d\s*\+|дет[иея]|билет|стол|оплат|руб)/u', $low );
 	}
 
 	/**
