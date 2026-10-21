@@ -97,6 +97,36 @@ PASS withdrawn articles removed from sitemap
 PASS no public JavaScript errors
 PASS republishing preserves issue number
 TOTAL 46 browser/HTTP assertions passed
+PASS club brand fallback visible without theme logo
+PASS existing named WordPress menu reused without assigning theme location
+PASS prominent home link targets main site
+PASS footer provides another route to main site
+PASS club submenu opens with native details
+PASS Escape closes club submenu
+PASS A+ enlarges front-page lead and headline
+PASS visible size indicator reports 110 percent
+PASS reader size leaves club navigation stable
+PASS reader preference survives reload
+PASS A- restores front-page text size
+PASS editor round trip preserves paragraphs alongside a list
+PASS A+ enlarges full article and introduction
+PASS 100 percent button resets article reading size
+PASS upper size limit and feedback 320px
+PASS no overflow at maximum font size 320px
+PASS home button visible with touch target 320px
+PASS upper size limit and feedback 390px
+PASS no overflow at maximum font size 390px
+PASS home button visible with touch target 390px
+PASS upper size limit and feedback 768px
+PASS no overflow at maximum font size 768px
+PASS home button visible with touch target 768px
+PASS upper size limit and feedback 1440px
+PASS no overflow at maximum font size 1440px
+PASS home button visible with touch target 1440px
+PASS lower size limit is explicit
+PASS shared menu works without JavaScript
+PASS no JavaScript errors in navigation or reading controls
+TOTAL 29 navigation/reader assertions passed
 PASS legacy issue URL redirects directly to short canonical
 PASS legacy URL does not redirect an unpublished issue
 PASS impossible short date returns 404
@@ -226,5 +256,5 @@ PASS reactivation preserves issues and schema
 PASS archive paginates and cache result matches
 PASS archive tested with 1200+ issues
 PASS archive uses publication/date index
-PERFORMANCE {"rows":1203,"page_size":12,"cold_ms":5.311,"warm_ms":0.158,"explain":[{"id":"1","select_type":"SIMPLE","table":"wp_es_issues","type":"range","possible_keys":"public_archive","key":"public_archive","key_len":"66","ref":null,"rows":"1201","Extra":"Using where"}]}
+PERFORMANCE {"rows":1203,"page_size":12,"cold_ms":3.108,"warm_ms":0.156,"explain":[{"id":"1","select_type":"SIMPLE","table":"wp_es_issues","type":"range","possible_keys":"public_archive","key":"public_archive","key_len":"66","ref":null,"rows":"1201","Extra":"Using where"}]}
 TOTAL 39 advanced assertions passed

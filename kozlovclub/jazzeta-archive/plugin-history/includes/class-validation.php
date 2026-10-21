@@ -69,7 +69,9 @@ final class Validation {
         $out='';
         foreach ($paragraphs as $p) {
             $p=self::rich($p);
-            $out.=preg_match('/<(?:p|ul|ol|blockquote)\b/i',$p)?$p:wpautop($p);
+            // The text editor can return unwrapped paragraphs followed by a list.
+            // wpautop preserves existing blocks and wraps the remaining plain paragraphs.
+            $out.=wpautop($p);
         }
         return $out;
     }

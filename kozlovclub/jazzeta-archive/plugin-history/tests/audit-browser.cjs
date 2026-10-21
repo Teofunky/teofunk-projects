@@ -56,7 +56,7 @@ function ok(v,label){if(!v)throw Error('FAIL '+label);passed++;console.log('PASS
  }finally{
   const saved=b64(previous);
   php("$s=json_decode(base64_decode('"+saved+"'),true);if($s['appearance']===null){delete_option('es_appearance');}else{update_option('es_appearance',$s['appearance']);}update_option('blog_public',$s['public']);update_option('permalink_structure',$s['permalinks']);"+(logo?"wp_delete_attachment("+logo+",true);":""));
-  if(fixtureInstalled){const f=path.join(php('echo WPMU_PLUGIN_DIR;'),'es-newspaper-audit-fixture.php');if(fs.existsSync(f))fs.unlinkSync(f);}
+  if(fixtureInstalled){php("$f=WPMU_PLUGIN_DIR.'/es-newspaper-audit-fixture.php';if(is_file($f)&&!unlink($f))throw new Exception('Cannot remove local audit fixture');");}
   await browser.close();
  }
 })().catch(e=>{console.error(e);process.exit(1)});

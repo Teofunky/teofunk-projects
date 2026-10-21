@@ -103,7 +103,7 @@ final class Admin {
     public static function screen() {
         if (!current_user_can('es_edit')) { wp_die('Нет прав.'); }
         $id=isset($_GET['issue'])?absint($_GET['issue']):0; $row=$id?Repository::issue($id):null;
-        echo '<div class="wrap es-admin"><h1>'.esc_html(Settings::name()).' <small>0.3.0</small></h1><p><a href="'.esc_url(self::url()).'">Редакционная очередь</a> · <a href="'.esc_url(Front::url()).'" target="_blank" rel="noopener">Открыть газету ↗</a></p>';
+        echo '<div class="wrap es-admin"><h1>'.esc_html(Settings::name()).' <small>'.esc_html(ES_VERSION).'</small></h1><p><a href="'.esc_url(self::url()).'">Редакционная очередь</a> · <a href="'.esc_url(Front::url()).'" target="_blank" rel="noopener">Открыть газету ↗</a></p>';
         if (isset($_GET['saved'])) { echo '<div class="notice notice-success"><p>Операция выполнена. Публичная версия меняется только при утверждении выпуска.</p></div>'; }
         if ($id&&!$row) { echo '<p>Выпуск не найден.</p></div>'; return; }
         if (!$row) { self::queue(); echo '</div>'; return; }

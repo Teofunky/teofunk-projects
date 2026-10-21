@@ -1,8 +1,14 @@
 (()=>{'use strict';
- const $=s=>document.querySelector(s);let scale=1;
+ const $=s=>document.querySelector(s);let fontPercent=100;
  $('#nightMode')?.addEventListener('click',()=>{const enabled=document.body.classList.toggle('night');$('#nightMode').setAttribute('aria-pressed',String(enabled));});
- const resize=d=>{scale=Math.max(.9,Math.min(1.4,scale+d));document.documentElement.style.setProperty('--scale',String(scale));};
- $('#smaller')?.addEventListener('click',()=>resize(-.1));$('#bigger')?.addEventListener('click',()=>resize(.1));
+ try {const saved=Number(localStorage.getItem('es-reader-percent'));if(Number.isFinite(saved)&&saved>=90&&saved<=140)fontPercent=Math.round(saved/10)*10;} catch {}
+ const resize=(next,persist=true)=>{fontPercent=Math.max(90,Math.min(140,next));document.documentElement.style.setProperty('--scale',String(fontPercent/100));if($('#resetFont'))$('#resetFont').textContent=fontPercent+'%';if($('#fontStatus'))$('#fontStatus').textContent='Размер текста: '+fontPercent+'%';if($('#smaller'))$('#smaller').disabled=fontPercent===90;if($('#bigger'))$('#bigger').disabled=fontPercent===140;if(persist){try{localStorage.setItem('es-reader-percent',String(fontPercent));}catch{}}};
+ resize(fontPercent,false);
+ $('#smaller')?.addEventListener('click',()=>resize(fontPercent-10));$('#bigger')?.addEventListener('click',()=>resize(fontPercent+10));$('#resetFont')?.addEventListener('click',()=>resize(100));
+ const clubMenus=Array.from(document.querySelectorAll('.es-club-menu>li>.es-club-dropdown'));
+ clubMenus.forEach(menu=>menu.addEventListener('toggle',()=>{if(menu.open)clubMenus.forEach(other=>{if(other!==menu)other.open=false;});}));
+ document.addEventListener('click',event=>clubMenus.forEach(menu=>{if(!menu.contains(event.target))menu.open=false;}));
+ document.addEventListener('keydown',event=>{if(event.key==='Escape')clubMenus.forEach(menu=>{if(menu.open){menu.open=false;menu.querySelector('summary').focus();}});});
  document.querySelectorAll('[data-filter]').forEach(button=>button.addEventListener('click',()=>{const filter=button.dataset.filter;let n=0;document.querySelectorAll('[data-region]').forEach(el=>{const show=filter==='all'||el.dataset.region===filter||el.dataset.region==='mixed';el.hidden=!show;if(show)n++;});document.querySelectorAll('[data-filter]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));$('#countLine').textContent=`Материалов: ${n}`;}));
  const el=$('#social-data');if(!el)return;const data=JSON.parse(el.textContent);
  const digest=()=>`${data.brand} · ${data.date}${data.preview?' · ЧЕРНОВИК':' · № '+data.number}\n\n`+data.items.map((a,i)=>`${i+1}. ${a.telegram}${a.disclosure?'\nСвязь с издателем: '+a.disclosure:''}${a.url?'\n'+a.url:''}`).join('\n\n')+(data.issue_url?'\n\nВесь выпуск: '+data.issue_url:'');

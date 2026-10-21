@@ -142,7 +142,7 @@ final class Runtime {
     public static function notice() {
         if (!current_user_can('es_edit')&&!current_user_can('manage_options')) { return; }
         $mode=self::mode();$fault=get_option('es_runtime_fault');
-        if (!self::ready()||$fault) { echo '<div class="notice notice-error"><p>Газета остановлена или требует активации версии 0.3.2. <a href="'.esc_url(admin_url('admin.php?page=es-runtime')).'">Режим и восстановление</a>. Материалы сохранены.</p></div>'; }
+        if (!self::ready()||$fault) { echo '<div class="notice notice-error"><p>Газета остановлена или требует активации версии '.esc_html(ES_VERSION).'. <a href="'.esc_url(admin_url('admin.php?page=es-runtime')).'">Режим и восстановление</a>. Материалы сохранены.</p></div>'; }
         elseif (isset($_GET['page'])&&is_string($_GET['page'])&&strpos($_GET['page'],'es-')===0&&$mode!=='public') { echo '<div class="notice notice-warning"><p>'.($mode==='paused'?'Газета остановлена.':'Закрытый режим: даже утверждённые выпуски видны только допущенной редакции.').' <a href="'.esc_url(admin_url('admin.php?page=es-runtime')).'">Режим и остановка</a></p></div>'; }
     }
     public static function screen() {
