@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.1",
+  "import_id": "manual-draft-2026-10-21",
+  "edition_date": "2026-10-21",
+  "timezone": "Europe/Moscow",
+  "edition_number": null,
+  "publication": {"status": "draft"},
+  "articles": [],
+  "social": [],
+  "editorial": {
+    "ready_for_human_review": false,
+    "blocking_issues": ["Это пустой образец. Добавьте реальные материалы и проверьте каждый факт."],
+    "source_scan_window_start": "2026-10-21T00:00:00+03:00",
+    "source_scan_window_end": "2026-10-21T00:00:00+03:00",
+    "generation_notes": ["Образец не является новостным выпуском."]
+  }
+}
