@@ -3,6 +3,8 @@ namespace Kozlov\Standard;
 if (!defined('ABSPATH')) { exit; }
 final class Admin {
     private static $permit=null;
+    private static $import_permit=null;
+    private static $import_candidate=null;
     public static function can_publish() { return Runtime::owner(); }
     public static function init() {
         add_action('admin_menu',[self::class,'menu']);
@@ -12,9 +14,10 @@ final class Admin {
     public static function menu() {
         add_menu_page(Settings::name(),Settings::name(),'es_edit','es-newsroom',[self::class,'screen'],'dashicons-media-document',29);
         add_submenu_page('es-newsroom','Источники','Источники','es_edit','es-sources',[self::class,'sources']);
-        add_submenu_page('es-newsroom','Импорт JSON','Импорт JSON','es_import','es-import',[self::class,'import_screen']);
+        $import_hook=add_submenu_page('es-newsroom','Импорт JSON','Импорт JSON','es_import','es-import',[self::class,'import_screen']);
+        add_action('load-'.$import_hook,Runtime::guard([self::class,'import_load']));
         add_submenu_page('es-newsroom','Перенос 0.2.0','Перенос 0.2.0','manage_options','es-migrate',[Migration::class,'screen']);
-        if (current_user_can('es_import')&&!current_user_can('es_edit')) { add_menu_page('Импорт газеты','Импорт газеты','es_import','es-import',[self::class,'import_screen'],'dashicons-upload'); }
+        if (current_user_can('es_import')&&!current_user_can('es_edit')) { $import_hook=add_menu_page('Импорт газеты','Импорт газеты','es_import','es-import',[self::class,'import_screen'],'dashicons-upload'); add_action('load-'.$import_hook,Runtime::guard([self::class,'import_load'])); }
     }
     public static function assets($hook) {
         $page=isset($_GET['page'])&&is_string($_GET['page'])?sanitize_key(wp_unslash($_GET['page'])):'';
@@ -27,6 +30,12 @@ final class Admin {
     public static function publication_authorized($id,$version) {
         return self::$permit===[(int)$id,(int)$version] && self::can_publish();
     }
+    public static function manual_import_authorized($id,$version,$raw) {
+        return self::$import_permit===[(int)$id,(int)$version,hash('sha256',$raw)] && Runtime::owner() && current_user_can('es_import');
+    }
+    private static function owner_browser() {
+        return Runtime::owner() && current_user_can('es_import') && get_current_user_id()>0 && (int)wp_validate_auth_cookie('', 'logged_in')===get_current_user_id() && !(defined('REST_REQUEST')&&REST_REQUEST) && !(defined('DOING_CRON')&&DOING_CRON);
+    }
     private static function value($key,$fallback='') { return isset($_POST[$key]) && is_scalar($_POST[$key])?wp_unslash((string)$_POST[$key]):$fallback; }
     private static function lines($v) { return array_values(array_filter(array_map('trim',preg_split('/\R/',(string)$v)),static function($x){return $x!=='';})); }
     public static function handle() {
@@ -37,6 +46,13 @@ final class Admin {
         if (!current_user_can($cap) || (in_array($op,['publish','withdraw'],true)&&!self::can_publish())) { wp_die('Нет прав.','',['response'=>403]); }
         check_admin_referer('es-'.$op.'-'.$id.'-'.$version);
         $result=Validation::error('Неизвестная операция.');
+        if ($op==='manual_import') {
+            if (!self::owner_browser()) { wp_die('Требуется авторизованная сессия выбранного владельца с правом импорта.','',['response'=>403]); }
+            $raw=self::value('raw');
+            if (self::value('confirm')!=='1' || !wp_verify_nonce(self::value('payload_nonce'),'es-import-payload-'.$id.'-'.$version.'-'.hash('sha256',$raw))) { wp_die('Подтвердите именно проверенный JSON. Вернитесь к проверке импорта.','',['response'=>403]); }
+            self::$import_permit=[$id,$version,hash('sha256',$raw)];
+            try { $result=Repository::manual_import_from_admin($id,$version,$raw); } finally { self::$import_permit=null; }
+        }
         if ($op==='create') { $result=Repository::create(self::value('edition_date')); }
         if ($op==='import') { $v=self::value('expected'); $result=Repository::import(self::value('raw'),$v===''?null:absint($v)); if (!is_wp_error($result)) { $result=$result['id']; } }
         if ($op==='migrate') { $result=Migration::one(absint(self::value('legacy_id'))); }
@@ -86,8 +102,8 @@ final class Admin {
         if (is_wp_error($result)) { wp_die(esc_html($result->get_error_message()).'<p>Вернитесь назад и сохраните свои правки перед обновлением страницы.</p>','Операция остановлена',['response'=>$result->get_error_data()['status']??400,'back_link'=>true]); }
         wp_safe_redirect(self::url((int)$result).'&saved=1'); exit;
     }
-    public static function form($op,$id=0,$version=0) {
-        echo '<form method="post" action="'.esc_url(admin_url('admin-post.php')).'" class="es-form">';
+    public static function form($op,$id=0,$version=0,$target='') {
+        echo '<form method="post" action="'.esc_url($target?:admin_url('admin-post.php')).'" class="es-form">';
         foreach (['action'=>'es_action','operation'=>$op,'issue_id'=>$id,'version'=>$version] as $k=>$v) { echo '<input type="hidden" name="'.esc_attr($k).'" value="'.esc_attr($v).'">'; }
         wp_nonce_field('es-'.$op.'-'.$id.'-'.$version);
     }
@@ -112,6 +128,9 @@ final class Admin {
         $d=Repository::doc($row); $rows=Repository::rows($id); $errors=Repository::blockers($row);
         echo '<h2>Выпуск '.esc_html($row['edition_date']).' · '.esc_html($row['number']?'№ '.$row['number']:'номер при публикации').'</h2><p>Версия '.(int)$row['version'].' · '.esc_html($row['state']).' · публичная версия '.(int)$row['public_version'].'</p>';
         echo '<p><a class="button" target="_blank" rel="noopener" href="'.esc_url(Front::preview_url($id)).'">Предпросмотр газеты</a> <a class="button" href="'.esc_url(self::url($id,'new')).'">Добавить материал</a></p>';
+        if (Runtime::owner()&&current_user_can('es_import')&&$row['state']==='draft'&&$row['public_json']===null&&!(int)$row['public_version']&&$row['published_at']===null&&$row['number']===null) {
+            echo '<p><a class="button" href="'.esc_url(add_query_arg(['page'=>'es-import','issue'=>$id],admin_url('admin.php'))).'">Заменить черновик из JSON…</a></p>';
+        }
         echo '<table class="widefat striped"><thead><tr><th>Порядок / ID</th><th>Материал</th><th>Проверка</th></tr></thead><tbody>';
         foreach ($rows as $r) { $a=json_decode($r['draft_json'],true); $reviewed=$r['reviewed_by']&&hash_equals($r['reviewed_hash'],Repository::hash($a)); echo '<tr><td>'.((int)$r['position']+1).' · '.esc_html($a['id']).'</td><td><a href="'.esc_url(self::url($id,$a['id'])).'">'.esc_html($a['headline']).'</a><br>'.esc_html(Validation::REGIONS[$a['region']].' / '.$a['placement']).'</td><td>'.($reviewed?'✓ Подтверждено человеком':'Требует проверки').'</td></tr>'; }
         echo '</tbody></table><h2>Сборка и редакционные блокеры</h2>';
@@ -207,7 +226,7 @@ final class Admin {
         $records=$wpdb->get_results($wpdb->prepare("SELECT id,version,actor_id,action,created_at FROM $t WHERE issue_id=%d ORDER BY id DESC LIMIT 20 OFFSET %d",$row['id'],($page-1)*20),ARRAY_A);
         $count=(int)$wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM $t WHERE issue_id=%d",$row['id']));
         echo '<h2 id="history">Журнал версий (время UTC)</h2><table class="widefat striped"><thead><tr><th>Версия</th><th>Когда / кто</th><th>Действие</th><th>Восстановить</th></tr></thead><tbody>';
-        foreach ($records as $rec) { $u=get_userdata($rec['actor_id']); echo '<tr><td>'.(int)$rec['version'].'</td><td>'.esc_html($rec['created_at'].' / '.($u?$u->display_name:'Пользователь #'.$rec['actor_id'])).'</td><td>'.esc_html($rec['action']).'</td><td>'; echo '<a href="'.esc_url(add_query_arg('revision',$rec['id'],self::url($row['id'])).'#history').'">Просмотреть</a>'; self::form('restore',$row['id'],$row['version']); echo '<input type="hidden" name="revision_id" value="'.(int)$rec['id'].'"><button class="button">В рабочий черновик</button></form></td></tr>'; }
+        foreach ($records as $rec) { $u=get_userdata($rec['actor_id']); echo '<tr><td>'.(int)$rec['version'].'</td><td>'.esc_html($rec['created_at'].' / '.($u?$u->display_name:'Пользователь #'.$rec['actor_id'])).'</td><td>'.esc_html(['before_manual_import'=>'Перед ручным импортом','manual_import'=>'Ручной импорт JSON'][$rec['action']]??$rec['action']).'</td><td>'; echo '<a href="'.esc_url(add_query_arg('revision',$rec['id'],self::url($row['id'])).'#history').'">Просмотреть</a>'; self::form('restore',$row['id'],$row['version']); echo '<input type="hidden" name="revision_id" value="'.(int)$rec['id'].'"><button class="button">В рабочий черновик</button></form></td></tr>'; }
         echo '</tbody></table>'; self::pagination($page,(int)ceil($count/20),self::url($row['id']),'history_page');
         $selected=isset($_GET['revision'])?absint($_GET['revision']):0;
         if ($selected) { $snap=$wpdb->get_var($wpdb->prepare("SELECT snapshot FROM $t WHERE issue_id=%d AND id=%d",$row['id'],$selected)); if ($snap) { echo '<h3>Снимок версии #'.(int)$selected.'</h3><textarea readonly rows="18" style="width:100%;font-family:monospace" aria-label="Снимок редакционной версии">'.esc_textarea(wp_json_encode(json_decode($snap,true),JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)).'</textarea>'; } }
@@ -222,10 +241,50 @@ final class Admin {
     }
     public static function import_screen() {
         if (!current_user_can('es_import')) { wp_die('Нет прав.'); }
-        echo '<div class="wrap es-admin"><h1>Импорт редакционного JSON</h1><p>Схема editorial v1. Только черновики. До 256 КиБ, глубина до 32. Ручные правки и опубликованные выпуски защищены от перезаписи.</p>';
+        if (self::$import_candidate!==null) { self::import_confirmation(self::$import_candidate); return; }
+        echo '<div class="wrap es-admin"><h1>Импорт редакционного JSON</h1><p>Схема editorial v1. Только черновики. До 256 КиБ, глубина до 32.</p>';
+        $id=isset($_GET['issue'])?absint($_GET['issue']):0;
+        if ($id) {
+            if (!Runtime::owner()) { wp_die('Ручная замена доступна только выбранному владельцу.','',['response'=>403]); }
+            $row=Repository::issue($id);
+            if (!$row) { wp_die('Черновик не найден.','',['response'=>404]); }
+            if ($row['state']!=='draft'||$row['public_json']!==null||(int)$row['public_version']||$row['published_at']!==null||$row['number']!==null) { echo '<p>Этот выпуск ранее публиковался или не является черновиком. Ручной импорт запрещён.</p></div>'; return; }
+            echo '<h2>Ручная замена черновика '.esc_html($row['edition_date']).'</h2><p>ID '.(int)$id.' · версия '.(int)$row['version'].'. Все материалы, соцвыжимки и заметки выпуска будут заменены содержимым JSON. Ручные подтверждения проверки будут сняты. Перед заменой сохранится резервная редакция.</p>';
+            self::form('import_preview',$id,$row['version'],add_query_arg(['page'=>'es-import','issue'=>$id],admin_url('admin.php'))); self::field('raw','JSON для замены черновика','','textarea'); echo '<button class="button button-primary">Проверить и показать изменения</button></form><p><a href="'.esc_url(self::url($id)).'">Отмена — вернуться к выпуску</a></p></div>'; return;
+        }
+        echo '<p>Обычный и автоматический импорт не перезаписывают ручные правки. Чтобы заменить существующий черновик, владелец открывает его и выбирает «Заменить черновик из JSON…». Опубликованные и ранее опубликованные выпуски заменить нельзя.</p>';
         self::form('import'); self::field('raw','JSON','', 'textarea'); self::field('expected','Текущая версия для обновления (If-Match); пусто для нового выпуска','', 'number'); echo '<button class="button button-primary">Проверить и импортировать</button></form>';
         echo '<p>REST: <code>POST /wp-json/ezhednevny-standard/v1/import</code>. Для интеграции создайте отдельного пользователя с ролью «Газета — импортёр» и Application Password. Эта роль не может редактировать сайт или публиковать газету.</p></div>';
     }
+    public static function import_load() {
+        $id=isset($_GET['issue'])?absint($_GET['issue']):0;
+        if (!$id) { return; }
+        if (!self::owner_browser()) { wp_die('Ручная замена доступна только выбранному владельцу в авторизованном браузере.','',['response'=>403]); }
+        if (($_SERVER['REQUEST_METHOD']??'')!=='POST') { return; }
+        if (Runtime::mode()==='paused') { wp_die('Газета остановлена.','',['response'=>503]); }
+        $version=absint(self::value('version'));
+        if (self::value('operation')!=='import_preview'||absint(self::value('issue_id'))!==$id) { wp_die('Неверная форма.','',['response'=>400]); }
+        check_admin_referer('es-import_preview-'.$id.'-'.$version);
+        $candidate=Repository::manual_import_candidate($id,$version,self::value('raw'));
+        if (is_wp_error($candidate)) { wp_die(esc_html($candidate->get_error_message()),'Импорт остановлен',['response'=>$candidate->get_error_data()['status']??400,'back_link'=>true]); }
+        self::$import_candidate=$candidate;
+    }
+    private static function import_confirmation($candidate) {
+        $row=$candidate['issue']; $d=$candidate['document']; $raw=DB::json($d); $id=(int)$row['id']; $version=(int)$row['version'];
+        $old=Repository::doc($row); $before=array_column($old['articles'],null,'id'); $after=array_column($d['articles'],null,'id');
+        echo '<div class="wrap es-admin"><h1>Подтверждение ручного импорта</h1><p><strong>Черновик '.esc_html($row['edition_date']).' · ID '.$id.' · версия '.$version.'</strong></p><p>Было материалов: '.count($before).'. После замены: '.count($after).'. Публикации не будет. Все подтверждения проверки и готовность выпуска будут сняты; автоматическая перезапись останется запрещена.</p>';
+        echo '<table class="widefat striped"><thead><tr><th>ID</th><th>Сейчас</th><th>После импорта</th><th>Изменение</th></tr></thead><tbody>';
+        foreach (array_unique(array_merge(array_keys($before),array_keys($after))) as $key) {
+            $change=!isset($after[$key])?'Будет убран':(!isset($before[$key])?'Будет добавлен':(self::same_article($before[$key],$after[$key])?'Текст без изменений; проверка сбросится':'Будет заменён'));
+            echo '<tr><td>'.esc_html($key).'</td><td>'.esc_html($before[$key]['headline']??'—').'</td><td>'.esc_html($after[$key]['headline']??'—').'</td><td>'.esc_html($change).'</td></tr>';
+        }
+        echo '</tbody></table><p>Замена затрагивает весь выпуск, включая соцвыжимки, источники и редакционные заметки. Текущая версия вместе с результатами проверки будет сохранена в журнале как «Перед ручным импортом». Её можно восстановить в рабочий черновик.</p><details><summary>Полный JSON, который будет записан</summary><pre style="white-space:pre-wrap;overflow-wrap:anywhere">'.esc_html(wp_json_encode($d,JSON_PRETTY_PRINT|JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)).'</pre></details>';
+        self::form('manual_import',$id,$version);
+        echo '<input type="hidden" name="payload_nonce" value="'.esc_attr(wp_create_nonce('es-import-payload-'.$id.'-'.$version.'-'.hash('sha256',$raw))).'"><textarea hidden name="raw">'.esc_textarea($raw).'</textarea>';
+        self::check('confirm','Я проверил JSON и подтверждаю замену всего этого черновика, включая прежние ручные правки, с сохранением резервной редакции.');
+        echo '<button class="button button-primary">Подтвердить замену черновика</button> <a class="button" href="'.esc_url(self::url($id)).'">Отмена</a></form></div>';
+    }
+    private static function same_article($a,$b) { return Repository::hash($a)===Repository::hash($b); }
     public static function sources() {
         if (!current_user_can('es_edit')) { wp_die('Нет прав.'); }
         $catalog=json_decode(file_get_contents(ES_DIR.'sources.json'),true);

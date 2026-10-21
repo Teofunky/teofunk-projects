@@ -55,6 +55,7 @@ final class Front {
         } elseif ($view==='archive') { $archive=Repository::listing($page,true); if ($page>max(1,$archive['pages'])) { self::error_page(404); } }
         if ($issue&&!$doc) { $doc=json_decode($issue['public_json'],true); }
         if (!$preview&&Runtime::mode()==='public') { header('Cache-Control: no-cache, max-age=0, must-revalidate'); header('Referrer-Policy: strict-origin-when-cross-origin'); }
+        if (is_user_logged_in()) { nocache_headers(); header('Cache-Control: private, no-store, max-age=0'); header('Vary: Cookie',false); }
         status_header(200); header('Content-Type: text/html; charset=UTF-8'); header('X-Content-Type-Options: nosniff'); header('X-Frame-Options: SAMEORIGIN');
         $canonical=$article?self::url('material/'.$article['slug']):($issue?self::url('issue/'.$issue['edition_date']):self::url($view==='archive'?($page>1?'archive/page/'.$page:'archive'):''));
         $brand=Settings::name();

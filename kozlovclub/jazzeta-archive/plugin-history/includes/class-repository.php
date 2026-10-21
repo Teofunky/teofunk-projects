@@ -95,6 +95,37 @@ final class Repository {
             $id=(int)$wpdb->insert_id; self::log($id,'create'); DB::commit(); return $id;
         } catch (\Throwable $e) { return self::fail($e); }
     }
+    /** Read-only validation shared by the confirmation page and the locked write. */
+    public static function manual_import_candidate($id,$version,$raw,$lock=false) {
+        if (!Runtime::owner() || !current_user_can('es_import')) { return Validation::error('Ручная замена доступна только выбранному владельцу с правом импорта.',403); }
+        $d=Validation::parse($raw); if (is_wp_error($d)) { return $d; }
+        try {
+            $row=self::issue($id,$lock); self::version($row,$version);
+            if ($row['state']!=='draft' || $row['public_json']!==null || (int)$row['public_version'] || $row['published_at']!==null || $row['number']!==null) { throw new \RuntimeException('Ручной импорт разрешён только в никогда не публиковавшийся черновик.',409); }
+            foreach (self::rows($id,false) as $article) {
+                if ($article['public_json']!==null) { throw new \RuntimeException('В выпуске есть опубликованные материалы. Замена запрещена.',409); }
+            }
+            if ($d['edition_date']!==$row['edition_date']) { throw new \RuntimeException('Дата в JSON должна совпадать с датой выбранного черновика.',400); }
+            // An owner replacement is not an automatic import receipt or a review.
+            unset($d['import_id']); $d['editorial']['ready_for_human_review']=false;
+            return ['issue'=>$row,'document'=>$d];
+        } catch (\Throwable $e) { return new \WP_Error('es_manual_import',$e->getMessage(),['status'=>$e->getCode()?:400]); }
+    }
+    /** No REST entry point. The browser gate binds the owner, target, version and exact JSON. */
+    public static function manual_import_from_admin($id,$version,$raw) {
+        if (!Admin::manual_import_authorized($id,$version,$raw)) { return Validation::error('Требуется подтверждённая форма ручного импорта владельца.',403); }
+        global $wpdb;
+        try {
+            self::begin();
+            $candidate=self::manual_import_candidate($id,$version,$raw,true);
+            if (is_wp_error($candidate)) { throw new \RuntimeException($candidate->get_error_message(),$candidate->get_error_data()['status']); }
+            // Backup and replacement commit together; failure of either rolls back both.
+            self::log($id,'before_manual_import');
+            self::put_document($id,$candidate['document'],true);
+            DB::must($wpdb->update(DB::table('issues'),['version'=>$version+1,'human_touched'=>1,'import_hash'=>''],['id'=>$id]));
+            self::log($id,'manual_import'); DB::commit(); return (int)$id;
+        } catch (\Throwable $e) { return self::fail($e); }
+    }
     public static function empty_doc($date) {
         return ['schema_version'=>'1.1','edition_date'=>$date,'timezone'=>'Europe/Moscow','edition_number'=>null,'publication'=>['status'=>'draft'],'articles'=>[],'social'=>[],'editorial'=>['ready_for_human_review'=>false,'blocking_issues'=>[],'source_scan_window_start'=>gmdate('c'),'source_scan_window_end'=>gmdate('c'),'generation_notes'=>[]]];
     }

@@ -1,7 +1,7 @@
 'use strict';
 const {chromium}=require('playwright'),fs=require('fs'),cp=require('child_process'),path=require('path');
 if(process.env.ES_TEST_ALLOW_RESET!=='1')throw Error('Disposable local test opt-in required');
-const root=process.env.ES_TEST_ROOT||process.cwd(),base='http://127.0.0.1:18080',output=path.join(root,'runtime/release034');
+const root=process.env.ES_TEST_ROOT||process.cwd(),base='http://127.0.0.1:18080',output=process.env.ES_TEST_OUTPUT||path.join(root,'runtime/theme-check');fs.mkdirSync(output,{recursive:true});
 const php=code=>cp.execFileSync(root+'/runtime/php',['-r',`require '${root}/runtime/wordpress/wp-load.php';if(wp_get_environment_type()!=='local'||wp_parse_url(home_url(),PHP_URL_HOST)!=='127.0.0.1')exit(2);${code}`],{encoding:'utf8'});
 if(!fs.existsSync(root+'/runtime/wordpress/wp-content/themes/KozlovCLub/header.php')||!fs.existsSync(root+'/runtime/wordpress/wp-content/plugins/wpglobus/wpglobus.php'))throw Error('Native theme and WPGlobus fixtures required');
 const previous=JSON.parse(php("echo wp_json_encode(['theme'=>get_option('stylesheet'),'plugins'=>get_option('active_plugins'),'runtime'=>get_option('es_runtime'),'appearance'=>get_option('es_appearance'),'globus'=>get_option('wpglobus_option')]);"));

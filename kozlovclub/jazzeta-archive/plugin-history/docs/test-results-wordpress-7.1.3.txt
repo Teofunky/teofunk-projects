@@ -134,7 +134,7 @@ PASS archive uses short issue URL
 PASS sitemap uses short issue URL
 PASS plain permalink fallback still resolves issue
 PASS isolated integration hooks run on public newspaper
-PASS native theme wp_head follows active classic theme
+PASS native wp_head runs in both classic and fallback shells
 PASS integration hooks never run in editorial preview
 PASS brand boundary 1: no overflow at 320px
 PASS brand boundary 1: no overflow at 390px
@@ -253,5 +253,5 @@ PASS reactivation preserves issues and schema
 PASS archive paginates and cache result matches
 PASS archive tested with 1200+ issues
 PASS archive uses publication/date index
-PERFORMANCE {"rows":1203,"page_size":12,"cold_ms":3.187,"warm_ms":0.163,"explain":[{"id":"1","select_type":"SIMPLE","table":"wp_es_issues","type":"range","possible_keys":"public_archive","key":"public_archive","key_len":"66","ref":null,"rows":"1201","Extra":"Using where"}]}
+PERFORMANCE {"rows":1203,"page_size":12,"cold_ms":3.411,"warm_ms":0.136,"explain":[{"id":"1","select_type":"SIMPLE","table":"wp_es_issues","type":"range","possible_keys":"public_archive","key":"public_archive","key_len":"66","ref":null,"rows":"1201","Extra":"Using where"}]}
 TOTAL 39 advanced assertions passed

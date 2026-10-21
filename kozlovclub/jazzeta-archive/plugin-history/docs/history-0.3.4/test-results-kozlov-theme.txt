@@ -1,0 +1,28 @@
+PASS actual theme header markup matches ordinary page apart from active-link state
+PASS header geometry and typography unchanged by newspaper CSS
+PASS actual theme footer rendered
+PASS WPGlobus 2.12.2 translates original WordPress menu
+PASS no duplicate handmade header
+PASS native desktop submenu opens on hover
+PASS native logo returns to homepage
+PASS single newspaper title and canonical with theme SEO present
+PASS reader retains browser zoom
+PASS A+ scales article text inside actual theme
+PASS reading scale does not change native header
+PASS night mode does not change native header
+PASS theme calendar opens (local response fixture)
+PASS native theme and enlarged newspaper fit 320px
+PASS native theme and enlarged newspaper fit 390px
+PASS native theme and enlarged newspaper fit 768px
+PASS native theme and enlarged newspaper fit 1440px
+PASS native mobile burger opens menu
+PASS native mobile search opens
+PASS no JavaScript errors with actual theme scripts
+PASS authorized native-theme preview opens
+PASS preview blocks external analytics connections
+PASS no third-party requests from private preview
+PASS preview stays private and noindex
+PASS private preview has no public canonical
+PASS nonce alone cannot open private preview
+PASS native theme does not bypass closed access
+TOTAL 27 actual-theme assertions passed
