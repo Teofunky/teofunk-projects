@@ -70,6 +70,6 @@ final class Settings {
     }
     public static function head_css() {
         $s=self::get();$font=$s['font']==='times'?"'Times New Roman',Georgia,serif":"Georgia,'Times New Roman',serif";
-        return ':root{--bg:'.sanitize_hex_color($s['background']).';--paper:'.sanitize_hex_color($s['paper']).';--ink:'.sanitize_hex_color($s['ink']).';--wine:'.sanitize_hex_color($s['accent']).';--serif:'.$font.'}';
+        return '#es-newspaper{--bg:'.sanitize_hex_color($s['background']).';--paper:'.sanitize_hex_color($s['paper']).';--ink:'.sanitize_hex_color($s['ink']).';--wine:'.sanitize_hex_color($s['accent']).';--serif:'.$font.'}';
     }
 }

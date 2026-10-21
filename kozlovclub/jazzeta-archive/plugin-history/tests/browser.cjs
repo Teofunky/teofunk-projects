@@ -45,24 +45,24 @@ function ok(v,n){if(!v)throw Error('FAIL '+n);passed++;console.log('PASS '+n);}
  const structured=JSON.parse(await page.locator('script[type="application/ld+json"]').textContent());ok(structured['@graph'].some(g=>g['@type']==='NewsArticle'),'NewsArticle JSON-LD renders');
  response=await anon.request.get(base+'/wp-json/ezhednevny-standard/v1/latest');ok(response.status()===200&&!(await response.text()).includes('PRIVATE_'),'public latest API only projected data');
  // Draft edits must leave published text and URLs untouched.
- const oldTitle=await page.locator('h1').textContent();
+ const oldTitle=await page.locator('#es-newspaper h1').textContent();
  const edit=base+'/wp-admin/admin.php?page=es-newsroom&issue='+state.issue_id+'&article=article-0';await admin.goto(edit);
  ok(await admin.locator('#es_article_body').count()===1,'native WordPress rich editor present');
  await admin.locator('[name="article[headline]"]').fill('ИСПРАВЛЕНИЕ В ЧЕРНОВИКЕ: '+oldTitle);
  await admin.locator('button').filter({hasText:'Сохранить материал'}).click();await admin.waitForURL(/saved=1/);
- await page.reload();ok((await page.locator('h1').textContent())===oldTitle,'saved working edit cannot overwrite published snapshot');
+ await page.reload();ok((await page.locator('#es-newspaper h1').textContent())===oldTitle,'saved working edit cannot overwrite published snapshot');
  await admin.goto(base+'/wp-admin/admin.php?page=es-newsroom&issue='+state.issue_id);
  ok(await admin.getByRole('button',{name:'Утвердить и опубликовать новую версию'}).isDisabled(),'edited article loses its approval');
  // Desktop/mobile and no-JS rendering of the approved issue.
  await page.goto(base+'/gazeta/2026-10-20/');await page.setViewportSize({width:1440,height:1000});await page.screenshot({path:path.join(output,'desktop.png'),fullPage:true});
  for(const width of [320,390,768,1440]){await page.setViewportSize({width,height:900});const over=await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth+1);ok(!over,'no horizontal overflow '+width+'px');}
  await page.setViewportSize({width:390,height:844});await page.screenshot({path:path.join(output,'mobile.png'),fullPage:true});
- await page.getByRole('button',{name:'Ночной свет'}).click();ok(await page.locator('body').evaluate(el=>el.classList.contains('night')),'night control works');
+ await page.getByRole('button',{name:'Ночной свет'}).click();ok(await page.locator('#es-newspaper').evaluate(el=>el.classList.contains('night')),'night control works');
  const dl=page.waitForEvent('download');await page.locator('[data-png]').first().click();const download=await dl;await download.saveAs(path.join(output,'social-card.png'));ok(fs.statSync(path.join(output,'social-card.png')).size>1000,'social PNG export works');
  const nojs=await browser.newContext({javaScriptEnabled:false});const staticPage=await nojs.newPage();await staticPage.goto(base+'/gazeta/2026-10-20/');ok(await staticPage.locator('.hero h2 a').count()===1,'news content and links work without JS');
  // Branding writes change neither content nor permanent URLs.
  await admin.goto(base+'/wp-admin/admin.php?page=es-appearance');await admin.locator('[name="es_appearance[name]"]').fill('Музыкальная газета');await admin.locator('[name="es_appearance[motto]"]').fill('Тест нового девиза');await admin.getByRole('button',{name:'Сохранить оформление'}).click();await admin.waitForURL(/settings-updated=true/);
- await page.goto(article);ok((await page.title()).includes('Музыкальная газета'),'branding setting changes SEO title');ok((await page.locator('link[rel=canonical]').getAttribute('href'))===article,'brand change preserves article URL');ok((await page.locator('h1').textContent())===oldTitle,'branding does not alter stored article');
+ await page.goto(article);ok((await page.title()).includes('Музыкальная газета'),'branding setting changes SEO title');ok((await page.locator('link[rel=canonical]').getAttribute('href'))===article,'brand change preserves article URL');ok((await page.locator('#es-newspaper h1').textContent())===oldTitle,'branding does not alter stored article');
  await page.setViewportSize({width:320,height:800});ok(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1),'new brand fits mobile');
  php("delete_option('es_appearance'); update_option('blog_public',1);");
  response=await anon.request.get(base+'/gazeta/sitemap.xml');ok(response.status()===200&&(await response.text()).includes('sitemap-articles-1.xml'),'sitemap index contains article sitemap');

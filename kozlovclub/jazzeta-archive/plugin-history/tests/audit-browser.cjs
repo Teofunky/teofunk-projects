@@ -32,7 +32,7 @@ function ok(v,label){if(!v)throw Error('FAIL '+label);passed++;console.log('PASS
  const fixture=Buffer.from(fs.readFileSync(path.join(__dirname,'integration-hook-fixture.php'))).toString('base64');
  php("$f=WPMU_PLUGIN_DIR.'/es-newspaper-audit-fixture.php';if(file_exists($f))exit(2);wp_mkdir_p(WPMU_PLUGIN_DIR);if(file_put_contents($f,base64_decode('"+fixture+"'))===false)exit(2);");fixtureInstalled=true;
  await page.goto(issue);ok(await page.locator('meta[name="es-audit-head"]').count()===1&&await page.locator('#es-audit-footer').count()===1,'isolated integration hooks run on public newspaper');
- ok(await page.locator('meta[name="es-unwanted-theme-hook"]').count()===0,'integration hooks do not invoke theme wp_head');
+ ok(await page.locator('meta[name="es-unwanted-theme-hook"]').count()===Number(php("echo (int)(bool)(locate_template('header.php')&&locate_template('footer.php'));").trim()),'native theme wp_head follows active classic theme');
  const owner=await browser.newContext(),admin=await owner.newPage();owner.setDefaultTimeout(15000);
  await admin.goto(base+'/wp-login.php');await admin.locator('#user_login').fill('es_owner');await admin.locator('#user_pass').fill('local-editor-test-pass');await admin.locator('#wp-submit').click();await admin.waitForURL(/wp-admin/);
  await admin.goto(base+'/wp-admin/admin.php?page=es-newsroom&issue='+state.issue_id);const preview=await admin.getByRole('link',{name:'Предпросмотр газеты'}).getAttribute('href');await admin.goto(preview);
