@@ -28,7 +28,7 @@ final class Document
      * Runs in <head> before any stylesheet. Reads only this browser's localStorage; nothing is
      * sent anywhere. Unknown values are ignored, so a stale or edited key cannot break the page.
      */
-    public const EARLY_SCRIPT = "(function(d){var h=d.documentElement,g=function(k){try{return window.localStorage.getItem(k)}catch(e){return null}};"
+    public const EARLY_SCRIPT = "(function(d){var h=d.documentElement,g=function(k){try{return window.localStorage.getItem(k)}catch(e){return null}};h.className+=' es-js';"
         . "var lock=h.getAttribute('data-es-lock')==='1';"
         . "var m=g('es-design');if(!lock&&(m==='gazeta'||m==='modern'||m==='brief')){h.setAttribute('data-es-design',m)}"
         . "if(!h.getAttribute('data-es-theme')){var t=g('es-theme');if(t===null&&g('es-night')==='1'){t='dark'}"
@@ -164,6 +164,11 @@ final class Document
         wp_enqueue_style('es-newspaper', View::versioned('css/newspaper.css'), [], null);
         wp_add_inline_style('es-newspaper', Appearance::cssVariables());
         wp_enqueue_script('es-newspaper', View::versioned('js/newspaper.js'), [], null, ['in_footer' => true, 'strategy' => 'defer']);
+        if ((self::$model['view'] ?? '') === 'crossword') {
+            // Only the crossword page loads the game.
+            wp_enqueue_style('es-crossword', View::versioned('css/crossword.css'), ['es-newspaper'], null);
+            wp_enqueue_script('es-crossword', View::versioned('js/crossword.js'), [], null, ['in_footer' => true, 'strategy' => 'defer']);
+        }
     }
 
     public static function head(): void

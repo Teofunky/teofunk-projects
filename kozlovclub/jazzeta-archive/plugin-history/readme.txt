@@ -3,7 +3,7 @@ Contributors: kozlovclub
 Requires at least: 6.4
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 0.5.1
+Stable tag: 0.5.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -33,6 +33,9 @@ License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Шрифт Lora 3.008 (Cyreal), SIL Open Font License 1.1 — assets/fonts/OFL.txt. Файлы шрифта не изменялись.
 
 == Changelog ==
+
+= 0.5.2 =
+Кроссворд недели: загрузка слов и вопросов (JSON es-crossword-1.0 или строки), сборка сетки, страница с игрой, архив, ответы через неделю.
 
 = 0.5.1 =
 Поиск по газете (/gazeta/search/), кадр фото по точке фокуса, фото в «Кратко» на ширину колонки.

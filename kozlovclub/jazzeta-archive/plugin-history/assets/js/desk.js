@@ -572,6 +572,55 @@
     }
   });
 
+  /* -------------------------------------------------------- crossword of the week (0.5.2) */
+  // A quick look at the file before sending: the full check and the grid are made on the server.
+  $$('form[data-es-cw-form]').forEach(function (form) {
+    var area = $('[data-es-cw-source]', form);
+    var status = $('[data-es-cw-status]', form);
+    var file = $('[data-es-file]', form);
+    var drop = $('[data-es-drop]', form);
+    var check = function () {
+      status.className = 'es-json-status';
+      var text = area.value.trim();
+      if (!text) { status.textContent = ''; return; }
+      if (text.charAt(0) === '{') {
+        try {
+          var doc = JSON.parse(text);
+          var n = Array.isArray(doc.words) ? doc.words.length : 0;
+          if (doc.format !== 'es-crossword-1.0') {
+            status.classList.add('is-bad');
+            status.textContent = 'JSON читается, но поле format должно быть «es-crossword-1.0».';
+            return;
+          }
+          status.classList.add(n >= 12 && n <= 60 ? 'is-ok' : 'is-bad');
+          status.textContent = 'JSON читается: «' + (doc.title || 'без названия') + '», ' + n + ' ' + plural(n, 'слово', 'слова', 'слов') + (n >= 12 && n <= 60 ? '.' : ' — нужно от 12 до 60.') + ' Полная проверка — на сервере.';
+        } catch (err) {
+          status.classList.add('is-bad');
+          status.textContent = 'Это не JSON: ' + err.message;
+        }
+        return;
+      }
+      var lines = text.split(/\r?\n/).filter(function (l) { return l.trim() && l.trim().charAt(0) !== '#'; });
+      var bad = lines.filter(function (l) { return !/\s[—–|-]\s|\t/.test(l); }).length;
+      status.classList.add(bad ? 'is-bad' : 'is-ok');
+      status.textContent = 'Строк «Ответ — вопрос»: ' + lines.length + (bad ? '; без разделителя: ' + bad + '.' : '.') + ' Название впишите ниже.';
+    };
+    area.addEventListener('input', check);
+    var load = function (f) {
+      if (!f) { return; }
+      if (f.size > 204800) { status.className = 'es-json-status is-bad'; status.textContent = 'Файл больше 200 КБ.'; return; }
+      var reader = new FileReader();
+      reader.onload = function () { area.value = String(reader.result); check(); };
+      reader.readAsText(f);
+    };
+    if (file) { file.addEventListener('change', function () { load(file.files[0]); }); }
+    if (drop) {
+      ['dragenter', 'dragover'].forEach(function (t) { drop.addEventListener(t, function (e) { e.preventDefault(); drop.classList.add('is-over'); }); });
+      ['dragleave', 'drop'].forEach(function (t) { drop.addEventListener(t, function () { drop.classList.remove('is-over'); }); });
+      drop.addEventListener('drop', function (e) { e.preventDefault(); load(e.dataTransfer.files[0]); });
+    }
+  });
+
   /* -------------------------------------------------------- appearance preview */
   var mast = $('[data-es-mast-preview]');
   if (mast) {

@@ -109,6 +109,8 @@ final class IssueScreen
             'can_replace' => $canReplace,
             'social_count' => count($doc['social']),
             'cover' => Meta::forIssue($id, 'draft')['cover'],
+            'crossword' => Meta::forIssue($id, 'draft')['crossword'],
+            'crossword_preview' => \Kozlov\Gazeta\Http\Router::preview($id, (int) $row['version']) . '&crossword=1',
             'lead_photo' => self::leadPhoto($doc),
             'plates' => Presenter::PLATE_NAMES,
         ]);

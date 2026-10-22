@@ -64,6 +64,22 @@ final class Readiness
             $items[] = self::item('article', !$problems, $article['headline'], $problems, $article['id']);
         }
 
+        // 0.5.2: a crossword attached to the issue must be a valid grid (it goes public with it).
+        $suppress = Db::wpdb()->suppress_errors(true);
+        $rawCrossword = Db::wpdb()->get_var(Db::wpdb()->prepare(
+            'SELECT meta_value FROM ' . Db::table('meta') . " WHERE object_type='issue' AND object_id=%d AND layer='draft' AND meta_key='crossword'",
+            (int) $issue['id']
+        ));
+        Db::wpdb()->suppress_errors($suppress);
+        if ($rawCrossword !== null) {
+            $crossword = Crossword::clean(json_decode((string) $rawCrossword, true));
+            $placed = $crossword ? count($crossword['placements']) : 0;
+            $ok = $crossword !== null && $placed >= Crossword::MIN_PLACED;
+            $items[] = self::item('crossword', $ok, $ok
+                ? 'Кроссворд недели: ' . Labels::count($placed, 'слово', 'слова', 'слов') . ', сетка ' . $crossword['rows'] . '×' . $crossword['cols']
+                : 'Кроссворд недели', $ok ? [] : ['Кроссворд недели не собран или повреждён: загрузите файл заново или уберите кроссворд.']);
+        }
+
         $duplicates = Duplicates::blockers($issue);
         $items[] = self::item('duplicates', !$duplicates, 'Нет повторов внутри номера и с архивом', $duplicates);
 

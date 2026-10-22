@@ -3,6 +3,7 @@
 namespace Kozlov\Gazeta\Front;
 
 use Kozlov\Gazeta\Data\Search;
+use Kozlov\Gazeta\Domain\Crossword;
 use Kozlov\Gazeta\Domain\Labels;
 use Kozlov\Gazeta\Domain\Text;
 use Kozlov\Gazeta\Domain\Validator;
@@ -38,7 +39,7 @@ final class Presenter
 
     /**
      * @param array $doc  {edition_date, number, articles[], social[]}
-     * @param array $opts {preview:bool, issue_id:int, version:int, cover?:array, briefs?:array, facts?:array, focus?:array} — the last four from Data\Meta
+     * @param array $opts {preview:bool, issue_id:int, version:int, cover?:array, briefs?:array, facts?:array, focus?:array, crossword?:array} — the last five from Data\Meta
      */
     public static function issue(array $doc, array $opts): array
     {
@@ -117,6 +118,12 @@ final class Presenter
             'rubrics' => array_values($rubrics),
             'digest' => $digest,
             'cover' => self::cover($opts['cover'] ?? null, $stories[0] ?? null),
+            // 0.5.2: the crossword of the week, when this issue carries one.
+            'crossword' => !empty($opts['crossword']) && is_array($opts['crossword'])
+                ? self::crosswordTeaser($opts['crossword'], $doc['edition_date'], $doc['number'] ?? null, $opts['preview']
+                    ? Router::preview((int) $opts['issue_id'], (int) $opts['version']) . '&crossword=1'
+                    : Router::crossword($doc['edition_date']))
+                : null,
             'url' => $opts['preview'] ? Router::preview((int) $opts['issue_id'], (int) $opts['version']) : Router::issue($doc['edition_date']),
         ];
     }
@@ -376,5 +383,99 @@ final class Presenter
             ];
         }
         return $items;
+    }
+
+    /**
+     * The crossword page (0.5.2). Answers appear in the HTML only once they are open;
+     * until then the browser gets them encoded for checking (Domain\Crossword::encode()).
+     * @param array $opts {date:string, number:?int, open:bool, preview:bool, url:string, issue_url:string}
+     */
+    public static function crossword(array $cw, array $opts): array
+    {
+        $open = !empty($opts['open']);
+        $grid = Crossword::grid($cw);
+        $clues = Crossword::clues($cw);
+        $starts = [];
+        $where = [];
+        $names = ['a' => 'по горизонтали', 'd' => 'по вертикали'];
+        foreach (['a', 'd'] as $d) {
+            foreach ($clues[$d] as $clue) {
+                $starts[$clue['r']][$clue['c']] = $clue['n'];
+                for ($i = 0; $i < $clue['len']; $i++) {
+                    $r = $clue['r'] + ($d === 'd' ? $i : 0);
+                    $c = $clue['c'] + ($d === 'a' ? $i : 0);
+                    $where[$r][$c][] = $clue['n'] . ' ' . $names[$d] . ', буква ' . ($i + 1) . ' из ' . $clue['len'];
+                }
+            }
+        }
+        $cells = [];
+        for ($r = 0; $r < $cw['rows']; $r++) {
+            for ($c = 0; $c < $cw['cols']; $c++) {
+                $cells[$r][$c] = isset($grid[$r][$c]) ? [
+                    'n' => $starts[$r][$c] ?? null,
+                    'label' => implode('; ', $where[$r][$c] ?? []),
+                    'letter' => $open ? $grid[$r][$c] : '',
+                ] : null;
+            }
+        }
+        $entries = [];
+        foreach (['a', 'd'] as $d) {
+            foreach ($clues[$d] as &$clue) {
+                $entries[] = ['n' => $clue['n'], 'd' => $d, 'r' => $clue['r'], 'c' => $clue['c'], 'len' => $clue['len'], 'clue' => $clue['clue'], 'enum' => $clue['enum']];
+                if (!$open) {
+                    $clue['answer'] = '';
+                    $clue['source'] = '';
+                }
+            }
+            unset($clue);
+        }
+        $encoded = Crossword::encode($cw);
+        $placed = count($cw['placements']);
+        return [
+            'id' => (string) $cw['id'],
+            'title' => Text::noWidow(Text::typograph((string) $cw['title'])),
+            'plain_title' => (string) $cw['title'],
+            'intro' => Text::typograph((string) $cw['intro']),
+            'author' => (string) ($cw['author'] ?? ''),
+            'rows' => (int) $cw['rows'],
+            'cols' => (int) $cw['cols'],
+            'words' => $placed,
+            'words_label' => Labels::count($placed, 'слово', 'слова', 'слов'),
+            'date' => (string) $opts['date'],
+            'human_date' => Labels::date((string) $opts['date']),
+            'number_label' => Labels::issueNumber($opts['number'] ?? null),
+            'url' => (string) ($opts['url'] ?? ''),
+            'issue_url' => (string) ($opts['issue_url'] ?? ''),
+            'open' => $open,
+            'opens_on' => Labels::date(gmdate('Y-m-d', (int) strtotime((string) $opts['date'] . ' +' . Crossword::ANSWERS_AFTER_DAYS . ' days'))),
+            'cells' => $cells,
+            'clues' => $clues,
+            'data' => [
+                'id' => (string) $cw['id'],
+                'layout' => substr(md5($cw['rows'] . 'x' . $cw['cols'] . ':' . $encoded), 0, 12),
+                'rows' => (int) $cw['rows'],
+                'cols' => (int) $cw['cols'],
+                'key' => (int) $cw['key'],
+                'cells' => $encoded,
+                'entries' => $entries,
+                'open' => $open,
+            ],
+        ];
+    }
+
+    /** Small card for the issue page and the list of crosswords. */
+    public static function crosswordTeaser(array $cw, string $date, $number, string $url): array
+    {
+        $placed = count($cw['placements']);
+        return [
+            'title' => Text::noWidow(Text::typograph((string) $cw['title'])),
+            'intro' => Text::typograph((string) $cw['intro']),
+            'words_label' => Labels::count($placed, 'слово', 'слова', 'слов'),
+            'size' => (int) $cw['rows'] . '×' . (int) $cw['cols'],
+            'date' => $date,
+            'human_date' => Labels::date($date),
+            'number_label' => Labels::issueNumber($number),
+            'url' => $url,
+        ];
     }
 }

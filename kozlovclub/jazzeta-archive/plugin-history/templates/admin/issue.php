@@ -165,6 +165,8 @@ $placementTone = ['lead' => 'lead', 'feature' => 'feature', 'regular' => 'neutra
             </div>
         </form>
 
+        <?php View::render('admin/parts/crossword', ['id' => $id, 'version' => $version, 'crossword' => $v['crossword'], 'preview' => $v['crossword_preview'], 'published' => (int) ($v['row']['public_version'] ?? 0) > 0]); ?>
+
         <section class="es-card es-history" id="history" aria-labelledby="es-history-title">
             <div class="es-card__head">
                 <h2 class="es-card__title" id="es-history-title">История версий</h2>

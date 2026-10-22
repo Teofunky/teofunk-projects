@@ -80,6 +80,7 @@ final class Labels
         'remove_article' => 'Материал убран',
         'edit_issue' => 'Правка сборки номера',
         'edit_focus' => 'Кадр фото',
+        'edit_crossword' => 'Кроссворд недели',
         'restore_draft' => 'Восстановлена прежняя версия',
         'publish' => 'Опубликовано',
         'withdraw' => 'Снято с публикации',

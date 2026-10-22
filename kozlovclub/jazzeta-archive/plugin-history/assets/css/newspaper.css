@@ -508,6 +508,26 @@ html[data-es-theme="dark"] #es-newspaper .es-social__card { filter: brightness(.
 #es-newspaper .es-result__title { margin-top: 4px; font: 700 calc(21 * var(--u))/1.25 var(--es-head); }
 #es-newspaper .es-result__text { margin-top: 6px; max-width: 760px; font: 400 calc(15.5 * var(--u))/1.5 var(--es-text); color: var(--es-ink-2); }
 #es-newspaper .es-results mark { padding: 0 .06em; background: var(--es-tint); color: var(--es-ink); border-radius: 2px; box-shadow: inset 0 -2px 0 var(--es-accent); }
+
+/* crossword of the week (0.5.2): the card in the issue and the list of crosswords; the game itself is in crossword.css */
+#es-newspaper .es-cwteaser { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 16px; margin-top: 28px; padding: 18px; background: var(--es-tint); border-top: 2px solid var(--es-rule); }
+#es-newspaper .es-cwteaser__mark { color: var(--es-ink); }
+#es-newspaper .es-cwteaser__mark svg { display: block; width: 52px; height: 52px; }
+#es-newspaper .es-cwteaser__kicker { font: 700 12px/1.3 var(--es-ui); letter-spacing: .12em; text-transform: uppercase; color: var(--es-accent); }
+#es-newspaper .es-cwteaser__title { margin-top: 4px; font: 700 calc(24 * var(--u))/1.2 var(--es-head); }
+#es-newspaper .es-cwteaser__intro { margin-top: 6px; font: 400 calc(16 * var(--u))/1.5 var(--es-text); color: var(--es-ink-2); }
+#es-newspaper .es-cwteaser__meta { margin-top: 6px; font: 500 calc(13 * var(--u))/1.4 var(--es-ui); color: var(--es-muted); }
+#es-newspaper .es-cwteaser__go { margin-top: 12px; }
+#es-newspaper .es-cwlist__items { margin-top: 8px; }
+#es-newspaper .es-cwlist__item { padding: 16px 0; border-top: 1px solid var(--es-rule-soft); }
+#es-newspaper .es-cwlist__meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font: 500 calc(13 * var(--u))/1.4 var(--es-ui); color: var(--es-muted); }
+#es-newspaper .es-cwlist__fresh { padding: 2px 7px; border: 1px solid var(--es-accent); border-radius: 3px; font-weight: 700; color: var(--es-accent); text-transform: uppercase; letter-spacing: .06em; font-size: 11px; }
+#es-newspaper .es-cwlist__title { margin-top: 4px; font: 700 calc(22 * var(--u))/1.25 var(--es-head); }
+#es-newspaper .es-cwlist__size { margin-top: 4px; font: 400 calc(14 * var(--u))/1.4 var(--es-ui); color: var(--es-ink-2); }
+html[data-es-design="brief"] #es-newspaper .es-cwteaser { grid-template-columns: 1fr; background: none; padding: 16px 0 0; }
+html[data-es-design="brief"] #es-newspaper .es-cwteaser__mark { display: none; }
+html[data-es-design="brief"] #es-newspaper .es-cwteaser__title,
+html[data-es-design="brief"] #es-newspaper .es-cwlist__title { font-family: var(--es-sans); }
 #es-newspaper .es-blank { max-width: 640px; margin: 0 auto; padding: 48px 0 24px; text-align: center; }
 #es-newspaper .es-blank__title { font: 700 calc(30 * var(--u))/1.15 var(--es-head); }
 #es-newspaper .es-blank__text { margin-top: 14px; font: 400 calc(17 * var(--u))/1.55 var(--es-text); color: var(--es-ink-2); }

@@ -12,12 +12,13 @@ if (!defined('ABSPATH')) {
  * Public addresses of the newspaper. The patterns and generated URLs are the 0.3.5 contract:
  * /gazeta/, /gazeta/YYYY-MM-DD/, /gazeta/material/{slug}/, /gazeta/archive/[page/N/],
  * /gazeta/preview/{id}/, sitemaps, and the legacy /gazeta/issue/YYYY-MM-DD/ redirect.
- * 0.5.1 adds /gazeta/search/[page/N/]?q=… (never indexed, never in sitemaps).
+ * 0.5.1 adds /gazeta/search/[page/N/]?q=… (never indexed, never in sitemaps);
+ * 0.5.2 adds /gazeta/crossword/ (all crosswords) and /gazeta/crossword/YYYY-MM-DD/.
  */
 final class Router
 {
     public const BASE = Request::BASE;
-    public const VIEWS = ['latest', 'issue', 'legacy_issue', 'article', 'archive', 'preview', 'sitemap', 'sitemap_part', 'search'];
+    public const VIEWS = ['latest', 'issue', 'legacy_issue', 'article', 'archive', 'preview', 'sitemap', 'sitemap_part', 'search', 'crossword', 'crosswords'];
 
     public static function rules(): array
     {
@@ -30,6 +31,8 @@ final class Router
             '^gazeta/archive/page/([1-9][0-9]*)/?$' => 'archive&es_page=$matches[1]',
             '^gazeta/search/?$' => 'search&es_page=1',
             '^gazeta/search/page/([1-9][0-9]*)/?$' => 'search&es_page=$matches[1]',
+            '^gazeta/crossword/?$' => 'crosswords',
+            '^gazeta/crossword/([0-9]{4}-[0-9]{2}-[0-9]{2})/?$' => 'crossword&es_key=$matches[1]',
             '^gazeta/preview/([0-9]+)/?$' => 'preview&es_key=$matches[1]',
             '^gazeta/sitemap\.xml$' => 'sitemap',
             '^gazeta/sitemap-(issues|articles)-([1-9][0-9]*)\.xml$' => 'sitemap_part&es_key=$matches[1]&es_page=$matches[2]',
@@ -95,6 +98,18 @@ final class Router
             return $url;
         }
         return $url . (strpos($url, '?') === false ? '?' : '&') . 'q=' . rawurlencode($query);
+    }
+
+    /** All crosswords, or the crossword of one issue date. Query-string fallback until rules are flushed. */
+    public static function crossword(string $date = ''): string
+    {
+        $rules = self::pretty() ? get_option('rewrite_rules') : [];
+        if (self::pretty() && (!is_array($rules) || isset($rules['^gazeta/crossword/?$']))) {
+            return home_url('/' . self::BASE . '/crossword/' . ($date !== '' ? $date . '/' : ''));
+        }
+        return $date !== ''
+            ? add_query_arg(['es_view' => 'crossword', 'es_key' => $date], home_url('/'))
+            : add_query_arg('es_view', 'crosswords', home_url('/'));
     }
 
     public static function sitemap(string $kind = '', int $page = 0): string

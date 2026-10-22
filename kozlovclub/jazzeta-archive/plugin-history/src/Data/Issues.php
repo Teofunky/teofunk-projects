@@ -668,6 +668,35 @@ final class Issues
     }
 
     /**
+     * Attaches, replaces (array) or removes (null) the crossword of the issue (0.5.2). The
+     * working version changes; readers see it after the owner approves the issue.
+     * @return int|\WP_Error
+     */
+    public static function saveCrossword(int $id, int $version, ?array $crossword)
+    {
+        if (!current_user_can('es_edit')) {
+            return Validator::error('Нет прав.', 403);
+        }
+        if ($crossword !== null && !\Kozlov\Gazeta\Domain\Crossword::clean($crossword)) {
+            return Validator::error('Кроссворд не прошёл проверку сетки. Соберите его заново.');
+        }
+        $wpdb = Db::wpdb();
+        try {
+            self::beginWrite();
+            $row = self::find($id, true);
+            self::assertVersion($row, $version);
+            Meta::setDraft('issue', $id, 'crossword', $crossword);
+            Db::must($wpdb->update(Db::table('issues'), ['version' => $version + 1, 'human_touched' => 1], ['id' => $id]));
+            Meta::forget();
+            self::log($id, 'edit_crossword');
+            Db::commit();
+            return $id;
+        } catch (\Throwable $e) {
+            return self::fail($e);
+        }
+    }
+
+    /**
      * Saves only the focus point of a photo: an article's own photo ($target = its external id)
      * or the issue's own cover photo ($target = 'cover'). Presentation only: the human review of
      * the text stays valid; the working version changes, so readers see it after re-approval.

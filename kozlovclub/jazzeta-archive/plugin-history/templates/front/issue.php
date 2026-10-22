@@ -62,6 +62,10 @@ $stories = $issue['stories'];
         <?php endforeach; ?>
     </div>
 
+    <?php if (!empty($issue['crossword'])) : ?>
+        <?php View::render('front/parts/crossword-teaser', ['teaser' => $issue['crossword']]); ?>
+    <?php endif; ?>
+
     <p class="es-issue__end"><span>Это весь номер<?php echo $issue['number'] ? ' ' . esc_html($issue['number_label']) : ''; ?></span></p>
 
     <?php if (count($issue['digest']) >= 3) : ?>

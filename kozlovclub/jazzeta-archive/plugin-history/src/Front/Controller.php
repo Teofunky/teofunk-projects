@@ -6,6 +6,8 @@ use Kozlov\Gazeta\Data\Db;
 use Kozlov\Gazeta\Data\Meta;
 use Kozlov\Gazeta\Data\Issues;
 use Kozlov\Gazeta\Data\Search;
+use Kozlov\Gazeta\Data\Crosswords;
+use Kozlov\Gazeta\Domain\Crossword;
 use Kozlov\Gazeta\Domain\Labels;
 use Kozlov\Gazeta\Domain\Validator;
 use Kozlov\Gazeta\Http\Router;
@@ -86,6 +88,19 @@ final class Controller
             case 'search':
                 $model = self::search($page);
                 break;
+            case 'crosswords':
+                $model = self::crosswordsModel(Crosswords::published());
+                break;
+            case 'crossword':
+                if (!Validator::isDate($key)) {
+                    self::notFound();
+                }
+                [$current, $newer, $older] = Crosswords::around($key);
+                if (!$current) {
+                    self::notFound();
+                }
+                $model = self::crosswordModel($current, $newer, $older);
+                break;
             default:
                 self::notFound();
                 return;
@@ -114,6 +129,7 @@ final class Controller
                 'home' => Router::home(),
                 'archive' => Router::archive(),
                 'search' => Router::search(),
+                'crosswords' => Router::crossword(),
                 'club' => (string) $settings['club_home_url'],
                 'desk' => admin_url('admin.php?page=es-newsroom'),
                 'mode' => admin_url('admin.php?page=es-runtime'),
@@ -122,6 +138,8 @@ final class Controller
             'article' => null,
             'archive' => null,
             'search' => null,
+            'crossword' => null,
+            'crosswords' => null,
             'neighbours' => [null, null],
         ];
     }
@@ -157,6 +175,7 @@ final class Controller
             'briefs' => $meta['briefs'] ?? [],
             'facts' => $meta['facts'] ?? [],
             'focus' => $meta['focus'] ?? [],
+            'crossword' => $meta['crossword'] ?? null,
         ]);
         $model['issue']['published_at'] = $issue['published_at'];
         $model['issue']['updated_at'] = $issue['public_updated_at'];
@@ -178,6 +197,16 @@ final class Controller
         $nonce = isset($_GET['_esnonce']) && is_string($_GET['_esnonce']) ? sanitize_text_field(wp_unslash($_GET['_esnonce'])) : '';
         if (!$issue || !current_user_can('es_edit') || !Router::verifyPreview((int) $issue['id'], (int) $issue['version'], $nonce)) {
             self::notFound();
+        }
+        if (isset($_GET['crossword'])) {
+            $meta = Meta::forIssue((int) $issue['id'], 'draft');
+            if (!$meta['crossword']) {
+                self::notFound();
+            }
+            $answers = isset($_GET['answers']) && $_GET['answers'] === '1';
+            $model = self::crosswordModel(['issue_id' => (int) $issue['id'], 'edition_date' => $issue['edition_date'], 'number' => $issue['number'], 'crossword' => $meta['crossword']], null, null, true, $answers);
+            $model['urls']['answers'] = Router::preview((int) $issue['id'], (int) $issue['version']) . '&crossword=1' . ($answers ? '' : '&answers=1');
+            return $model;
         }
         $selected = isset($_GET['article']) && is_string($_GET['article']) ? sanitize_key(wp_unslash($_GET['article'])) : '';
         $model = self::previewModel($issue, Issues::document($issue), Issues::articleRows((int) $issue['id']), $selected);
@@ -221,6 +250,7 @@ final class Controller
             // The preview shows the facts list exactly as publishing will build it.
             'facts' => Meta::draftFacts($meta, $drafts),
             'focus' => $meta['focus'] ?? [],
+            'crossword' => $meta['crossword'] ?? null,
         ]);
         $model['issue']['is_latest'] = true;
         $model['issue']['version'] = (int) $issue['version'];
@@ -289,6 +319,53 @@ final class Controller
             'next' => $page < $found['pages'] ? Router::search($query, $page + 1) : '',
         ];
         $model['seo'] = Seo::forSearch($model);
+        return $model;
+    }
+
+    /**
+     * The crossword page. $newer/$older are the neighbouring published crosswords (Data\Crosswords::around()).
+     * In the editor's preview the answers can be shown on request.
+     */
+    public static function crosswordModel(array $item, ?array $newer, ?array $older, bool $preview = false, bool $showAnswers = false): array
+    {
+        $model = self::base('crossword');
+        $date = (string) $item['edition_date'];
+        $open = $preview ? $showAnswers : Crossword::answersOpen($date, $newer['edition_date'] ?? null);
+        $model['crossword'] = Presenter::crossword($item['crossword'], [
+            'date' => $date,
+            'number' => $item['number'],
+            'open' => $open,
+            'preview' => $preview,
+            'url' => $preview ? '' : Router::crossword($date),
+            'issue_url' => $preview ? '' : Router::issue($date),
+        ]);
+        $model['crossword']['newer'] = $newer ? Presenter::crosswordTeaser($newer['crossword'], $newer['edition_date'], $newer['number'], Router::crossword($newer['edition_date'])) : null;
+        // The previous crossword's answers are open by definition: this one is newer.
+        $model['crossword']['previous'] = $older && !$preview ? Presenter::crossword($older['crossword'], [
+            'date' => $older['edition_date'],
+            'number' => $older['number'],
+            'open' => true,
+            'url' => Router::crossword($older['edition_date']),
+            'issue_url' => Router::issue($older['edition_date']),
+        ]) : null;
+        if ($preview) {
+            $model['preview'] = true;
+            $model['private'] = true;
+        }
+        $model['seo'] = Seo::forCrossword($model);
+        return $model;
+    }
+
+    /** All published crosswords, newest first. */
+    public static function crosswordsModel(array $published): array
+    {
+        $model = self::base('crosswords');
+        $items = [];
+        foreach ($published as $item) {
+            $items[] = Presenter::crosswordTeaser($item['crossword'], $item['edition_date'], $item['number'], Router::crossword($item['edition_date']));
+        }
+        $model['crosswords'] = ['items' => $items];
+        $model['seo'] = Seo::forCrosswords($model);
         return $model;
     }
 

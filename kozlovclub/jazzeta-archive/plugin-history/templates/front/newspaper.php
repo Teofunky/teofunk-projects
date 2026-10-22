@@ -44,6 +44,12 @@ if (!defined('ABSPATH')) {
                 case 'search':
                     View::render('front/search', $v);
                     break;
+                case 'crossword':
+                    View::render('front/crossword', $v);
+                    break;
+                case 'crosswords':
+                    View::render('front/crosswords', $v);
+                    break;
                 case 'empty':
                     View::render('front/empty', $v);
                     break;

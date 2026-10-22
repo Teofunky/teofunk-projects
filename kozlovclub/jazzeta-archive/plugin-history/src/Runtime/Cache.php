@@ -29,6 +29,7 @@ final class Cache
         }
         $urls = self::common();
         $urls[] = Router::issue((string) $issue['edition_date']);
+        $urls[] = Router::crossword((string) $issue['edition_date']);
         foreach (Issues::articleRows($issueId, false) as $row) {
             $urls[] = Router::article((string) $row['slug']);
         }
@@ -57,7 +58,7 @@ final class Cache
 
     private static function common(): array
     {
-        return [Router::home(), Router::archive(1), Router::archive(2), Router::archive(3), Router::sitemap('')];
+        return [Router::home(), Router::archive(1), Router::archive(2), Router::archive(3), Router::sitemap(''), Router::crossword()];
     }
 
     private static function purge(array $urls): void

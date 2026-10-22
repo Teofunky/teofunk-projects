@@ -2,6 +2,7 @@
 
 namespace Kozlov\Gazeta\Admin;
 
+use Kozlov\Gazeta\Domain\Crossword;
 use Kozlov\Gazeta\Data\Installer;
 use Kozlov\Gazeta\Data\Issues;
 use Kozlov\Gazeta\Data\Meta;
@@ -30,6 +31,7 @@ final class Actions
         'manual_import' => 'es_import',
         'article' => 'es_edit',
         'issue' => 'es_edit',
+        'crossword' => 'es_edit',
         'restore' => 'es_edit',
         'publish' => 'es_publish',
         'withdraw' => 'es_publish',
@@ -120,6 +122,10 @@ final class Actions
 
             case 'issue':
                 self::issue($id, $version, $back);
+                return;
+
+            case 'crossword':
+                self::crossword($id, $version, $back);
                 return;
 
             case 'restore':
@@ -299,6 +305,52 @@ final class Actions
         self::done($result, $back, static function () use ($id) {
             return Admin::url($id, '', ['es_notice' => 'issue_saved']);
         });
+    }
+
+    /** Crossword of the week (0.5.2): build from a file or lines, another grid, or remove. */
+    private static function crossword(int $id, int $version, string $back): void
+    {
+        $intent = sanitize_key(self::value('intent', 'build'));
+        $current = Meta::forIssue($id, 'draft')['crossword'];
+        if ($intent === 'remove') {
+            $result = Issues::saveCrossword($id, $version, null);
+            self::done($result, $back, static function () use ($id) {
+                return Admin::url($id, '', ['es_notice' => 'crossword_removed']) . '#crossword';
+            });
+            return;
+        }
+        if ($intent === 'rebuild') {
+            if (!$current) {
+                self::fail('Кроссворда в номере нет — загрузите файл.', $back);
+                return;
+            }
+            $parsed = ['title' => $current['title'], 'intro' => $current['intro'], 'author' => $current['author'], 'words' => $current['words'], 'warnings' => $current['warnings'] ?? []];
+            $built = Crossword::assemble($parsed, self::seed((int) $current['seed']), (string) $current['id']);
+        } else {
+            $parsed = Crossword::parse(self::value('crossword_source'), ['title' => self::value('crossword_title'), 'intro' => self::value('crossword_intro')]);
+            if (is_wp_error($parsed)) {
+                self::fail('Кроссворд не принят: ' . $parsed->get_error_message() . ' Ничего не сохранено.', $back);
+                return;
+            }
+            $built = Crossword::assemble($parsed, self::seed(0), $current ? (string) $current['id'] : '');
+        }
+        if (is_wp_error($built)) {
+            self::fail($built->get_error_message() . ' Ничего не сохранено.', $back);
+            return;
+        }
+        $result = Issues::saveCrossword($id, $version, $built);
+        self::done($result, $back, static function () use ($id) {
+            return Admin::url($id, '', ['es_notice' => 'crossword_saved']) . '#crossword';
+        });
+    }
+
+    /** A new seed for the grid builder, different from the previous one. */
+    private static function seed(int $previous): int
+    {
+        do {
+            $seed = (int) wp_rand(1, 999999);
+        } while ($seed === $previous);
+        return $seed;
     }
 
     /** "2026-10-21T08:30" from <input type=datetime-local> → ISO 8601 in Moscow time. Full ISO passes through. */

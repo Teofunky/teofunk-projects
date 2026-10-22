@@ -83,6 +83,37 @@ final class Seo
         ];
     }
 
+    public static function forCrossword(array $model): array
+    {
+        $cw = $model['crossword'];
+        if ($model['preview']) {
+            return ['title' => 'Предпросмотр кроссворда — ' . $model['brand'], 'description' => '', 'canonical' => '', 'robots' => 'noindex, nofollow, noarchive', 'og_type' => 'website', 'image' => '', 'schema' => []];
+        }
+        $description = $cw['intro'] !== '' ? $cw['intro'] : 'Кроссворд недели газеты «' . $model['brand'] . '»: ' . $cw['words_label'] . ', ответы — через неделю.';
+        return [
+            'title' => 'Кроссворд: ' . $cw['plain_title'] . ' — ' . $model['brand'],
+            'description' => wp_strip_all_tags(html_entity_decode($description, ENT_QUOTES, 'UTF-8')),
+            'canonical' => $model['private'] ? '' : $cw['url'],
+            'robots' => self::robots($model['private'], true),
+            'og_type' => 'website',
+            'image' => '',
+            'schema' => [],
+        ];
+    }
+
+    public static function forCrosswords(array $model): array
+    {
+        return [
+            'title' => 'Кроссворды — ' . $model['brand'],
+            'description' => 'Кроссворды недели газеты «' . $model['brand'] . '» о джазе и музыке нашего времени.',
+            'canonical' => $model['private'] ? '' : Router::crossword(),
+            'robots' => self::robots($model['private'], true),
+            'og_type' => 'website',
+            'image' => '',
+            'schema' => [],
+        ];
+    }
+
     public static function forEmpty(array $model): array
     {
         return [

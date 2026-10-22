@@ -25,6 +25,7 @@ if (!defined('ABSPATH')) {
     <nav class="es-colophon__links" aria-label="Газета и клуб">
         <a href="<?php echo esc_url($v['urls']['home']); ?>">Свежий номер</a>
         <a href="<?php echo esc_url($v['urls']['archive']); ?>">Все выпуски</a>
+        <a href="<?php echo esc_url($v['urls']['crosswords']); ?>">Кроссворды</a>
         <a class="es-colophon__club" href="<?php echo esc_url($v['urls']['club']); ?>">← На сайт Клуба Козлова</a>
     </nav>
 </footer>

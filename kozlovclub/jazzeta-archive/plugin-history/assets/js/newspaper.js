@@ -1,5 +1,5 @@
 /**
- * «Ежедневный стандарт» — reader script (0.5.1).
+ * «Ежедневный стандарт» — reader script (0.5.2).
  * Everything here is an enhancement: without JavaScript the issue, the articles, the archive
  * and the sources are fully readable in the server's default mode.
  * Reader settings (mode, palette, text size, density) live in this browser only

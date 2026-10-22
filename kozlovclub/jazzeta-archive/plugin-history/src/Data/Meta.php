@@ -2,6 +2,8 @@
 
 namespace Kozlov\Gazeta\Data;
 
+use Kozlov\Gazeta\Domain\Crossword;
+
 if (!defined('ABSPATH')) {
     exit;
 }
@@ -9,7 +11,8 @@ if (!defined('ABSPATH')) {
 /**
  * Editorial properties that the JSON exchange format does not carry: the issue cover and,
  * per article, the blocks «Почему важно / Контекст / Что дальше» and the reader-visible list
- * of checked facts, and (0.5.1) the focus point of a photo. Stored in the additive table wp_es_meta, in two layers: `draft` is what
+ * of checked facts, (0.5.1) the focus point of a photo and (0.5.2) the crossword of the week.
+ * Stored in the additive table wp_es_meta, in two layers: `draft` is what
  * the desk edits, `public` is a copy taken inside the publish transaction.
  *
  * Versions 0.3.x and 0.4.0 do not know this table: after a rollback they ignore it, and the
@@ -30,7 +33,7 @@ final class Meta
     /**
      * Everything the presenter needs for one issue, keyed by article external id.
      * A missing table (upgrade not finished) reads as "no extras", never as an error page.
-     * @return array{cover:?array,briefs:array<string,array>,facts:array<string,array>,facts_visible:array<string,bool>,focus:array<string,array>}
+     * @return array{cover:?array,briefs:array<string,array>,facts:array<string,array>,facts_visible:array<string,bool>,focus:array<string,array>,crossword:?array}
      */
     public static function forIssue(int $issueId, string $layer): array
     {
@@ -38,7 +41,7 @@ final class Meta
         if (isset(self::$cache[$key])) {
             return self::$cache[$key];
         }
-        $empty = ['cover' => null, 'briefs' => [], 'facts' => [], 'facts_visible' => [], 'focus' => []];
+        $empty = ['cover' => null, 'briefs' => [], 'facts' => [], 'facts_visible' => [], 'focus' => [], 'crossword' => null];
         if ($issueId <= 0 || !in_array($layer, self::LAYERS, true)) {
             return $empty;
         }
@@ -60,6 +63,10 @@ final class Meta
             $value = json_decode((string) $row['meta_value'], true);
             if ($row['object_type'] === 'issue' && $row['meta_key'] === 'cover') {
                 $out['cover'] = self::cleanCover($value);
+                continue;
+            }
+            if ($row['object_type'] === 'issue' && $row['meta_key'] === 'crossword') {
+                $out['crossword'] = Crossword::clean($value);
                 continue;
             }
             $id = (string) $row['external_id'];
@@ -125,7 +132,16 @@ final class Meta
             Db::must($wpdb->query($wpdb->prepare("DELETE FROM {$table} WHERE object_type=%s AND object_id=%d AND layer='public'", $type, $id)));
             $drafts = $wpdb->get_results($wpdb->prepare("SELECT meta_key, meta_value FROM {$table} WHERE object_type=%s AND object_id=%d AND layer='draft'", $type, $id), ARRAY_A);
             foreach ((array) $drafts as $draft) {
-                self::insert($type, $id, 'public', $draft['meta_key'], $draft['meta_value']);
+                $value = $draft['meta_value'];
+                if ($type === 'issue' && $draft['meta_key'] === 'crossword') {
+                    // Editor notes and build warnings never reach the public layer.
+                    $crossword = Crossword::clean(json_decode((string) $value, true));
+                    if (!$crossword) {
+                        continue;
+                    }
+                    $value = Db::json(Crossword::forPublic($crossword));
+                }
+                self::insert($type, $id, 'public', $draft['meta_key'], $value);
             }
         }
         // Facts become public only for articles where the editor asked for them.
@@ -144,13 +160,17 @@ final class Meta
     {
         $data = self::forIssue($issueId, 'draft');
         self::forget();
-        return ['cover' => $data['cover'], 'briefs' => $data['briefs'], 'facts_visible' => $data['facts_visible'], 'focus' => $data['focus']];
+        return ['cover' => $data['cover'], 'briefs' => $data['briefs'], 'facts_visible' => $data['facts_visible'], 'focus' => $data['focus'], 'crossword' => $data['crossword']];
     }
 
     /** Puts a snapshot back into the draft layer (restore of an old version). */
     public static function restoreSnapshot(int $issueId, array $snapshot, array $rowsByExternal): void
     {
         self::put('issue', $issueId, 'draft', 'cover', isset($snapshot['cover']) ? self::cleanCover($snapshot['cover']) : null);
+        // Snapshots older than 0.5.2 carry no crossword key: the current one stays as it is.
+        if (array_key_exists('crossword', $snapshot)) {
+            self::put('issue', $issueId, 'draft', 'crossword', Crossword::clean($snapshot['crossword']));
+        }
         foreach ($rowsByExternal as $externalId => $row) {
             $brief = isset($snapshot['briefs'][$externalId]) ? self::cleanBrief($snapshot['briefs'][$externalId]) : [];
             self::put('article', (int) $row['id'], 'draft', 'brief', $brief ?: null);
