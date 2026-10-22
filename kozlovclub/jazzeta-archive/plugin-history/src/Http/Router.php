@@ -12,11 +12,12 @@ if (!defined('ABSPATH')) {
  * Public addresses of the newspaper. The patterns and generated URLs are the 0.3.5 contract:
  * /gazeta/, /gazeta/YYYY-MM-DD/, /gazeta/material/{slug}/, /gazeta/archive/[page/N/],
  * /gazeta/preview/{id}/, sitemaps, and the legacy /gazeta/issue/YYYY-MM-DD/ redirect.
+ * 0.5.1 adds /gazeta/search/[page/N/]?q=… (never indexed, never in sitemaps).
  */
 final class Router
 {
     public const BASE = Request::BASE;
-    public const VIEWS = ['latest', 'issue', 'legacy_issue', 'article', 'archive', 'preview', 'sitemap', 'sitemap_part'];
+    public const VIEWS = ['latest', 'issue', 'legacy_issue', 'article', 'archive', 'preview', 'sitemap', 'sitemap_part', 'search'];
 
     public static function rules(): array
     {
@@ -27,6 +28,8 @@ final class Router
             '^gazeta/material/([a-z0-9_-]{1,160})/?$' => 'article&es_key=$matches[1]',
             '^gazeta/archive/?$' => 'archive&es_page=1',
             '^gazeta/archive/page/([1-9][0-9]*)/?$' => 'archive&es_page=$matches[1]',
+            '^gazeta/search/?$' => 'search&es_page=1',
+            '^gazeta/search/page/([1-9][0-9]*)/?$' => 'search&es_page=$matches[1]',
             '^gazeta/preview/([0-9]+)/?$' => 'preview&es_key=$matches[1]',
             '^gazeta/sitemap\.xml$' => 'sitemap',
             '^gazeta/sitemap-(issues|articles)-([1-9][0-9]*)\.xml$' => 'sitemap_part&es_key=$matches[1]&es_page=$matches[2]',
@@ -75,6 +78,23 @@ final class Router
             return add_query_arg(['es_view' => 'archive', 'es_page' => max(1, $page)], home_url('/'));
         }
         return home_url('/' . self::BASE . '/archive/' . ($page > 1 ? 'page/' . $page . '/' : ''));
+    }
+
+    /** The query is appended already encoded (add_query_arg() in WordPress does not encode values). */
+    public static function search(string $query = '', int $page = 1): string
+    {
+        $page = max(1, $page);
+        // Until the rewrite rules are flushed after an update, the query-string address still works.
+        $rules = self::pretty() ? get_option('rewrite_rules') : [];
+        if (self::pretty() && (!is_array($rules) || isset($rules['^gazeta/search/?$']))) {
+            $url = home_url('/' . self::BASE . '/search/' . ($page > 1 ? 'page/' . $page . '/' : ''));
+        } else {
+            $url = add_query_arg(['es_view' => 'search', 'es_page' => $page], home_url('/'));
+        }
+        if ($query === '') {
+            return $url;
+        }
+        return $url . (strpos($url, '?') === false ? '?' : '&') . 'q=' . rawurlencode($query);
     }
 
     public static function sitemap(string $kind = '', int $page = 0): string

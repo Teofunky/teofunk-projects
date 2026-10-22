@@ -79,6 +79,7 @@ final class Labels
         'review_article' => 'Материал проверен',
         'remove_article' => 'Материал убран',
         'edit_issue' => 'Правка сборки номера',
+        'edit_focus' => 'Кадр фото',
         'restore_draft' => 'Восстановлена прежняя версия',
         'publish' => 'Опубликовано',
         'withdraw' => 'Снято с публикации',

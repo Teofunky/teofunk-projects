@@ -132,6 +132,22 @@ final class Integrity
         $routes = isset($rules['^gazeta/?$']) || isset($rules['gazeta/?$']);
         $checks[] = self::check('Адреса /gazeta/ зарегистрированы', $routes || !get_option('permalink_structure') ? 'ok' : 'warn', [$routes ? 'Правила на месте' : 'Правила не найдены — пересохраните «Настройки → Постоянные ссылки» или переактивируйте плагин.']);
 
+        $searchRule = isset($rules['^gazeta/search/?$']);
+        $indexed = Search::size();
+        $searchable = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$articles} a JOIN {$issues} i ON i.id=a.issue_id WHERE i.state='published' AND a.public_json IS NOT NULL");
+        $fresh = Search::available() && Search::isFresh() && $indexed === $searchable;
+        $searchDetails = ['В указателе ' . $indexed . ' из ' . $searchable . ' опубликованных материалов.'];
+        if (!Search::available()) {
+            $searchDetails[] = 'На сервере нет модуля PHP mbstring: поиск выключен, читатели видят «Поиск временно недоступен». Остальная газета работает.';
+        }
+        if (!$fresh) {
+            $searchDetails[] = 'Указатель отстаёт (например, после отката на прежнюю версию). Он перестроится сам при открытии «Пульта»; читатели тем временем не видят снятых материалов.';
+        }
+        if (!$searchRule && get_option('permalink_structure')) {
+            $searchDetails[] = 'Правило адреса /gazeta/search/ не найдено: ссылка «Поиск» ведёт на запасной адрес ?es_view=search. Нажмите «Завершить обновление» или пересохраните постоянные ссылки.';
+        }
+        $checks[] = self::check('Поиск по газете', $fresh && ($searchRule || !get_option('permalink_structure')) ? 'ok' : 'warn', $searchDetails);
+
         $ok = !array_filter($checks, static function ($c) {
             return $c['status'] === 'error';
         });

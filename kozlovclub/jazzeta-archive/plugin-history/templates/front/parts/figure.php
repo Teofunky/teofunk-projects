@@ -28,6 +28,11 @@ $attrs = [
 if ($eager) {
     $attrs['fetchpriority'] = 'high';
 }
+// Which part of the photo stays in a frame of another shape (0.5.1: the editor's focus point).
+$position = $kind === 'photo' ? Presenter::objectPosition($image) : '';
+if ($position !== '') {
+    $attrs['style'] = 'object-position: ' . $position;
+}
 $html = '';
 if ($kind === 'photo' && !empty($image['attachment_id'])) {
     $html = (string) wp_get_attachment_image((int) $image['attachment_id'], 'large', false, $attrs);
@@ -41,7 +46,7 @@ if ($kind === 'photo' && !empty($image['attachment_id'])) {
         <?php elseif ($html !== '') : ?>
             <?php echo $html; // Built by wp_get_attachment_image(), attributes escaped by WordPress. ?>
         <?php else : ?>
-            <img class="es-figure__img" src="<?php echo esc_url((string) $image['url']); ?>" alt="<?php echo esc_attr((string) ($image['alt'] ?? '')); ?>" decoding="async"<?php echo $eager ? ' fetchpriority="high"' : ' loading="lazy"'; ?>>
+            <img class="es-figure__img" src="<?php echo esc_url((string) $image['url']); ?>" alt="<?php echo esc_attr((string) ($image['alt'] ?? '')); ?>" decoding="async"<?php echo $eager ? ' fetchpriority="high"' : ' loading="lazy"'; ?><?php echo $position !== '' ? ' style="object-position: ' . esc_attr($position) . '"' : ' data-es-autofocus'; ?>>
         <?php endif; ?>
     </span>
     <?php if ($link !== '') : ?></a><?php endif; ?>

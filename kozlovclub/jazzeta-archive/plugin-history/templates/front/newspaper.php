@@ -41,6 +41,9 @@ if (!defined('ABSPATH')) {
                 case 'archive':
                     View::render('front/archive', $v);
                     break;
+                case 'search':
+                    View::render('front/search', $v);
+                    break;
                 case 'empty':
                     View::render('front/empty', $v);
                     break;

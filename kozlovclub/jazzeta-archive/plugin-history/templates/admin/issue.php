@@ -8,6 +8,7 @@ use Kozlov\Gazeta\Admin\Actions;
 use Kozlov\Gazeta\Admin\Admin;
 use Kozlov\Gazeta\Admin\Ui;
 use Kozlov\Gazeta\Domain\Labels;
+use Kozlov\Gazeta\Front\View;
 use Kozlov\Gazeta\Runtime\Mode;
 
 if (!defined('ABSPATH')) {
@@ -119,6 +120,10 @@ $placementTone = ['lead' => 'lead', 'feature' => 'feature', 'regular' => 'neutra
                         </div>
                     </div>
                 </div>
+                <div data-es-cover-for="photo">
+                    <?php View::render('admin/parts/focus', ['id' => 'cover', 'name' => 'cover_focus', 'src' => !empty($cover['attachment_id']) ? (string) wp_get_attachment_image_url((int) $cover['attachment_id'], 'large') : '', 'focus' => $cover['focus'] ?? null, 'save' => false, 'published' => (int) ($v['row']['public_version'] ?? 0) > 0]); ?>
+                </div>
+                <p class="es-hint" data-es-cover-for="lead">Кадр фото главного материала задаётся в его карточке, в блоке «Иллюстрация».</p>
                 <div class="es-field es-cover__plate" data-es-cover-for="plate">
                     <label for="es-cover-plate">Иллюстрация</label>
                     <select id="es-cover-plate" name="cover_plate">

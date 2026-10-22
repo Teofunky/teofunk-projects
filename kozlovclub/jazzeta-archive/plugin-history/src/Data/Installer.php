@@ -69,7 +69,7 @@ final class Installer
                 wp_die('Не удалось подготовить транзакционную таблицу ' . esc_html($table) . '. Активация остановлена, данные не изменены.');
             }
         }
-        Db::must($wpdb->query('INSERT IGNORE INTO ' . Db::table('state') . " (name,value) VALUES ('number',0),('catalog',1),('write',0)"));
+        Db::must($wpdb->query('INSERT IGNORE INTO ' . Db::table('state') . " (name,value) VALUES ('number',0),('catalog',1),('write',0),('search',0)"));
 
         add_role('es_importer', 'Газета — импортёр', ['read' => true, 'es_import' => true]);
         add_role('es_editor', 'Газета — редактор', ['read' => true, 'es_edit' => true]);
@@ -83,5 +83,7 @@ final class Installer
         add_option('es_runtime', ['mode' => 'closed', 'changed_by' => get_current_user_id(), 'changed_at' => gmdate('c')], '', false);
         add_option('es_security', ['publisher_id' => get_current_user_id()], '', false);
         update_option('es_db_version', ES_VERSION, false);
+        // The search index is derived data: rebuilt here, never a reason to stop the upgrade.
+        Search::ensureFresh();
     }
 }

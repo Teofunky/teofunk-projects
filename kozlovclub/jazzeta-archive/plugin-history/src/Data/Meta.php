@@ -9,7 +9,7 @@ if (!defined('ABSPATH')) {
 /**
  * Editorial properties that the JSON exchange format does not carry: the issue cover and,
  * per article, the blocks «Почему важно / Контекст / Что дальше» and the reader-visible list
- * of checked facts. Stored in the additive table wp_es_meta, in two layers: `draft` is what
+ * of checked facts, and (0.5.1) the focus point of a photo. Stored in the additive table wp_es_meta, in two layers: `draft` is what
  * the desk edits, `public` is a copy taken inside the publish transaction.
  *
  * Versions 0.3.x and 0.4.0 do not know this table: after a rollback they ignore it, and the
@@ -21,6 +21,8 @@ final class Meta
     public const BRIEF_KEYS = ['why', 'context', 'next'];
     public const BRIEF_MAX = 600;
     public const COVER_KINDS = ['lead', 'photo', 'plate', 'none'];
+    /** Default focus: the centre of the picture. Stored only when it differs. */
+    public const FOCUS_CENTER = ['x' => 50, 'y' => 50];
 
     /** @var array<string,array> per-request cache: "issueId:layer" => result of forIssue() */
     private static $cache = [];
@@ -28,7 +30,7 @@ final class Meta
     /**
      * Everything the presenter needs for one issue, keyed by article external id.
      * A missing table (upgrade not finished) reads as "no extras", never as an error page.
-     * @return array{cover:?array,briefs:array<string,array>,facts:array<string,array>,facts_visible:array<string,bool>}
+     * @return array{cover:?array,briefs:array<string,array>,facts:array<string,array>,facts_visible:array<string,bool>,focus:array<string,array>}
      */
     public static function forIssue(int $issueId, string $layer): array
     {
@@ -36,7 +38,7 @@ final class Meta
         if (isset(self::$cache[$key])) {
             return self::$cache[$key];
         }
-        $empty = ['cover' => null, 'briefs' => [], 'facts' => [], 'facts_visible' => []];
+        $empty = ['cover' => null, 'briefs' => [], 'facts' => [], 'facts_visible' => [], 'focus' => []];
         if ($issueId <= 0 || !in_array($layer, self::LAYERS, true)) {
             return $empty;
         }
@@ -73,6 +75,11 @@ final class Meta
                 $out['facts'][$id] = self::cleanFacts($value);
             } elseif ($row['meta_key'] === 'facts_visible') {
                 $out['facts_visible'][$id] = $value === true || $value === 1 || $value === '1';
+            } elseif ($row['meta_key'] === 'focus') {
+                $focus = self::cleanFocus($value);
+                if ($focus) {
+                    $out['focus'][$id] = $focus;
+                }
             }
         }
         self::$cache[$key] = $out;
@@ -137,7 +144,7 @@ final class Meta
     {
         $data = self::forIssue($issueId, 'draft');
         self::forget();
-        return ['cover' => $data['cover'], 'briefs' => $data['briefs'], 'facts_visible' => $data['facts_visible']];
+        return ['cover' => $data['cover'], 'briefs' => $data['briefs'], 'facts_visible' => $data['facts_visible'], 'focus' => $data['focus']];
     }
 
     /** Puts a snapshot back into the draft layer (restore of an old version). */
@@ -148,6 +155,7 @@ final class Meta
             $brief = isset($snapshot['briefs'][$externalId]) ? self::cleanBrief($snapshot['briefs'][$externalId]) : [];
             self::put('article', (int) $row['id'], 'draft', 'brief', $brief ?: null);
             self::put('article', (int) $row['id'], 'draft', 'facts_visible', !empty($snapshot['facts_visible'][$externalId]) ? 1 : null);
+            self::put('article', (int) $row['id'], 'draft', 'focus', isset($snapshot['focus'][$externalId]) ? self::cleanFocus($snapshot['focus'][$externalId]) : null);
         }
         self::forget();
     }
@@ -189,6 +197,10 @@ final class Meta
             $cover['attachment_id'] = $id;
             $cover['alt'] = self::clip(sanitize_text_field((string) ($value['alt'] ?? '')), 300);
             $cover['credit'] = self::clip(sanitize_text_field((string) ($value['credit'] ?? '')), 300);
+            $focus = self::cleanFocus($value['focus'] ?? null);
+            if ($focus) {
+                $cover['focus'] = $focus;
+            }
         } elseif ($kind === 'plate') {
             $plate = sanitize_key((string) ($value['plate'] ?? ''));
             if ($plate === '') {
@@ -197,6 +209,23 @@ final class Meta
             $cover['plate'] = $plate;
         }
         return $cover;
+    }
+
+    /**
+     * Focus point of a photo in per cent from the top-left corner: the part of the picture
+     * that must stay visible when a frame of another shape crops it. The centre returns null.
+     * @return array{x:int,y:int}|null
+     */
+    public static function cleanFocus($value): ?array
+    {
+        if (!is_array($value) || !isset($value['x'], $value['y']) || !is_numeric($value['x']) || !is_numeric($value['y'])) {
+            return null;
+        }
+        $focus = [
+            'x' => (int) max(0, min(100, round((float) $value['x']))),
+            'y' => (int) max(0, min(100, round((float) $value['y']))),
+        ];
+        return $focus === self::FOCUS_CENTER ? null : $focus;
     }
 
     private static function cleanFacts($value): array

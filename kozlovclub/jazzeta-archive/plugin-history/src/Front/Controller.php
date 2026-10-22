@@ -5,6 +5,7 @@ namespace Kozlov\Gazeta\Front;
 use Kozlov\Gazeta\Data\Db;
 use Kozlov\Gazeta\Data\Meta;
 use Kozlov\Gazeta\Data\Issues;
+use Kozlov\Gazeta\Data\Search;
 use Kozlov\Gazeta\Domain\Labels;
 use Kozlov\Gazeta\Domain\Validator;
 use Kozlov\Gazeta\Http\Router;
@@ -82,6 +83,9 @@ final class Controller
             case 'archive':
                 $model = self::archive($page);
                 break;
+            case 'search':
+                $model = self::search($page);
+                break;
             default:
                 self::notFound();
                 return;
@@ -109,6 +113,7 @@ final class Controller
             'urls' => [
                 'home' => Router::home(),
                 'archive' => Router::archive(),
+                'search' => Router::search(),
                 'club' => (string) $settings['club_home_url'],
                 'desk' => admin_url('admin.php?page=es-newsroom'),
                 'mode' => admin_url('admin.php?page=es-runtime'),
@@ -116,6 +121,7 @@ final class Controller
             'issue' => null,
             'article' => null,
             'archive' => null,
+            'search' => null,
             'neighbours' => [null, null],
         ];
     }
@@ -150,6 +156,7 @@ final class Controller
             'cover' => $meta['cover'] ?? null,
             'briefs' => $meta['briefs'] ?? [],
             'facts' => $meta['facts'] ?? [],
+            'focus' => $meta['focus'] ?? [],
         ]);
         $model['issue']['published_at'] = $issue['published_at'];
         $model['issue']['updated_at'] = $issue['public_updated_at'];
@@ -213,6 +220,7 @@ final class Controller
             'briefs' => $meta['briefs'] ?? [],
             // The preview shows the facts list exactly as publishing will build it.
             'facts' => Meta::draftFacts($meta, $drafts),
+            'focus' => $meta['focus'] ?? [],
         ]);
         $model['issue']['is_latest'] = true;
         $model['issue']['version'] = (int) $issue['version'];
@@ -249,6 +257,38 @@ final class Controller
             'next' => $page < $listing['pages'] ? Router::archive($page + 1) : '',
         ];
         $model['seo'] = Seo::forArchive($model, $page);
+        return $model;
+    }
+
+    private static function search(int $page): array
+    {
+        $raw = isset($_GET['q']) && is_string($_GET['q']) ? sanitize_text_field(wp_unslash($_GET['q'])) : '';
+        $found = Search::find($raw, $page);
+        if ($page > 1 && $page > $found['pages']) {
+            self::notFound();
+        }
+        return self::searchModel($found);
+    }
+
+    /** @param array $found result of Data\Search::find() */
+    public static function searchModel(array $found): array
+    {
+        $model = self::base('search');
+        $query = (string) $found['query'];
+        $page = (int) $found['page'];
+        $model['search'] = [
+            'query' => $query,
+            'searched' => $query !== '',
+            'unavailable' => !empty($found['unavailable']),
+            'understood' => $found['terms'] !== [],
+            'total' => (int) $found['total'],
+            'page' => $page,
+            'pages' => (int) $found['pages'],
+            'items' => Presenter::searchResults($found['rows'], $found['terms']),
+            'prev' => $page > 1 ? Router::search($query, $page - 1) : '',
+            'next' => $page < $found['pages'] ? Router::search($query, $page + 1) : '',
+        ];
+        $model['seo'] = Seo::forSearch($model);
         return $model;
     }
 

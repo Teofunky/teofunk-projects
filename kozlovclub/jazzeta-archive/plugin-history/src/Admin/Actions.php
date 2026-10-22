@@ -56,6 +56,19 @@ final class Actions
         return isset($_POST[$key]) && is_scalar($_POST[$key]) ? (string) wp_unslash($_POST[$key]) : $fallback;
     }
 
+    /** A posted focus point {x,y}; false when the form had no picker. @return array{x:int,y:int}|false */
+    private static function focus(string $key)
+    {
+        if (!isset($_POST[$key]) || !is_array($_POST[$key])) {
+            return false;
+        }
+        $raw = wp_unslash($_POST[$key]);
+        return [
+            'x' => isset($raw['x']) && is_scalar($raw['x']) ? (int) $raw['x'] : 50,
+            'y' => isset($raw['y']) && is_scalar($raw['y']) ? (int) $raw['y'] : 50,
+        ];
+    }
+
     private static function lines(string $value): array
     {
         return array_values(array_filter(array_map('trim', preg_split('/\R/u', $value) ?: []), static function ($line) {
@@ -217,6 +230,18 @@ final class Actions
             }, $brief), array_flip(Meta::BRIEF_KEYS)),
             'facts_visible' => self::value('facts_visible') === '1',
         ];
+        $focus = self::focus('focus');
+        if ($focus !== false) {
+            $meta['focus'] = $focus;
+        }
+        if ($intent === 'focus') {
+            // Only the crop changes: the review of the text stays valid (Issues::saveFocus).
+            $result = Issues::saveFocus($id, $version, $article['id'], $focus === false ? null : $focus);
+            self::done($result, $back, static function () use ($id, $article) {
+                return Admin::url($id, $article['id'], ['es_notice' => 'focus_saved']);
+            });
+            return;
+        }
         foreach ($meta['brief'] as $text) {
             if ((function_exists('mb_strlen') ? mb_strlen(trim($text)) : strlen(trim($text))) > Meta::BRIEF_MAX) {
                 self::fail('Блок «Почему важно / Контекст / Что дальше» длиннее ' . Meta::BRIEF_MAX . ' знаков. Ничего не сохранено.', $back);
@@ -262,6 +287,10 @@ final class Actions
                     self::fail('Укажите автора и лицензию фото обложки: без подтверждённых прав фото не публикуется. Ничего не сохранено.', $back);
                 }
                 $cover += ['attachment_id' => $attachment, 'alt' => self::value('cover_alt'), 'credit' => self::value('cover_credit')];
+                $focus = self::focus('cover_focus');
+                if (is_array($focus)) {
+                    $cover['focus'] = $focus;
+                }
             } elseif ($kind === 'plate') {
                 $cover['plate'] = self::value('cover_plate');
             }

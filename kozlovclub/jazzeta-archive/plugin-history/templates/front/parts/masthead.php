@@ -1,6 +1,6 @@
 <?php
 /**
- * Masthead: name, edition line (date, number, size of the issue) and the two sections.
+ * Masthead: name, edition line (date, number, size of the issue), the two sections and search.
  * On the issue page the name is the page's only H1; elsewhere the H1 belongs to the content.
  * @var array $v
  */
@@ -41,6 +41,7 @@ $nameTag = $isFront ? 'h1' : 'p';
         <nav class="es-mast__nav" aria-label="Газета">
             <a href="<?php echo esc_url($homeUrl); ?>"<?php echo $isFront && !empty($issue['is_latest']) ? ' aria-current="page"' : ''; ?>>Свежий номер</a>
             <a href="<?php echo esc_url($v['urls']['archive']); ?>"<?php echo $v['view'] === 'archive' ? ' aria-current="page"' : ''; ?>>Все выпуски</a>
+            <a class="es-mast__search" href="<?php echo esc_url($v['urls']['search']); ?>"<?php echo $v['view'] === 'search' ? ' aria-current="page"' : ''; ?>><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m10.4 10.4 3.6 3.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Поиск</a>
         </nav>
     </div>
 </header>

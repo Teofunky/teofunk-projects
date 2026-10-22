@@ -9,6 +9,7 @@ use Kozlov\Gazeta\Admin\Admin;
 use Kozlov\Gazeta\Admin\Ui;
 use Kozlov\Gazeta\Domain\Duplicates;
 use Kozlov\Gazeta\Domain\Labels;
+use Kozlov\Gazeta\Front\View;
 use Kozlov\Gazeta\Http\Router;
 
 if (!defined('ABSPATH')) {
@@ -318,6 +319,9 @@ $quoteRow = static function ($index, array $q) use ($sourceIds) {
                         </div>
                     </div>
                 </div>
+                <?php if (!$v['is_new']) : ?>
+                    <?php View::render('admin/parts/focus', ['id' => 'article', 'name' => 'focus', 'src' => (string) $v['focus_src'], 'focus' => $v['focus'], 'save' => true, 'published' => $v['issue_published']]); ?>
+                <?php endif; ?>
                 <div class="es-field">
                     <label for="es-disclosure">Связь с издателем <span class="es-hint">видна читателю; обязательна для материалов о клубе и Jazzist</span></label>
                     <textarea id="es-disclosure" name="article[conflict_disclosure]" rows="2" data-es-autogrow><?php echo esc_textarea((string) ($a['conflict_disclosure'] ?? '')); ?></textarea>

@@ -5,6 +5,7 @@
  */
 
 use Kozlov\Gazeta\Domain\Labels;
+use Kozlov\Gazeta\Front\View;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -21,6 +22,9 @@ $archive = $v['archive'];
                 Первый выпуск ещё не опубликован.
             <?php endif; ?>
         </p>
+        <?php if ($archive['total']) : ?>
+            <?php View::render('front/parts/searchform', $v + ['form' => ['id' => 'archive', 'label' => 'Найти материал во всех выпусках']]); ?>
+        <?php endif; ?>
     </header>
 
     <?php foreach ($archive['groups'] as $month => $rows) : ?>

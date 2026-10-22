@@ -65,6 +65,7 @@ final class ArticleScreen
             'issue' => $issue,
             'row' => $row,
             'is_new' => $isNew,
+            'issue_published' => (int) ($issue['public_version'] ?? 0) > 0,
             'article' => $article,
             'body_html' => Validator::renderBody($article['body_paragraphs']),
             'social' => $social,
@@ -79,8 +80,21 @@ final class ArticleScreen
             'draft_key' => 'es-article-' . $issueId . '-' . ($isNew ? 'new' : $article['id']),
             'brief' => $brief,
             'facts_visible' => $factsVisible,
+            'focus' => $isNew ? null : ($meta['focus'][$article['id']] ?? null),
+            'focus_src' => self::pickerSource((string) ($article['media_rights']['image_url'] ?? '')),
             'facts_preview' => Meta::factsFromClaims($article['claims']),
         ]);
         Ui::close();
+    }
+
+    /** A lighter size of a media-library photo for the focus picker; other addresses as they are. */
+    private static function pickerSource(string $url): string
+    {
+        if ($url === '') {
+            return '';
+        }
+        $id = function_exists('attachment_url_to_postid') ? (int) attachment_url_to_postid($url) : 0;
+        $large = $id ? wp_get_attachment_image_url($id, 'large') : false;
+        return is_string($large) && $large !== '' ? $large : $url;
     }
 }

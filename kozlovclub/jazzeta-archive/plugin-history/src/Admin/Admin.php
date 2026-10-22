@@ -33,7 +33,17 @@ final class Admin
         add_action('admin_enqueue_scripts', [self::class, 'assets']);
         add_action('admin_post_es_action', Guard::wrap([Actions::class, 'handle']));
         add_action('admin_init', [self::class, 'settings']);
+        add_action('admin_init', [self::class, 'searchIndex']);
         add_filter('admin_body_class', [self::class, 'bodyClass']);
+    }
+
+    /** The desk's own pages bring a stale search index up to date (after a rollback window). */
+    public static function searchIndex(): void
+    {
+        $page = isset($_GET['page']) && is_string($_GET['page']) ? sanitize_key(wp_unslash($_GET['page'])) : '';
+        if ($page === 'es-newsroom' && current_user_can('es_edit')) {
+            \Kozlov\Gazeta\Data\Search::ensureFresh();
+        }
     }
 
     /**

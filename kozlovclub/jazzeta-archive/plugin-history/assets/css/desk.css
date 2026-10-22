@@ -464,6 +464,29 @@ details.es-card.es-details { margin-top: 0; }
 .es-media__preview { display: grid; place-items: center; aspect-ratio: 4 / 3; border-radius: 8px; border: 1px dashed var(--d-line-2); background: var(--d-soft); overflow: hidden; text-align: center; padding: 8px; font-size: 12px; color: var(--d-muted); }
 .es-media__preview img { width: 100%; height: 100%; object-fit: cover; }
 
+/* focus point of a photo (0.5.1) */
+.es-focus { margin: 4px 0 16px; padding: 12px; border: 1px solid var(--d-line); border-radius: var(--d-radius); background: var(--d-soft); }
+.es-focus[hidden] { display: none; }
+.es-focus__title { margin: 0 0 10px; font-size: 13px; color: var(--d-ink-2); }
+.es-focus__body { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 14px; }
+.es-focus__pad { position: relative; display: inline-block; flex: 0 1 auto; max-width: 100%; line-height: 0; cursor: crosshair; border-radius: 6px; }
+.es-focus__pad:focus-visible { outline: 3px solid var(--d-focus); outline-offset: 2px; }
+.es-focus__pad img { display: block; max-width: min(100%, 420px); max-height: 280px; width: auto; height: auto; border-radius: 6px; }
+.es-focus__dot {
+  position: absolute; left: 50%; top: 50%; width: 26px; height: 26px; margin: -13px 0 0 -13px; pointer-events: none;
+  border: 2px solid #fff; border-radius: 50%; box-shadow: 0 0 0 2px var(--d-accent), 0 1px 6px rgba(0, 0, 0, .45);
+}
+.es-focus__dot::after { content: ""; position: absolute; left: 50%; top: 50%; width: 4px; height: 4px; margin: -2px 0 0 -2px; border-radius: 50%; background: #fff; }
+.es-focus__previews { display: grid; gap: 10px; flex: 1 1 200px; max-width: 260px; }
+.es-focus__previews figure { margin: 0; }
+.es-focus__previews figcaption { margin-top: 4px; font-size: 12px; color: var(--d-muted); }
+.es-focus__frame { display: block; overflow: hidden; border-radius: 4px; background: var(--d-line); }
+.es-focus__frame--wide { aspect-ratio: 3 / 2; }
+.es-focus__frame--cinema { aspect-ratio: 16 / 9; }
+.es-focus__frame img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.es-focus__state { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 12px 0 0; font-size: 13px; }
+.es-focus > .es-hint { margin: 8px 0 0; font-size: 12.5px; }
+
 .es-status-box p { margin: 0 0 6px; }
 .es-problems { margin: 10px 0 0; padding: 0; list-style: none; display: grid; gap: 6px; }
 .es-problems li { padding: 7px 9px; border-radius: 7px; background: var(--d-bad-soft); color: #7a1a12; font-size: 12.5px; }

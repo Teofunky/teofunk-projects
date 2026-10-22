@@ -2,6 +2,7 @@
 
 namespace Kozlov\Gazeta\Front;
 
+use Kozlov\Gazeta\Data\Search;
 use Kozlov\Gazeta\Domain\Labels;
 use Kozlov\Gazeta\Domain\Text;
 use Kozlov\Gazeta\Domain\Validator;
@@ -37,7 +38,7 @@ final class Presenter
 
     /**
      * @param array $doc  {edition_date, number, articles[], social[]}
-     * @param array $opts {preview:bool, issue_id:int, version:int, cover?:array, briefs?:array, facts?:array} — the last three from Data\Meta
+     * @param array $opts {preview:bool, issue_id:int, version:int, cover?:array, briefs?:array, facts?:array, focus?:array} — the last four from Data\Meta
      */
     public static function issue(array $doc, array $opts): array
     {
@@ -236,7 +237,7 @@ final class Presenter
             'development_note' => Text::typograph((string) ($a['development_note'] ?? '')),
             'brief' => $brief,
             'facts' => $facts,
-            'image' => self::image($a['media_rights'] ?? [], (string) $a['headline'], $opts),
+            'image' => self::image($a['media_rights'] ?? [], (string) $a['headline'], $opts, $opts['focus'][(string) ($a['id'] ?? '')] ?? null),
         ];
     }
 
@@ -244,7 +245,7 @@ final class Presenter
      * A material's own photo: only with stated rights. Attachment ids give srcset and sizes;
      * a plain URL (older data) is still shown, inside a fixed-ratio frame.
      */
-    private static function image(array $media, string $headline, array $opts): ?array
+    private static function image(array $media, string $headline, array $opts, ?array $focus = null): ?array
     {
         $url = (string) ($media['image_url'] ?? '');
         if ($url === '' || ($media['status'] ?? 'none') === 'none') {
@@ -258,6 +259,7 @@ final class Presenter
             'url' => $url,
             'alt' => $headline,
             'credit' => Text::typograph((string) ($media['credit'] ?? '')),
+            'focus' => $focus,
         ];
     }
 
@@ -279,6 +281,7 @@ final class Presenter
                     'url' => (string) (wp_get_attachment_image_url((int) $chosen['attachment_id'], 'large') ?: ''),
                     'alt' => (string) ($chosen['alt'] ?? ''),
                     'credit' => Text::typograph((string) ($chosen['credit'] ?? '')),
+                    'focus' => isset($chosen['focus']) && is_array($chosen['focus']) ? $chosen['focus'] : null,
                 ];
             }
             if ($kind === 'plate' && isset(self::PLATE_NAMES[$chosen['plate'] ?? ''])) {
@@ -325,5 +328,53 @@ final class Presenter
             $groups[$month][] = $row;
         }
         return $groups;
+    }
+
+    /**
+     * CSS object-position for a photo in a cropping frame: the editor's focus point; without one,
+     * portrait photos keep their upper part (faces; 20 % chosen on a real concert portrait), everything else stays centred.
+     * @param array|null $image ['focus' => ?{x,y}, 'attachment_id' => int]
+     */
+    public static function objectPosition(?array $image): string
+    {
+        $focus = is_array($image['focus'] ?? null) ? $image['focus'] : null;
+        if ($focus && isset($focus['x'], $focus['y'])) {
+            return (int) $focus['x'] . '% ' . (int) $focus['y'] . '%';
+        }
+        $id = (int) ($image['attachment_id'] ?? 0);
+        if ($id > 0 && function_exists('wp_get_attachment_metadata')) {
+            $meta = wp_get_attachment_metadata($id);
+            if (is_array($meta) && (int) ($meta['width'] ?? 0) > 0 && (int) ($meta['height'] ?? 0) > (int) $meta['width'] * 1.05) {
+                return '50% 20%';
+            }
+        }
+        return '';
+    }
+
+    /** Search results for the template: highlighted headline and passage, date, number and rubric. */
+    public static function searchResults(array $rows, array $terms): array
+    {
+        $items = [];
+        foreach ($rows as $row) {
+            $a = (array) ($row['article'] ?? []);
+            $parts = [Search::plain((string) ($a['lead'] ?? ''))];
+            foreach ((array) ($a['body_paragraphs'] ?? []) as $paragraph) {
+                if (is_scalar($paragraph)) {
+                    $parts[] = Search::plain((string) $paragraph);
+                }
+            }
+            $rubric = array_filter([Labels::region((string) ($a['region'] ?? '')), Labels::category((string) ($a['category'] ?? ''))]);
+            $items[] = [
+                'url' => Router::article((string) $row['slug']),
+                'issue_url' => Router::issue((string) $row['edition_date']),
+                'headline_html' => Text::typographHtml(Search::highlight(Search::plain((string) ($a['headline'] ?? '')), $terms)),
+                'snippet_html' => Text::typographHtml(Search::snippet(implode(' ', $parts), $terms)),
+                'date' => (string) $row['edition_date'],
+                'human_date' => Labels::date((string) $row['edition_date']),
+                'number_label' => Labels::issueNumber($row['number']),
+                'rubric' => implode(' · ', $rubric),
+            ];
+        }
+        return $items;
     }
 }

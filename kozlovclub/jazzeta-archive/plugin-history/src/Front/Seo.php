@@ -67,6 +67,22 @@ final class Seo
         ];
     }
 
+    /** Search pages are useful to readers, not to search engines: never indexed, links still followed. */
+    public static function forSearch(array $model): array
+    {
+        $query = (string) ($model['search']['query'] ?? '');
+        $title = ($query !== '' ? 'Поиск: «' . $query . '»' : 'Поиск по газете') . ' — ' . $model['brand'];
+        return [
+            'title' => $title,
+            'description' => '',
+            'canonical' => '',
+            'robots' => $model['private'] ? 'noindex, nofollow, noarchive' : 'noindex, follow',
+            'og_type' => 'website',
+            'image' => '',
+            'schema' => [],
+        ];
+    }
+
     public static function forEmpty(array $model): array
     {
         return [

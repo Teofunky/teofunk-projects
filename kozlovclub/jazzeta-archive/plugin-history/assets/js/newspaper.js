@@ -1,5 +1,5 @@
 /**
- * «Ежедневный стандарт» — reader script (0.5.0).
+ * «Ежедневный стандарт» — reader script (0.5.1).
  * Everything here is an enhancement: without JavaScript the issue, the articles, the archive
  * and the sources are fully readable in the server's default mode.
  * Reader settings (mode, palette, text size, density) live in this browser only
@@ -17,6 +17,14 @@
     set: function (key, value) { try { window.localStorage.setItem(key, value); } catch (e) { /* private mode */ } },
     drop: function (key) { try { window.localStorage.removeItem(key); } catch (e) { /* private mode */ } }
   };
+
+  /* Older photos given by address carry no size: a portrait one keeps its upper part in the frame. */
+  $$('img[data-es-autofocus]').forEach(function (img) {
+    var fit = function () {
+      if (img.naturalWidth && img.naturalHeight > img.naturalWidth * 1.05) { img.style.objectPosition = '50% 20%'; }
+    };
+    if (img.complete) { fit(); } else { img.addEventListener('load', fit, { once: true }); }
+  });
 
   var DESIGNS = ['gazeta', 'modern', 'brief'];
   var SIZES = [90, 100, 112, 125, 140];

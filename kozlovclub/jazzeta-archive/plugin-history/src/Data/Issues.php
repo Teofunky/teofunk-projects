@@ -653,10 +653,58 @@ final class Issues
                     $brief = Meta::cleanBrief($meta['brief'] ?? []);
                     Meta::setDraft('article', $rowId, 'brief', $brief ?: null);
                     Meta::setDraft('article', $rowId, 'facts_visible', !empty($meta['facts_visible']) ? 1 : null);
+                    if (array_key_exists('focus', $meta)) {
+                        Meta::setDraft('article', $rowId, 'focus', Meta::cleanFocus($meta['focus']));
+                    }
                 }
             }
             Db::must($wpdb->update(Db::table('issues'), ['version' => $version + 1, 'human_touched' => 1], ['id' => $id]));
             self::log($id, $delete ? 'remove_article' : ($review ? 'review_article' : 'edit_article'));
+            Db::commit();
+            return $id;
+        } catch (\Throwable $e) {
+            return self::fail($e);
+        }
+    }
+
+    /**
+     * Saves only the focus point of a photo: an article's own photo ($target = its external id)
+     * or the issue's own cover photo ($target = 'cover'). Presentation only: the human review of
+     * the text stays valid; the working version changes, so readers see it after re-approval.
+     * @return int|\WP_Error
+     */
+    public static function saveFocus(int $id, int $version, string $target, ?array $focus)
+    {
+        if (!current_user_can('es_edit')) {
+            return Validator::error('Нет прав.', 403);
+        }
+        $wpdb = Db::wpdb();
+        try {
+            self::beginWrite();
+            $row = self::find($id, true);
+            self::assertVersion($row, $version);
+            $clean = Meta::cleanFocus($focus);
+            if ($target === 'cover') {
+                $cover = Meta::forIssue($id, 'draft')['cover'];
+                Meta::forget();
+                if (!$cover || $cover['kind'] !== 'photo') {
+                    throw new \RuntimeException('Кадр обложки задаётся только для своего фото обложки. Для фото главного материала — в его карточке.', 400);
+                }
+                unset($cover['focus']);
+                if ($clean) {
+                    $cover['focus'] = $clean;
+                }
+                Meta::setDraft('issue', $id, 'cover', $cover);
+            } else {
+                $rowId = (int) $wpdb->get_var($wpdb->prepare('SELECT id FROM ' . Db::table('articles') . ' WHERE issue_id=%d AND external_id=%s AND active=1', $id, $target));
+                if (!$rowId) {
+                    throw new \RuntimeException('Материал не найден в этом выпуске.', 404);
+                }
+                Meta::setDraft('article', $rowId, 'focus', $clean);
+            }
+            Db::must($wpdb->update(Db::table('issues'), ['version' => $version + 1, 'human_touched' => 1], ['id' => $id]));
+            Meta::forget();
+            self::log($id, 'edit_focus');
             Db::commit();
             return $id;
         } catch (\Throwable $e) {
@@ -768,6 +816,7 @@ final class Issues
             Meta::publish($id, $activeRows);
             self::log($id, 'publish');
             Db::invalidateCatalog();
+            Search::afterChange($id);
             Db::commit();
             return $id;
         } catch (\Throwable $e) {
@@ -797,6 +846,7 @@ final class Issues
             ], ['id' => $id]));
             self::log($id, 'withdraw');
             Db::invalidateCatalog();
+            Search::afterChange($id);
             Db::commit();
             return $id;
         } catch (\Throwable $e) {

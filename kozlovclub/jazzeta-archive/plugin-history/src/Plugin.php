@@ -45,6 +45,7 @@ final class Plugin
         add_filter('rest_post_dispatch', [self::class, 'restHeaders'], 99, 3);
         add_filter('robots_txt', [self::class, 'robotsTxt'], 10, 2);
         add_shortcode('kozlov_jazzeta', [self::class, 'shortcode']);
+        add_action('es_search_rebuild', [self::class, 'searchCron']); // = Data\Search::CRON_HOOK, without loading the class on every request
         add_action('plugins_loaded', [self::class, 'start']);
     }
 
@@ -79,6 +80,15 @@ final class Plugin
         } catch (\Throwable $e) {
             Guard::fault($e);
         }
+    }
+
+    /** WP-Cron: rebuilds a stale search index. Does nothing while the newspaper is stopped or not upgraded. */
+    public static function searchCron(): void
+    {
+        if (Mode::fault() || !Mode::ready()) {
+            return;
+        }
+        \Kozlov\Gazeta\Data\Search::ensureFresh();
     }
 
     /** Runs before WordPress queries posts: unreadable newspaper requests stop here. */

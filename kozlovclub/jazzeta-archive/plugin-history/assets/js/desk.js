@@ -198,6 +198,75 @@
     $$('[data-es-rubric-part]').forEach(function (el) { el.addEventListener('change', updateRubric); });
   }
 
+  /* -------------------------------------------------------- focus point of a photo (0.5.1) */
+  // Click the important part of the photo; the previews show the newspaper's frames at once.
+  function bindFocus(box) {
+    var pad = $('[data-es-focus-pad]', box);
+    var img = $('[data-es-focus-img]', box);
+    var dot = $('[data-es-focus-dot]', box);
+    var xIn = $('[data-es-focus-x]', box);
+    var yIn = $('[data-es-focus-y]', box);
+    var value = $('[data-es-focus-value]', box);
+    var previews = $$('[data-es-focus-preview]', box);
+    var clamp = function (n) { return Math.max(0, Math.min(100, Math.round(n))); };
+    var state = { x: clamp(parseInt(xIn.value, 10) || 50), y: clamp(parseInt(yIn.value, 10) || 50) };
+    var render = function (changed) {
+      dot.style.left = state.x + '%';
+      dot.style.top = state.y + '%';
+      previews.forEach(function (p) { p.style.objectPosition = state.x + '% ' + state.y + '%'; });
+      value.textContent = state.x === 50 && state.y === 50
+        ? 'Точка фокуса: по центру.'
+        : 'Точка фокуса: ' + state.x + ' % слева, ' + state.y + ' % сверху.';
+      if (changed) {
+        xIn.value = state.x; yIn.value = state.y;
+        xIn.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    };
+    var setSrc = function (url) {
+      box.hidden = !url;
+      if (!url) { return; }
+      img.src = url;
+      previews.forEach(function (p) { p.src = url; });
+      state = { x: 50, y: 50 };
+      render(true);
+    };
+    pad.addEventListener('click', function (e) {
+      var r = img.getBoundingClientRect();
+      if (!r.width || !r.height) { return; }
+      state.x = clamp((e.clientX - r.left) / r.width * 100);
+      state.y = clamp((e.clientY - r.top) / r.height * 100);
+      render(true);
+    });
+    pad.addEventListener('keydown', function (e) {
+      var step = e.shiftKey ? 1 : 5;
+      var moves = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] };
+      if (e.key === 'Home') { state = { x: 50, y: 50 }; }
+      else if (moves[e.key]) { state.x = clamp(state.x + moves[e.key][0]); state.y = clamp(state.y + moves[e.key][1]); }
+      else { return; }
+      e.preventDefault();
+      render(true);
+    });
+    var reset = $('[data-es-focus-reset]', box);
+    if (reset) { reset.addEventListener('click', function () { state = { x: 50, y: 50 }; render(true); pad.focus(); }); }
+    // «Сохранить кадр» saves the crop alone; with other unsaved edits the main «Сохранить» takes both.
+    var save = $('[data-es-focus-save]', box);
+    var note = $('[data-es-focus-note]', box);
+    var form = box.closest('form');
+    if (save && form) {
+      var other = function (e) {
+        if (box.contains(e.target)) { return; }
+        save.disabled = true;
+        if (note) { note.hidden = false; }
+      };
+      form.addEventListener('input', other);
+      form.addEventListener('change', other);
+    }
+    box.esSetSrc = setSrc;
+    box.hidden = !img.getAttribute('src');
+    render(false);
+  }
+  $$('[data-es-focus]').forEach(bindFocus);
+
   /* -------------------------------------------------------- media pickers */
   function picker(title, onPick) {
     if (!window.wp || !window.wp.media) { window.alert('Медиатека недоступна на этой странице.'); return; }
@@ -216,6 +285,8 @@
         preview.innerHTML = '';
         var el = document.createElement('img'); el.src = img.url; el.alt = '';
         preview.appendChild(el);
+        var focusBox = $('[data-es-focus]');
+        if (focusBox && focusBox.esSetSrc) { focusBox.esSetSrc((img.sizes && img.sizes.large && img.sizes.large.url) || img.url); }
         var credit = $('input[name="article[media_rights][credit]"]');
         if (credit && !credit.value && img.caption) { credit.value = img.caption.replace(/<[^>]+>/g, ''); }
       });
@@ -243,6 +314,8 @@
           var el = document.createElement('img');
           el.src = (img.sizes && img.sizes.medium && img.sizes.medium.url) || img.url; el.alt = '';
           thumb.appendChild(el);
+          var coverFocus = $('[data-es-focus]', cover);
+          if (coverFocus && coverFocus.esSetSrc) { coverFocus.esSetSrc((img.sizes && img.sizes.large && img.sizes.large.url) || img.url); }
           var alt = $('[data-es-cover-alt]', cover);
           if (alt && !alt.value && img.alt) { alt.value = img.alt; }
           var credit = $('[data-es-cover-credit]', cover);
