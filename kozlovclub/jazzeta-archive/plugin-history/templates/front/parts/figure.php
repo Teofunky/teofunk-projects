@@ -50,7 +50,11 @@ if ($kind === 'photo' && !empty($image['attachment_id'])) {
         <?php endif; ?>
     </span>
     <?php if ($link !== '') : ?></a><?php endif; ?>
-    <?php if (!empty($image['credit'])) : ?>
-        <figcaption class="es-figure__credit"><?php echo esc_html($kind === 'plate' ? 'Иллюстрация редакции · ' . (Presenter::PLATE_NAMES[$image['plate']] ?? '') : $image['credit']); ?></figcaption>
+    <?php if ($kind === 'plate') : ?>
+        <figcaption class="es-figure__credit"><?php echo esc_html('Иллюстрация редакции · ' . (Presenter::PLATE_NAMES[$image['plate']] ?? '')); ?></figcaption>
+    <?php elseif (!empty($image['credit_html'])) : ?>
+        <figcaption class="es-figure__credit"><?php echo $image['credit_html']; // Presenter::creditHtml(): escaped text and esc_url() links. ?></figcaption>
+    <?php elseif (!empty($image['credit'])) : ?>
+        <figcaption class="es-figure__credit"><?php echo esc_html($image['credit']); ?></figcaption>
     <?php endif; ?>
 </figure>

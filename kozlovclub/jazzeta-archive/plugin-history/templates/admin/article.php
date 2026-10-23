@@ -376,6 +376,17 @@ $quoteRow = static function ($index, array $q) use ($sourceIds) {
                 <?php elseif (!$v['is_new']) : ?>
                     <p class="es-muted">Структурных замечаний к сохранённой версии нет.</p>
                 <?php endif; ?>
+                <?php if (!empty($v['style_hints'])) : ?>
+                    <details class="es-hints" open>
+                        <summary><?php echo esc_html('Текст и подача: ' . Labels::count(count($v['style_hints']), 'подсказка', 'подсказки', 'подсказок')); ?></summary>
+                        <p class="es-hint">Публикации не мешают. Это советы, как сделать текст газетным.</p>
+                        <ul class="es-hints__list">
+                            <?php foreach ($v['style_hints'] as $hint) : ?>
+                                <li><?php echo esc_html($hint['advice']); ?><?php if ($hint['quote'] !== '') : ?><q class="es-hints__quote"><?php echo esc_html($hint['quote']); ?></q><?php endif; ?></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </details>
+                <?php endif; ?>
             </section>
 
             <section class="es-card es-props">

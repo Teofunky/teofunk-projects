@@ -68,7 +68,6 @@ $stories = $issue['stories'];
                             </li>
                         <?php endforeach; ?>
                     </ol>
-                    <p class="es-toc__foot"><?php echo esc_html($issue['count_label'] . ' · ≈ ' . $issue['minutes'] . ' мин чтения'); ?></p>
                 </aside>
             <?php endif; ?>
         <?php endforeach; ?>

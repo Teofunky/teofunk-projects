@@ -13,6 +13,7 @@ use Kozlov\Gazeta\Domain\Validator;
 use Kozlov\Gazeta\Front\View;
 use Kozlov\Gazeta\Http\Router;
 use Kozlov\Gazeta\Domain\Topics;
+use Kozlov\Gazeta\Domain\StyleHints;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -87,6 +88,8 @@ final class ArticleScreen
             // 0.5.5: topics for search — the automatic ones of the saved text and the editor's own choice.
             'tags_auto' => $isNew ? [] : Topics::auto($article),
             'tags_manual' => $isNew ? null : ($meta['tags'][$article['id']] ?? null),
+            // 0.5.6: advice on the writing; never blocks publication.
+            'style_hints' => $isNew ? [] : StyleHints::check($article),
         ]);
         Ui::close();
     }

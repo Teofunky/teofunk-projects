@@ -28,17 +28,11 @@ $hasFacts = $a['facts']['confirmed'] || $a['facts']['single'];
     <header class="es-article__head">
         <p class="es-article__kicker">
             <span><?php echo esc_html($a['rubric']); ?></span>
-            <?php if (!empty($a['is_lead'])) : ?><span class="es-article__flag">Главное в номере</span><?php endif; ?>
         </p>
         <h1 class="es-article__title" id="es-article-title"><?php echo esc_html($a['headline']); ?></h1>
         <p class="es-article__dek"><?php echo esc_html($a['lead']); ?></p>
         <p class="es-article__byline">
-            <span>Редакция «<?php echo esc_html($v['brand']); ?>»</span>
             <span>Выпуск <time datetime="<?php echo esc_attr($issue['date']); ?>"><?php echo esc_html($issue['human_date']); ?></time></span>
-            <span><?php echo esc_html($a['minutes'] . ' мин чтения'); ?></span>
-            <?php if ($a['event_date_label']) : ?>
-                <span>Событие: <time datetime="<?php echo esc_attr((string) $a['event_date']); ?>"><?php echo esc_html($a['event_date_label']); ?></time></span>
-            <?php endif; ?>
         </p>
     </header>
 
@@ -91,27 +85,22 @@ $hasFacts = $a['facts']['confirmed'] || $a['facts']['single'];
                 </aside>
             <?php endif; ?>
 
-            <section class="es-sources" id="es-sources" aria-labelledby="es-sources-title">
-                <h2 class="es-sources__title" id="es-sources-title">Источники</h2>
-                <p class="es-sources__check"><?php View::render('front/parts/badge', ['levels' => $a['levels'], 'all' => true]); ?></p>
-                <ol class="es-sources__list">
-                    <?php foreach ($a['sources'] as $source) : ?>
-                        <li>
-                            <span class="es-sources__pub"><?php echo esc_html($source['publisher']); ?></span>
-                            <a href="<?php echo esc_url($source['url']); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html($source['title']); ?><span class="es-sr"> (откроется в новой вкладке)</span></a>
-                            <span class="es-sources__meta"><?php echo esc_html($source['type_label'] . ($source['date'] ? ' · ' . $source['date'] : '')); ?></span>
-                        </li>
-                    <?php endforeach; ?>
-                </ol>
-            </section>
+            <?php if ($a['sources']) : ?>
+                <?php // 0.5.6: one line per source — who published it, what, when. No evidence badges or source types. ?>
+                <section class="es-sources" id="es-sources" aria-labelledby="es-sources-title">
+                    <h2 class="es-sources__title" id="es-sources-title">Источники</h2>
+                    <ol class="es-sources__list">
+                        <?php foreach ($a['sources'] as $source) : ?>
+                            <li>
+                                <span class="es-sources__pub"><?php echo esc_html($source['publisher']); ?></span><span class="es-sources__dash" aria-hidden="true"> — </span><a href="<?php echo esc_url($source['url']); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html($source['title'] !== '' ? $source['title'] : $source['host']); ?><span class="es-sr"> (откроется в новой вкладке)</span></a><?php if ($source['date']) : ?><span class="es-sources__date">, <time datetime="<?php echo esc_attr($source['datetime']); ?>"><?php echo esc_html($source['date']); ?></time></span><?php endif; ?>
+                            </li>
+                        <?php endforeach; ?>
+                    </ol>
+                </section>
+            <?php endif; ?>
         </div>
 
         <aside class="es-rail" aria-label="О материале">
-            <div class="es-rail__block">
-                <span class="es-rail__label">Проверка</span>
-                <?php View::render('front/parts/badge', ['levels' => $a['levels']]); ?>
-                <a class="es-rail__link" href="#es-sources"><?php echo esc_html(Labels::count($a['source_count'], 'источник', 'источника', 'источников')); ?></a>
-            </div>
             <div class="es-rail__block es-rail__block--topics">
                 <span class="es-rail__label">Темы</span>
                 <p class="es-topics-line">

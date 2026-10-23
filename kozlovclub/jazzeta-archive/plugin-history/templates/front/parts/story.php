@@ -38,28 +38,30 @@ foreach ($story['grid'] ?? [] as $hint) {
         <p class="es-story__kicker">
             <span class="es-story__num" aria-hidden="true"><?php echo esc_html($story['number_label']); ?></span>
             <span class="es-story__rubric"><?php echo esc_html($story['rubric']); ?></span>
-            <?php if ($lead) : ?><span class="es-story__flag">Главное</span><?php endif; ?>
         </p>
         <h2 class="es-story__title" id="<?php echo esc_attr($story['anchor']); ?>-title"><a href="<?php echo esc_url($story['url']); ?>"><?php echo esc_html($story['headline']); ?></a></h2>
         <p class="es-story__dek"><?php echo esc_html($story['lead']); ?></p>
         <?php if ($why) : ?>
             <p class="es-story__why"><strong><?php echo esc_html($why['title']); ?>.</strong> <?php echo esc_html($why['text']); ?></p>
         <?php endif; ?>
-        <p class="es-story__meta">
-            <?php View::render('front/parts/badge', ['levels' => $story['levels']]); ?>
-            <?php if ($story['source']) : ?>
-                <a class="es-story__source" href="<?php echo esc_url($story['source']['url']); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html($story['source']['publisher']); ?><span class="es-sr"> — первоисточник, откроется в новой вкладке</span><span aria-hidden="true"> ↗</span></a>
-                <?php if ($story['source_count'] > 1) : ?><span class="es-story__more-src">+<?php echo (int) ($story['source_count'] - 1); ?></span><?php endif; ?>
-            <?php endif; ?>
-            <span class="es-story__time"><?php echo esc_html($story['minutes'] . ' мин'); ?></span>
-            <?php if ($story['event_date_label']) : ?>
-                <span class="es-story__event"><?php echo esc_html('Событие: ' . $story['event_date_label']); ?></span>
-            <?php endif; ?>
-            <?php if ($story['disclosure']) : ?><span class="es-story__disclosure">Связь с издателем</span><?php endif; ?>
-            <?php if ($story['tag_links']) : ?>
-                <span class="es-story__tags"><span class="es-sr">Темы: </span><?php foreach ($story['tag_links'] as $tag) : ?><a class="es-story__tag" href="<?php echo esc_url($tag['url']); ?>"><?php echo esc_html($tag['label']); ?></a><?php endforeach; ?></span>
-            <?php endif; ?>
-        </p>
+        <?php
+        // 0.5.6: one quiet line — where the news comes from and what it is about. Evidence levels,
+        // reading time and the event date stay in the desk and in the text.
+        $meta = [];
+        if ($story['source']) {
+            $meta[] = '<a class="es-story__source" href="' . esc_url($story['source']['url']) . '" target="_blank" rel="noopener noreferrer">'
+                . esc_html($story['source']['publisher']) . '<span class="es-sr"> — первоисточник, откроется в новой вкладке</span><span class="es-story__ext" aria-hidden="true">↗</span></a>';
+        }
+        foreach ($story['tag_links'] as $tag) {
+            $meta[] = '<a class="es-story__tag" href="' . esc_url($tag['url']) . '"><span class="es-sr">Тема: </span>' . esc_html($tag['label']) . '</a>';
+        }
+        if ($story['disclosure']) {
+            $meta[] = '<span class="es-story__disclosure">Связь с издателем</span>';
+        }
+        ?>
+        <?php if ($meta) : ?>
+            <p class="es-story__meta"><?php echo implode(' <span class="es-story__sep" aria-hidden="true">·</span> ', $meta); // Each item escaped above. ?></p>
+        <?php endif; ?>
         <?php if ($lead && !$picture && $story['opening_html'] !== '') : ?>
             <div class="es-story__opening">
                 <?php echo $story['opening_html']; // Built from validated, kses-filtered paragraphs. ?>

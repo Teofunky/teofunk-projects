@@ -33,7 +33,6 @@ $nameTag = $isFront ? 'h1' : 'p';
         <?php if ($issue) : ?>
             <p class="es-mast__edition">
                 <span class="es-mast__when"><time datetime="<?php echo esc_attr($issue['date']); ?>"><?php echo esc_html($issue['long_date']); ?></time><?php if ($issue['number']) : ?><span class="es-mast__no"><?php echo esc_html($issue['number_label']); ?></span><?php endif; ?></span>
-                <?php if ($isFront) : ?><span class="es-mast__size"><?php echo esc_html($issue['count_label'] . ' · ≈ ' . $issue['minutes'] . ' мин чтения'); ?></span><?php endif; ?>
             </p>
         <?php else : ?>
             <p class="es-mast__edition"><span>Газета Клуба Алексея Козлова</span></p>

@@ -226,8 +226,9 @@ final class Search
             foreach ((array) ($briefs[$issueId][(string) $row['external_id']] ?? []) as $text) {
                 $parts[] = (string) $text;
             }
-            foreach ((array) ($article['sources'] ?? []) as $source) {
-                $parts[] = (string) ($source['publisher'] ?? '');
+            // 0.5.6: news sources only; the picture's page and licence are not what the material is about.
+            foreach (\Kozlov\Gazeta\Domain\Credit::split((array) ($article['sources'] ?? []))[0] as $source) {
+                $parts[] = is_array($source) ? (string) ($source['publisher'] ?? '') : '';
             }
             $out[] = [
                 'article_id' => (int) $row['id'],

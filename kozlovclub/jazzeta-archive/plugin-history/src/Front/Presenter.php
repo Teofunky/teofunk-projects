@@ -3,6 +3,7 @@
 namespace Kozlov\Gazeta\Front;
 
 use Kozlov\Gazeta\Data\Search;
+use Kozlov\Gazeta\Domain\Credit;
 use Kozlov\Gazeta\Domain\Crossword;
 use Kozlov\Gazeta\Domain\Labels;
 use Kozlov\Gazeta\Domain\Text;
@@ -200,6 +201,8 @@ final class Presenter
         $openingHtml = $opening && $openingWords <= 140 ? Text::typographHtml(Validator::renderBody($opening)) : '';
         $hasMore = count($opening) < count((array) ($a['body_paragraphs'] ?? []));
         $levels = array_values(array_intersect(array_keys(Labels::LEVELS), (array) ($a['verification'] ?? [])));
+        // 0.5.6: the picture's page and licence are credited under the picture, not listed as news sources.
+        [$newsSources, $pictureSources] = Credit::split((array) ($a['sources'] ?? []));
         $sources = array_map(static function ($s) {
             return [
                 'title' => (string) $s['title'],
@@ -211,7 +214,7 @@ final class Presenter
                 'type_label' => Labels::SOURCE_TYPES[$s['type'] ?? 'other'] ?? 'Источник',
                 'host' => preg_replace('/^www\./', '', (string) wp_parse_url((string) $s['url'], PHP_URL_HOST)),
             ];
-        }, $a['sources'] ?? []);
+        }, $newsSources);
         $brief = [];
         foreach (self::BRIEF_BLOCKS as $key => $title) {
             $text = trim((string) ($opts['briefs'][$id][$key] ?? ''));
@@ -282,7 +285,7 @@ final class Presenter
             'development_note' => Text::typograph((string) ($a['development_note'] ?? '')),
             'brief' => $brief,
             'facts' => $facts,
-            'image' => self::image($a['media_rights'] ?? [], (string) $a['headline'], $opts, $opts['focus'][(string) ($a['id'] ?? '')] ?? null),
+            'image' => self::image($a['media_rights'] ?? [], (string) $a['headline'], $opts, $opts['focus'][(string) ($a['id'] ?? '')] ?? null, $pictureSources),
         ];
     }
 
@@ -290,7 +293,7 @@ final class Presenter
      * A material's own photo: only with stated rights. Attachment ids give srcset and sizes;
      * a plain URL (older data) is still shown, inside a fixed-ratio frame.
      */
-    private static function image(array $media, string $headline, array $opts, ?array $focus = null): ?array
+    private static function image(array $media, string $headline, array $opts, ?array $focus = null, array $pictureSources = []): ?array
     {
         $url = (string) ($media['image_url'] ?? '');
         if ($url === '' || ($media['status'] ?? 'none') === 'none') {
@@ -303,7 +306,8 @@ final class Presenter
             'attachment_id' => function_exists('attachment_url_to_postid') ? (int) attachment_url_to_postid($url) : 0,
             'url' => $url,
             'alt' => $headline,
-            'credit' => Text::typograph((string) ($media['credit'] ?? '')),
+            'credit' => Text::typograph(Credit::clean((string) ($media['credit'] ?? ''))),
+            'credit_html' => self::creditHtml(Credit::segments((string) ($media['credit'] ?? ''), $pictureSources)),
             'focus' => $focus,
         ];
     }
@@ -325,7 +329,8 @@ final class Presenter
                     'attachment_id' => (int) $chosen['attachment_id'],
                     'url' => (string) (wp_get_attachment_image_url((int) $chosen['attachment_id'], 'large') ?: ''),
                     'alt' => (string) ($chosen['alt'] ?? ''),
-                    'credit' => Text::typograph((string) ($chosen['credit'] ?? '')),
+                    'credit' => Text::typograph(Credit::clean((string) ($chosen['credit'] ?? ''))),
+                    'credit_html' => self::creditHtml(Credit::segments((string) ($chosen['credit'] ?? ''), [])),
                     'focus' => isset($chosen['focus']) && is_array($chosen['focus']) ? $chosen['focus'] : null,
                 ];
             }
@@ -342,6 +347,23 @@ final class Presenter
             return ['kind' => 'photo'] + $lead['image'];
         }
         return null;
+    }
+
+    /**
+     * Safe HTML of a photo credit (0.5.6): escaped text, links to the picture's page and licence.
+     * @param array<int,array{text:string,url:string}> $segments from Domain\Credit::segments()
+     */
+    public static function creditHtml(array $segments): string
+    {
+        $html = '';
+        foreach ($segments as $segment) {
+            $text = esc_html((string) $segment['text']);
+            $url = (string) $segment['url'];
+            $html .= $url !== '' && preg_match('~^https?://~i', $url)
+                ? '<a href="' . esc_url($url) . '" target="_blank" rel="noopener noreferrer' . (strpos($url, 'creativecommons.org/') !== false ? ' license' : '') . '">' . $text . '</a>'
+                : $text;
+        }
+        return Text::typographHtml($html);
     }
 
     /** The box is already titled «Связь с издателем»; drop the same words at the start of the text. */
