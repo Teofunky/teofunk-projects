@@ -223,8 +223,13 @@ class KEP_Front {
 			$d['lead_rich'] = true;
 		}
 		$d['notices'] = $notes;
+		$keep         = KEP_Data::keep_text( $post_id );
 		foreach ( $d['paras'] as $i => $p ) {
 			if ( 'notice' !== $p['kind'] ) {
+				continue;
+			}
+			if ( $keep ) {
+				$d['paras'][ $i ]['kind'] = 'text'; // галочка «Не забирать сноски из текста»: абзац остаётся на месте
 				continue;
 			}
 			$html = KEP_Parser::notice_html( $p['html'] );

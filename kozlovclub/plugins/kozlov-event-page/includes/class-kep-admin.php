@@ -51,6 +51,7 @@ class KEP_Admin {
 	public static function texts_box( $post ) {
 		$lead  = (string) get_post_meta( $post->ID, KEP_META_LEAD, true );
 		$notes = (string) get_post_meta( $post->ID, KEP_META_NOTES, true );
+		$keep  = KEP_Data::keep_text( $post->ID );
 		?>
 		<div id="kep-texts" class="kep-t" data-post="<?php echo esc_attr( $post->ID ); ?>" data-nonce="<?php echo esc_attr( wp_create_nonce( 'kep_box_' . $post->ID ) ); ?>">
 			<div class="kep-t-grid">
@@ -65,6 +66,8 @@ class KEP_Admin {
 					<p class="kep-t-h">Показываются в рамке «Важно знать» под кнопкой покупки. Адрес сцены на Мясницкой писать не нужно: плагин добавит его сам по сцене концерта. Сноски, которые уже написаны в тексте анонса («Внимание!…», депозит, бронь, вход), плагин находит сам. Лучше перенести их сюда: текст анонса останется только о концерте.</p>
 				</div>
 			</div>
+			<input type="hidden" name="kep_keep_sent" value="1">
+			<label class="kep-t-keep"><input type="checkbox" name="kep_keep" value="1" data-kep-toggle="keep"<?php checked( $keep ); ?>> <b>Не забирать сноски из текста анонса</b> <span>Всё из «Текстового поля 1» остаётся на своём месте. Ставьте, если плагин унёс в «Важно знать» абзац, который нужен в тексте. Поле «Важно знать» выше работает как обычно.</span></label>
 			<p class="kep-t-foot">Можно <b>жирный</b> и ссылки. Оба поля видны и на старой странице, вверху описания, если такого текста там ещё нет. <span class="kep-a-saved" data-kep-saved aria-live="polite">Сохраняется сразу.</span></p>
 		</div>
 		<?php
@@ -202,6 +205,9 @@ class KEP_Admin {
 		if ( isset( $_POST['kep_notes'] ) ) {
 			$changed = self::set_text( $post_id, KEP_META_NOTES, wp_unslash( $_POST['kep_notes'] ), 1200 ) || $changed; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
 		}
+		if ( isset( $_POST['kep_keep_sent'] ) ) {
+			$changed = self::set_keep( $post_id, ! empty( $_POST['kep_keep'] ) ) || $changed;
+		}
 		if ( $changed ) {
 			KEP_Data::flush_post( $post_id );
 		}
@@ -237,6 +243,22 @@ class KEP_Admin {
 			delete_post_meta( $post_id, $key );
 		} else {
 			update_post_meta( $post_id, $key, wp_slash( $value ) );
+		}
+		return true;
+	}
+
+	/**
+	 * Галочка «Не забирать сноски из текста анонса».
+	 */
+	private static function set_keep( $post_id, $on ) {
+		$old = KEP_Data::keep_text( $post_id );
+		if ( $old === $on ) {
+			return false;
+		}
+		if ( $on ) {
+			update_post_meta( $post_id, KEP_META_KEEP, '1' );
+		} else {
+			delete_post_meta( $post_id, KEP_META_KEEP );
 		}
 		return true;
 	}
@@ -281,6 +303,8 @@ class KEP_Admin {
 			self::set_text( $post_id, KEP_META_LEAD, $value, 700 );
 		} elseif ( 'notes' === $field ) {
 			self::set_text( $post_id, KEP_META_NOTES, $value, 1200 );
+		} elseif ( 'keep' === $field ) {
+			self::set_keep( $post_id, '1' === (string) $value );
 		} else {
 			wp_send_json_error( array( 'message' => 'неизвестное поле' ), 400 );
 		}

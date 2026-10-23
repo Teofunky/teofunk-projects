@@ -80,6 +80,16 @@ class KEP_Data {
 	}
 
 	/**
+	 * Галочка «Не забирать сноски из текста анонса».
+	 *
+	 * @param int $post_id ID записи.
+	 * @return bool
+	 */
+	public static function keep_text( $post_id ) {
+		return '1' === (string) get_post_meta( $post_id, KEP_META_KEEP, true );
+	}
+
+	/**
 	 * «Важно знать»: сноски по одной на строку (депозит, бронь, вход, адрес).
 	 *
 	 * @param int $post_id ID записи.

@@ -28,7 +28,8 @@
 	var DONE = {
 		program: 'Название программы сохранено.',
 		lead: 'Текст сверху сохранён.',
-		notes: 'Сноски сохранены.'
+		notes: 'Сноски сохранены.',
+		keep: 'Сохранено.'
 	};
 
 	// Те же правила, что в PHP (KEP_Data::check_size).
@@ -99,7 +100,7 @@
 	}
 
 	function post(field, value) {
-		var out = (field === 'lead' || field === 'notes') ? textSaved : saved;
+		var out = (field === 'lead' || field === 'notes' || field === 'keep') ? textSaved : saved;
 		var fd = new FormData();
 		fd.append('action', 'kep_save');
 		fd.append('post_id', postId);
@@ -143,6 +144,13 @@
 				t = setTimeout(function () { send(field, el.value, seq); }, 900);
 			});
 		});
+		var keepEl = texts.querySelector('[data-kep-toggle="keep"]');
+		if (keepEl) {
+			keepEl.addEventListener('change', function () {
+				var seq = seqs.keep = (seqs.keep || 0) + 1;
+				send('keep', keepEl.checked ? '1' : '0', seq);
+			});
+		}
 	}
 
 	if (!box) {

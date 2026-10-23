@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Kozlov Event Page
  * Description:       Новая страница концерта. Включается для анонса, когда редактор загрузил заглавное фото. Тема, данные анонсов и афиша не меняются: плагин только перестраивает уже готовую страницу.
- * Version:           1.0.10
+ * Version:           1.0.11
  * Requires at least: 6.0
  * Requires PHP:      7.2
  * Author:            Kozlov Club
@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'KEP_VERSION', '1.0.10' );
+define( 'KEP_VERSION', '1.0.11' );
 define( 'KEP_FILE', __FILE__ );
 define( 'KEP_DIR', plugin_dir_path( __FILE__ ) );
 define( 'KEP_URL', plugin_dir_url( __FILE__ ) );
@@ -22,6 +22,7 @@ define( 'KEP_META_HERO', '_kep_hero_id' );
 define( 'KEP_META_PROGRAM', '_kep_program' );
 define( 'KEP_META_LEAD', '_kep_lead' );
 define( 'KEP_META_NOTES', '_kep_notes' );
+define( 'KEP_META_KEEP', '_kep_keep_text' );
 
 /**
  * Нужные расширения PHP. Без них плагин ничего не делает и показывает уведомление.

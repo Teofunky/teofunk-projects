@@ -308,11 +308,12 @@ class KEP_Parser {
 		}
 
 		// Короткое описание: первый обычный абзац до блоков о музыкантах.
+		// Абзац с двоеточием в конце не годится: без следующего за ним текста он обрывается.
 		$d['lead']      = '';
 		$d['lead_html'] = '';
 		foreach ( $d['paras'] as $i => $p ) {
 			$len = mb_strlen( $p['text'], 'UTF-8' );
-			if ( 'text' === $p['kind'] && 'p' === $p['tag'] && $p['before_artist'] && $len >= 30 && $len <= 420 ) {
+			if ( 'text' === $p['kind'] && 'p' === $p['tag'] && $p['before_artist'] && $len >= 30 && $len <= 420 && ! self::ends_colon( $p['text'] ) ) {
 				$d['lead']                  = $p['text'];
 				$d['lead_html']             = $p['html'];
 				$d['paras'][ $i ]['kind'] = 'lead';
@@ -441,7 +442,8 @@ class KEP_Parser {
 			return 'note';
 		}
 		// Практические сноски (адрес, вход, депозит, бронь): на новой странице они у кнопки покупки, а не первым абзацем.
-		if ( mb_strlen( $text, 'UTF-8' ) <= 320 && (
+		// Абзац с двоеточием в конце вводит то, что идёт следом («…один из двух сетов:»), поэтому остаётся в тексте.
+		if ( mb_strlen( $text, 'UTF-8' ) <= 320 && ! self::ends_colon( $text ) && (
 			preg_match( '/^\s*(Внимание|Обратите внимание|Важно)\s*[!:.]/iu', $text )
 			|| preg_match( '/(депозит|бронирован|забронир|вход через|находится по адресу|дресс-код)/iu', $text )
 		) ) {
@@ -451,6 +453,16 @@ class KEP_Parser {
 			return 'lineup';
 		}
 		return 'text';
+	}
+
+	/**
+	 * Абзац заканчивается двоеточием: он подводит к следующему тексту (списку, сетам, составу).
+	 *
+	 * @param string $text Текст.
+	 * @return bool
+	 */
+	public static function ends_colon( $text ) {
+		return (bool) preg_match( '/:[\s\x{00A0}]*$/u', (string) $text );
 	}
 
 	/**
