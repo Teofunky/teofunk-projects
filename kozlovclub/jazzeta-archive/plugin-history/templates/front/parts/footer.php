@@ -9,7 +9,7 @@ if (!defined('ABSPATH')) {
 ?>
 <footer class="es-colophon">
     <div class="es-colophon__brand">
-        <p class="es-colophon__name"><?php echo esc_html($v['brand']); ?>.</p>
+        <p class="es-colophon__name"><?php echo esc_html($v['brand']); ?></p>
         <p class="es-colophon__by">Газета Клуба Алексея Козлова</p>
     </div>
     <div class="es-colophon__principles">

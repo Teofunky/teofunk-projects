@@ -71,7 +71,7 @@ final class AppearanceScreen
         [$over, $main] = Appearance::nameParts();
         echo '<div class="es-mast-preview" data-es-mast-preview style="--p-bg:' . esc_attr((string) $s['background']) . ';--p-paper:' . esc_attr((string) $s['paper']) . ';--p-ink:' . esc_attr((string) $s['ink']) . ';--p-accent:' . esc_attr((string) $s['accent']) . '">';
         echo '<div class="es-mast-preview__sheet"><span class="es-mast-preview__sub" data-es-p-subtitle>' . esc_html((string) $s['subtitle']) . '</span>';
-        echo '<span class="es-mast-preview__over" data-es-p-over>' . esc_html($over) . '</span><span class="es-mast-preview__main"><span data-es-p-main>' . esc_html($main) . '</span><i>.</i></span>';
+        echo '<span class="es-mast-preview__over" data-es-p-over>' . esc_html($over) . '</span><span class="es-mast-preview__main"><span data-es-p-main>' . esc_html($main) . '</span></span>';
         echo '<span class="es-mast-preview__motto" data-es-p-motto>' . esc_html((string) $s['motto']) . '</span></div></div>';
         echo '<div class="es-actions"><button type="submit" class="es-btn es-btn--primary">Сохранить оформление</button></div>';
         echo '<p class="es-savehint" data-es-dirty-label>Изменений нет</p></section></aside>';

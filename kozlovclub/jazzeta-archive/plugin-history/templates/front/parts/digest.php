@@ -51,7 +51,7 @@ $payload = [
             <?php foreach ($issue['digest'] as $index => $item) : ?>
                 <li class="es-social">
                     <div class="es-social__card" aria-hidden="true">
-                        <span class="es-social__mast"><?php echo esc_html($over); ?><br><?php echo esc_html($main); ?>.</span>
+                        <span class="es-social__mast"><?php echo esc_html($over); ?><br><?php echo esc_html($main); ?></span>
                         <span class="es-social__rubric"><?php echo esc_html(str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT) . ' / ' . $item['rubric']); ?></span>
                         <?php $len = function_exists('mb_strlen') ? mb_strlen($item['instagram']) : strlen($item['instagram']); ?>
                         <span class="es-social__text<?php echo $len > 110 ? ' es-social__text--l' : ($len > 80 ? ' es-social__text--m' : ''); ?>"><?php echo esc_html($item['instagram']); ?></span>

@@ -59,7 +59,6 @@ body.es-desk-screen #wpbody-content { padding-bottom: 80px; }
 }
 .es-desk-head__brand { display: inline-flex; align-items: baseline; gap: 12px; color: var(--d-ink) !important; text-decoration: none !important; }
 .es-desk-head__mark { font: 700 20px/1 var(--d-serif); letter-spacing: -.01em; }
-.es-desk-head__mark .es-dot { color: var(--d-accent); }
 .es-desk-head__section { font: 600 11px/1 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; letter-spacing: .14em; text-transform: uppercase; color: var(--d-muted); }
 .es-desk-head__meta { display: inline-flex; align-items: center; gap: 14px; }
 .es-desk-head__link { font-weight: 600; }
@@ -603,7 +602,6 @@ details.es-card.es-details { margin-top: 0; }
 .es-mast-preview__sub { font: 600 8px/1.3 sans-serif; letter-spacing: .26em; text-transform: uppercase; opacity: .7; }
 .es-mast-preview__over { font-weight: 600; font-size: 12px; letter-spacing: .42em; text-transform: uppercase; }
 .es-mast-preview__main { font-weight: 700; font-size: 34px; line-height: .9; text-transform: uppercase; }
-.es-mast-preview__main i { color: var(--p-accent); font-style: normal; }
 .es-mast-preview__motto { font-style: italic; font-size: 12px; opacity: .8; }
 .es-mast-preview.is-georgia .es-mast-preview__sheet { font-family: Georgia, serif; }
 .es-mast-preview.is-times .es-mast-preview__sheet { font-family: 'Times New Roman', serif; }

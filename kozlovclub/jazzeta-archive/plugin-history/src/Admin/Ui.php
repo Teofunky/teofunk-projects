@@ -5,6 +5,7 @@ namespace Kozlov\Gazeta\Admin;
 use Kozlov\Gazeta\Domain\Labels;
 use Kozlov\Gazeta\Http\Router;
 use Kozlov\Gazeta\Runtime\Mode;
+use Kozlov\Gazeta\Settings\Appearance;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -50,7 +51,7 @@ final class Ui
         $mode = Mode::current();
         echo '<div class="wrap es-desk' . (!empty($opts['class']) ? ' ' . esc_attr($opts['class']) : '') . '">';
         echo '<header class="es-desk-head">';
-        echo '<a class="es-desk-head__brand" href="' . esc_url(Admin::url()) . '"><span class="es-desk-head__mark">Ежедневный стандарт<span class="es-dot">.</span></span><span class="es-desk-head__section">Редакция</span></a>';
+        echo '<a class="es-desk-head__brand" href="' . esc_url(Admin::url()) . '"><span class="es-desk-head__mark">' . esc_html(Appearance::name()) . '</span><span class="es-desk-head__section">Редакция</span></a>';
         echo '<div class="es-desk-head__meta">';
         echo '<a class="es-mode es-mode--' . esc_attr($mode) . '" href="' . esc_url(admin_url('admin.php?page=es-runtime')) . '" title="Режим газеты"><span class="es-mode__dot" aria-hidden="true"></span>' . esc_html(Mode::LABELS[$mode]) . '</a>';
         echo '<a class="es-desk-head__link" href="' . esc_url(Router::home()) . '" target="_blank" rel="noopener">Газета ↗</a>';

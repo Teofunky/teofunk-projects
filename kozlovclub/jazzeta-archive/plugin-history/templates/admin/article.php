@@ -279,7 +279,8 @@ $quoteRow = static function ($index, array $q) use ($sourceIds) {
                         </div>
                     </div>
                     <div class="es-minicard" aria-hidden="true">
-                        <span class="es-minicard__mast">Ежедневный<br>стандарт.</span>
+                        <?php [$cardOver, $cardMain] = \Kozlov\Gazeta\Settings\Appearance::nameParts(); ?>
+                        <span class="es-minicard__mast"><?php echo $cardOver !== '' ? esc_html($cardOver) . '<br>' : ''; ?><?php echo esc_html($cardMain); ?></span>
                         <span class="es-minicard__rubric" data-es-card-rubric><?php echo esc_html(Labels::region($a['region']) . ' · ' . Labels::category($a['category'])); ?></span>
                         <span class="es-minicard__text" data-es-card-preview><?php echo esc_html($v['social']['instagram_sentence'] ?? $a['summary']); ?></span>
                         <span class="es-minicard__foot"><span><?php echo esc_html(Labels::date($issue['edition_date'])); ?></span><span>4:5</span></span>

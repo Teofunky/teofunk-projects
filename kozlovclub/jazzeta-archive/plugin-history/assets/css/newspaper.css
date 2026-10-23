@@ -263,7 +263,6 @@ body.es-newspaper-page { margin: 0; padding: 0; min-height: 100vh; background: v
 #es-newspaper .es-mast__name:hover { color: var(--es-ink); }
 #es-newspaper .es-mast__over { font: 600 12px/1.2 var(--es-head); letter-spacing: .42em; text-transform: uppercase; margin-right: -.42em; }
 #es-newspaper .es-mast__main { font: 700 40px/.95 var(--es-head); letter-spacing: -.01em; text-transform: uppercase; }
-#es-newspaper .es-mast__dot { color: var(--es-accent); }
 #es-newspaper .es-mast__logo { display: block; max-height: 64px; width: auto; }
 #es-newspaper .es-mast__motto { display: none; }
 #es-newspaper .es-mast__line {

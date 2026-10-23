@@ -23,7 +23,7 @@ $nameTag = $isFront ? 'h1' : 'p';
                 <?php echo $logo; // wp_get_attachment_image escapes its attributes. ?>
             <?php else : ?>
                 <?php if ($over !== '') : ?><span class="es-mast__over"><?php echo esc_html($over); ?></span> <?php endif; ?>
-                <span class="es-mast__main"><?php echo esc_html($main); ?><span class="es-mast__dot" aria-hidden="true">.</span></span>
+                <span class="es-mast__main"><?php echo esc_html($main); ?></span>
             <?php endif; ?>
             <?php if ($isFront && $issue) : ?><span class="es-sr">, номер за <?php echo esc_html($issue['long_date']); ?></span><?php endif; ?>
         </a>
