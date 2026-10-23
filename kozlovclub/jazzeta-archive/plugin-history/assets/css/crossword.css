@@ -1,4 +1,4 @@
-/* «Ежедневный стандарт» — кроссворд недели (0.5.2). Loaded only on the crossword page. */
+/* «Ежедневный стандарт» — кроссворд недели (0.5.2; телефонная клавиатура — 0.5.3). Loaded only on the crossword page. */
 
 #es-newspaper .es-cw,
 #es-newspaper .es-cwsol {
@@ -167,8 +167,74 @@ html[data-es-design="brief"] #es-newspaper .es-cw__clues { position: static; max
   html[data-es-design="brief"] #es-newspaper .es-cw__clues { grid-template-columns: 1fr 1fr; }
 }
 
+/* ------------------------------------------------------------------ phone: the page's own keyboard (0.5.3)
+   crossword.js sets .is-pad on touch screens up to 699 px (or low landscape ones): the grid fits the
+   screen width (--cw-cell is computed there), cells are never focused, letters come from the keys. */
+#es-newspaper .es-cw__kbswitch {
+  display: inline-flex; align-items: center; min-height: 40px; margin-top: 2px; padding: 0;
+  font: 600 14px/1.3 var(--es-ui); color: var(--es-ink-2); text-decoration: underline; text-underline-offset: 3px;
+}
+#es-newspaper .es-cw__kbswitch[hidden] { display: none; }
+#es-newspaper .es-cw.is-pad .es-cw__tools { gap: 6px 8px; padding: 4px 0 10px; }
+#es-newspaper .es-cw.is-pad .es-cw__time { min-width: 2.9em; font-size: 15px; }
+#es-newspaper .es-cw.is-pad .es-cw__group { gap: 4px; align-items: center; }
+#es-newspaper .es-cw.is-pad .es-cw__group[data-short]::before { content: attr(data-short); margin-right: 1px; font: 600 13px/1 var(--es-ui); color: var(--es-muted); }
+#es-newspaper .es-cw.is-pad .es-cw__long { display: none; }
+#es-newspaper .es-cw.is-pad .es-cw__btn { min-height: 36px; min-width: 34px; padding: 0 7px; font-size: 13px; }
+#es-newspaper .es-cw.is-pad .es-cw__btn--icon { padding: 0; font-size: 19px; }
+#es-newspaper .es-cw.is-pad .es-cw__group--end { margin-left: 0; }
+#es-newspaper .es-cw.is-pad [data-es-cw-action="print"] { display: none; }
+/* The grid runs from edge to edge of the screen. */
+#es-newspaper .es-cw.is-pad .es-cw__scroll { max-width: none; margin: 0 calc(-1 * var(--es-gutter)); padding: 2px; }
+#es-newspaper .es-cw.is-pad .es-cw__grid { padding: 1px; touch-action: manipulation; }
+#es-newspaper .es-cw.is-pad .es-cw__grid input {
+  padding-top: calc(var(--cw-cell) * .12); font-size: calc(var(--cw-cell) * .62); cursor: pointer;
+  -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent;
+}
+#es-newspaper .es-cw.is-pad .es-cw__grid > span > em { top: 1px; left: 1px; font-size: max(5px, calc(var(--cw-cell) * .3)); }
+#es-newspaper .es-cw.is-pad .es-cw__grid > span.is-active { z-index: 1; box-shadow: 0 0 0 1px var(--cw-line), inset 0 0 0 2px var(--es-focus); }
+/* The keyboard panel: the current clue on top, three rows of keys below. */
+#es-newspaper .es-cw__pad {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 60;
+  padding: 4px 4px calc(6px + env(safe-area-inset-bottom, 0px));
+  background: var(--es-surface); border-top: 1px solid var(--es-rule-soft); box-shadow: 0 -8px 24px rgba(0, 0, 0, .14);
+  touch-action: manipulation; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent;
+}
+#es-newspaper .es-cw__pad[hidden], #es-newspaper .es-cw__padspace[hidden] { display: none; }
+#es-newspaper .es-cw__pad .es-cw__current {
+  position: relative; grid-template-columns: 34px minmax(0, 1fr) 34px; gap: 2px; margin: 0 0 4px; padding: 0;
+  background: transparent; border: 0; box-shadow: none;
+}
+#es-newspaper .es-cw__pad .es-cw__nav { min-height: 44px; font-size: 26px; }
+/* «Скрыть» sits on the line of the clue number, so the clue keeps the whole width. */
+#es-newspaper .es-cw__pad .es-cw__hide { position: absolute; top: -2px; right: 34px; min-height: 28px; min-width: 40px; font-size: 16px; color: var(--es-muted); }
+#es-newspaper .es-cw__pad .es-cw__clue { padding: 3px 2px 2px; font-size: 14.5px; line-height: 1.28; cursor: pointer; }
+#es-newspaper .es-cw__pad .es-cw__clue-id { padding-right: 44px; font-size: 11px; }
+#es-newspaper .es-cw__padnote { margin: 0 0 4px; padding: 0 6px; font: 600 13px/1.35 var(--es-ui); color: var(--es-accent); }
+#es-newspaper .es-cw__padnote:empty { display: none; }
+#es-newspaper .es-cw__keys { display: grid; gap: 6px; }
+#es-newspaper .es-cw__krow { display: flex; gap: 4px; }
+#es-newspaper .es-cw__kgap { flex: 0 1 0; min-width: 0; }
+#es-newspaper .es-cw__key {
+  flex: 1 1 0; min-width: 0; height: 44px; padding: 0; border: 0; border-radius: 5px;
+  background: var(--cw-bg); box-shadow: 0 1px 0 rgba(0, 0, 0, .28), 0 0 0 1px var(--es-rule-soft);
+  font: 500 19px/1 var(--es-ui); color: var(--es-ink);
+}
+#es-newspaper .es-cw__key--wide { flex-grow: 1.5; background: var(--es-tint); font-size: 18px; }
+#es-newspaper .es-cw__key:active { background: var(--cw-hot); }
+@media (max-height: 499px) {
+  #es-newspaper .es-cw__key { height: 34px; font-size: 17px; }
+  #es-newspaper .es-cw__keys { gap: 4px; }
+  #es-newspaper .es-cw__pad .es-cw__clue { font-size: 14px; }
+}
+@media (max-width: 340px) {
+  #es-newspaper .es-cw__krow { gap: 3px; }
+  #es-newspaper .es-cw__key { font-size: 17px; }
+}
+
 /* ------------------------------------------------------------------ print: the grid and the clues */
 @media print {
+  #es-newspaper .es-cw__pad, #es-newspaper .es-cw__padspace, #es-newspaper .es-cw__kbswitch { display: none !important; }
   #es-newspaper .es-cw__tools, #es-newspaper .es-cw__current, #es-newspaper .es-cw__status, #es-newspaper .es-cw__nojs,
   #es-newspaper .es-cwpage__answers, #es-newspaper .es-cwpage__prev, #es-newspaper .es-cwpage__later, #es-newspaper .es-cwpage__newer,
   #es-newspaper .es-cwpage__all, #es-newspaper .es-cwpage__back, #es-newspaper .es-cwpage__preview { display: none !important; }

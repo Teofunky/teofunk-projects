@@ -1,6 +1,6 @@
 <?php
 /**
- * «Кроссворд недели» (0.5.2). Without JavaScript the grid is a set of plain one-letter fields
+ * «Кроссворд недели» (0.5.2; phone keyboard 0.5.3). Without JavaScript the grid is a set of plain one-letter fields
  * (it can be filled by hand or printed); assets/js/crossword.js adds navigation, checking,
  * hints, the timer and progress kept in this browser.
  * @var array $v
@@ -36,13 +36,14 @@ $names = ['a' => 'По горизонтали', 'd' => 'По вертикали'
     <div class="es-cw" style="--cw-cols: <?php echo (int) $cw['cols']; ?>" data-es-cw data-es-cw-data="<?php echo esc_attr((string) wp_json_encode($cw['data'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)); ?>">
         <div class="es-cw__tools" data-es-cw-tools>
             <span class="es-cw__time" title="Время решения"><span class="es-sr">Время: </span><span data-es-cw-time>0:00</span></span>
-            <span class="es-cw__group" role="group" aria-label="Проверка">
-                <button type="button" class="es-cw__btn" data-es-cw-action="check-word">Проверить слово</button>
-                <button type="button" class="es-cw__btn" data-es-cw-action="check-all">Проверить всё</button>
+            <?php // On a phone (0.5.3) the verb moves to the group label: «Проверить: слово · всё». ?>
+            <span class="es-cw__group" role="group" aria-label="Проверка" data-short="Проверить">
+                <button type="button" class="es-cw__btn" data-es-cw-action="check-word" aria-label="Проверить слово"><span class="es-cw__long">Проверить&nbsp;</span>слово</button>
+                <button type="button" class="es-cw__btn" data-es-cw-action="check-all" aria-label="Проверить всё"><span class="es-cw__long">Проверить&nbsp;</span>всё</button>
             </span>
-            <span class="es-cw__group" role="group" aria-label="Подсказки">
-                <button type="button" class="es-cw__btn" data-es-cw-action="reveal-letter">Открыть букву</button>
-                <button type="button" class="es-cw__btn" data-es-cw-action="reveal-word">Открыть слово</button>
+            <span class="es-cw__group" role="group" aria-label="Подсказки" data-short="Открыть">
+                <button type="button" class="es-cw__btn" data-es-cw-action="reveal-letter" aria-label="Открыть букву"><span class="es-cw__long">Открыть&nbsp;</span>букву</button>
+                <button type="button" class="es-cw__btn" data-es-cw-action="reveal-word" aria-label="Открыть слово"><span class="es-cw__long">Открыть&nbsp;</span>слово</button>
             </span>
             <span class="es-cw__group es-cw__group--end" role="group" aria-label="Поле">
                 <button type="button" class="es-cw__btn es-cw__btn--icon" data-es-cw-action="zoom-out" aria-label="Мельче">−</button>
