@@ -9,6 +9,7 @@ use Kozlov\Gazeta\Admin\Admin;
 use Kozlov\Gazeta\Admin\Ui;
 use Kozlov\Gazeta\Domain\Duplicates;
 use Kozlov\Gazeta\Domain\Labels;
+use Kozlov\Gazeta\Domain\Topics;
 use Kozlov\Gazeta\Front\View;
 use Kozlov\Gazeta\Http\Router;
 
@@ -390,6 +391,26 @@ $quoteRow = static function ($index, array $q) use ($sourceIds) {
                         <?php foreach (Labels::CATEGORIES as $key => $label) : ?><option value="<?php echo esc_attr($key); ?>"<?php selected($a['category'], $key); ?>><?php echo esc_html($label); ?></option><?php endforeach; ?>
                     </select>
                 </div>
+                <?php
+                $tagsManual = $v['tags_manual'] ?? null;
+                $tagsAuto = (array) ($v['tags_auto'] ?? []);
+                $tagsChecked = $tagsManual !== null ? $tagsManual : $tagsAuto;
+                $tagsAutoText = $tagsAuto ? implode(', ', array_map([Topics::class, 'label'], $tagsAuto)) : 'тем не нашлось';
+                ?>
+                <fieldset class="es-topics" data-es-topics data-es-auto="<?php echo esc_attr(implode(' ', $tagsAuto)); ?>" data-es-max="<?php echo (int) Topics::MAX; ?>">
+                    <legend class="es-label-like">Темы для поиска <span class="es-hint">не больше <?php echo (int) Topics::MAX; ?></span></legend>
+                    <input type="hidden" name="tags_form" value="1">
+                    <div class="es-chips-select">
+                        <?php foreach (Topics::TAGS as $key => $label) : ?>
+                            <label class="es-chip-check"><input type="checkbox" name="tags[]" value="<?php echo esc_attr($key); ?>"<?php checked(in_array($key, $tagsChecked, true)); ?> data-es-topic-check><span><?php echo esc_html($label); ?></span></label>
+                        <?php endforeach; ?>
+                    </div>
+                    <label class="es-check">
+                        <input type="checkbox" name="tags_manual" value="1"<?php checked($tagsManual !== null); ?> data-es-topics-manual>
+                        <span>Выбрать вручную</span>
+                    </label>
+                    <p class="es-hint" data-es-topics-note><?php if ($v['is_new']) : ?>Темы подберутся автоматически после сохранения.<?php else : ?>Автоматически: <?php echo esc_html($tagsAutoText); ?>. Подбираются по заголовку, лиду и тексту при каждом сохранении<?php echo $tagsManual !== null ? '; сейчас действует ваш выбор' : ''; ?>.<?php endif; ?></p>
+                </fieldset>
                 <span class="es-label-like">Место на полосе</span>
                 <div class="es-segmented es-segmented--wrap" role="radiogroup" aria-label="Место на полосе">
                     <?php foreach (Labels::PLACEMENTS as $key => $label) : ?>

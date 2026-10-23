@@ -9,6 +9,7 @@ use Kozlov\Gazeta\Data\Search;
 use Kozlov\Gazeta\Data\Crosswords;
 use Kozlov\Gazeta\Domain\Crossword;
 use Kozlov\Gazeta\Domain\Labels;
+use Kozlov\Gazeta\Domain\Topics;
 use Kozlov\Gazeta\Domain\Validator;
 use Kozlov\Gazeta\Http\Router;
 use Kozlov\Gazeta\Runtime\Guard;
@@ -176,6 +177,7 @@ final class Controller
             'facts' => $meta['facts'] ?? [],
             'focus' => $meta['focus'] ?? [],
             'crossword' => $meta['crossword'] ?? null,
+            'tags' => $meta['tags'] ?? [],
         ]);
         $model['issue']['published_at'] = $issue['published_at'];
         $model['issue']['updated_at'] = $issue['public_updated_at'];
@@ -251,6 +253,7 @@ final class Controller
             'facts' => Meta::draftFacts($meta, $drafts),
             'focus' => $meta['focus'] ?? [],
             'crossword' => $meta['crossword'] ?? null,
+            'tags' => $meta['tags'] ?? [],
         ]);
         $model['issue']['is_latest'] = true;
         $model['issue']['version'] = (int) $issue['version'];
@@ -293,7 +296,9 @@ final class Controller
     private static function search(int $page): array
     {
         $raw = isset($_GET['q']) && is_string($_GET['q']) ? sanitize_text_field(wp_unslash($_GET['q'])) : '';
-        $found = Search::find($raw, $page);
+        // 0.5.5: «?tema=releases» — a rubric or a tag (Domain\Topics); anything else is ignored.
+        $topic = isset($_GET['tema']) && is_string($_GET['tema']) ? sanitize_key(wp_unslash($_GET['tema'])) : '';
+        $found = Search::find($raw, $page, Topics::isTopic($topic) ? $topic : '');
         if ($page > 1 && $page > $found['pages']) {
             self::notFound();
         }
@@ -306,20 +311,62 @@ final class Controller
         $model = self::base('search');
         $query = (string) $found['query'];
         $page = (int) $found['page'];
+        $topic = (string) ($found['topic'] ?? '');
         $model['search'] = [
             'query' => $query,
-            'searched' => $query !== '',
+            'topic' => $topic,
+            'topic_label' => $topic !== '' ? Topics::label($topic) : '',
+            'topic_clear' => $topic !== '' ? Router::search($query) : '',
+            'searched' => $query !== '' || $topic !== '',
             'unavailable' => !empty($found['unavailable']),
-            'understood' => $found['terms'] !== [],
+            'understood' => $found['terms'] !== [] || $topic !== '',
+            'has_words' => $found['terms'] !== [],
             'total' => (int) $found['total'],
             'page' => $page,
             'pages' => (int) $found['pages'],
             'items' => Presenter::searchResults($found['rows'], $found['terms']),
-            'prev' => $page > 1 ? Router::search($query, $page - 1) : '',
-            'next' => $page < $found['pages'] ? Router::search($query, $page + 1) : '',
+            'prev' => $page > 1 ? Router::search($query, $page - 1, $topic) : '',
+            'next' => $page < $found['pages'] ? Router::search($query, $page + 1, $topic) : '',
+            'topics' => self::topicChips(empty($found['unavailable']) ? Search::topicCounts() : [], $query, $topic),
         ];
         $model['seo'] = Seo::forSearch($model);
         return $model;
+    }
+
+    /**
+     * Topic links of the search page (0.5.5): rubrics and tags that have published materials,
+     * each with its count; the active one links back to all topics.
+     * @param array<string,int> $counts
+     * @return array{rubrics:array,tags:array}
+     */
+    public static function topicChips(array $counts, string $query, string $active): array
+    {
+        $out = ['rubrics' => [], 'tags' => []];
+        foreach ([Labels::CATEGORIES, Topics::TAGS] as $group => $vocabulary) {
+            foreach ($vocabulary as $key => $label) {
+                if ($group === 1 && isset(Labels::CATEGORIES[$key])) {
+                    continue; // «Фестивали» is listed once, with the rubrics.
+                }
+                $count = (int) ($counts[$key] ?? 0);
+                if ($count === 0 && $key !== $active) {
+                    continue;
+                }
+                $out[$group === 0 ? 'rubrics' : 'tags'][] = [
+                    'order' => count($out['rubrics']) + count($out['tags']),
+                    'key' => $key,
+                    'label' => $label,
+                    'count' => $count,
+                    'active' => $key === $active,
+                    'url' => Router::search($query, 1, $key === $active ? '' : $key),
+                ];
+            }
+        }
+        foreach (['rubrics', 'tags'] as $group) {
+            usort($out[$group], static function ($a, $b) {
+                return [$b['count'], $a['order']] <=> [$a['count'], $b['order']];
+            });
+        }
+        return $out;
     }
 
     /**

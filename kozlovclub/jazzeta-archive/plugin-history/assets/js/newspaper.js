@@ -1,5 +1,5 @@
 /**
- * «Ежедневный стандарт» — reader script (0.5.2).
+ * «Ежедневный стандарт» — reader script (0.5.5).
  * Everything here is an enhancement: without JavaScript the issue, the articles, the archive
  * and the sources are fully readable in the server's default mode.
  * Reader settings (mode, palette, text size, density) live in this browser only
@@ -205,21 +205,70 @@
     sync();
   }
 
-  /* ---------------------------------------------------------------- region filter */
-  var filterButtons = $$('[data-es-filter]');
-  if (filterButtons.length) {
+  /* ---------------------------------------------------------------- filters of the issue */
+  // 0.5.5: «Россия / Мир» and the chips «В номере» (rubrics and tags) filter together.
+  // A chip filters only with JavaScript; without it, it is a link to its first material.
+  // Hidden stories carry data-es-hidden; the stylesheet hides them in every reading mode.
+  var issueBox = $('.es-issue');
+  var stories = $$('.es-flow > .es-story');
+  var regionButtons = $$('[data-es-filter]');
+  var topicChips = $$('[data-es-topic]');
+  if (issueBox && stories.length && (regionButtons.length || topicChips.length)) {
+    var state = { region: '', topic: '' };
+    var emptyNote = $('[data-es-filter-empty]');
+    var status = $('[data-es-filter-status]');
+    var applyFilters = function (announce) {
+      var shown = 0;
+      stories.forEach(function (story) {
+        var region = story.getAttribute('data-es-region');
+        var topics = ' ' + (story.getAttribute('data-es-topics') || story.getAttribute('data-es-category') || '') + ' ';
+        var ok = (state.region === '' || region === state.region || region === 'mixed')
+          && (state.topic === '' || topics.indexOf(' ' + state.topic + ' ') !== -1);
+        if (ok) { story.removeAttribute('data-es-hidden'); shown++; } else { story.setAttribute('data-es-hidden', ''); }
+      });
+      regionButtons.forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-es-filter') === state.region)); });
+      topicChips.forEach(function (chip) { chip.setAttribute('aria-pressed', String(chip.getAttribute('data-es-topic') === state.topic)); });
+      var filtering = state.region !== '' || state.topic !== '';
+      if (filtering) { issueBox.setAttribute('data-es-filtering', ''); } else { issueBox.removeAttribute('data-es-filtering'); }
+      if (emptyNote) { emptyNote.hidden = shown > 0; }
+      if (status && announce) {
+        status.textContent = filtering
+          ? (shown ? 'Показано ' + shown + ' из ' + stories.length : 'Таких материалов в номере нет')
+          : 'Показаны все материалы';
+      }
+    };
     $$('[data-es-filters]').forEach(function (el) { el.hidden = false; });
-    filterButtons.forEach(function (button) {
+    regionButtons.forEach(function (button) {
       button.addEventListener('click', function () {
-        var region = button.getAttribute('data-es-filter');
-        $$('.es-flow > .es-story').forEach(function (story) {
-          var own = story.getAttribute('data-es-region');
-          var show = region === '' || own === region || own === 'mixed';
-          if (show) { story.removeAttribute('data-es-hidden'); } else { story.setAttribute('data-es-hidden', ''); }
-        });
-        filterButtons.forEach(function (b) { b.setAttribute('aria-pressed', String(b === button)); });
+        state.region = button.getAttribute('data-es-filter') || '';
+        applyFilters(true);
       });
     });
+    topicChips.forEach(function (chip) {
+      chip.setAttribute('role', 'button');
+      chip.setAttribute('aria-pressed', 'false');
+      chip.addEventListener('click', function (event) {
+        event.preventDefault();
+        var key = chip.getAttribute('data-es-topic') || '';
+        state.topic = state.topic === key ? '' : key;
+        applyFilters(true);
+      });
+      // role=button: Space presses it, as on a real button.
+      chip.addEventListener('keydown', function (event) {
+        if (event.key === ' ' || event.key === 'Spacebar') { event.preventDefault(); chip.click(); }
+      });
+    });
+    var reset = $('[data-es-filter-reset]');
+    if (reset) {
+      reset.addEventListener('click', function () {
+        state.region = '';
+        state.topic = '';
+        applyFilters(true);
+        var first = regionButtons[0] || topicChips[0];
+        if (first) { first.focus(); }
+      });
+    }
+    applyFilters(false);
   }
 
   /* ---------------------------------------------------------------- sticky offset & progress */

@@ -112,6 +112,12 @@ $hasFacts = $a['facts']['confirmed'] || $a['facts']['single'];
                 <?php View::render('front/parts/badge', ['levels' => $a['levels']]); ?>
                 <a class="es-rail__link" href="#es-sources"><?php echo esc_html(Labels::count($a['source_count'], 'источник', 'источника', 'источников')); ?></a>
             </div>
+            <div class="es-rail__block es-rail__block--topics">
+                <span class="es-rail__label">Темы</span>
+                <p class="es-topics-line">
+                    <a href="<?php echo esc_url($a['category_url']); ?>"><?php echo esc_html($a['category_label']); ?></a><?php foreach ($a['tag_links'] as $tag) : ?><a href="<?php echo esc_url($tag['url']); ?>"><?php echo esc_html($tag['label']); ?></a><?php endforeach; ?>
+                </p>
+            </div>
             <?php if ($canonical !== '') : ?>
                 <div class="es-rail__block es-share">
                     <span class="es-rail__label">Поделиться</span>

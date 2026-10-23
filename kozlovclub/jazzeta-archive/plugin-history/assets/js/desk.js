@@ -198,6 +198,35 @@
     $$('[data-es-rubric-part]').forEach(function (el) { el.addEventListener('change', updateRubric); });
   }
 
+  /* -------------------------------------------------------- topics for search (0.5.5) */
+  // Ticking a topic switches to the manual choice; unticking «Выбрать вручную» brings the
+  // automatic set back. While the limit is reached, the other topics are disabled.
+  $$('[data-es-topics]').forEach(function (box) {
+    var manual = $('[data-es-topics-manual]', box);
+    var checks = $$('[data-es-topic-check]', box);
+    var max = parseInt(box.getAttribute('data-es-max'), 10) || 2;
+    var auto = (box.getAttribute('data-es-auto') || '').split(' ').filter(Boolean);
+    var limit = function () {
+      var on = checks.filter(function (c) { return c.checked; }).length;
+      checks.forEach(function (c) { c.disabled = !c.checked && on >= max; });
+    };
+    checks.forEach(function (c) {
+      c.addEventListener('change', function () {
+        if (manual) { manual.checked = true; }
+        limit();
+      });
+    });
+    if (manual) {
+      manual.addEventListener('change', function () {
+        if (!manual.checked) {
+          checks.forEach(function (c) { c.checked = auto.indexOf(c.value) !== -1; });
+        }
+        limit();
+      });
+    }
+    limit();
+  });
+
   /* -------------------------------------------------------- focus point of a photo (0.5.1) */
   // Click the important part of the photo; the previews show the newspaper's frames at once.
   function bindFocus(box) {

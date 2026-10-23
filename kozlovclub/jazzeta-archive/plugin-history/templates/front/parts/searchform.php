@@ -18,6 +18,11 @@ if ($query !== '') {
     $action = (string) strtok($action, '?');
 }
 $value = (string) ($v['search']['query'] ?? '');
+// 0.5.5: a new query stays inside the chosen topic; the topic chip removes it.
+$topic = (string) ($v['search']['topic'] ?? '');
+if ($topic !== '') {
+    $hidden['tema'] = $topic;
+}
 ?>
 <form class="es-search" role="search" action="<?php echo esc_url($action); ?>" method="get">
     <label class="es-search__label" for="<?php echo esc_attr($id); ?>"><?php echo esc_html($label); ?></label>

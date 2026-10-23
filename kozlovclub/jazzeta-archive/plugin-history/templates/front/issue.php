@@ -20,13 +20,23 @@ $stories = $issue['stories'];
 <?php endif; ?>
 
 <div class="es-issue" data-es-count="<?php echo (int) $issue['count']; ?>">
-    <?php if (count($issue['rubrics']) > 1 || $issue['count'] > 3) : ?>
-        <nav class="es-rubrics" aria-label="Рубрики номера">
+    <?php if (count($issue['topics']) > 1 || $issue['count'] > 3) : ?>
+        <nav class="es-rubrics" aria-label="Рубрики и темы номера">
             <div class="es-rubrics__scroll">
                 <span class="es-rubrics__label">В номере:</span>
                 <ul>
-                    <?php foreach ($issue['rubrics'] as $rubric) : ?>
-                        <li><a href="#<?php echo esc_attr($rubric['anchor']); ?>"><?php echo esc_html($rubric['label']); ?><?php if ($rubric['count'] > 1) : ?> <span class="es-rubrics__count"><?php echo (int) $rubric['count']; ?></span><?php endif; ?></a></li>
+                    <?php
+                    // 0.5.5: rubrics, then tags. Without JavaScript each chip leads to its first material;
+                    // with it, the chip shows only the materials of that rubric or tag.
+                    $firstTag = true;
+                    foreach ($issue['topics'] as $topic) :
+                        $class = 'es-rubrics__item es-rubrics__item--' . $topic['kind'];
+                        if ($topic['kind'] === 'tag' && $firstTag) {
+                            $class .= ' es-rubrics__item--first-tag';
+                            $firstTag = false;
+                        }
+                        ?>
+                        <li class="<?php echo esc_attr($class); ?>"><a href="#<?php echo esc_attr($topic['anchor']); ?>" data-es-topic="<?php echo esc_attr($topic['key']); ?>"><?php echo esc_html($topic['label']); ?><?php if ($topic['count'] > 1) : ?> <span class="es-rubrics__count"><?php echo (int) $topic['count']; ?></span><?php endif; ?></a></li>
                     <?php endforeach; ?>
                 </ul>
             </div>
@@ -38,6 +48,8 @@ $stories = $issue['stories'];
                 </div>
             <?php endif; ?>
         </nav>
+        <p class="es-filter-empty" hidden data-es-filter-empty>В этом номере таких материалов нет. <button type="button" data-es-filter-reset>Показать все</button></p>
+        <p class="es-sr" role="status" data-es-filter-status></p>
     <?php endif; ?>
 
     <div class="es-flow">

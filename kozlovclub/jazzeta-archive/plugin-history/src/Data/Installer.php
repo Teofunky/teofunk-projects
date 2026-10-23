@@ -10,7 +10,8 @@ if (!defined('ABSPATH')) {
 
 /**
  * Activation and in-place code upgrade. Never drops, renames or rewrites data:
- * dbDelta only creates missing tables/columns of the unchanged 0.3.x schema.
+ * dbDelta only creates missing tables/columns of the unchanged 0.3.x schema (0.5.5: the column
+ * `topics` of the derived search index).
  */
 final class Installer
 {
@@ -84,6 +85,8 @@ final class Installer
         add_option('es_security', ['publisher_id' => get_current_user_id()], '', false);
         update_option('es_db_version', ES_VERSION, false);
         // The search index is derived data: rebuilt here, never a reason to stop the upgrade.
-        Search::ensureFresh();
+        // 0.5.5: always rebuilt, because topics are computed from the text while indexing and
+        // rows written by an older version (for example after a rollback) have none.
+        Search::ensureFresh(true);
     }
 }

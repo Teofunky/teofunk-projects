@@ -3,6 +3,7 @@
 namespace Kozlov\Gazeta\Admin;
 
 use Kozlov\Gazeta\Domain\Crossword;
+use Kozlov\Gazeta\Domain\Topics;
 use Kozlov\Gazeta\Data\Installer;
 use Kozlov\Gazeta\Data\Issues;
 use Kozlov\Gazeta\Data\Meta;
@@ -239,6 +240,18 @@ final class Actions
         $focus = self::focus('focus');
         if ($focus !== false) {
             $meta['focus'] = $focus;
+        }
+        // 0.5.5: topics. Only a form that shows the block changes them (tags_form=1).
+        if (self::value('tags_form') === '1') {
+            $meta['tags'] = null;
+            if (self::value('tags_manual') === '1') {
+                $posted = isset($_POST['tags']) && is_array($_POST['tags']) ? array_map('strval', array_filter(wp_unslash($_POST['tags']), 'is_scalar')) : [];
+                $posted = array_values(array_unique(array_filter($posted, [Topics::class, 'isTag'])));
+                if (count($posted) > Topics::MAX && $intent !== 'focus') {
+                    self::fail('Тем для поиска — не больше ' . Topics::MAX . '. Ничего не сохранено.', $back);
+                }
+                $meta['tags'] = Topics::manualValue($posted);
+            }
         }
         if ($intent === 'focus') {
             // Only the crop changes: the review of the text stays valid (Issues::saveFocus).

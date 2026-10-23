@@ -3,6 +3,7 @@
 namespace Kozlov\Gazeta\Data;
 
 use Kozlov\Gazeta\Domain\Stemmer;
+use Kozlov\Gazeta\Domain\Topics;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -21,6 +22,10 @@ if (!defined('ABSPATH')) {
  * and withdraw. The state row `search` remembers the counter the index matches. Publishing in
  * 0.5.1 updates the one issue in the same transaction; a mismatch (for example after a rollback
  * to an older version) leads to a full rebuild: on upgrade, on the next desk page or by WP-Cron.
+ *
+ * 0.5.5: the column `topics` holds the rubric and the tags of each article (Domain\Topics),
+ * space-padded, so «тема: Релизы» is one LIKE on the index. Every activation and «Завершить
+ * обновление» rebuild the index, because the tags are computed from the text when indexing.
  */
 final class Search
 {
@@ -30,6 +35,7 @@ final class Search
     public const MAX_PAGES = 50;
     public const CRON_HOOK = 'es_search_rebuild';
     private const BATCH = 100;
+    private const COUNTS_KEY = 'es_topic_counts';
 
     /** Words that would match almost every text as a prefix. */
     private const STOP = [
@@ -157,14 +163,18 @@ final class Search
             }
             throw $e;
         }
+        self::forgetCounts();
         return $count;
     }
 
-    /** Rebuilds now when stale; never throws (the index is a convenience, not the newspaper). */
-    public static function ensureFresh(): void
+    /**
+     * Rebuilds now when stale (or always with $force: upgrades, new tagging rules); never throws —
+     * the index is a convenience, not the newspaper.
+     */
+    public static function ensureFresh(bool $force = false): void
     {
         try {
-            if (self::available() && !self::isFresh()) {
+            if (self::available() && ($force || !self::isFresh())) {
                 self::rebuild();
             }
         } catch (\Throwable $e) {
@@ -198,12 +208,17 @@ final class Search
         );
         $out = [];
         $briefs = [];
+        $manual = [];
         foreach ($rows as $row) {
             $issueId = (int) $row['issue_id'];
             if (!isset($briefs[$issueId])) {
-                $briefs[$issueId] = Meta::forIssue($issueId, 'public')['briefs'];
+                $meta = Meta::forIssue($issueId, 'public');
+                $briefs[$issueId] = $meta['briefs'];
+                $manual[$issueId] = $meta['tags'] ?? [];
             }
             $article = Db::decode($row['public_json']);
+            $tags = Topics::effective($article, $manual[$issueId][(string) $row['external_id']] ?? null);
+            $topics = Topics::topics(is_string($article['category'] ?? null) ? $article['category'] : '', $tags);
             $parts = [(string) ($article['lead'] ?? ''), (string) ($article['summary'] ?? '')];
             foreach ((array) ($article['body_paragraphs'] ?? []) as $paragraph) {
                 $parts[] = is_scalar($paragraph) ? self::plain((string) $paragraph) : '';
@@ -220,6 +235,7 @@ final class Search
                 'edition_date' => (string) $row['edition_date'],
                 'title' => self::normalize((string) ($article['headline'] ?? '')),
                 'body' => self::normalize(implode(' ', $parts)),
+                'topics' => $topics ? ' ' . implode(' ', $topics) . ' ' : '',
             ];
         }
         return $out;
@@ -233,9 +249,9 @@ final class Search
         foreach (array_chunk($rows, self::BATCH) as $chunk) {
             $values = [];
             foreach ($chunk as $row) {
-                $values[] = $wpdb->prepare('(%d,%d,%s,%s,%s,%s)', $row['article_id'], $row['issue_id'], $row['edition_date'], $row['title'], $row['body'], $now);
+                $values[] = $wpdb->prepare('(%d,%d,%s,%s,%s,%s,%s)', $row['article_id'], $row['issue_id'], $row['edition_date'], $row['title'], $row['body'], substr($row['topics'], 0, 255), $now);
             }
-            Db::must($wpdb->query("INSERT INTO {$table} (article_id,issue_id,edition_date,title,body,indexed_at) VALUES " . implode(',', $values)));
+            Db::must($wpdb->query("INSERT INTO {$table} (article_id,issue_id,edition_date,title,body,topics,indexed_at) VALUES " . implode(',', $values)));
         }
     }
 
@@ -258,18 +274,20 @@ final class Search
     /**
      * One page of results, best first: headline matches weigh three times a text match; equal
      * scores go newest first. Every query word (as a word prefix) must occur.
-     * @return array{query:string,terms:string[],total:int,pages:int,page:int,rows:array<int,array>,fresh:bool}
+     * $topic (0.5.5): only materials of this rubric or tag; without words they go newest first.
+     * @return array{query:string,terms:string[],topic:string,total:int,pages:int,page:int,rows:array<int,array>,fresh:bool}
      */
-    public static function find(string $query, int $page): array
+    public static function find(string $query, int $page, string $topic = ''): array
     {
         $page = max(1, min(self::MAX_PAGES, $page));
+        $topic = Topics::isTopic($topic) ? $topic : '';
         if (!self::available()) {
-            return ['query' => trim(substr($query, 0, self::MAX_QUERY)), 'terms' => [], 'total' => 0, 'pages' => 0, 'page' => $page, 'rows' => [], 'fresh' => false, 'unavailable' => true];
+            return ['query' => trim(substr($query, 0, self::MAX_QUERY)), 'terms' => [], 'topic' => $topic, 'total' => 0, 'pages' => 0, 'page' => $page, 'rows' => [], 'fresh' => false, 'unavailable' => true];
         }
         $query = trim(mb_substr($query, 0, self::MAX_QUERY));
         $terms = self::terms($query);
-        $out = ['query' => $query, 'terms' => $terms, 'total' => 0, 'pages' => 0, 'page' => $page, 'rows' => [], 'fresh' => true];
-        if (!$terms) {
+        $out = ['query' => $query, 'terms' => $terms, 'topic' => $topic, 'total' => 0, 'pages' => 0, 'page' => $page, 'rows' => [], 'fresh' => true];
+        if (!$terms && $topic === '') {
             return $out;
         }
         $out['fresh'] = self::isFresh();
@@ -282,11 +300,18 @@ final class Search
         $score = [];
         $scoreArgs = [];
         foreach ($terms as $term) {
-            $like = '% ' . $term . '%';
+            $like = '% ' . $wpdb->esc_like($term) . '%';
             $where[] = '(s.title LIKE %s OR s.body LIKE %s)';
             array_push($whereArgs, $like, $like);
             $score[] = '(s.title LIKE %s)*3 + (s.body LIKE %s)';
             array_push($scoreArgs, $like, $like);
+        }
+        if ($topic !== '') {
+            $where[] = 's.topics LIKE %s';
+            $whereArgs[] = '% ' . $wpdb->esc_like($topic) . ' %';
+        }
+        if (!$score) {
+            $score[] = '0';
         }
         $from = ' FROM ' . Db::table('search') . ' s JOIN ' . Db::table('issues') . " i ON i.id=s.issue_id AND i.state='published' JOIN "
             . Db::table('articles') . ' a ON a.id=s.article_id AND a.public_json IS NOT NULL WHERE ' . implode(' AND ', $where);
@@ -296,7 +321,7 @@ final class Search
         $out['pages'] = min(self::MAX_PAGES, (int) ceil($total / self::PER_PAGE));
         if ($total > 0 && $page <= $out['pages']) {
             $rows = $wpdb->get_results($wpdb->prepare(
-                'SELECT a.id, a.slug, a.public_json, a.position, i.id AS issue_id, i.edition_date, i.number, (' . implode(' + ', $score) . ') AS score'
+                'SELECT a.id, a.slug, a.public_json, a.position, i.id AS issue_id, i.edition_date, i.number, s.topics, (' . implode(' + ', $score) . ') AS score'
                 . $from . ' ORDER BY score DESC, i.edition_date DESC, a.position ASC, a.id ASC LIMIT %d OFFSET %d',
                 array_merge($scoreArgs, $whereArgs, [self::PER_PAGE, ($page - 1) * self::PER_PAGE])
             ), ARRAY_A);
@@ -312,6 +337,52 @@ final class Search
         }
         $wpdb->suppress_errors($suppress);
         return $out;
+    }
+
+    /**
+     * How many published materials carry each rubric and tag: [key => count], most first.
+     * Cached per catalog version (a publication or withdrawal changes it). Never throws.
+     * @return array<string,int>
+     */
+    public static function topicCounts(): array
+    {
+        if (!self::available()) {
+            return [];
+        }
+        try {
+            $catalog = Db::catalogVersion();
+            $cached = function_exists('get_transient') ? get_transient(self::COUNTS_KEY) : false;
+            if (is_array($cached) && ($cached['catalog'] ?? null) === $catalog && is_array($cached['counts'] ?? null)) {
+                return $cached['counts'];
+            }
+            $wpdb = Db::wpdb();
+            $suppress = $wpdb->suppress_errors(true);
+            $rows = $wpdb->get_col('SELECT s.topics FROM ' . Db::table('search') . ' s JOIN ' . Db::table('issues') . " i ON i.id=s.issue_id AND i.state='published' JOIN "
+                . Db::table('articles') . ' a ON a.id=s.article_id AND a.public_json IS NOT NULL');
+            $wpdb->suppress_errors($suppress);
+            $counts = [];
+            foreach ((array) $rows as $topics) {
+                foreach (explode(' ', trim((string) $topics)) as $key) {
+                    if ($key !== '' && Topics::isTopic($key)) {
+                        $counts[$key] = ($counts[$key] ?? 0) + 1;
+                    }
+                }
+            }
+            arsort($counts);
+            if (function_exists('set_transient')) {
+                set_transient(self::COUNTS_KEY, ['catalog' => $catalog, 'counts' => $counts], DAY_IN_SECONDS);
+            }
+            return $counts;
+        } catch (\Throwable $e) {
+            return [];
+        }
+    }
+
+    public static function forgetCounts(): void
+    {
+        if (function_exists('delete_transient')) {
+            delete_transient(self::COUNTS_KEY);
+        }
     }
 
     // ---------------------------------------------------------------- display

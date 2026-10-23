@@ -4,6 +4,7 @@ namespace Kozlov\Gazeta\Data;
 
 use Kozlov\Gazeta\Domain\Duplicates;
 use Kozlov\Gazeta\Domain\Readiness;
+use Kozlov\Gazeta\Domain\Topics;
 use Kozlov\Gazeta\Domain\Validator;
 use Kozlov\Gazeta\Runtime\Mode;
 
@@ -573,7 +574,7 @@ final class Issues
 
     /**
      * Saves one article (or removes it) inside the working document.
-     * $meta (0.5): ['brief' => [why, context, next], 'facts_visible' => bool] — the blocks the JSON
+     * $meta (0.5): ['brief' => [why, context, next], 'facts_visible' => bool, 'focus'?, 'tags'? => ?{mode,tags}] — the blocks the JSON
      * format does not carry. Any save without a review mark resets the review, so an edited block
      * has to be confirmed again together with the text.
      * @return int|\WP_Error Issue id.
@@ -655,6 +656,11 @@ final class Issues
                     Meta::setDraft('article', $rowId, 'facts_visible', !empty($meta['facts_visible']) ? 1 : null);
                     if (array_key_exists('focus', $meta)) {
                         Meta::setDraft('article', $rowId, 'focus', Meta::cleanFocus($meta['focus']));
+                    }
+                    // 0.5.5: null returns the material to automatic topics.
+                    if (array_key_exists('tags', $meta)) {
+                        $tags = is_array($meta['tags']) ? Topics::cleanManual($meta['tags']) : null;
+                        Meta::setDraft('article', $rowId, 'tags', $tags !== null ? Topics::manualValue($tags) : null);
                     }
                 }
             }

@@ -12,6 +12,7 @@ use Kozlov\Gazeta\Domain\Labels;
 use Kozlov\Gazeta\Domain\Validator;
 use Kozlov\Gazeta\Front\View;
 use Kozlov\Gazeta\Http\Router;
+use Kozlov\Gazeta\Domain\Topics;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -83,6 +84,9 @@ final class ArticleScreen
             'focus' => $isNew ? null : ($meta['focus'][$article['id']] ?? null),
             'focus_src' => self::pickerSource((string) ($article['media_rights']['image_url'] ?? '')),
             'facts_preview' => Meta::factsFromClaims($article['claims']),
+            // 0.5.5: topics for search — the automatic ones of the saved text and the editor's own choice.
+            'tags_auto' => $isNew ? [] : Topics::auto($article),
+            'tags_manual' => $isNew ? null : ($meta['tags'][$article['id']] ?? null),
         ]);
         Ui::close();
     }

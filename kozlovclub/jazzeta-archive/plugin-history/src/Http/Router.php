@@ -84,7 +84,8 @@ final class Router
     }
 
     /** The query is appended already encoded (add_query_arg() in WordPress does not encode values). */
-    public static function search(string $query = '', int $page = 1): string
+    /** Search page; $topic (0.5.5) narrows the results to a rubric or a tag (Domain\Topics). */
+    public static function search(string $query = '', int $page = 1, string $topic = ''): string
     {
         $page = max(1, $page);
         // Until the rewrite rules are flushed after an update, the query-string address still works.
@@ -94,10 +95,17 @@ final class Router
         } else {
             $url = add_query_arg(['es_view' => 'search', 'es_page' => $page], home_url('/'));
         }
-        if ($query === '') {
+        $args = [];
+        if ($query !== '') {
+            $args[] = 'q=' . rawurlencode($query);
+        }
+        if ($topic !== '') {
+            $args[] = 'tema=' . rawurlencode($topic);
+        }
+        if (!$args) {
             return $url;
         }
-        return $url . (strpos($url, '?') === false ? '?' : '&') . 'q=' . rawurlencode($query);
+        return $url . (strpos($url, '?') === false ? '?' : '&') . implode('&', $args);
     }
 
     /** All crosswords, or the crossword of one issue date. Query-string fallback until rules are flushed. */

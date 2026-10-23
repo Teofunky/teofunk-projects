@@ -3,6 +3,7 @@
 namespace Kozlov\Gazeta\Data;
 
 use Kozlov\Gazeta\Domain\Crossword;
+use Kozlov\Gazeta\Domain\Topics;
 
 if (!defined('ABSPATH')) {
     exit;
@@ -11,7 +12,8 @@ if (!defined('ABSPATH')) {
 /**
  * Editorial properties that the JSON exchange format does not carry: the issue cover and,
  * per article, the blocks «Почему важно / Контекст / Что дальше» and the reader-visible list
- * of checked facts, (0.5.1) the focus point of a photo and (0.5.2) the crossword of the week.
+ * of checked facts, (0.5.1) the focus point of a photo, (0.5.2) the crossword of the week and
+ * (0.5.5) the editor's own choice of topics, when it replaces the automatic one (Domain\Topics).
  * Stored in the additive table wp_es_meta, in two layers: `draft` is what
  * the desk edits, `public` is a copy taken inside the publish transaction.
  *
@@ -33,7 +35,7 @@ final class Meta
     /**
      * Everything the presenter needs for one issue, keyed by article external id.
      * A missing table (upgrade not finished) reads as "no extras", never as an error page.
-     * @return array{cover:?array,briefs:array<string,array>,facts:array<string,array>,facts_visible:array<string,bool>,focus:array<string,array>,crossword:?array}
+     * @return array{cover:?array,briefs:array<string,array>,facts:array<string,array>,facts_visible:array<string,bool>,focus:array<string,array>,crossword:?array,tags:array<string,string[]>}
      */
     public static function forIssue(int $issueId, string $layer): array
     {
@@ -41,7 +43,7 @@ final class Meta
         if (isset(self::$cache[$key])) {
             return self::$cache[$key];
         }
-        $empty = ['cover' => null, 'briefs' => [], 'facts' => [], 'facts_visible' => [], 'focus' => [], 'crossword' => null];
+        $empty = ['cover' => null, 'briefs' => [], 'facts' => [], 'facts_visible' => [], 'focus' => [], 'crossword' => null, 'tags' => []];
         if ($issueId <= 0 || !in_array($layer, self::LAYERS, true)) {
             return $empty;
         }
@@ -86,6 +88,12 @@ final class Meta
                 $focus = self::cleanFocus($value);
                 if ($focus) {
                     $out['focus'][$id] = $focus;
+                }
+            } elseif ($row['meta_key'] === 'tags') {
+                // Only a manual choice is stored; an unreadable value means "automatic".
+                $tags = Topics::cleanManual($value);
+                if ($tags !== null) {
+                    $out['tags'][$id] = $tags;
                 }
             }
         }
@@ -160,7 +168,7 @@ final class Meta
     {
         $data = self::forIssue($issueId, 'draft');
         self::forget();
-        return ['cover' => $data['cover'], 'briefs' => $data['briefs'], 'facts_visible' => $data['facts_visible'], 'focus' => $data['focus'], 'crossword' => $data['crossword']];
+        return ['cover' => $data['cover'], 'briefs' => $data['briefs'], 'facts_visible' => $data['facts_visible'], 'focus' => $data['focus'], 'crossword' => $data['crossword'], 'tags' => $data['tags']];
     }
 
     /** Puts a snapshot back into the draft layer (restore of an old version). */
@@ -176,6 +184,13 @@ final class Meta
             self::put('article', (int) $row['id'], 'draft', 'brief', $brief ?: null);
             self::put('article', (int) $row['id'], 'draft', 'facts_visible', !empty($snapshot['facts_visible'][$externalId]) ? 1 : null);
             self::put('article', (int) $row['id'], 'draft', 'focus', isset($snapshot['focus'][$externalId]) ? self::cleanFocus($snapshot['focus'][$externalId]) : null);
+            // Snapshots older than 0.5.5 carry no tags key: the current choice stays as it is.
+            if (array_key_exists('tags', $snapshot)) {
+                $tags = isset($snapshot['tags'][$externalId]) && is_array($snapshot['tags'][$externalId])
+                    ? Topics::manualValue($snapshot['tags'][$externalId])
+                    : null;
+                self::put('article', (int) $row['id'], 'draft', 'tags', $tags);
+            }
         }
         self::forget();
     }

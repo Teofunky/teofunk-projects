@@ -71,7 +71,15 @@ final class Seo
     public static function forSearch(array $model): array
     {
         $query = (string) ($model['search']['query'] ?? '');
-        $title = ($query !== '' ? 'Поиск: «' . $query . '»' : 'Поиск по газете') . ' — ' . $model['brand'];
+        $topic = (string) ($model['search']['topic_label'] ?? '');
+        $parts = [];
+        if ($topic !== '') {
+            $parts[] = 'Тема «' . $topic . '»';
+        }
+        if ($query !== '') {
+            $parts[] = 'Поиск: «' . $query . '»';
+        }
+        $title = ($parts ? implode(' · ', $parts) : 'Поиск по газете') . ' — ' . $model['brand'];
         return [
             'title' => $title,
             'description' => '',
@@ -183,6 +191,10 @@ final class Seo
             ];
             if ($article['image']) {
                 $node['image'] = [$article['image']['url']];
+            }
+            // 0.5.5: the topics readers see under the article.
+            if (!empty($article['tag_links'])) {
+                $node['keywords'] = implode(', ', array_column($article['tag_links'], 'label'));
             }
             $graph[] = $node;
         } else {

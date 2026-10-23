@@ -24,7 +24,7 @@ foreach ($story['grid'] ?? [] as $hint) {
     $classes .= ' es-story--' . $hint;
 }
 ?>
-<article class="<?php echo esc_attr($classes); ?>" id="<?php echo esc_attr($story['anchor']); ?>" data-es-region="<?php echo esc_attr($story['region']); ?>" data-es-category="<?php echo esc_attr($story['category']); ?>" aria-labelledby="<?php echo esc_attr($story['anchor']); ?>-title">
+<article class="<?php echo esc_attr($classes); ?>" id="<?php echo esc_attr($story['anchor']); ?>" data-es-region="<?php echo esc_attr($story['region']); ?>" data-es-category="<?php echo esc_attr($story['category']); ?>" data-es-topics="<?php echo esc_attr(implode(' ', $story['topics'])); ?>" aria-labelledby="<?php echo esc_attr($story['anchor']); ?>-title">
     <?php if ($picture) : ?>
         <?php View::render('front/parts/figure', [
             'image' => $picture,
@@ -56,6 +56,9 @@ foreach ($story['grid'] ?? [] as $hint) {
                 <span class="es-story__event"><?php echo esc_html('Событие: ' . $story['event_date_label']); ?></span>
             <?php endif; ?>
             <?php if ($story['disclosure']) : ?><span class="es-story__disclosure">Связь с издателем</span><?php endif; ?>
+            <?php if ($story['tag_links']) : ?>
+                <span class="es-story__tags"><span class="es-sr">Темы: </span><?php foreach ($story['tag_links'] as $tag) : ?><a class="es-story__tag" href="<?php echo esc_url($tag['url']); ?>"><?php echo esc_html($tag['label']); ?></a><?php endforeach; ?></span>
+            <?php endif; ?>
         </p>
         <?php if ($lead && !$picture && $story['opening_html'] !== '') : ?>
             <div class="es-story__opening">

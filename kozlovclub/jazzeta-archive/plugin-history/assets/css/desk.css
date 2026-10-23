@@ -422,6 +422,11 @@ details.es-card.es-details { margin-top: 0; }
 .es-chip-check input:checked + span { background: var(--d-ink); color: #fff; border-color: var(--d-ink); }
 .es-chip-check input:focus-visible + span { outline: 2px solid var(--d-focus); }
 .es-chips-select:empty::before { content: "Сначала добавьте источник"; font-size: 12px; color: var(--d-muted); }
+/* 0.5.5: topics for search in the article properties */
+.es-topics { margin: 0 0 14px; padding: 0; border: 0; min-width: 0; }
+.es-topics .es-check { margin: 8px 0 4px; }
+.es-topics .es-hint { margin: 0; font-size: 12px; }
+.es-chip-check input:disabled + span { opacity: .45; cursor: not-allowed; }
 
 /* ------------------------------------------------------------ editor */
 

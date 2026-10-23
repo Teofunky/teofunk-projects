@@ -106,7 +106,7 @@ final class Db
     }
 
     /**
-     * The 0.3.5 schema plus the additive `meta` (0.5.0) and `search` (0.5.1) tables. Do not reformat: dbDelta compares column definitions.
+     * The 0.3.5 schema plus the additive `meta` (0.5.0) and `search` (0.5.1; column `topics` 0.5.5) tables. Do not reformat: dbDelta compares column definitions.
      * @return array<string,string> table suffix => column/key definitions
      */
     public static function schema(): array
@@ -173,7 +173,8 @@ final class Db
             // 0.5.0, additive: cover and article blocks the JSON format does not carry (Data\Meta).
             'meta' => "object_type varchar(16) NOT NULL,\n object_id bigint unsigned NOT NULL,\n layer varchar(8) NOT NULL,\n meta_key varchar(32) NOT NULL,\n meta_value longtext NOT NULL,\n updated_at datetime NOT NULL,\n updated_by bigint unsigned NOT NULL DEFAULT 0,\n PRIMARY KEY  (object_type,object_id,layer,meta_key)",
             // 0.5.1, additive and derived: normalised text of published articles for the search (Data\Search).
-            'search' => "article_id bigint unsigned NOT NULL,\n issue_id bigint unsigned NOT NULL,\n edition_date date NOT NULL,\n title text NOT NULL,\n body mediumtext NOT NULL,\n indexed_at datetime NOT NULL,\n PRIMARY KEY  (article_id),\n KEY issue_id (issue_id)",
+            // 0.5.5 adds `topics` (rubric and tags, space-padded); its default keeps older versions' inserts valid.
+            'search' => "article_id bigint unsigned NOT NULL,\n issue_id bigint unsigned NOT NULL,\n edition_date date NOT NULL,\n title text NOT NULL,\n body mediumtext NOT NULL,\n topics varchar(255) NOT NULL DEFAULT '',\n indexed_at datetime NOT NULL,\n PRIMARY KEY  (article_id),\n KEY issue_id (issue_id)",
         ];
     }
 }

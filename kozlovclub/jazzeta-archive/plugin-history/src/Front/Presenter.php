@@ -6,6 +6,7 @@ use Kozlov\Gazeta\Data\Search;
 use Kozlov\Gazeta\Domain\Crossword;
 use Kozlov\Gazeta\Domain\Labels;
 use Kozlov\Gazeta\Domain\Text;
+use Kozlov\Gazeta\Domain\Topics;
 use Kozlov\Gazeta\Domain\Validator;
 use Kozlov\Gazeta\Http\Router;
 
@@ -39,7 +40,7 @@ final class Presenter
 
     /**
      * @param array $doc  {edition_date, number, articles[], social[]}
-     * @param array $opts {preview:bool, issue_id:int, version:int, cover?:array, briefs?:array, facts?:array, focus?:array, crossword?:array} — the last five from Data\Meta
+     * @param array $opts {preview:bool, issue_id:int, version:int, cover?:array, briefs?:array, facts?:array, focus?:array, crossword?:array, tags?:array} — the last six from Data\Meta
      */
     public static function issue(array $doc, array $opts): array
     {
@@ -72,14 +73,36 @@ final class Presenter
         $words = 0;
         $regions = ['russia' => 0, 'world' => 0, 'mixed' => 0];
         $rubrics = [];
+        $tagChips = [];
         foreach ($stories as $story) {
             $words += $story['words'];
             $regions[$story['region']] = ($regions[$story['region']] ?? 0) + 1;
             if (!isset($rubrics[$story['category']])) {
-                $rubrics[$story['category']] = ['label' => $story['category_label'], 'anchor' => $story['anchor'], 'count' => 0];
+                $rubrics[$story['category']] = ['key' => $story['category'], 'kind' => 'rubric', 'label' => $story['category_label'], 'anchor' => $story['anchor'], 'count' => 0];
             }
             $rubrics[$story['category']]['count']++;
+            foreach ($story['tags'] as $tag) {
+                if (!isset($tagChips[$tag])) {
+                    $tagChips[$tag] = ['key' => $tag, 'kind' => 'tag', 'label' => Topics::label($tag), 'anchor' => $story['anchor'], 'count' => 0];
+                }
+                $tagChips[$tag]['count']++;
+            }
         }
+        // 0.5.5: «В номере» lists the rubrics, then the tags found in this issue (most first).
+        // «Фестивали» is a rubric and a tag: one chip, counting both.
+        foreach ($tagChips as $tag => $chip) {
+            if (isset($rubrics[$tag])) {
+                $rubrics[$tag]['count'] = 0;
+                foreach ($stories as $story) {
+                    $rubrics[$tag]['count'] += in_array($tag, $story['topics'], true) ? 1 : 0;
+                }
+                unset($tagChips[$tag]);
+            }
+        }
+        $tagOrder = array_flip(array_keys(Topics::TAGS));
+        uasort($tagChips, static function ($a, $b) use ($tagOrder) {
+            return [$b['count'], $tagOrder[$a['key']]] <=> [$a['count'], $tagOrder[$b['key']]];
+        });
 
         $byId = [];
         foreach ($stories as $story) {
@@ -116,6 +139,7 @@ final class Presenter
             'minutes' => max(1, Text::readingMinutes($words)),
             'regions' => $regions,
             'rubrics' => array_values($rubrics),
+            'topics' => array_merge(array_values($rubrics), array_values($tagChips)),
             'digest' => $digest,
             'cover' => self::cover($opts['cover'] ?? null, $stories[0] ?? null),
             // 0.5.2: the crossword of the week, when this issue carries one.
@@ -205,6 +229,16 @@ final class Presenter
                 }
             }
         }
+        // 0.5.5: topics for filters and search — the editor's choice or the automatic one.
+        $category = (string) $a['category'];
+        $tags = Topics::effective($a, isset($opts['tags'][$id]) && is_array($opts['tags'][$id]) ? $opts['tags'][$id] : null);
+        $tagLinks = [];
+        foreach (Topics::topics($category, $tags) as $key) {
+            // The rubric is already printed in the kicker; readers see only the other topics.
+            if ($key !== $category) {
+                $tagLinks[] = ['key' => $key, 'label' => Topics::label($key), 'url' => Router::search('', 1, $key)];
+            }
+        }
         return [
             'id' => $id,
             'slug' => $slug,
@@ -216,6 +250,10 @@ final class Presenter
             'region_label' => Labels::region((string) $a['region']),
             'category' => (string) $a['category'],
             'category_label' => Labels::category((string) $a['category']),
+            'category_url' => Router::search('', 1, $category),
+            'tags' => $tags,
+            'tag_links' => $tagLinks,
+            'topics' => Topics::topics($category, $tags),
             'rubric' => Labels::region((string) $a['region']) . ' · ' . Labels::category((string) $a['category']),
             'placement' => (string) $a['placement'],
             'headline' => Text::noWidow(Text::typograph((string) $a['headline'])),
@@ -371,6 +409,12 @@ final class Presenter
                 }
             }
             $rubric = array_filter([Labels::region((string) ($a['region'] ?? '')), Labels::category((string) ($a['category'] ?? ''))]);
+            $tags = [];
+            foreach (explode(' ', trim((string) ($row['topics'] ?? ''))) as $key) {
+                if ($key !== '' && Topics::isTag($key) && $key !== ($a['category'] ?? '')) {
+                    $tags[] = Topics::label($key);
+                }
+            }
             $items[] = [
                 'url' => Router::article((string) $row['slug']),
                 'issue_url' => Router::issue((string) $row['edition_date']),
@@ -380,6 +424,7 @@ final class Presenter
                 'human_date' => Labels::date((string) $row['edition_date']),
                 'number_label' => Labels::issueNumber($row['number']),
                 'rubric' => implode(' · ', $rubric),
+                'tags' => $tags,
             ];
         }
         return $items;
