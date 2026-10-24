@@ -308,6 +308,7 @@ function kny_default_data() {
 			'og_title'        => 'Новый год в Клубе Алексея Козлова',
 			'og_description'  => '31 декабря: джазовый бранч, концерты и новогодняя ночь с диджеями до 04:00. Программа, ужин и бронирование.',
 			'og_image'        => 'plugin:og-image.jpg',
+			'header_logo'     => 'plugin:logo-site.png',
 			'logo'            => 'plugin:club-logo.png',
 			'nav_program'     => 'Программа',
 			'nav_night'       => 'Новогодняя ночь',

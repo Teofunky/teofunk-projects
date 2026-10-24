@@ -257,7 +257,8 @@ function kny_schema() {
 			'tab'    => 'Общее и SEO',
 			'fields' => array(
 				'phone'           => kny_f( 'text', 'Телефон клуба', array( 'help' => 'Подставляется во все кнопки звонка и в {phone}.' ) ),
-				'logo'            => kny_f( 'image', 'Логотип (тёмный, на прозрачном фоне)', array( 'help' => 'В подвале автоматически становится светлым.' ) ),
+				'header_logo'     => kny_f( 'image', 'Логотип в шапке', array( 'help' => 'Как на сайте. Ведёт на главную kozlovclub.ru.' ) ),
+				'logo'            => kny_f( 'image', 'Логотип в подвале', array( 'help' => 'Тёмный на прозрачном фоне: в подвале сам становится светлым.' ) ),
 				'_seo'            => kny_f( 'sub', 'Поисковики и соцсети' ),
 				'seo_title'       => kny_f( 'text', 'Title страницы', array( 'wide' => true, 'help' => 'До 70 знаков.', 'counter' => 70 ) ),
 				'seo_description' => kny_f( 'textarea', 'Description', array( 'wide' => true, 'help' => 'До 160 знаков.', 'counter' => 160 ) ),
