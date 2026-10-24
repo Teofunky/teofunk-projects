@@ -2,6 +2,7 @@
 
 namespace Kozlov\Gazeta\Runtime;
 
+use Kozlov\Gazeta\Data\Crosswords;
 use Kozlov\Gazeta\Data\Db;
 use Kozlov\Gazeta\Data\Issues;
 use Kozlov\Gazeta\Http\Router;
@@ -30,6 +31,10 @@ final class Cache
         $urls = self::common();
         $urls[] = Router::issue((string) $issue['edition_date']);
         $urls[] = Router::crossword((string) $issue['edition_date']);
+        // 0.5.9: the crossword shows on the issues of its week too.
+        foreach (Crosswords::weekDates((string) $issue['edition_date']) as $date) {
+            $urls[] = Router::issue($date);
+        }
         foreach (Issues::articleRows($issueId, false) as $row) {
             $urls[] = Router::article((string) $row['slug']);
         }

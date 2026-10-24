@@ -144,10 +144,16 @@ final class Presenter
             'digest' => $digest,
             'cover' => self::cover($opts['cover'] ?? null, $stories[0] ?? null),
             // 0.5.2: the crossword of the week, when this issue carries one.
+            // 0.5.9: the teaser links to the crossword's own date, which may be an earlier issue of the week.
             'crossword' => !empty($opts['crossword']) && is_array($opts['crossword'])
-                ? self::crosswordTeaser($opts['crossword'], $doc['edition_date'], $doc['number'] ?? null, $opts['preview']
-                    ? Router::preview((int) $opts['issue_id'], (int) $opts['version']) . '&crossword=1'
-                    : Router::crossword($doc['edition_date']))
+                ? self::crosswordTeaser(
+                    $opts['crossword'],
+                    (string) ($opts['crossword_date'] ?? $doc['edition_date']),
+                    array_key_exists('crossword_date', $opts) ? ($opts['crossword_number'] ?? null) : ($doc['number'] ?? null),
+                    $opts['preview']
+                        ? Router::preview((int) $opts['issue_id'], (int) $opts['version']) . '&crossword=1'
+                        : Router::crossword((string) ($opts['crossword_date'] ?? $doc['edition_date']))
+                )
                 : null,
             'url' => $opts['preview'] ? Router::preview((int) $opts['issue_id'], (int) $opts['version']) : Router::issue($doc['edition_date']),
         ];

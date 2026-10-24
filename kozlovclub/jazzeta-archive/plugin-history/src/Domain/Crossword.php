@@ -13,7 +13,8 @@ if (!defined('ABSPATH')) {
  *
  * The editor sends answers and clues only — a JSON file or plain lines «Ответ — вопрос».
  * The grid is built here (CrosswordBuilder). The stored crossword lives in wp_es_meta under
- * the issue (key `crossword`, draft and public layers) and goes public with the issue.
+ * the issue (key `crossword`, draft and public layers) and goes public with the issue. From 0.5.9 it
+ * hangs on seven issues from its date (Data\Crosswords::activeFor()); the next one replaces it.
  *
  * Answers reach the reader's browser lightly encoded so that a glance at the page source does
  * not spoil the puzzle. This is not protection: there is no prize, and the full solution is

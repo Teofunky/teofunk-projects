@@ -167,6 +167,8 @@ final class Controller
     {
         $doc = Db::decode($issue['public_json']);
         $meta = $meta ?? Meta::forIssue((int) $issue['id'], 'public');
+        // 0.5.9: the crossword of the week hangs on every issue of its week, not only on its own issue.
+        $active = Crosswords::activeFor((string) $issue['edition_date']);
         $model = self::base($articleSlug !== null ? 'article' : 'issue');
         $model['issue'] = Presenter::issue($doc, [
             'preview' => false,
@@ -176,7 +178,9 @@ final class Controller
             'briefs' => $meta['briefs'] ?? [],
             'facts' => $meta['facts'] ?? [],
             'focus' => $meta['focus'] ?? [],
-            'crossword' => $meta['crossword'] ?? null,
+            'crossword' => $active['crossword'] ?? null,
+            'crossword_date' => $active['edition_date'] ?? null,
+            'crossword_number' => $active['number'] ?? null,
             'tags' => $meta['tags'] ?? [],
         ]);
         $model['issue']['published_at'] = $issue['published_at'];
