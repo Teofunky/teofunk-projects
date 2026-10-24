@@ -13,13 +13,14 @@ if (!defined('ABSPATH')) {
 $search = $v['search'];
 $chips = (array) ($search['topics'] ?? []) + ['rubrics' => [], 'tags' => []];
 $topicLabel = (string) ($search['topic_label'] ?? '');
-$inTopic = $topicLabel !== '' ? ' в теме «' . $topicLabel . '»' : '';
+// 0.5.8: « в рубрике «Джаз» и теме «Релизы»» — a rubric and a topic can be chosen together.
+$inTopic = (string) ($search['filter_phrase'] ?? ($topicLabel !== '' ? ' в теме «' . $topicLabel . '»' : ''));
 $byQuery = !empty($search['has_words']) ? ' по запросу «' . $search['query'] . '»' : '';
 ?>
 <section class="es-searchpage" aria-labelledby="es-search-title">
     <header class="es-page-head">
         <h1 class="es-page-head__title" id="es-search-title">Поиск по газете</h1>
-        <?php View::render('front/parts/searchform', $v + ['form' => ['id' => 'page', 'label' => $topicLabel !== '' ? 'Что найти в теме «' . $topicLabel . '»' : 'Что найти в опубликованных номерах']]); ?>
+        <?php View::render('front/parts/searchform', $v + ['form' => ['id' => 'page', 'label' => $inTopic !== '' ? 'Что найти' . $inTopic : 'Что найти в опубликованных номерах']]); ?>
     </header>
 
     <?php if ($chips['rubrics'] || $chips['tags']) : ?>
@@ -32,7 +33,7 @@ $byQuery = !empty($search['has_words']) ? ' по запросу «' . $search['q
                     <span class="es-topicnav__label"><?php echo esc_html($title); ?></span>
                     <ul>
                         <?php foreach ($chips[$group] as $chip) : ?>
-                            <li><a class="es-topicnav__chip" href="<?php echo esc_url($chip['url']); ?>"<?php echo $chip['active'] ? ' aria-current="true"' : ''; ?>><?php echo esc_html($chip['label']); ?><?php if ($chip['count'] > 0) : ?> <span class="es-topicnav__count"><?php echo (int) $chip['count']; ?></span><?php endif; ?><?php if ($chip['active']) : ?><span class="es-topicnav__x" aria-hidden="true">×</span><span class="es-sr"> — показать все темы</span><?php endif; ?></a></li>
+                            <li><a class="es-topicnav__chip" href="<?php echo esc_url($chip['url']); ?>"<?php echo $chip['active'] ? ' aria-current="true"' : ''; ?>><?php echo esc_html($chip['label']); ?><?php if ($chip['count'] > 0) : ?> <span class="es-topicnav__count"><?php echo (int) $chip['count']; ?></span><?php endif; ?><?php if ($chip['active']) : ?><span class="es-topicnav__x" aria-hidden="true">×</span><span class="es-sr"> (снять фильтр)</span><?php endif; ?></a></li>
                         <?php endforeach; ?>
                     </ul>
                 </div>
@@ -48,9 +49,9 @@ $byQuery = !empty($search['has_words']) ? ' по запросу «' . $search['q
         <p class="es-searchpage__note" role="status">Слишком короткий запрос. Добавьте имя или слово подлиннее.</p>
     <?php elseif (!$search['total']) : ?>
         <?php if ($byQuery === '') : ?>
-            <p class="es-searchpage__note" role="status">В теме «<?php echo esc_html($topicLabel); ?>» пока нет опубликованных материалов. Все номера по датам — в разделе <a href="<?php echo esc_url($v['urls']['archive']); ?>">«Все выпуски»</a>.</p>
+            <p class="es-searchpage__note" role="status"><?php echo esc_html(Labels::ucfirst(ltrim($inTopic))); ?> пока нет опубликованных материалов.<?php if ($search['topic_clear'] !== '' && $search['rubric'] !== '' && $search['topic'] !== '') : ?> <a href="<?php echo esc_url($search['topic_clear']); ?>">Снять оба фильтра</a>.<?php endif; ?> Все номера по датам — в разделе <a href="<?php echo esc_url($v['urls']['archive']); ?>">«Все выпуски»</a>.</p>
         <?php else : ?>
-            <p class="es-searchpage__note" role="status"><?php echo esc_html(Labels::ucfirst(ltrim($byQuery . $inTopic))); ?> ничего не нашлось. Проверьте написание или попробуйте другое слово.<?php if ($inTopic !== '') : ?> <a href="<?php echo esc_url($search['topic_clear']); ?>">Искать во всех темах</a>.<?php endif; ?> Все номера по датам — в разделе <a href="<?php echo esc_url($v['urls']['archive']); ?>">«Все выпуски»</a>.</p>
+            <p class="es-searchpage__note" role="status"><?php echo esc_html(Labels::ucfirst(ltrim($byQuery . $inTopic))); ?> ничего не нашлось. Проверьте написание или попробуйте другое слово.<?php if ($inTopic !== '') : ?> <a href="<?php echo esc_url($search['topic_clear']); ?>">Искать во всех рубриках и темах</a>.<?php endif; ?> Все номера по датам — в разделе <a href="<?php echo esc_url($v['urls']['archive']); ?>">«Все выпуски»</a>.</p>
         <?php endif; ?>
     <?php else : ?>
         <p class="es-searchpage__summary" role="status">
@@ -60,9 +61,19 @@ $byQuery = !empty($search['has_words']) ? ' по запросу «' . $search['q
             <?php foreach ($search['items'] as $item) : ?>
                 <li class="es-result">
                     <p class="es-result__meta">
-                        <?php if ($item['rubric'] !== '') : ?><span class="es-result__rubric"><?php echo esc_html($item['rubric']); ?></span><?php endif; ?>
-                        <?php if (!empty($item['tags'])) : ?><span class="es-result__tags"><?php echo esc_html(implode(' · ', $item['tags'])); ?></span><?php endif; ?>
-                        <a class="es-result__issue" href="<?php echo esc_url($item['issue_url']); ?>"><time datetime="<?php echo esc_attr($item['date']); ?>"><?php echo esc_html($item['human_date']); ?></time> · <?php echo esc_html($item['number_label']); ?></a>
+                        <?php
+                        // 0.5.8: the parts are separated by «·» for the eye and for copy-paste, not only by a gap.
+                        $metaParts = [];
+                        if ($item['rubric'] !== '') {
+                            $metaParts[] = '<span class="es-result__rubric">' . esc_html($item['rubric']) . '</span>';
+                        }
+                        if (!empty($item['tags'])) {
+                            $metaParts[] = '<span class="es-result__tags">' . esc_html(implode(' · ', $item['tags'])) . '</span>';
+                        }
+                        echo implode('<span class="es-result__sep" aria-hidden="true">·</span>', $metaParts); // Each part escaped above.
+                        // The date and the issue go on their own line, so no «·» hangs at a line end.
+                        echo ' <a class="es-result__issue" href="' . esc_url($item['issue_url']) . '"><time datetime="' . esc_attr($item['date']) . '">' . esc_html($item['human_date']) . '</time> · ' . esc_html($item['number_label']) . '</a>';
+                        ?>
                     </p>
                     <h2 class="es-result__title"><a href="<?php echo esc_url($item['url']); ?>"><?php echo $item['headline_html']; // Escaped by Data\Search::highlight(). ?></a></h2>
                     <?php if ($item['snippet_html'] !== '') : ?><p class="es-result__text"><?php echo $item['snippet_html']; // Escaped by Data\Search::snippet(). ?></p><?php endif; ?>

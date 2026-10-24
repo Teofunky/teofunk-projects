@@ -1,7 +1,8 @@
 <?php
 /**
- * "Номер в двух словах": one sentence per story with a link to the material. The 4:5 cards
- * for social networks sit in a closed <details>; copy and PNG buttons appear only with JS.
+ * "Номер в двух словах": one sentence per story with a link to the material. Since 0.5.7 the whole
+ * block is a closed «Поделиться номером» drawer; the 4:5 cards for social networks sit in a second
+ * closed <details> inside it; copy and PNG buttons appear only with JS.
  * Nothing is posted anywhere automatically.
  * @var array $v
  */
@@ -25,7 +26,9 @@ $payload = [
     'items' => $issue['digest'],
 ];
 ?>
-<section class="es-digest" id="es-digest" aria-labelledby="es-digest-title">
+<?php // 0.5.7: a closed drawer under the issue. Open, the same five sentences repeated the issue a second time. ?>
+<details class="es-digest" id="es-digest">
+    <summary class="es-digest__summary">Поделиться номером <span class="es-digest__hint">коротко для мессенджера и карточки для соцсетей</span></summary>
     <div class="es-digest__head">
         <h2 id="es-digest-title" class="es-digest__title">Номер в двух словах</h2>
         <button type="button" class="es-button es-button--quiet" data-es-copy-digest hidden>
@@ -65,4 +68,4 @@ $payload = [
     </details>
     <p class="es-digest__status" role="status" data-es-digest-status><?php echo $v['private'] ? 'Закрытый просмотр: карточки помечены как черновик, ссылок на неопубликованные материалы нет.' : ''; ?></p>
     <script type="application/json" id="es-digest-data"><?php echo wp_json_encode($payload, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?></script>
-</section>
+</details>

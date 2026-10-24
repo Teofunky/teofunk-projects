@@ -23,6 +23,11 @@ $classes = 'es-story' . ($lead ? ' es-story--lead' : '') . ($picture ? ' es-stor
 foreach ($story['grid'] ?? [] as $hint) {
     $classes .= ' es-story--' . $hint;
 }
+// 0.5.7: where the opening of the text is printed (lead without a photo, «Газета» on a wide
+// screen), it has its own «Читать дальше»; the one after the lead is hidden there by CSS.
+if ($lead && !$picture && $story['opening_html'] !== '') {
+    $classes .= ' es-story--opening';
+}
 ?>
 <article class="<?php echo esc_attr($classes); ?>" id="<?php echo esc_attr($story['anchor']); ?>" data-es-region="<?php echo esc_attr($story['region']); ?>" data-es-category="<?php echo esc_attr($story['category']); ?>" data-es-topics="<?php echo esc_attr(implode(' ', $story['topics'])); ?>" aria-labelledby="<?php echo esc_attr($story['anchor']); ?>-title">
     <?php if ($picture) : ?>
@@ -40,27 +45,30 @@ foreach ($story['grid'] ?? [] as $hint) {
             <span class="es-story__rubric"><?php echo esc_html($story['rubric']); ?></span>
         </p>
         <h2 class="es-story__title" id="<?php echo esc_attr($story['anchor']); ?>-title"><a href="<?php echo esc_url($story['url']); ?>"><?php echo esc_html($story['headline']); ?></a></h2>
-        <p class="es-story__dek"><?php echo esc_html($story['lead']); ?></p>
+        <p class="es-story__dek"><?php echo esc_html($story['lead']); ?><?php if (!empty($story['has_body'])) : ?> <a class="es-story__more" href="<?php echo esc_url($story['url']); ?>">Читать дальше<span class="es-sr">: <?php echo esc_html($story['headline_plain']); ?></span>&nbsp;→</a><?php endif; ?></p>
         <?php if ($why) : ?>
             <p class="es-story__why"><strong><?php echo esc_html($why['title']); ?>.</strong> <?php echo esc_html($why['text']); ?></p>
         <?php endif; ?>
         <?php
         // 0.5.6: one quiet line — where the news comes from and what it is about. Evidence levels,
         // reading time and the event date stay in the desk and in the text.
-        $meta = [];
+        // 0.5.7: the source is named as a source («Источник: Nonesuch ↗»), so it is not read as one
+        // more topic. «Связь с издателем» is explained on the material's page only: on the card it
+        // was a word without context that looked like a button.
+        // The source and the topics are two groups on two lines, so no «·» is left hanging at a line end.
+        $from = '';
         if ($story['source']) {
-            $meta[] = '<a class="es-story__source" href="' . esc_url($story['source']['url']) . '" target="_blank" rel="noopener noreferrer">'
-                . esc_html($story['source']['publisher']) . '<span class="es-sr"> — первоисточник, откроется в новой вкладке</span><span class="es-story__ext" aria-hidden="true">↗</span></a>';
+            $from = '<span class="es-story__from"><span class="es-story__label">Источник:</span> <a class="es-story__source" href="' . esc_url($story['source']['url']) . '" target="_blank" rel="noopener noreferrer">'
+                . esc_html($story['source']['publisher']) . '<span class="es-sr"> (откроется в новой вкладке)</span><span class="es-story__ext" aria-hidden="true">↗</span></a></span>';
         }
+        $tags = [];
         foreach ($story['tag_links'] as $tag) {
-            $meta[] = '<a class="es-story__tag" href="' . esc_url($tag['url']) . '"><span class="es-sr">Тема: </span>' . esc_html($tag['label']) . '</a>';
+            $tags[] = '<a class="es-story__tag" href="' . esc_url($tag['url']) . '"><span class="es-sr">Тема: </span>' . esc_html($tag['label']) . '</a>';
         }
-        if ($story['disclosure']) {
-            $meta[] = '<span class="es-story__disclosure">Связь с издателем</span>';
-        }
+        $tagsHtml = $tags ? '<span class="es-story__tags">' . implode(' <span class="es-story__sep" aria-hidden="true">·</span> ', $tags) . '</span>' : '';
         ?>
-        <?php if ($meta) : ?>
-            <p class="es-story__meta"><?php echo implode(' <span class="es-story__sep" aria-hidden="true">·</span> ', $meta); // Each item escaped above. ?></p>
+        <?php if ($from !== '' || $tagsHtml !== '') : ?>
+            <p class="es-story__meta"><?php echo $from . ($from !== '' && $tagsHtml !== '' ? ' ' : '') . $tagsHtml; // Each item escaped above. ?></p>
         <?php endif; ?>
         <?php if ($lead && !$picture && $story['opening_html'] !== '') : ?>
             <div class="es-story__opening">

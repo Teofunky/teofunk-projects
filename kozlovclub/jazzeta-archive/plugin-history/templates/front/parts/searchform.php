@@ -23,6 +23,11 @@ $topic = (string) ($v['search']['topic'] ?? '');
 if ($topic !== '') {
     $hidden['tema'] = $topic;
 }
+// 0.5.8: and inside the chosen rubric.
+$rubric = (string) ($v['search']['rubric'] ?? '');
+if ($rubric !== '') {
+    $hidden['rubric'] = $rubric;
+}
 ?>
 <form class="es-search" role="search" action="<?php echo esc_url($action); ?>" method="get">
     <label class="es-search__label" for="<?php echo esc_attr($id); ?>"><?php echo esc_html($label); ?></label>

@@ -25,7 +25,7 @@ $nameTag = $isFront ? 'h1' : 'p';
                 <?php if ($over !== '') : ?><span class="es-mast__over"><?php echo esc_html($over); ?></span> <?php endif; ?>
                 <span class="es-mast__main"><?php echo esc_html($main); ?></span>
             <?php endif; ?>
-            <?php if ($isFront && $issue) : ?><span class="es-sr">, номер за <?php echo esc_html($issue['long_date']); ?></span><?php endif; ?>
+            <?php if ($isFront && $issue) : ?><span class="es-sr">, <?php echo esc_html(($issue['number'] ? $issue['number_label'] . ', ' : '') . $issue['human_date']); ?></span><?php endif; ?>
         </a>
     </<?php echo $nameTag; ?>>
     <p class="es-mast__motto"><?php echo esc_html($s['motto']); ?></p>
@@ -40,7 +40,9 @@ $nameTag = $isFront ? 'h1' : 'p';
         <nav class="es-mast__nav" aria-label="Газета">
             <a href="<?php echo esc_url($homeUrl); ?>"<?php echo $isFront && !empty($issue['is_latest']) ? ' aria-current="page"' : ''; ?>>Свежий номер</a>
             <a href="<?php echo esc_url($v['urls']['archive']); ?>"<?php echo $v['view'] === 'archive' ? ' aria-current="page"' : ''; ?>>Все выпуски</a>
-            <a class="es-mast__search" href="<?php echo esc_url($v['urls']['search']); ?>"<?php echo $v['view'] === 'search' ? ' aria-current="page"' : ''; ?>><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m10.4 10.4 3.6 3.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>Поиск</a>
+            <?php // 0.5.7: the weekly crossword is a section of the newspaper, not a footer link. ?>
+            <a href="<?php echo esc_url($v['urls']['crosswords']); ?>"<?php echo in_array($v['view'], ['crosswords', 'crossword'], true) ? ' aria-current="page"' : ''; ?>>Кроссворды</a>
+            <a class="es-mast__search" href="<?php echo esc_url($v['urls']['search']); ?>"<?php echo $v['view'] === 'search' ? ' aria-current="page"' : ''; ?>><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="m10.4 10.4 3.6 3.6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span class="es-mast__search-label">Поиск</span></a>
         </nav>
     </div>
 </header>

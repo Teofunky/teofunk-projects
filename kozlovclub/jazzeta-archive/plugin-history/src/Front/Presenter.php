@@ -253,7 +253,7 @@ final class Presenter
             'region_label' => Labels::region((string) $a['region']),
             'category' => (string) $a['category'],
             'category_label' => Labels::category((string) $a['category']),
-            'category_url' => Router::search('', 1, $category),
+            'category_url' => Router::search('', 1, '', $category),
             'tags' => $tags,
             'tag_links' => $tagLinks,
             'topics' => Topics::topics($category, $tags),
@@ -267,6 +267,8 @@ final class Presenter
             'body_html' => Text::typographHtml($bodyHtml),
             'opening_html' => $openingHtml,
             'opening_more' => $hasMore,
+            // 0.5.7: the material has text beyond the lead, so the card says «Читать дальше →».
+            'has_body' => trim(wp_strip_all_tags($bodyHtml)) !== '',
             'words' => $words,
             'minutes' => Text::readingMinutes($words),
             'event_date' => $a['event_date'] ?? null,
@@ -418,18 +420,38 @@ final class Presenter
         return '';
     }
 
+    /** A query stem starts a word of the text (the same rule as Data\Search::snippet()). */
+    private static function hasTerm(string $text, array $terms): bool
+    {
+        if (!$terms) {
+            return false;
+        }
+        $quoted = array_map(static function ($t) {
+            return preg_quote((string) $t, '/');
+        }, $terms);
+        return (bool) preg_match('/(?<![\p{L}\p{N}])(?:' . implode('|', $quoted) . ')/u', Search::fold($text));
+    }
+
     /** Search results for the template: highlighted headline and passage, date, number and rubric. */
     public static function searchResults(array $rows, array $terms): array
     {
         $items = [];
         foreach ($rows as $row) {
             $a = (array) ($row['article'] ?? []);
-            $parts = [Search::plain((string) ($a['lead'] ?? ''))];
+            $lead = Search::plain((string) ($a['lead'] ?? ''));
+            $body = [];
             foreach ((array) ($a['body_paragraphs'] ?? []) as $paragraph) {
                 if (is_scalar($paragraph)) {
-                    $parts[] = Search::plain((string) $paragraph);
+                    $body[] = Search::plain((string) $paragraph);
                 }
             }
+            // 0.5.8: the whole lead, as on the front page, never «лид + начало текста…» cut mid-sentence.
+            // Only when the words are found in the text and not in the headline or lead does the
+            // passage around them stand in for the lead.
+            $inHead = !$terms || self::hasTerm($lead . ' ' . Search::plain((string) ($a['headline'] ?? '')), $terms);
+            $snippet = $inHead || !$body
+                ? Search::highlight($lead, $terms)
+                : Search::snippet(implode(' ', $body), $terms);
             $rubric = array_filter([Labels::region((string) ($a['region'] ?? '')), Labels::category((string) ($a['category'] ?? ''))]);
             $tags = [];
             foreach (explode(' ', trim((string) ($row['topics'] ?? ''))) as $key) {
@@ -441,7 +463,7 @@ final class Presenter
                 'url' => Router::article((string) $row['slug']),
                 'issue_url' => Router::issue((string) $row['edition_date']),
                 'headline_html' => Text::typographHtml(Search::highlight(Search::plain((string) ($a['headline'] ?? '')), $terms)),
-                'snippet_html' => Text::typographHtml(Search::snippet(implode(' ', $parts), $terms)),
+                'snippet_html' => Text::typographHtml($snippet),
                 'date' => (string) $row['edition_date'],
                 'human_date' => Labels::date((string) $row['edition_date']),
                 'number_label' => Labels::issueNumber($row['number']),

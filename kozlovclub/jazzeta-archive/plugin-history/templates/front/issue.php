@@ -36,7 +36,7 @@ $stories = $issue['stories'];
                             $firstTag = false;
                         }
                         ?>
-                        <li class="<?php echo esc_attr($class); ?>"><a href="#<?php echo esc_attr($topic['anchor']); ?>" data-es-topic="<?php echo esc_attr($topic['key']); ?>"><?php echo esc_html($topic['label']); ?><?php if ($topic['count'] > 1) : ?> <span class="es-rubrics__count"><?php echo (int) $topic['count']; ?></span><?php endif; ?></a></li>
+                        <li class="<?php echo esc_attr($class); ?>"><a href="#<?php echo esc_attr($topic['anchor']); ?>" data-es-topic="<?php echo esc_attr($topic['key']); ?>"><?php echo esc_html($topic['label']); ?><?php if ($topic['count'] >= 1) : // 0.5.8: «Концерты 1» too, not a bare word next to «Релизы 3». ?> <span class="es-rubrics__count"><?php echo (int) $topic['count']; ?></span><?php endif; ?></a></li>
                     <?php endforeach; ?>
                 </ul>
             </div>

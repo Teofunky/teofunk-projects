@@ -278,17 +278,19 @@ final class Search
      * $topic (0.5.5): only materials of this rubric or tag; without words they go newest first.
      * @return array{query:string,terms:string[],topic:string,total:int,pages:int,page:int,rows:array<int,array>,fresh:bool}
      */
-    public static function find(string $query, int $page, string $topic = ''): array
+    public static function find(string $query, int $page, string $topic = '', string $rubric = ''): array
     {
         $page = max(1, min(self::MAX_PAGES, $page));
         $topic = Topics::isTopic($topic) ? $topic : '';
+        // 0.5.8: a rubric is a second, independent filter: «Джаз» + «Релизы».
+        $rubric = Topics::isTopic($rubric) && $rubric !== $topic ? $rubric : '';
         if (!self::available()) {
-            return ['query' => trim(substr($query, 0, self::MAX_QUERY)), 'terms' => [], 'topic' => $topic, 'total' => 0, 'pages' => 0, 'page' => $page, 'rows' => [], 'fresh' => false, 'unavailable' => true];
+            return ['query' => trim(substr($query, 0, self::MAX_QUERY)), 'terms' => [], 'topic' => $topic, 'rubric' => $rubric, 'total' => 0, 'pages' => 0, 'page' => $page, 'rows' => [], 'fresh' => false, 'unavailable' => true];
         }
         $query = trim(mb_substr($query, 0, self::MAX_QUERY));
         $terms = self::terms($query);
-        $out = ['query' => $query, 'terms' => $terms, 'topic' => $topic, 'total' => 0, 'pages' => 0, 'page' => $page, 'rows' => [], 'fresh' => true];
-        if (!$terms && $topic === '') {
+        $out = ['query' => $query, 'terms' => $terms, 'topic' => $topic, 'rubric' => $rubric, 'total' => 0, 'pages' => 0, 'page' => $page, 'rows' => [], 'fresh' => true];
+        if (!$terms && $topic === '' && $rubric === '') {
             return $out;
         }
         $out['fresh'] = self::isFresh();
@@ -307,9 +309,9 @@ final class Search
             $score[] = '(s.title LIKE %s)*3 + (s.body LIKE %s)';
             array_push($scoreArgs, $like, $like);
         }
-        if ($topic !== '') {
+        foreach (array_filter([$topic, $rubric]) as $key) {
             $where[] = 's.topics LIKE %s';
-            $whereArgs[] = '% ' . $wpdb->esc_like($topic) . ' %';
+            $whereArgs[] = '% ' . $wpdb->esc_like($key) . ' %';
         }
         if (!$score) {
             $score[] = '0';

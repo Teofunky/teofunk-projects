@@ -31,9 +31,7 @@ $hasFacts = $a['facts']['confirmed'] || $a['facts']['single'];
         </p>
         <h1 class="es-article__title" id="es-article-title"><?php echo esc_html($a['headline']); ?></h1>
         <p class="es-article__dek"><?php echo esc_html($a['lead']); ?></p>
-        <p class="es-article__byline">
-            <span>Выпуск <time datetime="<?php echo esc_attr($issue['date']); ?>"><?php echo esc_html($issue['human_date']); ?></time></span>
-        </p>
+        <?php // 0.5.8: no «Выпуск 24 октября 2026» here: the path above names the issue and its date. ?>
     </header>
 
     <?php if ($a['image']) : ?>
@@ -123,10 +121,10 @@ $hasFacts = $a['facts']['confirmed'] || $a['facts']['single'];
 
     <nav class="es-pager" aria-label="Материалы этого номера">
         <?php if ($a['prev']) : ?>
-            <a class="es-pager__link" rel="prev" href="<?php echo esc_url($a['prev']['url']); ?>"><span class="es-pager__dir">← Предыдущий материал</span><span class="es-pager__title"><?php echo esc_html($a['prev']['headline']); ?></span></a>
+            <a class="es-pager__link" rel="prev" href="<?php echo esc_url($a['prev']['url']); ?>"><span class="es-pager__dir">← Предыдущий материал</span><span class="es-sr">: </span><span class="es-pager__title"><?php echo esc_html($a['prev']['headline']); ?></span></a>
         <?php endif; ?>
         <?php if ($a['next']) : ?>
-            <a class="es-pager__link es-pager__link--next" rel="next" href="<?php echo esc_url($a['next']['url']); ?>"><span class="es-pager__dir">Следующий материал →</span><span class="es-pager__title"><?php echo esc_html($a['next']['headline']); ?></span></a>
+            <a class="es-pager__link es-pager__link--next" rel="next" href="<?php echo esc_url($a['next']['url']); ?>"><span class="es-pager__dir">Следующий материал →</span><span class="es-sr">: </span><span class="es-pager__title"><?php echo esc_html($a['next']['headline']); ?></span></a>
         <?php endif; ?>
     </nav>
 

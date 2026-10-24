@@ -72,8 +72,11 @@ final class Seo
     {
         $query = (string) ($model['search']['query'] ?? '');
         $topic = (string) ($model['search']['topic_label'] ?? '');
+        $filterTitle = (string) ($model['search']['filter_title'] ?? '');
         $parts = [];
-        if ($topic !== '') {
+        if ($filterTitle !== '') {
+            $parts[] = $filterTitle; // 0.5.8: «Рубрика «Джаз» · Тема «Релизы»»
+        } elseif ($topic !== '') {
             $parts[] = 'Тема «' . $topic . '»';
         }
         if ($query !== '') {

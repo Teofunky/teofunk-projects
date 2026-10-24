@@ -70,7 +70,7 @@ final class StyleHints
         $media = is_array($article['media_rights'] ?? null) ? $article['media_rights'] : [];
         $credit = self::scalar($media['credit'] ?? '');
         if ($credit !== '' && Credit::clean($credit) !== trim((string) preg_replace('/\s+/u', ' ', $credit))) {
-            array_unshift($hints, ['advice' => 'В подписи к фото служебная пометка. Читатель её не увидит — сайт срезает её сам, — но в данных лучше убрать.', 'quote' => self::clip($credit)]);
+            array_unshift($hints, ['advice' => 'В подписи к фото служебная пометка или адрес ссылки текстом. Читатель их не увидит (сайт убирает их сам), но в данных лучше поправить.', 'quote' => self::clip($credit)]);
         }
         [$news, $picture] = Credit::split(is_array($article['sources'] ?? null) ? $article['sources'] : []);
         $page = array_filter($picture, static function ($source) {

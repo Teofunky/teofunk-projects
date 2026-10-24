@@ -298,7 +298,15 @@ final class Controller
         $raw = isset($_GET['q']) && is_string($_GET['q']) ? sanitize_text_field(wp_unslash($_GET['q'])) : '';
         // 0.5.5: «?tema=releases» — a rubric or a tag (Domain\Topics); anything else is ignored.
         $topic = isset($_GET['tema']) && is_string($_GET['tema']) ? sanitize_key(wp_unslash($_GET['tema'])) : '';
-        $found = Search::find($raw, $page, Topics::isTopic($topic) ? $topic : '');
+        $topic = Topics::isTopic($topic) ? $topic : '';
+        // 0.5.8: «?rubric=jazz» is a separate filter; a rubric in «tema» (links before 0.5.8) moves there.
+        $rubric = isset($_GET['rubric']) && is_string($_GET['rubric']) ? sanitize_key(wp_unslash($_GET['rubric'])) : '';
+        $rubric = isset(Labels::CATEGORIES[$rubric]) ? $rubric : '';
+        if ($rubric === '' && isset(Labels::CATEGORIES[$topic])) {
+            $rubric = $topic;
+            $topic = '';
+        }
+        $found = Search::find($raw, $page, $topic, $rubric);
         if ($page > 1 && $page > $found['pages']) {
             self::notFound();
         }
@@ -312,22 +320,38 @@ final class Controller
         $query = (string) $found['query'];
         $page = (int) $found['page'];
         $topic = (string) ($found['topic'] ?? '');
+        $rubric = (string) ($found['rubric'] ?? '');
+        $filtered = $topic !== '' || $rubric !== '';
+        // 0.5.8: «в рубрике «Джаз» и теме «Релизы»» for the texts; «Джаз · Релизы» as a short label.
+        $phrase = [];
+        $labels = [];
+        if ($rubric !== '') {
+            $phrase[] = 'рубрике «' . Topics::label($rubric) . '»';
+            $labels[] = Topics::label($rubric);
+        }
+        if ($topic !== '') {
+            $phrase[] = 'теме «' . Topics::label($topic) . '»';
+            $labels[] = Topics::label($topic);
+        }
         $model['search'] = [
             'query' => $query,
             'topic' => $topic,
-            'topic_label' => $topic !== '' ? Topics::label($topic) : '',
-            'topic_clear' => $topic !== '' ? Router::search($query) : '',
-            'searched' => $query !== '' || $topic !== '',
+            'rubric' => $rubric,
+            'topic_label' => implode(' · ', $labels),
+            'filter_phrase' => $phrase ? ' в ' . implode(' и ', $phrase) : '',
+            'filter_title' => trim(($rubric !== '' ? 'Рубрика «' . Topics::label($rubric) . '»' : '') . ($rubric !== '' && $topic !== '' ? ' · ' : '') . ($topic !== '' ? 'Тема «' . Topics::label($topic) . '»' : '')),
+            'topic_clear' => $filtered ? Router::search($query) : '',
+            'searched' => $query !== '' || $filtered,
             'unavailable' => !empty($found['unavailable']),
-            'understood' => $found['terms'] !== [] || $topic !== '',
+            'understood' => $found['terms'] !== [] || $filtered,
             'has_words' => $found['terms'] !== [],
             'total' => (int) $found['total'],
             'page' => $page,
             'pages' => (int) $found['pages'],
             'items' => Presenter::searchResults($found['rows'], $found['terms']),
-            'prev' => $page > 1 ? Router::search($query, $page - 1, $topic) : '',
-            'next' => $page < $found['pages'] ? Router::search($query, $page + 1, $topic) : '',
-            'topics' => self::topicChips(empty($found['unavailable']) ? Search::topicCounts() : [], $query, $topic),
+            'prev' => $page > 1 ? Router::search($query, $page - 1, $topic, $rubric) : '',
+            'next' => $page < $found['pages'] ? Router::search($query, $page + 1, $topic, $rubric) : '',
+            'topics' => self::topicChips(empty($found['unavailable']) ? Search::topicCounts() : [], $query, $topic, $rubric),
         ];
         $model['seo'] = Seo::forSearch($model);
         return $model;
@@ -339,7 +363,7 @@ final class Controller
      * @param array<string,int> $counts
      * @return array{rubrics:array,tags:array}
      */
-    public static function topicChips(array $counts, string $query, string $active): array
+    public static function topicChips(array $counts, string $query, string $active, string $activeRubric = ''): array
     {
         $out = ['rubrics' => [], 'tags' => []];
         foreach ([Labels::CATEGORIES, Topics::TAGS] as $group => $vocabulary) {
@@ -347,17 +371,22 @@ final class Controller
                 if ($group === 1 && isset(Labels::CATEGORIES[$key])) {
                     continue; // «Фестивали» is listed once, with the rubrics.
                 }
+                // 0.5.8: a rubric chip changes only the rubric, a topic chip only the topic.
+                $isRubric = $group === 0;
+                $on = $isRubric ? $key === $activeRubric : $key === $active;
                 $count = (int) ($counts[$key] ?? 0);
-                if ($count === 0 && $key !== $active) {
+                if ($count === 0 && !$on) {
                     continue;
                 }
-                $out[$group === 0 ? 'rubrics' : 'tags'][] = [
+                $out[$isRubric ? 'rubrics' : 'tags'][] = [
                     'order' => count($out['rubrics']) + count($out['tags']),
                     'key' => $key,
                     'label' => $label,
                     'count' => $count,
-                    'active' => $key === $active,
-                    'url' => Router::search($query, 1, $key === $active ? '' : $key),
+                    'active' => $on,
+                    'url' => $isRubric
+                        ? Router::search($query, 1, $active, $on ? '' : $key)
+                        : Router::search($query, 1, $on ? '' : $key, $activeRubric),
                 ];
             }
         }

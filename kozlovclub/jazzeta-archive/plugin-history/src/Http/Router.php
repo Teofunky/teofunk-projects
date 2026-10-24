@@ -85,7 +85,11 @@ final class Router
 
     /** The query is appended already encoded (add_query_arg() in WordPress does not encode values). */
     /** Search page; $topic (0.5.5) narrows the results to a rubric or a tag (Domain\Topics). */
-    public static function search(string $query = '', int $page = 1, string $topic = ''): string
+    /**
+     * 0.5.8: a rubric («?rubric=jazz») and a topic («?tema=releases») are separate filters and can
+     * be combined. Older links with a rubric in «tema» still work (Front\Controller::search()).
+     */
+    public static function search(string $query = '', int $page = 1, string $topic = '', string $rubric = ''): string
     {
         $page = max(1, $page);
         // Until the rewrite rules are flushed after an update, the query-string address still works.
@@ -98,6 +102,9 @@ final class Router
         $args = [];
         if ($query !== '') {
             $args[] = 'q=' . rawurlencode($query);
+        }
+        if ($rubric !== '') {
+            $args[] = 'rubric=' . rawurlencode($rubric);
         }
         if ($topic !== '') {
             $args[] = 'tema=' . rawurlencode($topic);

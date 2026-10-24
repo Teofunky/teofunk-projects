@@ -23,8 +23,26 @@ final class Credit
         'flickr.com', 'unsplash.com', 'pexels.com', 'pixabay.com',
     ];
 
-    /** Sentences of a credit that only explain the editor's work to the editor. */
-    private const SERVICE_NOTE = '/кадрирован|кадр изменён|кадр изменен|в ссылках к материал|источник и лицензи|лицензия и источник/iu';
+    /**
+     * Sentences of a credit that only explain the editor's work to the editor. 0.5.7: «кадрир»
+     * catches every form («кадрируется», «кадрирование»), plus «Снимок уменьшен», «в вёрстке».
+     */
+    private const SERVICE_NOTE = '/кадрир|кадр изменён|кадр изменен|снимок уменьшен|в в[её]рстке|в ссылках к материал|источник и лицензи|лицензия и источник/iu';
+
+    /**
+     * A sentence with the credit itself (author, platform, licence) is never dropped, even when it
+     * also says «кадрировано»: «Фото: Rama / Wikimedia Commons (CC BY 2.0, кадрировано).»
+     */
+    private const CREDIT_CORE = '/фото|©|\bCC(?:0|\b)|wikimedia|wikipedia|flickr|unsplash|pexels|pixabay|автор/iu';
+
+    /** A service note that says the picture was changed: the reader still gets one word about it. */
+    private const CHANGE_NOTE = '/кадрир|кадр изменён|кадр изменен|обрезан/iu';
+
+    /** Dashes a typograph or an editor may put between the parts of a licence name: «CC BY–SA 2.0». */
+    private const DASH = '[ \x{2010}\x{2011}\x{2012}\x{2013}\x{2014}\-]';
+
+    /** A bare address in the credit text, with the dash before it: « — https://creativecommons.org/…». */
+    private const BARE_URL = '/\s*[\x{2013}\x{2014}\-]?\s*\bhttps?:\/\/[^\s)]+?(?=[.,;:!?]*(?:[\s)]|$))/u';
 
     public static function isImageSource(array $source): bool
     {
@@ -63,18 +81,55 @@ final class Credit
         return [$news, $picture];
     }
 
-    /** The credit without service notes; the rest of the text is left as written. */
+    /**
+     * The credit without service notes and bare addresses; the rest of the text is left as written.
+     * 0.5.7: when a dropped note said the picture was cropped, «Кадрировано.» is added instead:
+     * Creative Commons licences ask to mark changes, the reader does not need the editor's wording.
+     */
     public static function clean(string $credit): string
     {
         $credit = trim((string) preg_replace('/\s+/u', ' ', $credit));
-        if ($credit === '' || !preg_match(self::SERVICE_NOTE, $credit)) {
+        if ($credit === '') {
+            return $credit;
+        }
+        // The address of the licence or of the picture is a link, never text (see segments()).
+        if (preg_match(self::BARE_URL, $credit)) {
+            $credit = (string) preg_replace(self::BARE_URL, '', $credit);
+            $credit = (string) preg_replace('/\s+([.,;:!?)])/u', '$1', $credit);   // «2.0 .» → «2.0.»
+            $credit = (string) preg_replace('/[,;:]+(?=[.,;:!?)]|$)/u', '', $credit); // «2.0,.» → «2.0.»
+            $credit = trim((string) preg_replace('/\(\s*\)/u', '', $credit));
+            if ($credit !== '' && !preg_match('/[.!?…)»]$/u', $credit)) {
+                $credit .= '.';
+            }
+        }
+        if (!preg_match(self::SERVICE_NOTE, $credit)) {
             return $credit;
         }
         $sentences = preg_split('/(?<=[.!?…])\s+(?=\S)/u', $credit) ?: [$credit];
-        $kept = array_filter($sentences, static function ($sentence) {
-            return !preg_match(self::SERVICE_NOTE, $sentence);
+        $changed = false;
+        $kept = array_filter($sentences, static function ($sentence) use (&$changed) {
+            if (!preg_match(self::SERVICE_NOTE, $sentence) || preg_match(self::CREDIT_CORE, $sentence)) {
+                return true;
+            }
+            if (preg_match(self::CHANGE_NOTE, $sentence)) {
+                $changed = true;
+            }
+            return false;
         });
-        return trim(implode(' ', $kept));
+        $out = trim(implode(' ', $kept));
+        if ($changed && $out !== '') {
+            $out .= (preg_match('/[.!?…]$/u', $out) ? '' : '.') . ' Кадрировано.';
+        }
+        return $out;
+    }
+
+    /** The first creativecommons.org address written in the credit text itself, or ''. */
+    public static function licenceUrlInText(string $credit): string
+    {
+        if (preg_match('~https?://(?:www\.)?creativecommons\.org/[^\s]*?(?=[.,;:)]*(?:\s|$))~u', $credit, $m)) {
+            return $m[0];
+        }
+        return '';
     }
 
     /**
@@ -83,7 +138,8 @@ final class Credit
      */
     public static function licenceUrl(string $name): string
     {
-        $name = strtoupper(trim($name));
+        $name = strtoupper(trim((string) preg_replace('/' . self::DASH . '+/u', '-', trim($name))));
+        $name = str_replace('-', ' ', $name);
         if (preg_match('/^CC0(?:[ -]1\.0)?$/', $name)) {
             return 'https://creativecommons.org/publicdomain/zero/1.0/';
         }
@@ -106,13 +162,16 @@ final class Credit
      */
     public static function segments(string $credit, array $pictureSources): array
     {
+        $written = self::licenceUrlInText($credit);
         $credit = self::clean($credit);
         if ($credit === '') {
             return [];
         }
         $links = [];
-        // Licence.
-        if (preg_match('/\bCC(?:0(?:[ -]1\.0)?|[ -](?:BY|SA|NC|ND)(?:[ -](?:SA|NC|ND))*[ -]\d\.\d)(?![\p{L}\p{N}])/u', $credit, $m, PREG_OFFSET_CAPTURE)) {
+        // Licence. 0.5.7: any dash between the parts («CC BY–SA 2.0»); the address written in the
+        // credit itself («…/by-sa/2.0/fr/») wins over the canonical one.
+        $d = self::DASH;
+        if (preg_match('/\bCC(?:0(?:' . $d . '1\.0)?|' . $d . '(?:BY|SA|NC|ND)(?:' . $d . '(?:SA|NC|ND))*' . $d . '\d\.\d)(?![\p{L}\p{N}])/u', $credit, $m, PREG_OFFSET_CAPTURE)) {
             $url = '';
             foreach ($pictureSources as $source) {
                 if (strpos((string) ($source['url'] ?? ''), 'creativecommons.org/') !== false) {
@@ -120,7 +179,7 @@ final class Credit
                     break;
                 }
             }
-            $url = $url !== '' ? $url : self::licenceUrl($m[0][0]);
+            $url = $url !== '' ? $url : ($written !== '' ? $written : self::licenceUrl($m[0][0]));
             if ($url !== '') {
                 $links[] = [$m[0][1], strlen($m[0][0]), $url];
             }
