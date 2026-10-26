@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Kozlov Redirect Guard
  * Description:       Диагностика и страховка для пустого ответа на адресах без слеша (/event/slug). Для таких запросов записывает, что происходит внутри WordPress (заголовки, фильтры, кто завершил запрос), в wp-content/uploads/kozlov-redirect-guard.txt. Если какой-то плагин обнуляет адрес в фильтре wp_redirect, восстанавливает его.
- * Version:           1.1.0
+ * Version:           1.2.0
  * Author:            Kozlov Club
  * License:           GPL-2.0-or-later
  */
@@ -24,6 +24,19 @@ function kozlov_rg_write( $text ) {
 	if ( false === $ok ) {
 		error_log( 'kozlov-redirect-guard: ' . str_replace( "\n", ' | ', $text ) );
 	}
+}
+
+/** Сбрасывает накопленные отметки в файл (чтобы они не пропали, если запрос завершат через exit). */
+function kozlov_rg_flush() {
+	if ( empty( $GLOBALS['kozlov_rg_diag'] ) ) {
+		return;
+	}
+	if ( empty( $GLOBALS['kozlov_rg_header_written'] ) ) {
+		$GLOBALS['kozlov_rg_header_written'] = true;
+		kozlov_rg_write( '==================== ' . gmdate( 'Y-m-d H:i:s' ) . ' UTC  ' . ( isset( $_SERVER['REQUEST_URI'] ) ? $_SERVER['REQUEST_URI'] : '' ) );
+	}
+	kozlov_rg_write( implode( "\n", $GLOBALS['kozlov_rg_diag'] ) );
+	$GLOBALS['kozlov_rg_diag'] = array();
 }
 
 function kozlov_rg_describe( $f ) {
@@ -126,6 +139,28 @@ if ( $kozlov_rg_diag ) {
 	add_action( 'template_redirect', function () { kozlov_rg_mark( 'template_redirect КОНЕЦ (никто не завершил запрос, дальше шаблон)' ); }, 1000000 );
 	add_filter( 'redirect_canonical', function ( $url, $req ) {
 		kozlov_rg_mark( 'redirect_canonical вычислил: ' . var_export( $url, true ) . ' для ' . $req );
+		// Оборачиваем каждый чужой фильтр redirect_canonical: пишем в файл СРАЗУ, до вызова.
+		// Если какой-то из них завершает запрос (exit), последняя строка «вызываю…» укажет на него.
+		$hook = isset( $GLOBALS['wp_filter']['redirect_canonical'] ) ? $GLOBALS['wp_filter']['redirect_canonical'] : null;
+		if ( $hook && is_object( $hook ) && isset( $hook->callbacks ) ) {
+			foreach ( array_keys( $hook->callbacks ) as $prio ) {
+				if ( -1000000 == $prio || 1000000 == $prio ) {
+					continue;
+				}
+				foreach ( array_keys( $hook->callbacks[ $prio ] ) as $id ) {
+					$orig = $hook->callbacks[ $prio ][ $id ]['function'];
+					$desc = kozlov_rg_describe( $orig );
+					$hook->callbacks[ $prio ][ $id ]['function'] = function () use ( $orig, $desc, $prio ) {
+						$args = func_get_args();
+						kozlov_rg_write( "  -> вызываю фильтр redirect_canonical (приоритет $prio): $desc" );
+						$r = call_user_func_array( $orig, $args );
+						kozlov_rg_write( '  <- вернул: ' . var_export( $r, true ) );
+						return $r;
+					};
+				}
+			}
+		}
+		kozlov_rg_flush();
 		return $url;
 	}, -1000000, 2 );
 	add_filter( 'redirect_canonical', function ( $url ) {
@@ -143,9 +178,8 @@ if ( $kozlov_rg_diag ) {
 				$bt[] = str_replace( ABSPATH, '', $fr['file'] ) . ':' . ( isset( $fr['line'] ) ? $fr['line'] : '?' ) . ' ' . ( isset( $fr['function'] ) ? $fr['function'] : '' );
 			}
 		}
-		$text  = "==================== " . gmdate( 'Y-m-d H:i:s' ) . " UTC  " . ( isset( $_SERVER['REQUEST_URI'] ) ? $_SERVER['REQUEST_URI'] : '' ) . "\n";
-		$text .= implode( "\n", $GLOBALS['kozlov_rg_diag'] ) . "\n";
-		$text .= 'Последняя ошибка PHP: ' . ( $e ? ( $e['message'] . ' в ' . str_replace( ABSPATH, '', $e['file'] ) . ':' . $e['line'] ) : 'нет' ) . "\n";
+		kozlov_rg_flush();
+		$text  = 'Последняя ошибка PHP: ' . ( $e ? ( $e['message'] . ' в ' . str_replace( ABSPATH, '', $e['file'] ) . ':' . $e['line'] ) : 'нет' ) . "\n";
 		$text .= 'Активные плагины: ' . implode( ', ', (array) get_option( 'active_plugins' ) ) . "\n";
 		kozlov_rg_write( $text );
 	} );
