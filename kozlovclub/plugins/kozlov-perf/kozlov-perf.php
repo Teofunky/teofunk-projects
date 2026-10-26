@@ -3,7 +3,7 @@
  * Plugin Name:       Kozlov Perf
  * Plugin URI:        https://kozlovclub.ru/
  * Description:       Изолированные оптимизации загрузки: нативная ленивая загрузка вместо a3 Lazy Load, уборка неиспользуемых скриптов (FancyBox, YouTube Embed Plus, emoji), preconnect, дедупликация тегов. Не меняет тему, данные и другие плагины. Отключается галочкой в настройках, параметром ?kperf=off или деактивацией.
- * Version:           1.0.1
+ * Version:           1.0.2
  * Author:            Kozlov Club
  * Requires at least: 6.3
  * Requires PHP:      7.4
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class Kozlov_Perf {
 
 	const OPTION  = 'kozlov_perf_options';
-	const VERSION = '1.0.1';
+	const VERSION = '1.0.2';
 
 	/**
 	 * Тело тега с учётом кавычек: символ > внутри значения атрибута не завершает тег.
@@ -46,6 +46,7 @@ final class Kozlov_Perf {
 			'enabled'          => 1,
 			'native_lazy'      => 1,
 			'eager_count'      => 8,
+			'thumb_srcset'     => 1,
 			'strip_unused'     => 1,
 			'dequeue_patterns' => "jquery.animateNumber",
 			'defer_patterns'   => '',
@@ -400,19 +401,21 @@ final class Kozlov_Perf {
 
 	private function images( $html ) {
 		$eager    = max( 0, (int) $this->opt( 'eager_count' ) );
+		$thumbs   = (bool) $this->opt( 'thumb_srcset' );
 		$a3_page  = ( false !== stripos( $html, 'data-lazy-type' ) || false !== stripos( $html, 'lazy_placeholder' ) );
 		$count    = 0;
 		$lazied   = 0;
 		$reverted = 0;
+		$srcset_dropped = 0;
 		$self     = $this;
 
 		$res = $this->outside(
 			$html,
 			array( 'comment', 'script', 'noscript', 'style', 'template', 'textarea' ),
-			function ( $part ) use ( &$count, &$lazied, &$reverted, $eager, $a3_page, $self ) {
+			function ( $part ) use ( &$count, &$lazied, &$reverted, &$srcset_dropped, $eager, $thumbs, $a3_page, $self ) {
 				return preg_replace_callback(
 					'/<(img|iframe|video|source)\b' . Kozlov_Perf::ATTRS . '>/i',
-					function ( $m ) use ( &$count, &$lazied, &$reverted, $eager, $a3_page, $self ) {
+					function ( $m ) use ( &$count, &$lazied, &$reverted, &$srcset_dropped, $eager, $thumbs, $a3_page, $self ) {
 						$tag  = $m[0];
 						$name = strtolower( $m[1] );
 
@@ -427,6 +430,14 @@ final class Kozlov_Perf {
 						}
 						if ( 'img' !== $name ) {
 							return $tag;
+						}
+
+						// Превью (src вида …-450x338.jpg) со srcset: браузер на retina берёт из srcset
+						// оригинал 800+ КБ вместо превью. Оставляем только src.
+						if ( $thumbs && preg_match( '/\ssrcset\s*=/i', $tag ) && preg_match( '/\ssrc\s*=\s*["\'][^"\']*-\d{2,4}x\d{2,4}\.(?:jpe?g|png|gif|webp|avif)(?:[?#][^"\']*)?["\']/i', $tag ) ) {
+							$tag = preg_replace( '/\ssrcset\s*=\s*(["\'])[^"\']*\1/i', '', $tag, 1 );
+							$tag = preg_replace( '/\ssizes\s*=\s*(["\'])[^"\']*\1/i', '', $tag, 1 );
+							$srcset_dropped++;
 						}
 
 						$count++;
@@ -456,6 +467,7 @@ final class Kozlov_Perf {
 		$this->stats['img_total']   = $count;
 		$this->stats['img_lazy']    = $lazied;
 		$this->stats['a3_reverted'] = $reverted;
+		$this->stats['srcset_dropped'] = $srcset_dropped;
 		return $res;
 	}
 
@@ -522,7 +534,8 @@ final class Kozlov_Perf {
 			if ( preg_match( '/\.(?:jpe?g|png|gif|webp|svg|pdf|swf)$/', $path ) ) {
 				return true;
 			}
-			if ( preg_match( '/(?:youtube\.com|youtu\.be|vimeo\.com|dailymotion\.com)\//', $href ) ) {
+			// Только ссылки на конкретное видео (их FancyBox умеет открывать), не на канал или профиль.
+			if ( preg_match( '/youtube\.com\/(?:watch\?|embed\/|v\/|shorts\/)|youtu\.be\/[a-z0-9_-]{6,}|vimeo\.com\/(?:video\/)?\d+|dailymotion\.com\/video\//', $href ) ) {
 				return true;
 			}
 		}
@@ -846,7 +859,7 @@ final class Kozlov_Perf {
 	public function sanitize( $in ) {
 		$in  = is_array( $in ) ? $in : array();
 		$out = array();
-		foreach ( array( 'enabled', 'native_lazy', 'strip_unused', 'emoji', 'head_cleanup', 'dedupe', 'fix_ver', 'block_css' ) as $k ) {
+		foreach ( array( 'enabled', 'native_lazy', 'thumb_srcset', 'strip_unused', 'emoji', 'head_cleanup', 'dedupe', 'fix_ver', 'block_css' ) as $k ) {
 			$out[ $k ] = empty( $in[ $k ] ) ? 0 : 1;
 		}
 		$out['eager_count'] = isset( $in['eager_count'] ) ? max( 0, min( 50, (int) $in['eager_count'] ) ) : 8;
@@ -905,6 +918,7 @@ final class Kozlov_Perf {
 					<label>Сколько первых картинок грузить сразу: <input type="number" min="0" max="50" name="<?php echo esc_attr( $n ); ?>[eager_count]" value="<?php echo esc_attr( (int) $o['eager_count'] ); ?>" style="width:70px"></label>
 					<span class="description">(логотип + слайдер + первый ряд афиши, обычно 6–10)</span>
 				</p>
+				<?php $cb( 'thumb_srcset', 'У превью (src вида …-450x338.jpg) убирать srcset и sizes', 'Без этого браузер на экранах retina берёт из srcset оригинал 200–850 КБ вместо превью 40 КБ: на главной это сотни мегабайт при прокрутке. Превью 450 px для карточки шириной ~200 px это уже 2x.' ); ?>
 
 				<h2 class="title">Лишние скрипты и стили</h2>
 				<?php $cb( 'strip_unused', 'Убирать Easy FancyBox и YouTube Embed Plus со страниц, где они не нужны', 'Решение по готовому HTML страницы. FancyBox остаётся, если есть хоть одна ссылка, которую он может перехватить: класс/rel/data с fancybox, ссылка на картинку, PDF, SWF, YouTube, Vimeo, Dailymotion. YouTube Embed Plus остаётся, если на странице есть его embed (классы __youtube_prefs__/epyt-) или шорткод [embedyt].' ); ?>
