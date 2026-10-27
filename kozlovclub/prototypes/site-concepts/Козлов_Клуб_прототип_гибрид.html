@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Клуб Козлова · Прототип · Гибрид A+B+C</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Piazzolla:ital,opsz,wght@0,8..30,300..900;1,8..30,300..900&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cream:#FBF6EC; --sand:#EDE4D3; --sand2:#F4EDDF; --ink:#1F1A15; --ink2:#4a4238;
+  --amber:#C96A2E; --amber-soft:#e8c9ae;
+  --st-main:#C96A2E; --st-beat:#6D95A2; --st-mans:#9a7b8f; --st-unpl:#7d8f6f;
+  --hot:#b0492a; --ok:#7d8f6f;
+  --serif:'Piazzolla',Georgia,serif; --sans:'Inter',system-ui,sans-serif; --mono:'JetBrains Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{background:#efe7d8;font-family:var(--sans);color:var(--ink);display:flex;justify-content:center}
+#app{width:100%;max-width:430px;min-height:100dvh;background:var(--cream);position:relative;display:flex;flex-direction:column;box-shadow:0 0 60px rgba(31,26,21,.12)}
+main{flex:1;overflow-y:auto;padding-bottom:76px;-webkit-overflow-scrolling:touch}
+.screen{display:none;animation:fade .25s ease}
+.screen.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.screen{animation:none}}
+
+/* type */
+.h-serif{font-family:var(--serif);font-optical-sizing:auto;font-weight:560;letter-spacing:-.02em;line-height:1.06}
+.it{font-style:italic;color:var(--amber)}
+.eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber);font-weight:500}
+.eyebrow.dim{color:#a2947f}
+.meta{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;color:#877a67}
+.lead{font-family:var(--serif);font-style:italic;font-size:15px;line-height:1.5;color:var(--ink2)}
+
+/* header */
+.topbar{position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--cream) 92%,transparent);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:space-between;padding:14px 20px 10px;border-bottom:1px solid var(--sand)}
+.brand{font-family:var(--serif);font-size:17px;font-weight:600}
+.brand em{font-style:italic;color:var(--amber)}
+.topbar .back{font-family:var(--mono);font-size:11px;color:#877a67;cursor:pointer;letter-spacing:.08em}
+.avatar{width:28px;height:28px;border-radius:50%;background:var(--ink);color:var(--cream);font-family:var(--serif);font-size:13px;display:flex;align-items:center;justify-content:center}
+
+/* buttons */
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;font-family:var(--sans);font-weight:600;font-size:14.5px;border:none;cursor:pointer;border-radius:999px;padding:14px 22px;transition:transform .12s ease}
+.btn:active{transform:scale(.98)}
+.btn-ink{background:var(--ink);color:var(--cream)}
+.btn-amber{background:var(--amber);color:var(--cream)}
+.btn-line{background:transparent;color:var(--ink);border:1.5px solid var(--ink)}
+.btn-block{width:100%}
+
+/* chips */
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 20px 4px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;font-size:12.5px;font-weight:500;padding:8px 14px;border-radius:999px;border:1px solid #d9cdb8;background:transparent;color:var(--ink2);cursor:pointer;white-space:nowrap}
+.chip.on{background:var(--ink);color:var(--cream);border-color:var(--ink)}
+
+/* stage tags */
+.stag{font-family:var(--mono);font-size:9px;letter-spacing:.14em;padding:4px 8px;border-radius:4px;color:#fff;text-transform:uppercase}
+.stag.main{background:var(--st-main)}.stag.beat{background:var(--st-beat)}.stag.mans{background:var(--st-mans)}.stag.unpl{background:var(--st-unpl)}
+
+/* poster placeholder */
+.poster{background:repeating-linear-gradient(135deg,#2a221b 0 10px,#332921 10px 20px);border-radius:14px;position:relative;overflow:hidden}
+.poster::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 30%,rgba(20,15,11,.82))}
+.poster .pin{position:absolute;top:10px;left:10px;z-index:2}
+.poster .cap{position:absolute;left:12px;right:12px;bottom:10px;z-index:2;color:#f3ead9}
+.poster .cap .t{font-family:var(--serif);font-weight:600;font-size:15px;line-height:1.15}
+.poster .cap .m{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;color:#c9b99f;margin-top:3px}
+
+/* shelves */
+.shelf{margin-top:26px}
+.shelf-head{display:flex;align-items:baseline;justify-content:space-between;padding:0 20px 10px}
+.shelf-head .all{font-family:var(--mono);font-size:10px;color:#a2947f;letter-spacing:.1em;cursor:pointer}
+.rail{display:flex;gap:12px;overflow-x:auto;padding:0 20px 6px;scrollbar-width:none}
+.rail::-webkit-scrollbar{display:none}
+.card-s{flex:0 0 148px;cursor:pointer}
+.card-s .poster{height:190px}
+.card-s .pr{font-family:var(--mono);font-size:10px;color:#f3ead9;background:rgba(20,15,11,.55);padding:3px 7px;border-radius:4px;position:absolute;right:8px;top:8px;z-index:2}
+
+/* dense list row (concept C) */
+.row{display:flex;gap:12px;padding:14px 20px;border-bottom:1px solid var(--sand);cursor:pointer}
+.row .thumb{flex:0 0 54px;height:68px;border-radius:8px;background:repeating-linear-gradient(135deg,#2a221b 0 8px,#332921 8px 16px)}
+.row .body{flex:1;min-width:0}
+.row .t{font-family:var(--serif);font-weight:600;font-size:15.5px;line-height:1.15;margin:3px 0 2px}
+.row .sub{font-size:12px;color:#877a67}
+.row .badges{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.badge{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;padding:3px 7px;border-radius:4px;background:var(--sand);color:var(--ink2)}
+.badge.hot{background:#f3ddd2;color:var(--hot)}
+.badge.pick{background:#efe3d2;color:var(--amber)}
+.row .side{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.row .price{font-family:var(--serif);font-weight:600;font-size:15px;white-space:nowrap}
+.row .seats{font-family:var(--mono);font-size:9.5px;color:#a2947f}
+.row .seats.low{color:var(--hot)}
+.buy{font-size:12px;font-weight:600;color:var(--cream);background:var(--amber);border:none;border-radius:999px;padding:7px 14px;cursor:pointer}
+
+/* quiz */
+.opt{display:flex;align-items:center;gap:14px;border:1.5px solid #d9cdb8;border-radius:14px;padding:15px 16px;margin:0 20px 10px;cursor:pointer;background:transparent}
+.opt .ic{font-size:16px;width:24px;text-align:center;color:var(--amber)}
+.opt .tx .n{font-family:var(--serif);font-weight:600;font-size:15.5px}
+.opt .tx .d{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:#a2947f;margin-top:2px}
+.opt.on{border-color:var(--amber);background:var(--sand2);box-shadow:inset 0 0 0 1px var(--amber)}
+.qprog{font-family:var(--mono);font-size:10px;color:#a2947f;letter-spacing:.14em}
+.qbar{position:sticky;bottom:76px;padding:12px 20px;background:linear-gradient(180deg,transparent,var(--cream) 40%)}
+
+/* recommendation cards (concept A voice) */
+.rec{margin:0 20px 18px;border:1px solid var(--sand);border-radius:16px;overflow:hidden;background:#fff8;cursor:pointer}
+.rec .poster{height:150px;border-radius:0}
+.rec .pad{padding:14px 16px 16px}
+.rec .why{font-family:var(--serif);font-style:italic;font-size:13.5px;line-height:1.45;color:var(--ink2);margin:8px 0 12px}
+.rec .foot{display:flex;align-items:center;justify-content:space-between}
+
+/* concert page */
+.hero{height:230px;border-radius:0}
+.kv{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--sand);border-top:1px solid var(--sand);border-bottom:1px solid var(--sand);margin:18px 0}
+.kv div{background:var(--cream);padding:12px 8px;text-align:center}
+.kv .l{font-family:var(--mono);font-size:8.5px;letter-spacing:.14em;color:#a2947f;text-transform:uppercase}
+.kv .v{font-family:var(--serif);font-weight:600;font-size:14px;margin-top:4px}
+.tarif{display:flex;align-items:center;gap:12px;border:1.5px solid #d9cdb8;border-radius:14px;padding:14px 16px;margin:0 20px 10px;cursor:pointer}
+.tarif.on{border-color:var(--amber);background:var(--sand2)}
+.tarif .radio{width:16px;height:16px;border-radius:50%;border:1.5px solid #b7a88f;flex:0 0 auto}
+.tarif.on .radio{border:5px solid var(--amber)}
+.tarif .n{font-weight:600;font-size:14.5px}
+.tarif .d{font-family:var(--mono);font-size:9.5px;color:#a2947f;margin-top:2px}
+.tarif .p{margin-left:auto;font-family:var(--serif);font-weight:600;font-size:15px;white-space:nowrap}
+.guests{display:flex;align-items:center;justify-content:space-between;margin:6px 20px 0;padding:12px 16px;border:1.5px solid #d9cdb8;border-radius:14px}
+.stepper{display:flex;align-items:center;gap:16px}
+.stepper button{width:32px;height:32px;border-radius:50%;border:1.5px solid var(--ink);background:none;font-size:17px;cursor:pointer;color:var(--ink)}
+.stepper .num{font-family:var(--serif);font-weight:600;font-size:17px;min-width:16px;text-align:center}
+.trust{margin:16px 20px 0;font-size:12px;color:#877a67;line-height:1.9}
+.trust b{color:var(--ok)}
+.sticky-cta{position:fixed;bottom:76px;left:50%;transform:translateX(-50%);width:100%;max-width:430px;padding:10px 20px 12px;background:linear-gradient(180deg,transparent,var(--cream) 35%);display:none;z-index:15}
+.sticky-cta.show{display:block}
+.sticky-cta .inner{display:flex;align-items:center;gap:14px;background:var(--ink);border-radius:999px;padding:8px 8px 8px 20px}
+.sticky-cta .tot{color:var(--cream)}
+.sticky-cta .tot .l{font-family:var(--mono);font-size:8.5px;letter-spacing:.14em;color:#b7a88f}
+.sticky-cta .tot .v{font-family:var(--serif);font-weight:600;font-size:16px}
+.sticky-cta .btn{margin-left:auto;padding:11px 20px}
+
+/* curator note */
+.cur{margin:20px;padding:16px 18px;border-left:3px solid var(--amber);background:var(--sand2);border-radius:0 12px 12px 0}
+.cur .q{font-family:var(--serif);font-style:italic;font-size:14.5px;line-height:1.5}
+.cur .s{font-family:var(--mono);font-size:9px;letter-spacing:.16em;color:#a2947f;margin-top:10px;text-transform:uppercase}
+
+/* stages */
+.stage-card{margin:0 20px 14px;border-radius:16px;padding:18px;color:#f3ead9;cursor:pointer;position:relative;overflow:hidden}
+.stage-card .bg{position:absolute;inset:0;background:repeating-linear-gradient(135deg,rgba(0,0,0,.18) 0 10px,transparent 10px 20px)}
+.stage-card>*{position:relative}
+.stage-card .n{font-family:var(--serif);font-weight:600;font-size:21px}
+.stage-card .d{font-family:var(--serif);font-style:italic;font-size:13px;opacity:.9;margin-top:2px}
+.stage-card .m{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;margin-top:12px;opacity:.85;text-transform:uppercase}
+
+/* tabs */
+nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:color-mix(in srgb,var(--cream) 94%,transparent);backdrop-filter:blur(12px);border-top:1px solid var(--sand);display:flex;z-index:30;padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;background:none;border:none;padding:10px 0 8px;cursor:pointer;color:#a2947f;font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase}
+nav button .i{display:block;font-size:17px;margin-bottom:3px;font-family:var(--sans)}
+nav button.on{color:var(--ink)}
+
+/* modal (TC widget) */
+.modal{position:fixed;inset:0;background:rgba(31,26,21,.5);display:none;align-items:flex-end;justify-content:center;z-index:50}
+.modal.show{display:flex}
+.sheet{width:100%;max-width:430px;background:#fff;border-radius:20px 20px 0 0;padding:22px 22px 30px;animation:up .25s ease}
+@keyframes up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+.tc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.tc-logo{font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:#888;text-transform:uppercase}
+.tc-field{border:1px solid #ddd;border-radius:10px;padding:13px 14px;font-size:14px;color:#999;margin-bottom:10px;font-family:var(--sans)}
+
+/* success */
+.qr{width:132px;height:132px;margin:18px auto;display:grid;grid-template-columns:repeat(9,1fr);gap:2px}
+.qr i{background:var(--ink);border-radius:1px}
+.qr i.o{background:transparent}
+.ok-ring{width:52px;height:52px;border-radius:50%;background:var(--ok);color:#fff;display:flex;align-items:center;justify-content:center;font-size:24px;margin:26px auto 0}
+
+/* pass upsell */
+.pass{margin:20px;background:var(--ink);color:var(--cream);border-radius:16px;padding:20px}
+.pass .t{font-family:var(--serif);font-weight:600;font-size:19px}
+.pass .old{text-decoration:line-through;opacity:.5;font-size:14px;margin-left:8px}
+.pass .d{font-size:12.5px;opacity:.75;margin-top:6px;line-height:1.5}
+
+.section-pad{padding:0 20px}
+.divider{height:1px;background:var(--sand);margin:22px 20px}
+.note-proto{font-family:var(--mono);font-size:9px;color:#b7a88f;text-align:center;padding:20px;letter-spacing:.1em}
+</style>
+</head>
+<body>
+<div id="app">
+<main id="main">
+
+<!-- ============ 01 ГЛАВНАЯ (B: hero+полки, A: голос куратора) ============ -->
+<section class="screen active" id="scr-home">
+  <div class="topbar"><div class="brand">Клуб <em>Козлова</em></div><div class="avatar">А</div></div>
+
+  <div class="section-pad" style="margin-top:18px">
+    <div class="eyebrow dim">Вторник · 18 ноября</div>
+    <h1 class="h-serif" style="font-size:32px;margin-top:8px">Сегодня в клубе<br><span class="it">четыре</span> вечера.</h1>
+  </div>
+
+  <div style="padding:16px 20px 0">
+    <div class="poster" style="height:210px" onclick="openConcert(6)">
+      <span class="pin stag beat">The Beat</span>
+      <span class="card-s pr" style="position:absolute">от 1 400 ₽</span>
+      <div class="cap">
+        <div class="eyebrow" style="color:#e8c9ae">Сегодня · 22:00</div>
+        <div class="t" style="font-size:22px;margin-top:4px">The Beat Session № 214</div>
+        <div class="m">Резиденты · самая живая среда недели</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-pad" style="margin-top:14px">
+    <button class="btn btn-ink btn-block" onclick="startQuiz()">Помочь выбрать · 60 секунд →</button>
+  </div>
+
+  <div class="cur">
+    <div class="q">«Если этой осенью можно пойти только на один вечер — это Anna Koeppe в Unplugged. Европа в Москве, редко и тихо».</div>
+    <div class="s">— Павел Ермолаев · куратор месяца</div>
+  </div>
+
+  <div class="shelf">
+    <div class="shelf-head"><span class="eyebrow">Сегодня в клубе</span><span class="all" onclick="go('afisha')">всё →</span></div>
+    <div class="rail" id="rail-today"></div>
+  </div>
+
+  <div class="shelf">
+    <div class="shelf-head"><span class="eyebrow">Хорошо для свидания</span><span class="all" onclick="go('afisha')">всё →</span></div>
+    <div class="rail" id="rail-date"></div>
+  </div>
+
+  <div class="shelf" style="margin-bottom:10px">
+    <div class="shelf-head"><span class="eyebrow">Выбор куратора</span><span class="all" onclick="go('afisha')">всё →</span></div>
+    <div class="rail" id="rail-pick"></div>
+  </div>
+
+  <div class="note-proto">ПРОТОТИП · ГИБРИД A+B+C · СИНТЕТИЧЕСКИЕ ДАННЫЕ</div>
+</section>
+
+<!-- ============ 02 КВИЗ (A) ============ -->
+<section class="screen" id="scr-quiz">
+  <div class="topbar"><span class="back" onclick="go('home')">← закрыть</span><span class="qprog" id="qprog">01 / 03</span><span style="width:40px"></span></div>
+  <div id="quiz-body"></div>
+  <div class="qbar"><button class="btn btn-ink btn-block" id="qnext" onclick="quizNext()">Дальше →</button></div>
+</section>
+
+<!-- ============ 03 ПОДБОРКА (A: 3 рекомендации с причиной) ============ -->
+<section class="screen" id="scr-recs">
+  <div class="topbar"><span class="back" onclick="startQuiz()">← квиз</span><div class="brand">Клуб <em>Козлова</em></div><span style="width:40px"></span></div>
+  <div class="section-pad" style="margin-top:18px;margin-bottom:16px">
+    <div class="eyebrow">По вашему ответу</div>
+    <h2 class="h-serif" style="font-size:27px;margin-top:8px">Три вечера,<br>с которых стоит начать</h2>
+    <div class="meta" id="recs-filter" style="margin-top:8px"></div>
+  </div>
+  <div id="recs-list"></div>
+  <div class="section-pad" style="margin-bottom:24px">
+    <button class="btn btn-line btn-block" onclick="go('afisha')">Смотреть всю афишу</button>
+  </div>
+</section>
+
+<!-- ============ 04 АФИША (C: плотный список) ============ -->
+<section class="screen" id="scr-afisha">
+  <div class="topbar"><div class="brand">Афиша</div><div class="avatar">А</div></div>
+  <div class="section-pad" style="margin:16px 0 12px">
+    <div class="eyebrow dim">Ноябрь 2026</div>
+    <h2 class="h-serif" style="font-size:25px;margin-top:6px" id="afisha-count">Тридцать вечеров</h2>
+  </div>
+  <div class="chips" id="afisha-chips">
+    <button class="chip on" data-f="all">Все</button>
+    <button class="chip" data-f="main">Main Stage</button>
+    <button class="chip" data-f="beat">The Beat</button>
+    <button class="chip" data-f="mans">Mansarde</button>
+    <button class="chip" data-f="unpl">Unplugged</button>
+    <button class="chip" data-f="date">Свидание</button>
+    <button class="chip" data-f="cheap">До 2 000 ₽</button>
+  </div>
+  <div id="afisha-list" style="margin-top:8px"></div>
+</section>
+
+<!-- ============ 05 СЦЕНЫ ============ -->
+<section class="screen" id="scr-stages">
+  <div class="topbar"><div class="brand">Сцены</div><div class="avatar">А</div></div>
+  <div class="section-pad" style="margin:16px 0 18px">
+    <div class="eyebrow dim">Четыре клуба в одном</div>
+    <h2 class="h-serif" style="font-size:25px;margin-top:6px">Каждый этаж —<br>свой вечер</h2>
+  </div>
+  <div class="stage-card" style="background:var(--st-main)" onclick="go('afisha')">
+    <div class="bg"></div><div class="n">Main Stage</div><div class="d">Большой вечер · ужин · столы</div><div class="m">165 мест · премиальный концерт →</div>
+  </div>
+  <div class="stage-card" style="background:var(--st-beat)" onclick="go('afisha')">
+    <div class="bg"></div><div class="n">The Beat</div><div class="d">Барный джаз · groove · поздние сеты</div><div class="m">80 мест · резиденты и джемы →</div>
+  </div>
+  <div class="stage-card" style="background:var(--st-mans)" onclick="go('afisha')">
+    <div class="bg"></div><div class="n">Mansarde</div><div class="d">Камерно · мягкий свет · вокал</div><div class="m">100 мест · свидание и атмосфера →</div>
+  </div>
+  <div class="stage-card" style="background:var(--st-unpl)" onclick="go('afisha')">
+    <div class="bg"></div><div class="n">Unplugged</div><div class="d">Акустика без усиления</div><div class="m">60 мест · близко к артисту →</div>
+  </div>
+</section>
+
+<!-- ============ 06 КОНЦЕРТ (C: checkout + A: почему) ============ -->
+<section class="screen" id="scr-concert">
+  <div class="topbar"><span class="back" onclick="go('afisha')">← афиша</span><span class="meta">♡ · поделиться</span></div>
+  <div id="concert-body"></div>
+</section>
+
+<!-- ============ 07 ПОСЛЕ ПОКУПКИ (B: ещё вечер + Pass) ============ -->
+<section class="screen" id="scr-done">
+  <div class="ok-ring">✓</div>
+  <div class="section-pad" style="text-align:center;margin-top:14px">
+    <div class="eyebrow">Билет у вас</div>
+    <h2 class="h-serif" style="font-size:27px;margin-top:8px">До встречи<br>в клубе</h2>
+    <p class="lead" style="margin-top:10px" id="done-sub"></p>
+  </div>
+  <div class="qr" id="qr"></div>
+  <div style="text-align:center" class="meta">KZ-2841 · посадка свободная · Apple Wallet · В календарь</div>
+
+  <div class="cur">
+    <div class="q">«Если после программы останется время — на третьем этаже играет Late Night Organ Trio. Они не ждут, они просто играют. Это другой клуб, но тот же дом».</div>
+    <div class="s">— Павел Ермолаев</div>
+  </div>
+
+  <div class="pass">
+    <div class="eyebrow" style="color:var(--amber-soft)">Kozlov Pass · 8 вечеров</div>
+    <div class="t" style="margin-top:8px">от 1 550 ₽ за вечер<span class="old">2 025 ₽</span></div>
+    <div class="d">Любые 8 концертов до конца сезона. Один у вас уже есть — Pass засчитает его.</div>
+    <button class="btn btn-amber btn-block" style="margin-top:14px">Собрать маршрут →</button>
+  </div>
+
+  <div class="shelf" style="margin-bottom:20px">
+    <div class="shelf-head"><span class="eyebrow">Ещё один вечер?</span></div>
+    <div class="rail" id="rail-next"></div>
+  </div>
+</section>
+
+</main>
+
+<!-- sticky checkout bar (C) -->
+<div class="sticky-cta" id="cta">
+  <div class="inner">
+    <div class="tot"><div class="l">Итого</div><div class="v" id="cta-total">5 800 ₽</div></div>
+    <button class="btn btn-amber" onclick="openTC()">Купить билет →</button>
+  </div>
+</div>
+
+<!-- TC widget modal -->
+<div class="modal" id="tc">
+  <div class="sheet">
+    <div class="tc-head"><span class="tc-logo">Ticketscloud · Виджет</span><span class="back" onclick="closeTC()">✕ закрыть</span></div>
+    <div style="font-family:var(--sans);font-weight:600;font-size:16px;margin-bottom:4px" id="tc-title"></div>
+    <div style="font-size:12px;color:#888;margin-bottom:16px" id="tc-sub"></div>
+    <div class="tc-field">Имя и фамилия</div>
+    <div class="tc-field">E-mail для билета</div>
+    <div class="tc-field">Телефон</div>
+    <button class="btn btn-ink btn-block" style="border-radius:12px;margin-top:6px" onclick="paid()">Оплатить · СБП / карта</button>
+    <div style="font-size:10.5px;color:#aaa;text-align:center;margin-top:12px">Здесь встраивается реальный виджет Ticketscloud с основного сайта · персональные данные обрабатывает TC</div>
+  </div>
+</div>
+
+<nav>
+  <button class="on" data-t="home" onclick="tab('home',this)"><span class="i">▤</span>Главная</button>
+  <button data-t="afisha" onclick="tab('afisha',this)"><span class="i">≡</span>Афиша</button>
+  <button data-t="quiz" onclick="tab('quiz',this);startQuiz()"><span class="i">✦</span>Подбор</button>
+  <button data-t="stages" onclick="tab('stages',this)"><span class="i">◐</span>Сцены</button>
+  <button data-t="done" onclick="tab('done',this)"><span class="i">▭</span>Билеты</button>
+</nav>
+</div>
+<script>
+/* ================= DATA (синтетика — заменяется на Ticketscloud API) ================= */
+const STAGES={main:['Main Stage','main'],beat:['The Beat','beat'],mans:['Mansarde','mans'],unpl:['Unplugged','unpl']};
+const C=[
+{id:1,a:'Мария Ленц трио',p:'Bossa & Standards',st:'mans',d:'ЧТ · 20 ноя',t:'20:00',pr:1900,seats:32,dur:'75′',lvl:'первый визит',mood:['date','first','calm'],who:['date','solo'],why:'Хорошо для свидания. Узнаваемые мелодии, мягкий вокал — вечер, в котором легко.',today:0,pick:0,comm:0},
+{id:2,a:'Kurt Lindmann trio',p:'ECM · программа диска',st:'unpl',d:'СР · 19 ноя',t:'21:00',pr:2700,seats:13,dur:'80′',lvl:'для знатоков',mood:['deep','calm'],who:['solo','date'],why:'Северная эстетика. Рекомендуем тем, кто любит ECM и тишину между нотами.',today:0,pick:0,comm:0},
+{id:3,a:'Anna Koeppe quartet',p:'DE · гастроль',st:'unpl',d:'ПТ · 21 ноя',t:'21:00',pr:2900,seats:9,dur:'85′',lvl:'для знатоков',mood:['deep','wild'],who:['solo','date'],why:'Тот редкий случай, когда стоит прийти, даже если не знаешь имени. Акустика Unplugged сделана под такое.',today:0,pick:1,comm:0},
+{id:4,a:'Алексей Ивашкин секстет',p:'Coltrane revisited',st:'main',d:'СР · 19 ноя',t:'20:00',pr:2500,seats:40,dur:'90′',lvl:'для знатоков',mood:['deep'],who:['solo','friends'],why:'Пост-боп во всей мощи секстета — для тех, кто идёт слушать.',today:0,pick:0,comm:0},
+{id:5,a:'Николай Сизов',p:'Piano & Words · Бродский',st:'mans',d:'СР · 19 ноя',t:'20:30',pr:2200,seats:14,dur:'70′',lvl:'редкий формат',mood:['wild','calm','date'],who:['date','solo'],why:'Поэзия и фортепиано — формат, который случается нечасто.',today:0,pick:0,comm:0},
+{id:6,a:'The Beat Session № 214',p:'Резиденты клуба',st:'beat',d:'ВТ · 18 ноя',t:'22:00',pr:1400,seats:25,dur:'100′',lvl:'понятный вход',mood:['dance','first'],who:['friends','work'],why:'Самая живая среда недели: резиденты, джем, бар в трёх шагах.',today:1,pick:0,comm:1},
+{id:7,a:'Soulsisters',p:'Aretha · Erykah · Sly Stone',st:'main',d:'СБ · 22 ноя',t:'22:30',pr:2400,seats:24,dur:'110′',lvl:'понятный вход',mood:['dance','first'],who:['friends','work','date'],why:'Соул, под который не усидеть. Идеально компанией.',today:0,pick:0,comm:0},
+{id:8,a:'Алиса Гордина · квартет',p:'Ноябрьские письма',st:'main',d:'ПТ · 21 ноя',t:'20:30',pr:2800,seats:18,dur:'90′',lvl:'атмосферный',mood:['date','calm','deep'],who:['date','solo'],why:'Большая сцена, мягкая программа — вечер, о котором вспоминают.',today:0,pick:0,comm:0},
+{id:9,a:'Late Night Organ Trio',p:'Smokin′ · Hammond',st:'beat',d:'ЧТ · 20 ноя',t:'22:30',pr:1700,seats:19,dur:'80′',lvl:'понятный вход',mood:['dance','wild'],who:['friends','solo'],why:'Hammond после полуночи — редкий вечер, который знают свои.',today:0,pick:0,comm:1},
+{id:10,a:'Евгения Лесина',p:'Gershwin · Porter',st:'mans',d:'СБ · 22 ноя',t:'19:30',pr:2100,seats:28,dur:'75′',lvl:'первый визит',mood:['date','first','calm'],who:['date','work'],why:'Узнаваемые мелодии и тёплый зал — хороший первый визит.',today:0,pick:0,comm:0},
+{id:11,a:'Vladimir Chekasin',p:'Соло',st:'unpl',d:'СБ · 22 ноя',t:'19:00',pr:3200,seats:7,dur:'70′',lvl:'для знатоков',mood:['deep','wild'],who:['solo'],why:'Соло без страховки. Для тех, кто ходит за событием.',today:0,pick:1,comm:0},
+{id:12,a:'Funky Bus Collective',p:'Funk · Groove',st:'beat',d:'ПТ · 21 ноя',t:'23:30',pr:1600,seats:31,dur:'100′',lvl:'понятный вход',mood:['dance'],who:['friends'],why:'Поздний фанк — танцевально и громко, как и обещано.',today:1,pick:0,comm:0}
+];
+const fmt=n=>n.toLocaleString('ru-RU')+' ₽';
+
+/* ================= NAV ================= */
+function go(s){document.querySelectorAll('.screen').forEach(e=>e.classList.remove('active'));document.getElementById('scr-'+s).classList.add('active');document.getElementById('main').scrollTo(0,0);window.scrollTo(0,0);document.getElementById('cta').classList.toggle('show',s==='concert');}
+function tab(s,btn){document.querySelectorAll('nav button').forEach(b=>b.classList.remove('on'));btn.classList.add('on');if(s!=='quiz')go(s);}
+
+/* ================= SHELVES ================= */
+function cardS(c){const s=STAGES[c.st];return `<div class="card-s" onclick="openConcert(${c.id})"><div class="poster"><span class="pin stag ${s[1]}">${s[0]}</span><span class="pr">${fmt(c.pr)}</span><div class="cap"><div class="t">${c.a}</div><div class="m">${c.d} · ${c.t}</div></div></div></div>`;}
+document.getElementById('rail-today').innerHTML=C.filter(c=>c.today).concat([C[4]]).map(cardS).join('');
+document.getElementById('rail-date').innerHTML=C.filter(c=>c.mood.includes('date')).map(cardS).join('');
+document.getElementById('rail-pick').innerHTML=C.filter(c=>c.pick).map(cardS).join('');
+document.getElementById('rail-next').innerHTML=[C[6],C[8],C[0]].map(cardS).join('');
+
+/* ================= АФИША (C) ================= */
+function rowHTML(c){const s=STAGES[c.st];const low=c.seats<=10;
+ const badges=[low?'<span class="badge hot">почти sold out</span>':'',c.pick?'<span class="badge pick">выбор куратора</span>':'',c.mood.includes('date')?'<span class="badge">для свидания</span>':'',c.mood.includes('first')?'<span class="badge">первый визит</span>':''].join('');
+ return `<div class="row" onclick="openConcert(${c.id})"><div class="thumb"></div><div class="body"><div style="display:flex;gap:6px;align-items:center"><span class="stag ${s[1]}">${s[0]}</span><span class="meta">${c.d} · ${c.t}</span></div><div class="t">${c.a}</div><div class="sub">${c.p}</div><div class="badges">${badges}</div></div><div class="side"><div class="price">от ${fmt(c.pr)}</div><div class="seats ${low?'low':''}">● ${c.seats} мест</div><button class="buy" onclick="event.stopPropagation();openConcert(${c.id})">Купить</button></div></div>`;}
+function renderAfisha(f='all'){let L=[...C];
+ if(f in STAGES)L=L.filter(c=>c.st===f);
+ if(f==='date')L=L.filter(c=>c.mood.includes('date'));
+ if(f==='cheap')L=L.filter(c=>c.pr<=2000);
+ L.sort((a,b)=>(b.comm*5+ (b.seats<=10?3:0))-(a.comm*5+(a.seats<=10?3:0)));
+ document.getElementById('afisha-list').innerHTML=L.map(rowHTML).join('');
+ document.getElementById('afisha-count').textContent=L.length+' '+plural(L.length);}
+function plural(n){return n%10===1&&n%100!==11?'вечер':(n%10>=2&&n%10<=4&&(n%100<10||n%100>=20)?'вечера':'вечеров');}
+document.getElementById('afisha-chips').addEventListener('click',e=>{if(!e.target.dataset.f)return;document.querySelectorAll('#afisha-chips .chip').forEach(c=>c.classList.remove('on'));e.target.classList.add('on');renderAfisha(e.target.dataset.f);});
+renderAfisha();
+
+/* ================= КВИЗ (A) → СКОРИНГ (PDF-формула) ================= */
+const QUIZ=[
+ {q:'Какой <span class="it">вечер</span> вам сегодня нужен?',sub:'Можно выбрать несколько. Можно ничего — покажем «всё хорошее».',multi:true,key:'mood',opts:[
+  ['first','①','Впервые в клубе','понятный вход в джаз'],['calm','✦','Атмосферный вечер','свет, вино, разговор'],['deep','♪','Сильный уровень','для знатоков'],['dance','◐','Танцевально и громко','funk · soul · groove'],['wild','✺','Что-то неожиданное','выбор куратора']]},
+ {q:'С кем <span class="it">пойдёте</span>?',sub:'От ответа зависит, какие сцены покажем — где стол, где тише.',multi:false,key:'who',opts:[
+  ['solo','①','Один / одна','сосредоточиться, послушать'],['date','♥','Свидание','стол, мягкий свет'],['friends','◯','Компания друзей','после работы, бар'],['work','▭','С коллегами','ужин и концерт']]},
+ {q:'Сколько на <span class="it">билет</span>?',sub:'Цены честные и видны сразу — без сюрпризов в корзине.',multi:false,key:'bud',opts:[
+  ['2000','₽','До 2 000 ₽','понятный вечер'],['3000','₽₽','До 3 000 ₽','основная афиша'],['any','✦','Не важно','лучший вечер, а не цена']]}
+];
+let qStep=0,answers={mood:[],who:null,bud:null};
+function startQuiz(){qStep=0;answers={mood:[],who:null,bud:null};go('quiz');renderQuiz();}
+function renderQuiz(){const Q=QUIZ[qStep];document.getElementById('qprog').textContent='0'+(qStep+1)+' / 03';
+ document.getElementById('quiz-body').innerHTML=`<div class="section-pad" style="margin:20px 0 18px"><div class="eyebrow">Вопрос ${['первый · о настроении','второй · с кем','третий · бюджет'][qStep]}</div><h2 class="h-serif" style="font-size:28px;margin-top:8px">${Q.q}</h2><p class="lead" style="margin-top:8px;font-size:13.5px">${Q.sub}</p></div>`+
+ Q.opts.map(o=>`<div class="opt" data-v="${o[0]}" onclick="pick(this,'${Q.key}',${Q.multi})"><span class="ic">${o[1]}</span><span class="tx"><div class="n">${o[2]}</div><div class="d">${o[3]}</div></span></div>`).join('');
+ document.getElementById('qnext').textContent=qStep<2?'Дальше →':'Показать мой вечер →';}
+function pick(el,key,multi){if(multi){el.classList.toggle('on');answers.mood=[...document.querySelectorAll('#quiz-body .opt.on')].map(e=>e.dataset.v);}else{document.querySelectorAll('#quiz-body .opt').forEach(e=>e.classList.remove('on'));el.classList.add('on');answers[key]=el.dataset.v;}}
+function quizNext(){if(qStep<2){qStep++;renderQuiz();}else{buildRecs();}}
+
+/* score = mood×30 + who×20 + budget×15 + commercial×10 (скрыт) + urgency×5 */
+function score(c){let s=0;
+ if(answers.mood.length){const hit=c.mood.filter(m=>answers.mood.includes(m)).length;s+=30*(hit/answers.mood.length);}else s+=15;
+ if(answers.who)s+=c.who.includes(answers.who)?20:0;
+ const cap=answers.bud==='2000'?2000:answers.bud==='3000'?3000:99999;
+ s+=c.pr<=cap?15:-40;
+ s+=c.comm*10;                    /* резиденты · low-fill — гость этого не видит */
+ s+=c.seats<=10?5:0;
+ return s;}
+function reason(c,i){if(i===0)return'Лучший выбор';if(c.pick)return'Выбор куратора';if(c.comm)return'Редкий вечер';return'Чуть смелее';}
+function buildRecs(){const top=[...C].map(c=>({c,s:score(c)})).sort((a,b)=>b.s-a.s).slice(0,3);
+ const f=[answers.who==='date'?'свидание':answers.who==='friends'?'компанией':answers.who==='solo'?'соло':answers.who==='work'?'с коллегами':null,answers.bud&&answers.bud!=='any'?'до '+fmt(+answers.bud):null].filter(Boolean).join(' · ');
+ document.getElementById('recs-filter').textContent=f?f.toUpperCase()+' · МОЖНО ПРАВИТЬ':'';
+ document.getElementById('recs-list').innerHTML=top.map((r,i)=>{const c=r.c,s=STAGES[c.st];
+  return `<div class="rec" onclick="openConcert(${c.id})"><div class="poster"><span class="pin stag ${s[1]}">${s[0]}</span></div><div class="pad"><div style="display:flex;justify-content:space-between;align-items:center"><span class="eyebrow">· ${reason(c,i)} · 0${i+1}/03</span><span class="meta">${c.d} · ${c.t}</span></div><div class="h-serif" style="font-size:21px;margin-top:6px">${c.a}</div><div class="meta" style="margin-top:2px">${c.p}</div><div class="why">— ${c.why}</div><div class="foot"><span class="price h-serif" style="font-size:16px;font-weight:600">${fmt(c.pr)}</span><span class="seats meta ${c.seats<=10?'low':''}">● ${c.seats} мест</span><button class="buy" onclick="event.stopPropagation();openConcert(${c.id})">Купить</button></div></div></div>`;}).join('');
+ go('recs');}
+
+/* ================= КОНЦЕРТ + CHECKOUT (C) ================= */
+let cur=null,tarif=0,guests=2;
+const TARIFS=[['Стандарт','посадка свободная + бар',0],['Лучшие места','первые ряды · рекомендуем',800],['Стол на 2','ужин · сервис у стола',1500]];
+function openConcert(id){cur=C.find(c=>c.id===id);tarif=1;guests=2;const s=STAGES[cur.st];
+ document.getElementById('concert-body').innerHTML=`
+ <div class="poster hero"><span class="pin stag ${s[1]}">${s[0]}</span><div class="cap"><div class="eyebrow" style="color:#e8c9ae">${cur.d} · ${cur.t}</div><div class="t" style="font-size:26px;margin-top:4px">${cur.a}</div><div class="m">${cur.p}</div></div></div>
+ <div class="cur" style="margin-top:18px"><div class="eyebrow" style="margin-bottom:8px">Почему стоит пойти</div><div class="q">— ${cur.why}</div><div class="s">— Павел Ермолаев · куратор месяца</div></div>
+ <div class="kv"><div><div class="l">Длится</div><div class="v">${cur.dur}</div></div><div><div class="l">Уровень</div><div class="v" style="font-size:11.5px;padding-top:3px">${cur.lvl}</div></div><div><div class="l">Мест</div><div class="v" style="color:${cur.seats<=10?'var(--hot)':'inherit'}">${cur.seats}</div></div><div><div class="l">Возраст</div><div class="v">16+</div></div></div>
+ <div class="eyebrow section-pad" style="margin-bottom:10px">Тариф</div>
+ ${TARIFS.map((t,i)=>`<div class="tarif ${i===1?'on':''}" data-i="${i}" onclick="setTarif(${i})"><span class="radio"></span><span><div class="n">${t[0]}</div><div class="d">${t[1].toUpperCase()}</div></span><span class="p">${fmt(cur.pr+t[2])}</span></div>`).join('')}
+ <div class="guests"><span style="font-weight:600;font-size:14.5px">Гостей</span><div class="stepper"><button onclick="setG(-1)">−</button><span class="num" id="gnum">2</span><button onclick="setG(1)">+</button></div></div>
+ <div class="trust">✓ <b>Официальные билеты клуба</b> — виджет Ticketscloud<br>✓ Apple Pay · СБП · Мир &nbsp;&nbsp;✓ Возврат до 24 часов</div>
+ <div style="height:110px"></div>`;
+ updTotal();go('concert');}
+function setTarif(i){tarif=i;document.querySelectorAll('.tarif').forEach((e,j)=>e.classList.toggle('on',j===i));updTotal();}
+function setG(d){guests=Math.min(6,Math.max(1,guests+d));document.getElementById('gnum').textContent=guests;updTotal();}
+function updTotal(){document.getElementById('cta-total').textContent=fmt((cur.pr+TARIFS[tarif][2])*guests);}
+
+/* ================= TC WIDGET → SUCCESS ================= */
+function openTC(){document.getElementById('tc-title').textContent=cur.a+' · '+guests+' × '+TARIFS[tarif][0];document.getElementById('tc-sub').textContent=cur.d+' · '+cur.t+' · '+STAGES[cur.st][0]+' · итого '+fmt((cur.pr+TARIFS[tarif][2])*guests);document.getElementById('tc').classList.add('show');}
+function closeTC(){document.getElementById('tc').classList.remove('show');}
+function paid(){closeTC();document.getElementById('done-sub').textContent=cur.a+' · '+cur.d+' · '+cur.t+' · '+STAGES[cur.st][0]+'. Билет ушёл на почту и в Wallet. Лучше прийти за 30 минут.';go('done');document.querySelectorAll('nav button').forEach(b=>b.classList.remove('on'));document.querySelector('nav [data-t="done"]').classList.add('on');}
+
+/* fake QR */
+(()=>{const q=document.getElementById('qr');let h='';for(let i=0;i<81;i++){const r=Math.floor(i/9),c=i%9;const corner=(r<3&&c<3)||(r<3&&c>5)||(r>5&&c<3);h+=`<i class="${corner?((r%3===1&&c%3===1)||r===0||r===2||c%9===0||c===2||c===6||c===8||r===6||r===8?'':'o'):(Math.random()>.5?'':'o')}"></i>`;}q.innerHTML=h;})();
+</script>
+</body>
+</html>
