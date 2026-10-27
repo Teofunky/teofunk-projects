@@ -387,3 +387,9 @@ body.kep-page .go-to-home-mb { display: none !important; }
 @media (prefers-reduced-motion: reduce) {
 	.kep-fixed .kep-bar, .kep .kep-video-play, .kep.kep .kep-cta { transition: none; }
 }
+/* 1.0.12: плитка «ещё N дат» в карточке покупки на компьютере. Дописать в конец kep.css. */
+.kep.kep .kep-dates-list li[hidden] { display: none; }
+.kep.kep .kep-date--more { margin: 0; font-family: inherit; cursor: pointer; border-style: dashed; color: var(--kep-mute); }
+.kep.kep .kep-date--more .kep-date-d { color: var(--kep-accent); }
+.kep.kep .kep-date--more:hover,
+.kep.kep .kep-date--more:focus-visible { border-color: var(--kep-ink); color: var(--kep-ink); }

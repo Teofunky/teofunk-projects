@@ -1,4 +1,4 @@
-/* Kozlov Event Page: поведение новой страницы концерта. Без jQuery и глобальных переменных. */
+/* Kozlov Event Page: поведение новой страницы концерта. Без jQuery и глобальных переменных. 1.0.12 */
 (function () {
 	'use strict';
 
@@ -95,11 +95,85 @@
 		io.observe(buy);
 	}
 
-	// Компьютер: карточка покупки прилипает сразу под шапкой темы. Шапка фиксированная
-	// и меняет высоту при прокрутке, поэтому отступ меряется по факту, а не числом в CSS.
 	var card = root.querySelector('.kep-card');
 	var desk = window.matchMedia ? window.matchMedia('(min-width: 1025px)') : null;
 	var frame = 0;
+
+	// Даты концерта на компьютере: виден первый ряд, остальные за плиткой «ещё N дат»,
+	// чтобы карточка покупки влезала в окно и могла прилипать целиком.
+	var dates = root.querySelector('.kep-dates');
+	var datesList = dates ? dates.querySelector('.kep-dates-list') : null;
+	var datesOpen = false;
+	var moreLi = null;
+	function plural(n, one, few, many) {
+		var m10 = n % 10, m100 = n % 100;
+		if (m10 === 1 && m100 !== 11) { return one; }
+		if (m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14)) { return few; }
+		return many;
+	}
+	function foldDates() {
+		if (!datesList) {
+			return;
+		}
+		var items = Array.prototype.filter.call(datesList.children, function (li) { return li !== moreLi; });
+		if (moreLi && moreLi.parentNode) {
+			moreLi.parentNode.removeChild(moreLi);
+		}
+		items.forEach(function (li) { li.hidden = false; });
+		if (!desk || !desk.matches || datesOpen || items.length < 3) {
+			return;
+		}
+		var firstTop = items[0].offsetTop;
+		var rowEnd = items.length;
+		for (var i = 1; i < items.length; i++) {
+			if (items[i].offsetTop > firstTop) {
+				rowEnd = i;
+				break;
+			}
+		}
+		if (rowEnd === items.length) {
+			return; // всё в одном ряду
+		}
+		var cut = rowEnd - 1; // последняя плитка первого ряда уступает место кнопке
+		var hidden = items.slice(cut);
+		if (hidden.length < 2) {
+			return;
+		}
+		// Текущая дата должна оставаться видимой: если она в хвосте, не сворачиваем.
+		for (var h = 0; h < hidden.length; h++) {
+			if (hidden[h].querySelector('.is-cur')) {
+				return;
+			}
+		}
+		hidden.forEach(function (li) { li.hidden = true; });
+		if (!moreLi) {
+			moreLi = document.createElement('li');
+			moreLi.className = 'kep-dates-more';
+			var b = document.createElement('button');
+			b.type = 'button';
+			b.className = 'kep-date kep-date--more';
+			b.addEventListener('click', function () {
+				var next = moreLi.nextElementSibling; // первая раскрываемая дата
+				datesOpen = true;
+				foldDates();
+				placeSoon();
+				var a = next ? next.querySelector('a') : null;
+				if (a) {
+					a.focus(); // клавиатура: фокус на первую раскрытую дату, а не в пустоту
+				}
+			});
+			moreLi.appendChild(b);
+		}
+		var n = hidden.length;
+		var btn = moreLi.firstChild;
+		btn.innerHTML = '<span class="kep-date-w">ещё</span><span class="kep-date-d">+' + n + '</span><span class="kep-date-m">' + plural(n, 'дата', 'даты', 'дат') + '</span>';
+		btn.setAttribute('aria-label', 'Показать ещё ' + n + ' ' + plural(n, 'дату', 'даты', 'дат'));
+		btn.setAttribute('aria-expanded', 'false');
+		datesList.insertBefore(moreLi, hidden[0]);
+	}
+
+	// Компьютер: карточка покупки прилипает сразу под шапкой темы. Шапка фиксированная
+	// и меняет высоту при прокрутке, поэтому отступ меряется по факту, а не числом в CSS.
 	function coveredTop(x) {
 		var y = 0;
 		for (var round = 0; round < 6 && document.elementsFromPoint; round++) {
@@ -142,21 +216,39 @@
 		}
 		var r = card.getBoundingClientRect();
 		var top = coveredTop(Math.round(r.left + r.width / 2)) + 16;
+		// Карточка выше свободного места: липнет не верхом, а низом (top уходит в минус),
+		// чтобы цена и кнопка покупки всегда оставались на экране. Срезается верх карточки,
+		// название и дата при этом есть в шапке страницы слева.
+		var fit = window.innerHeight - 16 - card.offsetHeight;
+		if (fit < top) {
+			top = fit;
+		}
 		card.style.top = top + 'px';
-		// Карточка выше свободного места: пусть едет вместе со страницей, иначе низ с кнопкой не увидеть.
-		card.classList.toggle('is-free', card.offsetHeight + top + 16 > window.innerHeight);
+		card.classList.remove('is-free');
 	}
 	function placeSoon() {
 		if (!frame) {
 			frame = window.requestAnimationFrame(placeCard);
 		}
 	}
+	var resizeTimer;
+	function onResize() {
+		placeSoon();
+		clearTimeout(resizeTimer);
+		resizeTimer = setTimeout(function () { foldDates(); placeSoon(); }, 120);
+	}
 	if (card) {
+		foldDates();
 		placeCard();
 		window.addEventListener('scroll', placeSoon, { passive: true });
-		window.addEventListener('resize', placeSoon);
-		window.addEventListener('load', placeSoon);
+		window.addEventListener('resize', onResize);
+		window.addEventListener('load', onResize);
 		document.addEventListener('transitionend', placeSoon, true);
+		if (desk && desk.addEventListener) {
+			desk.addEventListener('change', onResize);
+		} else if (desk && desk.addListener) {
+			desk.addListener(onResize);
+		}
 	}
 
 	// Поделиться: системное меню телефона или копирование ссылки.
