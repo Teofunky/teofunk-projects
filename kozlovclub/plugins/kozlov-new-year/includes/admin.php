@@ -30,6 +30,12 @@ function kny_maybe_setup() {
 	if ( false === get_option( 'kny_settings', false ) && current_user_can( 'activate_plugins' ) ) {
 		kny_activate();
 	}
+	// После обновления плагина убираем из кэша старую копию страницы.
+	if ( KNY_VERSION !== get_option( 'kny_version' ) && current_user_can( 'edit_pages' ) ) {
+		$s = kny_get_settings();
+		kny_purge_cache( (int) $s['page_id'] );
+		update_option( 'kny_version', KNY_VERSION, false );
+	}
 }
 
 /**
@@ -160,6 +166,14 @@ function kny_admin_field( $key, $field, $value, $default ) {
 				$opts .= '<option value="' . esc_attr( $ov ) . '"' . selected( (string) $value, (string) $ov, false ) . '>' . esc_html( $ol ) . '</option>';
 			}
 			return $open . '<label for="' . $id . '">' . $label . '</label><select id="' . $id . '" class="kny-control">' . $opts . '</select>' . $help . '</div>';
+
+		case 'radio':
+			$name = 'kny-r' . $uid;
+			$opts = '';
+			foreach ( $field['options'] as $ov => $ol ) {
+				$opts .= '<label class="kny-radio"><input type="radio" class="kny-control" name="' . esc_attr( $name ) . '" value="' . esc_attr( $ov ) . '"' . checked( (string) $value, (string) $ov, false ) . '> <span>' . esc_html( $ol ) . '</span></label>';
+			}
+			return $open . '<span class="kny-label">' . $label . '</span><div class="kny-radios" role="radiogroup" aria-label="' . esc_attr( $field['label'] ) . '">' . $opts . '</div><p class="kny-hint" hidden></p>' . $help . '</div>';
 
 		case 'checkbox':
 			return $open . '<label class="kny-check"><input class="kny-control" type="checkbox"' . checked( (bool) $value, true, false ) . '> ' . $label . '</label>' . $help . '</div>';
@@ -359,6 +373,12 @@ function kny_admin_notices( $s, $page ) {
 		'badjson'   => array( 'error', 'Не удалось прочитать данные. Ничего не изменено.' ),
 		'badfile'   => array( 'error', 'Файл не похож на копию этой страницы. Ничего не изменено.' ),
 	);
+	if ( 'saved' === $msg ) {
+		$time = function_exists( 'wp_date' ) ? wp_date( 'H:i' ) : date_i18n( 'H:i' );
+		$link = ( $page && 'publish' === $page->post_status ) ? ' <a href="' . esc_url( get_permalink( $page ) ) . '" target="_blank" rel="noopener">Открыть страницу ↗</a>' : '';
+		echo '<div class="notice notice-success is-dismissible"><p>' . esc_html( 'Сохранено в ' . $time . '. На сайте правки видны сразу.' ) . $link . '</p></div>'; // phpcs:ignore WordPress.Security.EscapeOutput
+		$msg = '';
+	}
 	if ( isset( $map[ $msg ] ) ) {
 		echo '<div class="notice notice-' . esc_attr( $map[ $msg ][0] ) . ' is-dismissible"><p>' . esc_html( $map[ $msg ][1] ) . '</p></div>';
 	}
@@ -410,7 +430,7 @@ function kny_admin_settings_panel( $s ) {
 	echo '<form method="post" action="' . esc_url( $post ) . '" class="kny-inline" onsubmit="return confirm(\'Создать новую страницу-черновик и показывать лендинг на ней?\')">';
 	wp_nonce_field( 'kny_create_page' );
 	echo '<input type="hidden" name="action" value="kny_create_page"><button class="button">Создать новую страницу-черновик</button></form></div>';
-	echo '</div><div class="kny-card"><h2>Как устроено</h2><ul class="kny-list"><li>Страница выводится своим шаблоном: стили и скрипты темы на неё не грузятся, её стили не попадают на остальной сайт.</li><li>Если при выводе что-то сломается, по адресу откроется обычная страница темы, а ошибка запишется в журнал PHP.</li><li>Данные хранятся в трёх опциях WordPress (kny_data, kny_history, kny_settings). Таблицы, афиша и файлы темы не меняются.</li><li>Title, description и картинка для соцсетей задаются на вкладке «Общее и SEO»; настройки Yoast/Rank Math у этой страницы не используются.</li><li>После сохранения кэш страницы сбрасывается в WP Super Cache, WP Rocket, W3 Total Cache, LiteSpeed, WP Fastest Cache, если они стоят.</li></ul></div></section>';
+	echo '</div><div class="kny-card"><h2>Как устроено</h2><ul class="kny-list"><li>Страница выводится своим шаблоном: стили и скрипты темы на неё не грузятся, её стили не попадают на остальной сайт.</li><li>Если при выводе что-то сломается, по адресу откроется обычная страница темы, а ошибка запишется в журнал PHP.</li><li>Данные хранятся в трёх опциях WordPress (kny_data, kny_history, kny_settings). Таблицы, афиша и файлы темы не меняются.</li><li>Title, description и картинка для соцсетей задаются на вкладке «Общее и SEO»; настройки Yoast/Rank Math у этой страницы не используются.</li><li>Страница не кэшируется (ни плагинами кэша, ни браузером): правки видны сразу после сохранения.</li><li>После сохранения кэш страницы дополнительно сбрасывается в WP Super Cache, WP Rocket, W3 Total Cache, LiteSpeed, WP Fastest Cache, если они стоят.</li></ul></div></section>';
 }
 
 /* ---------- Обработчики ---------- */

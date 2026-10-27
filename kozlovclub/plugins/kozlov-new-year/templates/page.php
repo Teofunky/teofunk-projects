@@ -17,6 +17,16 @@ if ( $kny_post && post_password_required( $kny_post ) ) {
 	return;
 }
 
+// Редакторы правят страницу часто: её нельзя отдавать из кэша, иначе правки видны с опозданием.
+// Шаблон лёгкий (без темы), поэтому каждый показ собирается заново за миллисекунды.
+if ( ! defined( 'DONOTCACHEPAGE' ) ) {
+	define( 'DONOTCACHEPAGE', true ); // W3 Total Cache, WP Super Cache, WP Rocket.
+}
+do_action( 'litespeed_control_set_nocache', 'kozlov-new-year: editable page' );
+if ( ! headers_sent() ) {
+	nocache_headers();
+}
+
 $kny_ok = kny_safe_render(
 	kny_get_data(),
 	array(

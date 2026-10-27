@@ -146,6 +146,7 @@ function kny_field_default( $field ) {
 		case 'repeater':
 			return array();
 		case 'select':
+		case 'radio':
 			$keys = array_keys( $field['options'] );
 			return $keys[0];
 		default:
@@ -167,6 +168,7 @@ function kny_sanitize_value( $field, $value, $default ) {
 			return (bool) $value;
 
 		case 'select':
+		case 'radio':
 			$value = is_scalar( $value ) ? (string) $value : '';
 			return array_key_exists( $value, $field['options'] ) ? $value : $default;
 
@@ -343,6 +345,12 @@ function kny_purge_cache( $page_id ) {
 	}
 	if ( function_exists( 'w3tc_flush_post' ) ) {
 		w3tc_flush_post( $page_id ); // W3 Total Cache.
+	}
+	if ( function_exists( 'w3tc_flush_url' ) ) {
+		$url = get_permalink( $page_id );
+		if ( $url ) {
+			w3tc_flush_url( $url ); // W3 Total Cache: точечно по адресу.
+		}
 	}
 	if ( class_exists( 'WpFastestCache' ) && isset( $GLOBALS['wp_fastest_cache'] ) && method_exists( $GLOBALS['wp_fastest_cache'], 'singleDeleteCache' ) ) {
 		$GLOBALS['wp_fastest_cache']->singleDeleteCache( false, $page_id ); // WP Fastest Cache.

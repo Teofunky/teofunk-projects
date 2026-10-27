@@ -29,6 +29,13 @@
 .kny-wrap .kny-field textarea{line-height:1.5;min-height:58px;resize:vertical}
 .kny-wrap .kny-field textarea[data-rich]{font-family:inherit}
 .kny-wrap .kny-help{margin:5px 0 0;color:#646970;font-size:12px;line-height:1.45}
+.kny-wrap .kny-label{display:block;font-weight:600;margin:0 0 6px;font-size:13px}
+.kny-wrap .kny-radios{display:flex;flex-wrap:wrap;gap:6px 22px}
+.kny-wrap .kny-radio{display:inline-flex;align-items:center;gap:7px;cursor:pointer;padding:4px 0}
+.kny-wrap .kny-radio input{margin:0}
+.kny-wrap .kny-hint{margin:8px 0 0;padding:7px 10px;border-radius:4px;background:#fcf3e1;color:#7a4e00;font-size:12px;line-height:1.45}
+.kny-wrap .kny-target{font-weight:400;color:#646970}
+.kny-wrap .kny-target.is-call{color:#8a5a00}
 .kny-wrap .kny-check{display:flex!important;align-items:center;gap:8px;font-weight:600}
 .kny-wrap .kny-counter{float:right;font-weight:400;color:#646970;font-size:12px}
 .kny-wrap .kny-counter.is-over{color:#b32d2e;font-weight:600}

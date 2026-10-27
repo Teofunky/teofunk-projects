@@ -38,6 +38,11 @@ function collect(scope) {
 			out[key] = [].slice.call(list.children).filter(function (c) { return c.classList.contains('kny-item'); }).map(collect);
 			return;
 		}
+		if (type === 'radio') {
+			var on = el.querySelector('.kny-control:checked');
+			out[key] = on ? on.value : '';
+			return;
+		}
 		var ctl = el.querySelector('.kny-control');
 		if (!ctl) return;
 		out[key] = type === 'checkbox' ? ctl.checked : ctl.value;
@@ -76,12 +81,41 @@ function itemTitle(item) {
 	});
 	var hidden = item.querySelector('[data-key="hidden"] .kny-control');
 	var t = parts.filter(Boolean).join(' · ') || 'Без названия';
+	var target = itemTarget(item);
 	item.classList.toggle('is-hidden-item', !!(hidden && hidden.checked));
-	return t + (hidden && hidden.checked ? '  (скрыт)' : '');
+	return t + (target ? '   →  ' + target : '') + (hidden && hidden.checked ? '  (скрыт)' : '');
+}
+/* Куда на самом деле поведёт кнопка: та же логика, что на сайте. */
+function itemTarget(item) {
+	var act = item.querySelector('[data-key="action"] .kny-control:checked');
+	if (!act) return '';
+	var url = item.querySelector('[data-key="url"] .kny-control');
+	var hasUrl = !!(url && url.value.trim());
+	return act.value === 'book_phone' || !hasUrl ? 'кнопка звонит' : 'кнопка ведёт на страницу концерта';
+}
+function updateHint(item) {
+	var hint = item.querySelector('[data-key="action"] .kny-hint');
+	if (!hint) return;
+	var act = item.querySelector('[data-key="action"] .kny-control:checked');
+	var url = item.querySelector('[data-key="url"] .kny-control');
+	var hasUrl = !!(url && url.value.trim()), msg = '';
+	if (act && act.value !== 'book_phone' && !hasUrl) msg = 'Ссылка на концерт не заполнена, поэтому кнопка будет звонить в клуб.';
+	else if (act && act.value === 'book_phone' && hasUrl) msg = 'Сейчас кнопка звонит в клуб. Чтобы она вела на страницу концерта, выберите «Забронировать → страница концерта».';
+	hint.textContent = msg;
+	hint.hidden = !msg;
+}
+/* У каждой карточки свои радиокнопки: при копировании и добавлении даём группе новое имя. */
+var radioSeq = 0;
+function uniqueRadios(node) {
+	var map = {};
+	[].forEach.call(node.querySelectorAll('input[type=radio]'), function (r) {
+		if (!map[r.name]) map[r.name] = 'kny-rn' + Date.now().toString(36) + (++radioSeq);
+		r.name = map[r.name];
+	});
 }
 function refreshList(list) {
 	var items = [].slice.call(list.children).filter(function (c) { return c.classList.contains('kny-item'); });
-	items.forEach(function (it) { var t = it.querySelector('.kny-item-title'); if (t) t.textContent = itemTitle(it); });
+	items.forEach(function (it) { var t = it.querySelector('.kny-item-title'); if (t) t.textContent = itemTitle(it); updateHint(it); });
 	var rep = list.closest('.kny-t-repeater'), cnt = rep && rep.querySelector('.kny-count');
 	if (cnt) cnt.textContent = '(' + items.length + ')';
 	var add = rep && rep.querySelector(':scope > .kny-add'), max = parseInt(list.getAttribute('data-max') || '50', 10);
@@ -108,6 +142,7 @@ doc.addEventListener('click', function (e) {
 	if (t.closest('.kny-add')) {
 		var rep = t.closest('.kny-t-repeater'), list = rep.querySelector('.kny-items'), tpl = rep.querySelector(':scope > .kny-tpl');
 		var node = tpl.content.firstElementChild.cloneNode(true);
+		uniqueRadios(node);
 		list.appendChild(node); refreshList(list); setDirty(true);
 		var first = node.querySelector('.kny-control'); if (first) first.focus();
 		node.scrollIntoView({ block: 'center', behavior: 'smooth' });
@@ -119,9 +154,10 @@ doc.addEventListener('click', function (e) {
 	else if (t.closest('.kny-down') && item.nextElementSibling) { lst.insertBefore(item.nextElementSibling, item); refreshList(lst); setDirty(true); }
 	else if (t.closest('.kny-copy')) {
 		var copy = item.cloneNode(true);
-		// cloneNode не копирует текущее значение textarea/checkbox/select, переносим вручную.
+		uniqueRadios(copy);
+		// cloneNode не копирует текущее значение полей, переносим вручную.
 		var src = item.querySelectorAll('.kny-control'), dst = copy.querySelectorAll('.kny-control');
-		[].forEach.call(src, function (s, i) { if (s.type === 'checkbox') dst[i].checked = s.checked; else dst[i].value = s.value; });
+		[].forEach.call(src, function (s, i) { if (s.type === 'checkbox' || s.type === 'radio') dst[i].checked = s.checked; else dst[i].value = s.value; });
 		lst.insertBefore(copy, item.nextSibling); refreshList(lst); setDirty(true);
 	}
 	else if (t.closest('.kny-del')) {
@@ -180,13 +216,13 @@ doc.addEventListener('input', function (e) {
 	if (t.hasAttribute('data-counter')) counter(t);
 	if (t.tagName === 'TEXTAREA') { t.style.height = 'auto'; t.style.height = Math.min(t.scrollHeight + 2, 520) + 'px'; }
 	var item = t.closest('.kny-item');
-	if (item) { var tt = item.querySelector('.kny-item-title'); if (tt) tt.textContent = itemTitle(item); }
+	if (item) { var tt = item.querySelector('.kny-item-title'); if (tt) tt.textContent = itemTitle(item); updateHint(item); }
 });
 doc.addEventListener('change', function (e) {
 	var t = e.target;
 	if (!t.classList || !t.classList.contains('kny-control')) return;
 	setDirty(true);
 	var item = t.closest('.kny-item');
-	if (item) { var tt = item.querySelector('.kny-item-title'); if (tt) tt.textContent = itemTitle(item); }
+	if (item) { var tt = item.querySelector('.kny-item-title'); if (tt) tt.textContent = itemTitle(item); updateHint(item); }
 });
 })();

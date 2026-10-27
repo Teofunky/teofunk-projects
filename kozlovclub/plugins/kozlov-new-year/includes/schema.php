@@ -65,9 +65,11 @@ function kny_schema() {
 							'price'       => kny_f( 'text', 'Цена', array( 'placeholder' => 'от 3 500 ₽' ) ),
 							'price_note'  => kny_f( 'text', 'Подпись под ценой', array( 'placeholder' => 'билет на концерт' ) ),
 							'action'      => kny_f(
-								'select',
-								'Кнопка',
+								'radio',
+								'Куда ведёт кнопка',
 								array(
+									'wide'    => true,
+									'help'    => 'Для «страницы концерта» нужна ссылка ниже, без неё кнопка позвонит в клуб.',
 									'options' => array(
 										'ticket'     => '«Купить билет» → страница концерта',
 										'book_page'  => '«Забронировать» → страница концерта',
@@ -76,7 +78,7 @@ function kny_schema() {
 									'default' => 'ticket',
 								)
 							),
-							'url'         => kny_f( 'url', 'Ссылка на концерт в афише', array( 'wide' => true, 'placeholder' => 'https://kozlovclub.ru/event/...', 'help' => 'Если пусто, кнопка звонит в клуб.' ) ),
+							'url'         => kny_f( 'url', 'Ссылка на концерт в афише', array( 'wide' => true, 'placeholder' => 'https://kozlovclub.ru/event/...', 'help' => 'Фото и «Подробнее» ведут сюда всегда. Кнопка ведёт сюда, только если выше выбрана «страница концерта».' ) ),
 							'image'       => kny_f( 'image', 'Фото', array( 'help' => 'Пропорция 4:3, от 800×600.' ) ),
 							'description' => kny_f( 'textarea', 'Короткое описание', array( 'wide' => true ) ),
 							'detail'      => kny_f( 'rich', 'Подробности (раскрываются по клику)', array( 'wide' => true ) ),
