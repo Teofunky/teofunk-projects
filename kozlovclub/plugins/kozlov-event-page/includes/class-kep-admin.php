@@ -608,6 +608,13 @@ class KEP_Admin {
 				$cookies = array( 'beget' => 'begetok' ); // защита хостинга Beget от ботов
 				continue;
 			}
+			$code = (int) wp_remote_retrieve_response_code( $r );
+			if ( 200 !== $code ) {
+				return new WP_Error( 'kep_http', 'сервер ответил кодом ' . $code . ' вместо страницы' );
+			}
+			if ( false === strpos( $body, 'single-ai1ec' ) ) {
+				return new WP_Error( 'kep_not_event', 'ответ сервера не похож на страницу концерта' );
+			}
 			$clean++;
 		}
 		return $body;

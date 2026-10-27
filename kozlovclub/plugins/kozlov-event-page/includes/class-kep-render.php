@@ -42,7 +42,7 @@ class KEP_Render {
 		$h .= '<aside class="kep-card" aria-label="Дата и билеты">';
 		$h .= '<div class="kep-when"><span class="kep-day">' . esc_html( $d['day'] ) . '</span><span class="kep-when-rows">';
 		$h .= '<span class="kep-r1">' . esc_html( self::row1( $d, $ctx, $time ) ) . '</span>';
-		$h .= '<span class="kep-r2">' . esc_html( $d['weekday'] ) . ' <span class="kep-badge" hidden></span></span>';
+		$h .= '<span class="kep-r2">' . esc_html( self::weekday_text( $d, $ctx ) ) . ' <span class="kep-badge" hidden></span></span>';
 		if ( '' !== $d['stage'] ) {
 			$map = KEP_Settings::map_url( $ctx['code'] );
 			if ( '' !== $map && '' !== $ctx['code'] ) {
@@ -487,7 +487,7 @@ class KEP_Render {
 			$stage = isset( $stages[ $e['stage'] ] ) ? $stages[ $e['stage'] ] : '';
 			$h    .= '<a class="kep-more-card" href="' . esc_url( KEP_Data::event_url( $e['slug'] ) ) . '">';
 			$h    .= '' !== $img ? '<img src="' . esc_url( $img ) . '" alt="" loading="lazy" decoding="async">' : '<span class="kep-more-noimg"></span>';
-			$h    .= '<span class="kep-more-when">' . esc_html( trim( self::show_time( $e['time'] ) . ( '' !== $stage ? ' · ' . $stage : '' ) ) ) . '</span>';
+			$h    .= '<span class="kep-more-when">' . esc_html( trim( self::show_time( $e['time'] ) . self::night_short( $e['time'], $e['date'] ) . ( '' !== $stage ? ' · ' . $stage : '' ) ) ) . '</span>';
 			$h    .= '<span class="kep-more-title">' . esc_html( $e['title'] ) . '</span>';
 			$h    .= '<span class="kep-more-price">' . esc_html( self::price( $e['price'] ) ) . '</span></a>';
 		}
@@ -607,12 +607,36 @@ class KEP_Render {
 		if ( '' === $time ) {
 			return $d['row1'];
 		}
-		$label = $time;
-		if ( '23:59' === $d['time'] ) {
-			$next  = self::next_day( $ctx['date'] );
-			$label = '00:00, ночь' . ( $next ? ' на ' . (int) gmdate( 'j', $next ) : '' );
+		return preg_replace( '/\d{1,2}:\d{2}/', $time, $d['row1'], 1 );
+	}
+
+	const WD_ACC       = array( 1 => 'понедельник', 'вторник', 'среду', 'четверг', 'пятницу', 'субботу', 'воскресенье' );
+	const WD_ACC_SHORT = array( 1 => 'пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс' );
+
+	/**
+	 * «Пятница, в ночь на субботу» для ночного концерта (23:59 в афише), иначе день недели как есть.
+	 */
+	private static function weekday_text( $d, $ctx ) {
+		$wd = trim( $d['weekday'] );
+		if ( '23:59' !== $d['time'] ) {
+			return $wd;
 		}
-		return preg_replace( '/\d{1,2}:\d{2}/', $label, $d['row1'], 1 );
+		$next = self::next_day( $ctx['date'] );
+		if ( ! $next ) {
+			return $wd;
+		}
+		return ( '' !== $wd ? $wd . ', ' : '' ) . 'в ночь на ' . self::WD_ACC[ (int) gmdate( 'N', $next ) ];
+	}
+
+	/**
+	 * «, ночь на сб» для ночного концерта, иначе пусто.
+	 */
+	private static function night_short( $time, $date ) {
+		if ( '23:59' !== $time ) {
+			return '';
+		}
+		$next = self::next_day( $date );
+		return $next ? ', ночь на ' . self::WD_ACC_SHORT[ (int) gmdate( 'N', $next ) ] : '';
 	}
 
 	private static function next_day( $date ) {
@@ -639,7 +663,8 @@ class KEP_Render {
 		$month = self::MONTHS_GEN[ (int) gmdate( 'n', $ts ) ];
 		if ( '23:59' === $d['time'] ) {
 			$next = $ts + DAY_IN_SECONDS;
-			return sprintf( 'Ночь с %d на %d %s, 00:00', $day, (int) gmdate( 'j', $next ), self::MONTHS_GEN[ (int) gmdate( 'n', $next ) ] );
+			$wdn  = '' !== $d['weekday'] ? $d['weekday'] . ', ' : '';
+			return sprintf( '%s%d %s, 00:00 (в ночь на %s %d %s)', $wdn, $day, $month, self::WD_ACC[ (int) gmdate( 'N', $next ) ], (int) gmdate( 'j', $next ), self::MONTHS_GEN[ (int) gmdate( 'n', $next ) ] );
 		}
 		$wd = '' !== $d['weekday'] ? $d['weekday'] . ', ' : '';
 		return $wd . $day . ' ' . $month . ( '' !== $time ? ', ' . $time : '' );
@@ -649,12 +674,8 @@ class KEP_Render {
 		$wd = mb_strtolower( $d['weekday'], 'UTF-8' );
 		$wd = isset( self::WD_SHORT[ $wd ] ) ? self::WD_SHORT[ $wd ] . ', ' : '';
 		$ts = '' !== $ctx['date'] ? strtotime( $ctx['date'] . ' 12:00:00 UTC' ) : 0;
-		if ( '23:59' === $d['time'] && $ts ) {
-			$next = $ts + DAY_IN_SECONDS;
-			return 'Ночь на ' . (int) gmdate( 'j', $next ) . ' ' . self::MONTHS_SHORT[ (int) gmdate( 'n', $next ) ] . ' · 00:00';
-		}
 		$dm = $ts ? (int) gmdate( 'j', $ts ) . ' ' . self::MONTHS_SHORT[ (int) gmdate( 'n', $ts ) ] : $d['day'];
-		return $wd . $dm . ( '' !== $time ? ' · ' . $time : '' );
+		return $wd . $dm . ( '' !== $time ? ' · ' . $time : '' ) . self::night_short( $d['time'], $ctx['date'] );
 	}
 
 	/**

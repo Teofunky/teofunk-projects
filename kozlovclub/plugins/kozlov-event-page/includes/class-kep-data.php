@@ -104,7 +104,7 @@ class KEP_Data {
 				$out[] = $line;
 			}
 		}
-		return array_slice( $out, 0, 8 );
+		return $out;
 	}
 
 	/**

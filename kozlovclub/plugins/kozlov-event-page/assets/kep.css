@@ -381,13 +381,18 @@ body.kep-page .go-to-home-mb { display: none !important; }
 	.kep .kep-more-head { padding-right: 0; }
 	.kep .kep-more-rail { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; padding-right: 0; overflow: visible; }
 	.kep.kep .kep-more-card { width: auto; }
-	.kep-fixed .kep-bar { display: none; }
+	/* Нижняя панель на компьютере: только когда карточка не влезла в окно и кнопка ушла за верх.
+	   Отступы по ширине контейнера сайта (1220px), кнопка оказывается под колонкой карточки. */
+	.kep-fixed .kep-bar { padding-left: max(24px, calc((100% - 1220px) / 2)); padding-right: max(24px, calc((100% - 1220px) / 2)); gap: 24px; }
+	.kep-fixed .kep-bar-cta { width: 232px; }
+	.kep-fixed .kep-bar-p { font-size: 20px; }
+	.kep-fixed .kep-bar-d { font-size: 13px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
 	.kep-fixed .kep-bar, .kep .kep-video-play, .kep.kep .kep-cta { transition: none; }
 }
-/* 1.0.12: плитка «ещё N дат» в карточке покупки на компьютере. Дописать в конец kep.css. */
+/* 1.0.12: плитка «ещё N дат» в карточке покупки на компьютере. */
 .kep.kep .kep-dates-list li[hidden] { display: none; }
 .kep.kep .kep-date--more { margin: 0; font-family: inherit; cursor: pointer; border-style: dashed; color: var(--kep-mute); }
 .kep.kep .kep-date--more .kep-date-d { color: var(--kep-accent); }

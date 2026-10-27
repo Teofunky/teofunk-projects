@@ -99,6 +99,13 @@ class KEP_Parser {
 			$key        = self::lower( mb_substr( $m[1], 0, 3, 'UTF-8' ) );
 			$d['month'] = isset( self::MONTHS[ $key ] ) ? self::MONTHS[ $key ] : 0;
 		}
+		// Тема показывает ночным концертам 00:00, а хранимое время (23:59) отдаёт в data-time строки row_1.
+		$r1 = self::q1( $x, './/*[' . self::c( 'row_1' ) . ']', $info );
+		if ( $r1 && '23:59' === $r1->getAttribute( 'data-time' ) ) {
+			$d['time'] = '23:59';
+		}
+		// Подпись «, в ночь на субботу» тема дописывает сама; здесь нужен только день недели.
+		$d['weekday'] = trim( preg_replace( '/\s*,.*$/u', '', $d['weekday'] ) );
 		if ( '' === $d['title'] || '' === $d['day'] ) {
 			return null;
 		}

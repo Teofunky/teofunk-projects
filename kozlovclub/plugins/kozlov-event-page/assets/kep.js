@@ -1,4 +1,4 @@
-/* Kozlov Event Page: поведение новой страницы концерта. Без jQuery и глобальных переменных. 1.0.12 */
+/* Kozlov Event Page: поведение новой страницы концерта. Без jQuery и глобальных переменных. 1.0.14 */
 (function () {
 	'use strict';
 
@@ -216,15 +216,11 @@
 		}
 		var r = card.getBoundingClientRect();
 		var top = coveredTop(Math.round(r.left + r.width / 2)) + 16;
-		// Карточка выше свободного места: липнет не верхом, а низом (top уходит в минус),
-		// чтобы цена и кнопка покупки всегда оставались на экране. Срезается верх карточки,
-		// название и дата при этом есть в шапке страницы слева.
-		var fit = window.innerHeight - 16 - card.offsetHeight;
-		if (fit < top) {
-			top = fit;
-		}
 		card.style.top = top + 'px';
-		card.classList.remove('is-free');
+		// Карточка выше свободного места: едет вместе со страницей, а цену и кнопку даёт
+		// нижняя панель (та же, что на телефоне): она появляется, когда кнопка в карточке
+		// ушла за верх экрана. Иначе при прилипании часть карточки (кнопка или «Важно знать») не видна.
+		card.classList.toggle('is-free', card.offsetHeight + top + 16 > window.innerHeight);
 	}
 	function placeSoon() {
 		if (!frame) {
