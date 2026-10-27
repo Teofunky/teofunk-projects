@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Kozlov New Year
  * Description:       Новогодняя страница «Новый год в Клубе Алексея Козлова» с редактором текстов, концертов, цен и фото. Изолирована от темы: не меняет файлы темы, таблицы, афишу и другие страницы.
- * Version:           1.0.2
+ * Version:           1.0.3
  * Requires at least: 5.6
  * Requires PHP:      7.2
  * Author:            Клуб Алексея Козлова
@@ -14,7 +14,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'KNY_VERSION', '1.0.2' );
+define( 'KNY_VERSION', '1.0.3' );
 define( 'KNY_FILE', __FILE__ );
 define( 'KNY_DIR', plugin_dir_path( __FILE__ ) );
 define( 'KNY_URL', plugin_dir_url( __FILE__ ) );

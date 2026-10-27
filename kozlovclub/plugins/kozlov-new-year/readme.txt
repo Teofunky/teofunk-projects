@@ -1,7 +1,7 @@
 === Kozlov New Year ===
 Requires at least: 5.6
 Requires PHP: 7.2
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 
 Новогодняя страница «Новый год в Клубе Алексея Козлова» с редактором.
 

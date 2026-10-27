@@ -244,6 +244,7 @@ function kny_save_data( $data, $label = 'Сохранение' ) {
 	// Первое сохранение: в историю уходит исходный макет, чтобы к нему всегда можно было вернуться.
 	kny_push_history( is_array( $current ) ? $current : kny_default_data(), $label );
 	update_option( 'kny_data', $data, false );
+	kny_flush_object_caches();
 	$settings = kny_get_settings();
 	if ( ! empty( $settings['page_id'] ) ) {
 		kny_purge_cache( (int) $settings['page_id'] );
@@ -302,6 +303,27 @@ function kny_get_settings() {
  */
 function kny_save_settings( $s ) {
 	update_option( 'kny_settings', array_merge( kny_default_settings(), $s ), false );
+	kny_flush_object_caches();
+}
+
+/**
+ * Сбрасывает кэш объектов и запросов к базе (Redis/Memcached).
+ *
+ * W3 Total Cache по умолчанию не пишет в кэш объектов из админки: сохранение в базе проходит,
+ * а сайт продолжает читать старую копию из Redis. Поэтому после каждого сохранения
+ * кэш объектов и кэш базы сбрасываются явно.
+ */
+function kny_flush_object_caches() {
+	wp_cache_delete( 'kny_data', 'options' );
+	wp_cache_delete( 'kny_settings', 'options' );
+	wp_cache_delete( 'notoptions', 'options' );
+	if ( function_exists( 'w3tc_objectcache_flush' ) ) {
+		w3tc_objectcache_flush();
+	}
+	if ( function_exists( 'w3tc_dbcache_flush' ) ) {
+		w3tc_dbcache_flush();
+	}
+	do_action( 'kny_flush_object_caches' );
 }
 
 /**

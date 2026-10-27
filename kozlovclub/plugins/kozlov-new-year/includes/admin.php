@@ -33,6 +33,7 @@ function kny_maybe_setup() {
 	// После обновления плагина убираем из кэша старую копию страницы.
 	if ( KNY_VERSION !== get_option( 'kny_version' ) && current_user_can( 'edit_pages' ) ) {
 		$s = kny_get_settings();
+		kny_flush_object_caches();
 		kny_purge_cache( (int) $s['page_id'] );
 		update_option( 'kny_version', KNY_VERSION, false );
 	}
@@ -430,7 +431,7 @@ function kny_admin_settings_panel( $s ) {
 	echo '<form method="post" action="' . esc_url( $post ) . '" class="kny-inline" onsubmit="return confirm(\'Создать новую страницу-черновик и показывать лендинг на ней?\')">';
 	wp_nonce_field( 'kny_create_page' );
 	echo '<input type="hidden" name="action" value="kny_create_page"><button class="button">Создать новую страницу-черновик</button></form></div>';
-	echo '</div><div class="kny-card"><h2>Как устроено</h2><ul class="kny-list"><li>Страница выводится своим шаблоном: стили и скрипты темы на неё не грузятся, её стили не попадают на остальной сайт.</li><li>Если при выводе что-то сломается, по адресу откроется обычная страница темы, а ошибка запишется в журнал PHP.</li><li>Данные хранятся в трёх опциях WordPress (kny_data, kny_history, kny_settings). Таблицы, афиша и файлы темы не меняются.</li><li>Title, description и картинка для соцсетей задаются на вкладке «Общее и SEO»; настройки Yoast/Rank Math у этой страницы не используются.</li><li>Страница не кэшируется (ни плагинами кэша, ни браузером): правки видны сразу после сохранения.</li><li>После сохранения кэш страницы дополнительно сбрасывается в WP Super Cache, WP Rocket, W3 Total Cache, LiteSpeed, WP Fastest Cache, если они стоят.</li></ul></div></section>';
+	echo '</div><div class="kny-card"><h2>Как устроено</h2><ul class="kny-list"><li>Страница выводится своим шаблоном: стили и скрипты темы на неё не грузятся, её стили не попадают на остальной сайт.</li><li>Если при выводе что-то сломается, по адресу откроется обычная страница темы, а ошибка запишется в журнал PHP.</li><li>Данные хранятся в трёх опциях WordPress (kny_data, kny_history, kny_settings). Таблицы, афиша и файлы темы не меняются.</li><li>Title, description и картинка для соцсетей задаются на вкладке «Общее и SEO»; настройки Yoast/Rank Math у этой страницы не используются.</li><li>Страница не кэшируется (ни плагинами кэша, ни браузером), а после сохранения сбрасывается кэш объектов и базы (Redis в W3 Total Cache): правки видны сразу.</li><li>После сохранения кэш страницы дополнительно сбрасывается в WP Super Cache, WP Rocket, W3 Total Cache, LiteSpeed, WP Fastest Cache, если они стоят.</li></ul></div></section>';
 }
 
 /* ---------- Обработчики ---------- */
