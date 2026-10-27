@@ -3,7 +3,7 @@
  * Plugin Name:       Kozlov Perf
  * Plugin URI:        https://kozlovclub.ru/
  * Description:       Изолированные оптимизации загрузки: нативная ленивая загрузка вместо a3 Lazy Load, уборка неиспользуемых скриптов (FancyBox, YouTube Embed Plus, emoji), preconnect, дедупликация тегов. Не меняет тему, данные и другие плагины. Отключается галочкой в настройках, параметром ?kperf=off или деактивацией.
- * Version:           1.0.2
+ * Version:           1.1.0
  * Author:            Kozlov Club
  * Requires at least: 6.3
  * Requires PHP:      7.4
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class Kozlov_Perf {
 
 	const OPTION  = 'kozlov_perf_options';
-	const VERSION = '1.0.2';
+	const VERSION = '1.1.0';
 
 	/**
 	 * Тело тега с учётом кавычек: символ > внутри значения атрибута не завершает тег.
@@ -32,7 +32,7 @@ final class Kozlov_Perf {
 	private $opts = array();
 
 	/** @var array Статистика для HTML-комментария в конце страницы. */
-	private $stats = array();
+	public $stats = array();
 
 	public static function instance() {
 		if ( null === self::$instance ) {
@@ -56,6 +56,7 @@ final class Kozlov_Perf {
 			'dedupe'           => 1,
 			'fix_ver'          => 1,
 			'block_css'        => 0,
+			'mobile_zoom'      => 1,
 		);
 	}
 
@@ -154,6 +155,10 @@ final class Kozlov_Perf {
 			add_filter( 'wp_resource_hints', array( $this, 'resource_hints' ), 20, 2 );
 		}
 
+		if ( $this->opt( 'mobile_zoom' ) ) {
+			add_action( 'wp_head', array( $this, 'touch_css' ), 2 );
+		}
+
 		if ( $this->opt( 'fix_ver' ) ) {
 			add_filter( 'script_loader_src', array( $this, 'fix_ver' ), 99 );
 			add_filter( 'style_loader_src', array( $this, 'fix_ver' ), 99 );
@@ -186,6 +191,15 @@ final class Kozlov_Perf {
 			$urls  = array_values( array_diff( $urls, array( $emoji ) ) );
 		}
 		return $urls;
+	}
+
+	/**
+	 * Касания на мобильных: кнопки и ссылки отвечают сразу (без ожидания второго тапа и без
+	 * случайного зума по двойному тапу), поля ввода 16px, чтобы iOS не увеличивал страницу при фокусе.
+	 * Пинч-зум при этом остаётся: он разрешён в viewport (см. шаг viewport в буфере).
+	 */
+	public function touch_css() {
+		echo '<style id="kperf-touch">a,button,input,select,textarea,label,summary,[role=button],[onclick]{touch-action:manipulation}@media (pointer:coarse){input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea{font-size:max(16px,1em)}}</style>' . "\n";
 	}
 
 	public function remove_powered_by() {
@@ -308,7 +322,7 @@ final class Kozlov_Perf {
 		if ( isset( $_SERVER['REQUEST_METHOD'] ) && 'GET' !== strtoupper( (string) $_SERVER['REQUEST_METHOD'] ) ) {
 			return;
 		}
-		if ( ! $this->opt( 'native_lazy' ) && ! $this->opt( 'strip_unused' ) && ! $this->opt( 'dedupe' ) && ! $this->patterns( 'dequeue_patterns' ) ) {
+		if ( ! $this->opt( 'native_lazy' ) && ! $this->opt( 'strip_unused' ) && ! $this->opt( 'dedupe' ) && ! $this->opt( 'mobile_zoom' ) && ! $this->patterns( 'dequeue_patterns' ) ) {
 			return;
 		}
 		ob_start( array( $this, 'process_html' ) );
@@ -344,6 +358,9 @@ final class Kozlov_Perf {
 			if ( $this->opt( 'dedupe' ) ) {
 				$out = $this->step( $out, 'dedupe_assets' );
 				$out = $this->step( $out, 'dedupe_og' );
+			}
+			if ( $this->opt( 'mobile_zoom' ) ) {
+				$out = $this->step( $out, 'viewport' );
 			}
 
 			$ms  = round( ( microtime( true ) - $t0 ) * 1000, 1 );
@@ -653,6 +670,54 @@ final class Kozlov_Perf {
 		return $html;
 	}
 
+	/* ---------- шаг 2б: viewport ---------- */
+
+	/**
+	 * Разрешает масштабирование: убирает user-scalable=no|0, maximum-scale и minimum-scale из meta viewport.
+	 * iOS и так игнорирует запрет с 2016 года, на Android он мешает увеличивать текст.
+	 */
+	private function viewport( $html ) {
+		$self = $this;
+		$res  = $this->outside(
+			$html,
+			array( 'comment', 'script', 'noscript', 'template', 'textarea' ),
+			function ( $part ) use ( $self ) {
+				return preg_replace_callback(
+					'/<meta\b' . Kozlov_Perf::ATTRS . '>/i',
+					function ( $m ) use ( $self ) {
+						$tag = $m[0];
+						if ( ! preg_match( '/\sname\s*=\s*(["\'])viewport\1/i', $tag ) ) {
+							return $tag;
+						}
+						if ( ! preg_match( '/\scontent\s*=\s*(["\'])(.*?)\1/is', $tag, $c ) ) {
+							return $tag;
+						}
+						$parts = array();
+						foreach ( explode( ',', $c[2] ) as $p ) {
+							$p = trim( $p );
+							if ( '' === $p ) {
+								continue;
+							}
+							$key = strtolower( trim( strtok( $p, '=' ) ) );
+							if ( in_array( $key, array( 'user-scalable', 'maximum-scale', 'minimum-scale' ), true ) ) {
+								continue;
+							}
+							$parts[] = $p;
+						}
+						$new = implode( ', ', $parts );
+						if ( $new === trim( $c[2] ) ) {
+							return $tag;
+						}
+						$self->stats['viewport'] = 'fixed';
+						return str_replace( $c[0], ' content=' . $c[1] . $new . $c[1], $tag );
+					},
+					$part
+				);
+			}
+		);
+		return null === $res ? $html : $res;
+	}
+
 	/* ---------- шаг 3: дубли ---------- */
 
 	/**
@@ -859,7 +924,7 @@ final class Kozlov_Perf {
 	public function sanitize( $in ) {
 		$in  = is_array( $in ) ? $in : array();
 		$out = array();
-		foreach ( array( 'enabled', 'native_lazy', 'thumb_srcset', 'strip_unused', 'emoji', 'head_cleanup', 'dedupe', 'fix_ver', 'block_css' ) as $k ) {
+		foreach ( array( 'enabled', 'native_lazy', 'thumb_srcset', 'strip_unused', 'emoji', 'head_cleanup', 'dedupe', 'fix_ver', 'block_css', 'mobile_zoom' ) as $k ) {
 			$out[ $k ] = empty( $in[ $k ] ) ? 0 : 1;
 		}
 		$out['eager_count'] = isset( $in['eager_count'] ) ? max( 0, min( 50, (int) $in['eager_count'] ) ) : 8;
@@ -934,6 +999,9 @@ final class Kozlov_Perf {
 				</p>
 				<?php $cb( 'emoji', 'Отключить wp-emoji (скрипт и стили эмодзи WordPress)' ); ?>
 				<?php $cb( 'block_css', 'Не подключать CSS блоков Гутенберга (wp-block-library, global-styles)', 'По умолчанию выключено. Включать только после проверки: если анонсы набраны блоками, стили могут понадобиться.' ); ?>
+
+				<h2 class="title">Мобильные</h2>
+				<?php $cb( 'mobile_zoom', 'Разрешить масштабирование и убрать случайный зум', 'Из meta viewport убираются user-scalable=no и maximum-scale (iOS их и так игнорирует, на Android они мешают увеличивать текст). Кнопкам, ссылкам и полям ставится touch-action: manipulation: отклик без задержки и без зума по двойному тапу, пинч-зум остаётся. Полям ввода на тач-экранах 16px, чтобы iOS не увеличивал страницу при фокусе.' ); ?>
 
 				<h2 class="title">Сеть и заголовки</h2>
 				<p style="margin:0 0 10px 0">
