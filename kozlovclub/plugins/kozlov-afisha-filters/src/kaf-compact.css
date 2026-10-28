@@ -12,8 +12,17 @@
   .events_wrap.kaf-compact .events.view_cell .event .thumbnail{border-radius:8px;overflow:hidden;aspect-ratio:4/3;background:#e6e6e6}
   .events_wrap.kaf-compact .events.view_cell .event .thumbnail img{display:block;width:100%;height:100%;object-fit:cover}
   .events_wrap.kaf-compact .events.view_cell .event .desc{padding:0;flex:1;display:flex;flex-direction:column}
-  /* высоту названия тема задаёт скриптом (50px), в компактном виде она по тексту */
-  .events_wrap.kaf-compact .events.view_cell .event .desc .title{height:auto!important;padding:8px 0 6px;font-size:13px;line-height:1.25;letter-spacing:.01em;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+  /* высоту названия тема задаёт скриптом (50px), в компактном виде она по тексту.
+     Отступы только margin: у обрезанного line-clamp элемента в padding просвечивала следующая строка. */
+  .events_wrap.kaf-compact .events.view_cell .event .desc .title{height:auto!important;padding:0;margin:8px 0 6px;font-size:13px;line-height:1.25;letter-spacing:.01em;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+  /* название «Артист: программа» разделено скриптом: артист капсом, программа строкой ниже мельче и серым */
+  .events_wrap.kaf-compact .events.view_cell .event .desc .title.kaf-split{display:block;-webkit-line-clamp:none;overflow:visible}
+  .events_wrap.kaf-compact .events.view_cell .event .desc .title.kaf-split .kaf-name{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .events_wrap.kaf-compact .events.view_cell .event .desc .title.kaf-split .kaf-colon{display:none}
+  .events_wrap.kaf-compact .events.view_cell .event .desc .title.kaf-split .kaf-prog{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;margin-top:3px;font-size:11px;line-height:1.3;font-weight:400;letter-spacing:.02em;color:#646b76}
+  .events_wrap.kaf-compact .events.view_cell .event .desc .title.kaf-split .kaf-prog.kaf-dup{display:none}
+  /* программа из поля Kozlov Event Page (kep-sub): в компактном виде тем же шрифтом, что и программа из названия */
+  .events_wrap.kaf-compact .events.view_cell .event .desc .kep-sub{height:auto;margin:-3px 0 6px;padding:0;white-space:normal;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;font-size:11px;line-height:1.3;letter-spacing:.02em;color:#646b76;overflow-wrap:anywhere}
   .events_wrap.kaf-compact .events.view_cell .event .desc .datetime{padding:0;margin-top:auto}
   .events_wrap.kaf-compact .events.view_cell .event .desc .datetime .cell_1{font-size:26px;margin-right:8px}
   .events_wrap.kaf-compact .events.view_cell .event .desc .datetime .cell_2{font-size:10.5px;line-height:15px;min-width:0;overflow-wrap:anywhere}

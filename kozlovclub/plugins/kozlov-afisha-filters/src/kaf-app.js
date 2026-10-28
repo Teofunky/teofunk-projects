@@ -368,9 +368,10 @@
           var slug = a ? slugOf(a.getAttribute('href') || '') : '';
           var day = c ? parseInt((c.textContent || '').replace(/\D/g, ''), 10) : 0;
           var rowTxt = r ? (r.textContent || '') : '';
-          var tm = rowTxt.match(/(\d{1,2}):(\d\d)/);
+          var dta = r ? (r.getAttribute('data-time') || '') : ''; // тема отдаёт хранимое время (ночные концерты: 23:59), на экране может быть 00:00
+          var tm = /^\d\d:\d\d$/.test(dta) ? dta.match(/(\d{1,2}):(\d\d)/) : rowTxt.match(/(\d{1,2}):(\d\d)/);
           var c2 = card.querySelector('.cell_2'); // в плитке день недели в той же строке, в списке строкой ниже
-          var date = (day && tm) ? cardDate(day, monthOf(rowTxt), weekdayOf(c2 ? c2.textContent : rowTxt)) : '';
+          var date = (day && tm) ? cardDate(day, monthOf(rowTxt), ((r && +r.getAttribute('data-wd')) || weekdayOf(c2 ? c2.textContent : rowTxt))) : '';
           var item = { el: card, grp: grp, ev: null, key: '', start: 0 };
           if (slug && date) {
             var hh = ('0' + tm[1]).slice(-2);
@@ -620,6 +621,30 @@
             f.load().catch(function () { /* без шрифта окна покажутся шрифтом Roboto */ });
           } catch (e) { /* не критично */ }
         });
+      });
+    }
+
+    /* ---------- название «Артист: программа» в компактном виде ----------
+       Текст в теме набран одной строкой. Делим по первому «: » на два span внутри той же ссылки:
+       вне компактного вида они строчные и выглядят как исходный текст (двоеточие и пробел сохранены),
+       в компактном виде CSS ставит их друг под другом. textContent ссылки не меняется. */
+    function normProg(s) { return (s || '').toLowerCase().replace(/[^a-zа-яё0-9]+/g, ''); }
+    function splitTitles() {
+      cards.forEach(function (c) {
+        var a = c.el.querySelector('a.title');
+        if (!a || a.children.length || a.classList.contains('kaf-split')) return;
+        var txt = a.textContent || '';
+        var m = txt.match(/^(\s*)([^:]{2,}?):(\s+)(\S[\s\S]*?)(\s*)$/);
+        if (!m) return;
+        var name = doc.createElement('span'), colon = doc.createElement('span'), prog = doc.createElement('span');
+        name.className = 'kaf-name'; colon.className = 'kaf-colon'; prog.className = 'kaf-prog';
+        name.textContent = m[2]; colon.textContent = ':'; prog.textContent = m[4];
+        var sub = c.el.querySelector('.desc .kep-sub'); // программа из поля плагина страницы концерта
+        if (sub && normProg(sub.textContent) === normProg(m[4])) prog.classList.add('kaf-dup');
+        a.textContent = '';
+        a.appendChild(doc.createTextNode(m[1])); a.appendChild(name); a.appendChild(colon);
+        a.appendChild(doc.createTextNode(m[3])); a.appendChild(prog); a.appendChild(doc.createTextNode(m[5]));
+        a.classList.add('kaf-split');
       });
     }
 
@@ -1015,6 +1040,7 @@
     /* ---------- запуск ---------- */
     try {
       collectCards();
+      try { splitTitles(); } catch (e) { /* названия остаются как в теме */ }
       if (!cards.length) { flag('off'); return; }
       readUrl();
       mount();
