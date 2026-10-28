@@ -2,7 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 const P = (...a) => path.join(__dirname, ...a);
-const pkg = '1.0.5';
+const pkg = '1.0.6';
 const engine = fs.readFileSync(P('engine.js'), 'utf8');
 const ui = fs.readFileSync(P('ui.js'), 'utf8');
 const css = fs.readFileSync(P('..', 'assets', 'navigator.css'), 'utf8');

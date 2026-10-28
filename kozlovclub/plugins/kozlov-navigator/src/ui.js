@@ -157,8 +157,9 @@ function knavStart(E, CSS) {
   var wrap = document.createElement('div');
   wrap.className = 'kn';
   wrap.innerHTML =
-    (cfg.launcher === false ? '' : '<div class="lw away"><button type="button" class="launcher" data-act="open" aria-label="Джаз-навигатор: подобрать концерт"><span class="ic">' + EQ + '</span>Подобрать концерт</button>' +
-      (DISMISS ? '<button type="button" class="launcher-x" data-act="hide-launcher" aria-label="Скрыть кнопку навигатора">' + XSVG + '</button>' : '') + '</div>') +
+    (cfg.launcher === false ? '' : '<div class="lw away"><button type="button" class="launcher" data-act="open" aria-label="Джаз-навигатор: подобрать концерт"><span class="ic">' + EQ + '</span><span class="lbl">Подобрать концерт</span></button>' +
+      (DISMISS ? '<button type="button" class="launcher-x" data-act="hide-launcher" aria-label="Свернуть кнопку навигатора">' + XSVG + '</button>' +
+        '<button type="button" class="kmini" data-act="restore-launcher" aria-label="Вернуть кнопку «Подобрать концерт»" title="Вернуть кнопку «Подобрать концерт»"><span class="eq"><i></i><i></i><i></i><i></i></span></button>' : '') + '</div>') +
     '<div class="nav" role="dialog" aria-modal="true" aria-labelledby="knav-q" hidden><div class="panel">' +
     '<div class="head"><button type="button" class="icon-btn hide" data-act="back" aria-label="Назад">' + ICON.back + '</button>' +
     '<div class="brand"><span class="eq"><i></i><i></i><i></i><i></i></span>Джаз-навигатор</div>' +
@@ -169,8 +170,9 @@ function knavStart(E, CSS) {
   R.appendChild(wrap);
   var $ = function (sel) { return R.querySelector(sel); };
   var navEl = $('.nav'), body = $('.body'), foot = $('.foot'), sheetBox = $('.sheet-box'), btnBack = $('[data-act=back]'), progress = $('.progress'), live = $('.sr'), launcherEl = $('.lw');
-  var launcherOff = false;
-  if (launcherEl && isHidden('launcher')) { launcherOff = true; launcherEl.hidden = true; }
+  // свёрнута крестиком: в углу остаётся маленький значок, нажатие на него возвращает кнопку
+  var mini = !!(launcherEl && isHidden('launcher'));
+  if (mini) launcherEl.classList.add('mini');
 
   /* ---------- вход у фильтров афиши ----------
    * Компьютер: красная кнопка «Подобрать концерт» в той же строке, что фильтры, сразу после «Сцена»
@@ -648,7 +650,8 @@ function knavStart(E, CSS) {
     if (act === 'sheet-close' && e.target.closest('[data-stop]') && !e.target.closest('.close-s')) return;
     switch (act) {
       case 'open': open('launcher'); break;
-      case 'hide-launcher': hideLauncher(); break;
+      case 'hide-launcher': minimize(); break;
+      case 'restore-launcher': restore(); break;
       case 'close': close(); break;
       case 'mood': a.moods = toggle(a.moods, v, 2); refresh(); break;
       case 'when': a.when = a.when === v ? null : v; a.date = null; refresh(); break;
@@ -714,10 +717,9 @@ function knavStart(E, CSS) {
     if (sheetBox.innerHTML) sheetBox.innerHTML = ''; else close();
   });
 
-  /* ---------- кнопка на странице ----------
-   * Главная: пока видна полоса входа под фильтрами, плавающей кнопки нет. Ниже кнопка прячется, когда листают вниз
-   * (не закрывает «Купить билет»), и возвращается, когда листают вверх.
-   * Остальные страницы (launcherMode 'scroll'): кнопка появляется после прокрутки и остаётся, как у прежнего виджета.
+  /* ---------- кнопка в углу ----------
+   * Появляется после прокрутки (на главной, когда пролистали фильтры) и дальше остаётся в углу, как у прежнего виджета.
+   * Пока листают вниз, сжимается в кружок со значком, чтобы не закрывать карточки; при прокрутке вверх снова с надписью.
    * На коротких страницах, где листать почти некуда, видна сразу. */
   var SCROLL_MODE = cfg.launcherMode === 'scroll';
   var lastY = window.scrollY;
@@ -731,6 +733,8 @@ function knavStart(E, CSS) {
     return room < 120 ? -1 : Math.min(200, room * 0.4);
   }
   function restAway() { var y = window.scrollY; return SCROLL_MODE ? y <= showAt() : y <= topZone(); }
+  var compact = false;
+  function setCompact(on) { on = on && !mini; if (launcherEl && on !== compact) { compact = on; launcherEl.classList.toggle('compact', on); } }
   function syncLauncher() { if (!state.open) setAway(restAway()); }
 
   /* Свои закреплённые кнопки сайта не закрываем: если в углу экрана уже есть элемент страницы
@@ -746,7 +750,7 @@ function knavStart(E, CSS) {
     return null;
   }
   function measureLift() {
-    if (!launcherEl || launcherOff) return;
+    if (!launcherEl) return;
     liftAt = Date.now();
     var W = window.innerWidth, H = window.innerHeight, lw = launcherEl.offsetWidth || 200, lh = launcherEl.offsetHeight || 50, base = 16, need = 0;
     for (var pass = 0; pass < 3; pass++) {
@@ -769,7 +773,7 @@ function knavStart(E, CSS) {
     if (need !== lift) { lift = need; launcherEl.style.setProperty('--lift', need + 'px'); }
   }
   function setAway(on) {
-    if (!launcherEl || launcherOff) return;
+    if (!launcherEl) return;
     var was = launcherEl.classList.contains('away');
     if (!on && (was || Date.now() - liftAt > 400)) measureLift();
     if (on !== was) launcherEl.classList.toggle('away', on);
@@ -777,20 +781,16 @@ function knavStart(E, CSS) {
   if (launcherEl) {
     window.addEventListener('scroll', function () {
       if (state.open) return;
-      var y = window.scrollY;
-      if (SCROLL_MODE) setAway(y <= showAt());
-      else if (y < topZone() || y > lastY + 6) setAway(true);
-      else if (y < lastY - 6) setAway(false);
+      var y = window.scrollY, away = restAway();
+      setAway(away);
+      if (away) setCompact(false);
+      else if (y > lastY + 6) setCompact(true);
+      else if (y < lastY - 6) setCompact(false);
       lastY = y;
     }, { passive: true });
-    if (SCROLL_MODE) {
-      syncLauncher();
-      window.addEventListener('load', syncLauncher);
-    }
-    window.addEventListener('resize', function () {
-      liftAt = 0;
-      if (SCROLL_MODE) syncLauncher(); else if (!state.open && !launcherEl.classList.contains('away')) measureLift();
-    }, { passive: true });
+    syncLauncher();
+    window.addEventListener('load', syncLauncher);
+    window.addEventListener('resize', function () { liftAt = 0; syncLauncher(); }, { passive: true });
   }
 
   var toastT = 0;
@@ -801,7 +801,7 @@ function knavStart(E, CSS) {
     t.className = 'toast';
     t.setAttribute('role', 'status');
     t.innerHTML = '<span>' + esc(text) + '</span><button type="button">Вернуть</button>';
-    if (launcherEl && !launcherOff) measureLift();
+    if (launcherEl) measureLift();
     t.style.setProperty('--lift', lift + 'px'); // над своими закреплёнными кнопками сайта, как и кнопка навигатора
     wrap.appendChild(t);
     function done() { clearTimeout(toastT); if (t.parentNode) t.parentNode.removeChild(t); }
@@ -828,22 +828,25 @@ function knavStart(E, CSS) {
       setTimeout(function () { st.height = ''; st.overflow = ''; st.transition = ''; layoutStrip(); }, 300);
     });
   }
-  function hideLauncher() {
-    if (!launcherEl || launcherOff) return;
-    launcherEl.classList.add('away');
-    launcherOff = true;
+  function minimize() {
+    if (!launcherEl || mini) return;
+    mini = true;
+    launcherEl.classList.add('mini');
+    setCompact(false);
     setHidden('launcher', true);
     track('dismiss', { what: 'launcher' });
-    var gone = setTimeout(function () { if (launcherOff) launcherEl.hidden = true; }, 320);
-    toast('Кнопка навигатора скрыта', function () {
-      clearTimeout(gone);
-      launcherOff = false;
-      setHidden('launcher', false);
-      track('dismiss_undo', { what: 'launcher' });
-      launcherEl.hidden = false;
-      liftAt = 0;
-      requestAnimationFrame(function () { setAway(SCROLL_MODE ? restAway() : window.scrollY < topZone()); });
-    });
+    liftAt = 0;
+    measureLift();
+  }
+  function restore() {
+    if (!launcherEl || !mini) return;
+    mini = false;
+    launcherEl.classList.remove('mini');
+    setCompact(false);
+    setHidden('launcher', false);
+    track('dismiss_undo', { what: 'launcher' });
+    liftAt = 0;
+    measureLift();
   }
 
   if (cfg.autoOpen) open('auto');
