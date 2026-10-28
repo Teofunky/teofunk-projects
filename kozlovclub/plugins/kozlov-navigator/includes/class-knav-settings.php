@@ -15,7 +15,8 @@ class KNAV_Settings {
 			'audience'     => 'admins',   // admins: видят только администраторы (проверка); all: все посетители
 			'launcher'     => 1,          // главная: плавающая кнопка
 			'strip'        => 1,          // главная: полоса входа под панелью фильтров
-			'dismiss'      => 1,          // крестик: посетитель скрывает плашку и кнопку у себя
+			'dismiss_launcher' => 1,      // крестик на плавающей кнопке: посетитель сворачивает её в язычок у себя
+			'dismiss_strip'    => 1,      // крестик на строке у фильтров (телефон): посетитель сворачивает её в чип «Подбор»
 			'dismiss_days' => 30,         // сколько дней помнить, что скрыто
 			'others'       => 'off',      // остальные страницы: off: навигатора нет; button: только плавающая кнопка, появляется при прокрутке
 			'strip_after'  => '#kaf-filters',
@@ -39,6 +40,15 @@ class KNAV_Settings {
 			$saved['others'] = 'button';
 		}
 		unset( $saved['pages'] );
+		// 1.0.14 и раньше: одна галочка «Крестик» на кнопке и на строке сразу. Обе новые берут её значение.
+		if ( isset( $saved['dismiss'] ) ) {
+			foreach ( array( 'dismiss_launcher', 'dismiss_strip' ) as $k ) {
+				if ( ! isset( $saved[ $k ] ) ) {
+					$saved[ $k ] = $saved['dismiss'] ? 1 : 0;
+				}
+			}
+		}
+		unset( $saved['dismiss'] );
 		return array_merge( self::defaults(), $saved );
 	}
 
@@ -46,7 +56,7 @@ class KNAV_Settings {
 		$d   = self::defaults();
 		$in  = is_array( $in ) ? $in : array();
 		$out = array();
-		foreach ( array( 'enabled', 'launcher', 'strip', 'dismiss', 'replace_old', 'old_everywhere', 'stats' ) as $k ) {
+		foreach ( array( 'enabled', 'launcher', 'strip', 'dismiss_launcher', 'dismiss_strip', 'replace_old', 'old_everywhere', 'stats' ) as $k ) {
 			$out[ $k ] = empty( $in[ $k ] ) ? 0 : 1;
 		}
 		$out['audience']    = ( isset( $in['audience'] ) && 'all' === $in['audience'] ) ? 'all' : 'admins';

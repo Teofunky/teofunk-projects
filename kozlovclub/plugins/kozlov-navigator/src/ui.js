@@ -143,12 +143,18 @@ function knavStart(E, CSS) {
   /* ---------- посетитель скрыл плашку или кнопку крестиком ----------
    * Выбор хранится в браузере посетителя (localStorage) cfg.dismissDays дней, потом подсказки возвращаются.
    * Вернуть у себя сразу: открыть любую страницу с ?knav_show=1 в адресе. */
-  var DISMISS = cfg.dismiss !== false, DISMISS_DAYS = Math.max(1, +cfg.dismissDays || 30), HKEY = 'knav_hidden';
+  // Крестики включаются в настройках отдельно: на плавающей кнопке и на строке у фильтров.
+  // Страница из кэша со старыми настройками (одна галочка cfg.dismiss) работает как раньше.
+  var DISMISS_OLD = cfg.dismiss !== false;
+  var DISMISS_L = 'dismissLauncher' in cfg ? !!cfg.dismissLauncher : DISMISS_OLD;
+  var DISMISS_S = 'dismissStrip' in cfg ? !!cfg.dismissStrip : DISMISS_OLD;
+  var DISMISS_DAYS = Math.max(1, +cfg.dismissDays || 30), HKEY = 'knav_hidden';
   var XSVG = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>';
   try { if (/[?&]knav_show=1\b/.test(location.search)) localStorage.removeItem(HKEY); } catch (e) { }
   function hiddenMap() { try { var m = JSON.parse(localStorage.getItem(HKEY) || '{}'); return m && typeof m === 'object' ? m : {}; } catch (e) { return {}; } }
   // 'entry': вход у фильтров с версии 1.0.4. Скрытая раньше тёмная полоса ('strip') новую кнопку не прячет.
-  function isHidden(what) { if (!DISMISS) return false; var t = +hiddenMap()[what]; return !!t && now() - t < DISMISS_DAYS * 864e5; }
+  // крестик выключен в настройках: то, что посетитель скрыл раньше, снова видно
+  function isHidden(what) { if (!(what === 'launcher' ? DISMISS_L : DISMISS_S)) return false; var t = +hiddenMap()[what]; return !!t && now() - t < DISMISS_DAYS * 864e5; }
   function setHidden(what, on) { try { var m = hiddenMap(); if (on) m[what] = now(); else delete m[what]; localStorage.setItem(HKEY, JSON.stringify(m)); } catch (e) { } }
 
   var host = document.createElement('div');
@@ -159,7 +165,7 @@ function knavStart(E, CSS) {
   wrap.className = 'kn';
   wrap.innerHTML =
     (cfg.launcher === false ? '' : '<div class="lw away"><button type="button" class="launcher" data-act="open" aria-label="Джаз-навигатор: подобрать концерт"><span class="ic">' + EQ + '</span><span class="lbl">Подобрать концерт</span></button>' +
-      (DISMISS ? '<button type="button" class="launcher-x" data-act="hide-launcher" aria-label="Свернуть кнопку навигатора">' + XSVG + '</button>' +
+      (DISMISS_L ? '<button type="button" class="launcher-x" data-act="hide-launcher" aria-label="Свернуть кнопку навигатора">' + XSVG + '</button>' +
         '<button type="button" class="kmini" data-act="restore-launcher" aria-label="Вернуть кнопку «Подобрать концерт»" title="Вернуть кнопку «Подобрать концерт»"><span class="eq"><i></i><i></i><i></i><i></i></span></button>' : '') +
       '<span class="hint" aria-hidden="true">Подобрать концерт</span></div>') +
     '<div class="nav" role="dialog" aria-modal="true" aria-labelledby="knav-q" hidden><div class="panel">' +
@@ -195,11 +201,11 @@ function knavStart(E, CSS) {
       sw.innerHTML = '<div class="strip-wrap"><button type="button" class="strip" data-act="open"><span class="ic">' + EQ + '</span>' +
         '<span class="s-t">Не знаете, что выбрать?<small> Подберём концерт под настроение за 30 секунд</small></span>' +
         '<span class="s-cta">Подобрать<span class="long"> концерт</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>' +
-        (DISMISS ? '<button type="button" class="strip-x" data-act="hide-strip" aria-label="Свернуть подсказку навигатора"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>' : '') + '</div>' +
+        (DISMISS_S ? '<button type="button" class="strip-x" data-act="hide-strip" aria-label="Свернуть подсказку навигатора"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>' : '') + '</div>' +
         // свёрнутое состояние: маленький чип справа, нажатие возвращает строку
         '<div class="strip-mini-row"><button type="button" class="strip-mini" data-act="show-strip" aria-label="Вернуть строку «Не знаете, что выбрать?»" title="Вернуть строку подбора"><span class="ic">' + EQ + '</span>Подбор<svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>';
       SR.appendChild(sw);
-      if (DISMISS && isHidden('entry')) { stripOff = true; stripHost.classList.add('knav-strip-off'); }
+      if (isHidden('entry')) { stripOff = true; stripHost.classList.add('knav-strip-off'); }
       SR.addEventListener('click', function (e) {
         if (e.target.closest('[data-act=hide-strip]')) setStripOff(true);
         else if (e.target.closest('[data-act=show-strip]')) setStripOff(false);
@@ -533,13 +539,15 @@ function knavStart(E, CSS) {
   }
   function tags() { return ''; }
   function link(p) { return '<a href="' + esc(eventUrl(p.ev)) + '" data-act="page" data-id="' + esc(p.ev.id) + '">' + esc(p.ev.title) + '</a>'; }
+  /* Вся фотография карточки ведёт на анонс концерта. Для клавиатуры и экранных дикторов ссылка одна: название. */
+  function picLink(p) { return '<a class="t-hit" href="' + esc(eventUrl(p.ev)) + '" data-act="page" data-id="' + esc(p.ev.id) + '" tabindex="-1" aria-hidden="true"></a>'; }
   function stageLine(p) { return p.stage ? '<span class="dot" style="background:' + STAGE_COLOR[p.ev.stage] + '"></span>' + esc(p.stage.short) : ''; }
 
   function heroTicket(p) {
     var ev = p.ev, d = +ev.date.slice(8, 10), mo = MONTH_SHORT[+ev.date.slice(5, 7) - 1], dow = E.dowOf(ev.date);
     var timeB = ev.midnight ? 'Полночь' : ev.time;
     var timeS = ev.midnight ? 'в ночь с ' + WD_GEN[dow] + ' на ' + WD_ACC[(dow + 1) % 7] : 'начало концерта';
-    return '<article class="ticket fade"><div class="t-pic">' + img(ev, 'big') +
+    return '<article class="ticket fade"><div class="t-pic">' + img(ev, 'big') + picLink(p) +
       '<div class="t-top">' + (p.best ? '<span class="badge best">Ближе всего к ответам</span>' : '') + (p.date.rel ? '<span class="badge rel">' + p.date.rel + '</span>' : '') + '</div>' +
       '<div class="t-cap"><span class="t-stage">' + stageLine(p) + '</span><h3 class="t-title">' + link(p) + '</h3></div></div>' +
       '<div class="perf" aria-hidden="true"></div><div class="stub"><div class="stub-row">' +
@@ -552,7 +560,7 @@ function knavStart(E, CSS) {
     var ev = p.ev, d = +ev.date.slice(8, 10), mo = MONTH_SHORT[+ev.date.slice(5, 7) - 1], dow = E.dowOf(ev.date);
     var timeB = ev.midnight ? 'Полночь' : ev.time;
     var timeS = ev.midnight ? 'в ночь с ' + WD_GEN[dow] + ' на ' + WD_ACC[(dow + 1) % 7] : 'начало концерта';
-    return '<article class="ticket sec fade"><div class="t-pic">' + img(ev, 'big') +
+    return '<article class="ticket sec fade"><div class="t-pic">' + img(ev, 'big') + picLink(p) +
       '<div class="t-top">' + (p.date.rel ? '<span class="badge rel">' + p.date.rel + '</span>' : '') + '</div>' +
       '<div class="t-cap"><span class="t-stage">' + stageLine(p) + '</span><h3 class="t-title">' + link(p) + '</h3></div></div>' +
       '<div class="perf" aria-hidden="true"></div><div class="stub"><div class="stub-row">' +
@@ -616,7 +624,6 @@ function knavStart(E, CSS) {
     }
     sheetBox.innerHTML = h + '<button type="button" class="close-s" data-act="sheet-close">Вернуться к подборке</button></div></div>';
   }
-  // окно Ticketscloud открывается так же, как с кнопок сайта: скрытой кнопкой с атрибутом tc-event
   /* Покупка. Кнопка «Купить билет» несёт атрибут tc-event, и виджет Ticketscloud открывает окно покупки сам,
    * по настоящему нажатию посетителя: на компьютере он слушает click, на телефоне touchend (и глушит click).
    * Навигатор при этом остаётся открытым под окном покупки: закрыл окно, снова видишь подборку.
@@ -843,7 +850,10 @@ function knavStart(E, CSS) {
   function measureLift() {
     if (!launcherEl) return;
     liftAt = now();
-    var W = window.innerWidth, H = window.innerHeight, lw = launcherEl.offsetWidth || 200, lh = launcherEl.offsetHeight || 50, base = 16, need = 0;
+    // base: отступ кнопки от низа из стилей (--kb: 16 px, на iOS выше, см. navigator.css)
+    var base = parseFloat(getComputedStyle(launcherEl).bottom) - lift;
+    if (!(base >= 0 && base < 200)) base = 16;
+    var W = window.innerWidth, H = window.innerHeight, lw = launcherEl.offsetWidth || 200, lh = launcherEl.offsetHeight || 50, need = 0;
     try {
       for (var pass = 0; pass < 3; pass++) {
         var bottom = H - base - need, top = bottom - lh, hit = need;
@@ -961,8 +971,14 @@ function knavStart(E, CSS) {
   }
 
   if (cfg.autoOpen) open('auto');
-  // публичный вход для своих кнопок на сайте: <a href="#navigator"> открывает навигатор
-  function hashOpen() { if (location.hash === '#navigator') { open('link'); try { history.replaceState(history.state, '', location.pathname + location.search); } catch (e) { } } }
+  /* Публичный вход для своих кнопок на сайте: <a href="#navigator"> открывает навигатор.
+   * #navigator убирается из адреса до открытия. Раньше он убирался после, и закрытие навигатора (шаг назад
+   * в истории) возвращало адрес с #navigator: навигатор тут же открывался снова. */
+  function hashOpen() {
+    if (location.hash !== '#navigator') return;
+    try { history.replaceState(history.state, '', location.pathname + location.search); } catch (e) { }
+    open('link');
+  }
   window.addEventListener('hashchange', hashOpen);
   hashOpen();
 }

@@ -15,6 +15,7 @@
  *  3. Мягкие условия дают баллы 0..100 (WEIGHTS): настроение, звучание, опыт,
  *     компания, близость даты, особый вечер, покупка онлайн.
  *  4. Три карточки выбираются так, чтобы это были три разных вечера (DIVERSITY).
+ *     Порядок: лучшая по баллу первой, две другие по дате; без ответов все три по дате.
  *  5. Для каждой карточки строится строка «почему вам» из самых сильных совпадений.
  *
  * Файл без зависимостей. Работает в браузере (window.KozlovNavigator) и в Node (module.exports).
@@ -642,13 +643,14 @@
       notes.push({ kind: 'relaxed', text: 'Точно под все ответы нашлось меньше трёх вечеров. Добавили близкие варианты и отметили, в чём они отличаются.' });
     }
 
-    // лучший по совпадению первым, остальные по дате
+    // лучший по совпадению первым, остальные по дате.
+    // Без ответов («Не знаю, покажите лучшее») совпадать не с чем: все три по дате, без пометки «ближе всего к ответам».
+    var noAnswers = isEmptyAnswers(answers);
     if (picks.length > 1) {
-      var first = picks[0];
-      var others = picks.slice(1).sort(function (a, b) { return a.ev.start - b.ev.start; });
-      picks = [first].concat(others);
+      var byDate = function (a, b) { return a.ev.start - b.ev.start; };
+      picks = noAnswers ? picks.slice().sort(byDate) : [picks[0]].concat(picks.slice(1).sort(byDate));
     }
-    var out = picks.map(function (it, i) { return decorate(it, answers, c, i === 0); });
+    var out = picks.map(function (it, i) { return decorate(it, answers, c, i === 0 && !noAnswers); });
     return {
       picks: out,
       reserve: base,
@@ -678,6 +680,12 @@
       reason: reasonFor(it, answers, c), relaxed: it.relaxed || [],
       buy: it.ev.tc && it.ev.tcKind === 'ticket' ? 'ticket' : (it.ev.tc && it.ev.tcKind === 'registration' ? 'registration' : (it.ev.entry === 'deposit' ? 'table' : 'page'))
     };
+  }
+
+  /** Посетитель ничего не выбрал. «Не важно» в вопросе «Когда» считается ответом. */
+  function isEmptyAnswers(a) {
+    return !(a.moods || []).length && !a.when && !(a.times || []).length && !(a.instruments || []).length &&
+      !(a.formats || []).length && !a.experience && !a.company && !a.budget;
   }
 
   function relaxIrrelevant(key, answers) {

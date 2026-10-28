@@ -98,7 +98,8 @@ class KNAV_Front {
 			'launcher'   => ! empty( $s['launcher'] ),
 			'strip'      => ! empty( $s['strip'] ),
 			'stripAfter' => $s['strip_after'],
-			'dismiss'     => ! empty( $s['dismiss'] ),
+			'dismissLauncher' => ! empty( $s['dismiss_launcher'] ),
+			'dismissStrip'    => ! empty( $s['dismiss_strip'] ),
 			'dismissDays' => (int) $s['dismiss_days'],
 		);
 		if ( ! self::is_home() ) {
