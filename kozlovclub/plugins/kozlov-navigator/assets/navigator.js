@@ -1,4 +1,4 @@
-/*! Kozlov Navigator 1.0.4: подбор концертов клуба по ответам посетителя. Исходники: src/engine.js, src/ui.js. */
+/*! Kozlov Navigator 1.0.5: подбор концертов клуба по ответам посетителя. Исходники: src/engine.js, src/ui.js. */
 (function () {
 'use strict';
 var module = { exports: {} };
@@ -895,6 +895,7 @@ function knavStart(E, CSS) {
   var XSVG = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>';
   try { if (/[?&]knav_show=1\b/.test(location.search)) localStorage.removeItem(HKEY); } catch (e) { }
   function hiddenMap() { try { var m = JSON.parse(localStorage.getItem(HKEY) || '{}'); return m && typeof m === 'object' ? m : {}; } catch (e) { return {}; } }
+  // 'entry': вход у фильтров с версии 1.0.4. Скрытая раньше тёмная полоса ('strip') новую кнопку не прячет.
   function isHidden(what) { if (!DISMISS) return false; var t = +hiddenMap()[what]; return !!t && now() - t < DISMISS_DAYS * 864e5; }
   function setHidden(what, on) { try { var m = hiddenMap(); if (on) m[what] = now(); else delete m[what]; localStorage.setItem(HKEY, JSON.stringify(m)); } catch (e) { } }
 
@@ -925,7 +926,7 @@ function knavStart(E, CSS) {
    * (вставляется в панель Smart Search своим Shadow DOM, стили панели не трогает). Если места мало,
    * надпись короче («Подобрать»), ещё меньше места: только значок. Телефон (уже 720 px): строка под панелью. */
   var stripHost = null, stripOff = false, stripAnchor = null, chipHost = null, inlineOn = false, bootAt = now();
-  if (cfg.strip !== false && cfg.stripAfter && !isHidden('strip')) {
+  if (cfg.strip !== false && cfg.stripAfter && !isHidden('entry')) {
     try { stripAnchor = document.querySelector(cfg.stripAfter); } catch (e) { }
     if (stripAnchor && stripAnchor.parentNode) {
       stripHost = document.createElement('div');
@@ -1560,7 +1561,7 @@ function knavStart(E, CSS) {
   function hideStrip() {
     if (!stripHost || stripOff) return;
     stripOff = true;
-    setHidden('strip', true);
+    setHidden('entry', true);
     track('dismiss', { what: 'strip' });
     var st = stripHost.style, h = stripHost.offsetHeight, mt = parseFloat(st.marginTop) || 0;
     st.overflow = 'hidden'; st.height = h + 'px'; st.transition = 'height .25s ease, margin-top .25s ease, opacity .2s ease';
@@ -1569,7 +1570,7 @@ function knavStart(E, CSS) {
     toast('Подсказка скрыта', function () {
       clearTimeout(gone);
       stripOff = false;
-      setHidden('strip', false);
+      setHidden('entry', false);
       track('dismiss_undo', { what: 'strip' });
       st.display = 'block';
       requestAnimationFrame(function () { st.height = h + 'px'; st.marginTop = mt + 'px'; st.opacity = '1'; });

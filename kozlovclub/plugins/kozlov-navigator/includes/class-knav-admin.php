@@ -15,7 +15,7 @@ class KNAV_Admin {
 		'instruments' => array( 'vocal' => 'Вокал', 'sax' => 'Саксофон', 'piano' => 'Фортепиано', 'guitar' => 'Гитара', 'trumpet' => 'Труба', 'bass' => 'Контрабас', 'drums' => 'Ударные', 'violin' => 'Скрипка', 'trombone' => 'Тромбон', 'clarinet' => 'Кларнет', 'flute' => 'Флейта', 'percussion' => 'Перкуссия', 'accordion' => 'Аккордеон', 'cello' => 'Виолончель', 'mallets' => 'Маримба, вибрафон', 'organ' => 'Орган Хаммонд' ),
 		'experience'  => array( 'new' => 'Впервые', 'regular' => 'Иногда', 'expert' => 'Часто' ),
 		'company'     => array( 'solo' => 'Один', 'pair' => 'Вдвоём', 'group' => 'Компанией' ),
-		'dismissed'   => array( 'strip' => 'Скрыли плашку под поиском', 'launcher' => 'Скрыли плавающую кнопку', 'strip_undo' => 'Вернули плашку', 'launcher_undo' => 'Вернули кнопку' ),
+		'dismissed'   => array( 'strip' => 'Скрыли строку у фильтров', 'launcher' => 'Скрыли плавающую кнопку', 'strip_undo' => 'Вернули строку у фильтров', 'launcher_undo' => 'Вернули кнопку' ),
 		'sources'     => array( 'chip' => 'Кнопка в строке фильтров', 'strip' => 'Строка под фильтрами (телефон)', 'launcher_home' => 'Кнопка на главной', 'launcher_other' => 'Кнопка на остальных страницах', 'link' => 'Ссылка #navigator', 'auto' => 'Открылся сам' ),
 	);
 
