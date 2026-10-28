@@ -49,6 +49,17 @@
 .strip:hover .s-cta { background: var(--accent-press); }
 .strip-x { flex: none; width: 34px; height: 40px; display: inline-flex; align-items: center; justify-content: center; border-radius: 20px; color: #8a8f98; transition: color .15s, background .15s; }
 .strip-x:hover { color: #020817; background: rgba(2,8,23,.05); }
+/* свёрнутая строка: только значок справа */
+.strip-mini-row { display: none; justify-content: flex-end; }
+.strip-mini { height: 32px; padding: 0 10px 0 5px; border-radius: 16px; background: #f2f1ef; color: #676d78; display: inline-flex; align-items: center; gap: 7px; font: 500 13px/1 Roboto, Arial, sans-serif; transition: background .15s, color .15s; }
+.strip-mini .ic { width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: #fff; display: inline-flex; align-items: center; justify-content: center; flex: none; }
+.strip-mini .ic .eq { height: 9px; gap: 1px; }
+.strip-mini .ic .eq i { width: 2px; }
+.strip-mini:hover { background: #e9e7e3; color: #020817; }
+.strip-mini, .strip-x { position: relative; }
+.strip-mini::before, .strip-x::before { content: ""; position: absolute; top: -6px; bottom: -6px; left: -5px; right: -5px; }
+:host(.knav-strip-off) .strip-wrap { display: none; }
+:host(.knav-strip-off) .strip-mini-row { display: flex; }
 @media (max-width: 700px) { .strip .s-t small { display: none; } }
 @media (max-width: 480px) {
   .strip { gap: 8px; padding-left: 8px; font-size: 14px; }
@@ -74,7 +85,8 @@
 
 /* ---------- кнопка на странице ---------- */
 .lw { position: fixed; right: calc(16px + env(safe-area-inset-right, 0px)); bottom: calc(16px + var(--lift, 0px) + env(safe-area-inset-bottom, 0px)); z-index: 99990;
-  display: flex; transition: transform .3s cubic-bezier(.2,.8,.2,1), opacity .2s ease, bottom .25s ease; }
+  display: flex; transition: transform .3s cubic-bezier(.2,.8,.2,1), opacity .2s ease; }
+.lw button { touch-action: manipulation; -webkit-touch-callout: none; }
 .launcher { position: relative; display: inline-flex; align-items: center; gap: 10px; height: 50px; padding: 0 18px 0 6px; border-radius: 999px; background: var(--ink); color: #fff;
   font: 700 14px/1 var(--fd); letter-spacing: .09em; text-transform: uppercase; box-shadow: 0 10px 28px rgba(12,15,23,.3); }
 .launcher .lbl { white-space: nowrap; }
@@ -87,6 +99,8 @@
 .lw.mini .kmini .eq { height: 12px; gap: 1.5px; }
 .lw.mini .kmini .eq i { width: 2.5px; }
 .lw.mini .kmini:hover { width: 36px; }
+.lw.mini .kmini { position: relative; }
+.lw.mini .kmini::before { content: ""; position: absolute; top: -6px; bottom: -6px; left: -14px; right: 0; }
 /* крестик на кнопке: маленький значок, область нажатия 40 px */
 .launcher-x { position: absolute; top: -9px; right: -7px; width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
   background: #fff; color: var(--ink); box-shadow: 0 2px 8px rgba(12,15,23,.22), 0 0 0 1px rgba(12,15,23,.08); transition: transform .15s, opacity .2s; }
@@ -101,7 +115,8 @@
 .lw.round .launcher { width: 52px; height: 52px; padding: 0; gap: 0; justify-content: center; animation: none; box-shadow: 0 6px 18px rgba(12,15,23,.32); }
 .lw.round .launcher .lbl { display: none; }
 .lw.round .launcher .ic { width: 40px; height: 40px; }
-.lw.round .launcher-x { top: -5px; right: -5px; width: 21px; height: 21px; }
+.lw.round .launcher-x { top: -7px; right: -7px; width: 22px; height: 22px; }
+.lw.round .launcher-x::before { inset: -4px; }
 .lw.round .launcher-x svg { width: 10px; height: 10px; }
 /* подсказка рядом с кнопкой: один раз за визит, потом исчезает сама */
 .hint { position: absolute; right: calc(100% + 12px); top: 50%; transform: translate(8px, -50%); opacity: 0; pointer-events: none; white-space: nowrap; padding: 10px 13px; border-radius: 10px;
@@ -169,6 +184,8 @@
 .mood[aria-pressed="true"] .n { display: none; }
 .mood[aria-pressed="true"] .lvl i.on { background: var(--accent); }
 .moods.has-sel .mood[aria-pressed="false"] img { filter: saturate(.25) brightness(.7); }
+.moods.full .mood[aria-pressed="false"] { opacity: .55; cursor: default; }
+.help.warn { color: var(--accent-press); }
 
 /* чипы */
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -256,15 +273,23 @@
 .primary.ghost { background: var(--paper); color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--line); }
 
 /* подборка: билеты */
-.answers { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin: 14px calc(-1 * max(20px, env(safe-area-inset-right, 0px))) 0 0; padding: 0 20px 2px 0; }
+.answers-t { margin-top: 14px; font: 600 11px/1.2 var(--fd); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.answers { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; margin: 8px calc(-1 * max(20px, env(safe-area-inset-right, 0px))) 0 0; padding: 0 20px 2px 0; }
 .answers::-webkit-scrollbar { display: none; }
-.answers .chip { min-height: 32px; padding: 5px 12px; font-size: 13px; flex: none; }
-.answers .chip.edit { background: none; border-style: dashed; }
+.answers .chip { min-height: 32px; padding: 5px 12px 5px 10px; font-size: 13px; flex: none; gap: 5px; border-style: dashed; border-color: var(--faint); }
+.answers .chip svg { color: var(--faint); }
+.answers .chip:hover { border-color: var(--ink); color: var(--ink); }
+.answers .chip:hover svg { color: var(--ink); }
 .note { margin-top: 14px; background: var(--accent-soft); border-radius: 14px; padding: 12px 14px; font-size: 14px; line-height: 1.42; }
 .note button { margin-top: 8px; font: 700 12.5px/1 var(--fd); letter-spacing: .1em; text-transform: uppercase; color: var(--accent-press); }
 .cards { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
 .ticket { position: relative; background: var(--paper); border-radius: 20px; }
-.t-pic { position: relative; isolation: isolate; aspect-ratio: 3 / 2; max-width: 100%; border-radius: 20px 20px 0 0; overflow: hidden; background: var(--ink-2); color: #fff; }
+.t-pic { position: relative; isolation: isolate; aspect-ratio: 16 / 10; max-width: 100%; border-radius: 20px 20px 0 0; overflow: hidden; background: var(--ink-2); color: #fff; }
+/* карточки 2 и 3: та же анатомия, фотополоса короче, дата мельче */
+.ticket.sec .t-pic { aspect-ratio: 21 / 9; }
+.ticket.sec .t-title { font-size: 20px; }
+.ticket.sec .t-date b { font-size: 32px; }
+.ticket.sec .stub { padding-top: 12px; }
 .t-pic img { object-position: 50% 28%; }
 .t-pic::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(12,15,23,.25) 0%, rgba(12,15,23,0) 28%, rgba(12,15,23,0) 45%, rgba(12,15,23,.85) 100%); }
 .t-top { position: absolute; top: 12px; left: 12px; right: 12px; display: flex; gap: 6px; flex-wrap: wrap; }
@@ -292,8 +317,12 @@
 .t-price { text-align: right; flex: none; }
 .t-price b { display: block; font: 700 18px/1.05 var(--fd); font-variant-numeric: tabular-nums; }
 .t-price span { font-size: 11.5px; color: var(--muted); }
-.why { display: flex; gap: 8px; align-items: flex-start; font-size: 14px; line-height: 1.4; }
-.why .sp { flex: none; margin-top: 1px; color: var(--accent); }
+.why { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; font-size: 14px; line-height: 1.35; }
+.why li { display: flex; gap: 8px; align-items: flex-start; }
+.why li svg { flex: none; margin-top: 3px; }
+.why li.ok svg { color: var(--accent); }
+.why li.miss { color: var(--muted); }
+.why li.miss svg { color: var(--faint); }
 .tags { display: flex; flex-wrap: wrap; gap: 5px; }
 .tag { font: 600 10.5px/1 var(--fd); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); border: 1px dashed var(--faint); border-radius: 999px; padding: 5px 9px; }
 .cta { height: 50px; width: 100%; border-radius: 999px; background: var(--accent); color: #fff; font: 700 15px/1 var(--fd); letter-spacing: .1em; text-transform: uppercase; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-decoration: none; transition: background .15s; }

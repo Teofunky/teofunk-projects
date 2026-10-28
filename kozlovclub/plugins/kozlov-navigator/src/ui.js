@@ -121,6 +121,7 @@ function knavStart(E, CSS) {
     arrow: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     back: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
     close: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+    miss: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 9h14M5 15h14M15 5L9 19" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>',
     spark: '<svg class="sp" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l1.9 6.1L20 10l-6.1 1.9L12 18l-1.9-6.1L4 10l6.1-1.9z"/><circle cx="19" cy="19" r="2"/></svg>',
     pen: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>',
     copy: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2" stroke="currentColor" stroke-width="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3" stroke="currentColor" stroke-width="2"/></svg>',
@@ -176,27 +177,32 @@ function knavStart(E, CSS) {
   if (mini) launcherEl.classList.add('mini');
 
   /* ---------- вход у фильтров афиши ----------
-   * Компьютер: красная кнопка «Подобрать концерт» в той же строке, что фильтры, сразу после «Сцена»
-   * (вставляется в панель Smart Search своим Shadow DOM, стили панели не трогает). Если места мало,
-   * надпись короче («Подобрать»), ещё меньше места: только значок. Телефон (уже 720 px): строка под панелью. */
+   * Компьютер: красная кнопка «Подобрать концерт» в той же строке, что фильтры, сразу после «Сцена».
+   * Телефон (уже 720 px): строка «Не знаете, что выбрать?» второй строкой внутри панели фильтров, под её серым блоком.
+   * Оба входа вставляются в панель Smart Search своими Shadow DOM и ничего в ней не меряют: панель сама держит
+   * свой отступ до афиши, поэтому подписи карточек и заголовок месяца остаются на местах. Если панели нет,
+   * строка встаёт сразу после блока из настройки «Полоса после блока». */
   var stripHost = null, stripOff = false, stripAnchor = null, chipHost = null, inlineOn = false, bootAt = now();
-  if (cfg.strip !== false && cfg.stripAfter && !isHidden('entry')) {
+  if (cfg.strip !== false && cfg.stripAfter) {
     try { stripAnchor = document.querySelector(cfg.stripAfter); } catch (e) { }
     if (stripAnchor && stripAnchor.parentNode) {
       stripHost = document.createElement('div');
       stripHost.className = 'knav-strip-host';
-      stripHost.style.display = window.innerWidth >= 720 ? 'none' : 'block'; // на компьютере сначала пробуем строку фильтров
-      stripAnchor.parentNode.insertBefore(stripHost, stripAnchor.nextSibling);
+      stripHost.style.cssText = 'display:none;margin:8px 0 0;padding:0;border:0;background:none';
       var SR = makeRoot(stripHost);
       var sw = document.createElement('div');
       sw.className = 'kn';
       sw.innerHTML = '<div class="strip-wrap"><button type="button" class="strip" data-act="open"><span class="ic">' + EQ + '</span>' +
         '<span class="s-t">Не знаете, что выбрать?<small> Подберём концерт под настроение за 30 секунд</small></span>' +
         '<span class="s-cta">Подобрать<span class="long"> концерт</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>' +
-        (DISMISS ? '<button type="button" class="strip-x" data-act="hide-strip" aria-label="Скрыть подсказку навигатора"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>' : '') + '</div>';
+        (DISMISS ? '<button type="button" class="strip-x" data-act="hide-strip" aria-label="Свернуть подсказку навигатора"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>' : '') + '</div>' +
+        // свёрнутое состояние: маленький чип справа, нажатие возвращает строку
+        '<div class="strip-mini-row"><button type="button" class="strip-mini" data-act="show-strip" aria-label="Вернуть строку «Не знаете, что выбрать?»" title="Вернуть строку подбора"><span class="ic">' + EQ + '</span>Подбор<svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>';
       SR.appendChild(sw);
+      if (DISMISS && isHidden('entry')) { stripOff = true; stripHost.classList.add('knav-strip-off'); }
       SR.addEventListener('click', function (e) {
-        if (e.target.closest('[data-act=hide-strip]')) hideStrip();
+        if (e.target.closest('[data-act=hide-strip]')) setStripOff(true);
+        else if (e.target.closest('[data-act=show-strip]')) setStripOff(false);
         else if (e.target.closest('[data-act=open]')) open('strip');
       });
       SR.addEventListener('pointerenter', loadData, true);
@@ -204,25 +210,33 @@ function knavStart(E, CSS) {
       [300, 1000, 2500, 3200].forEach(function (t) { setTimeout(placeEntry, t); });
       window.addEventListener('load', schedulePlace);
       window.addEventListener('resize', schedulePlace, { passive: true });
-      if (window.ResizeObserver) { try { new ResizeObserver(schedulePlace).observe(stripAnchor); } catch (e) { } }
     }
   }
 
-  var placeT = 0, kafObserved = false;
+  var placeT = 0, kafObserved = false, kafRootObserved = false;
   function schedulePlace() { clearTimeout(placeT); placeT = setTimeout(placeEntry, 80); }
-  function kafRow() {
+  function kafParts() {
     var sr = stripAnchor && stripAnchor.shadowRoot;
     if (!sr) return null;
-    var bar = sr.querySelector('.kaf-bar'), chips = sr.querySelector('.kaf-chips');
-    if (!bar || !chips) return null;
-    var last = chips.lastElementChild;
+    var wrap = sr.querySelector('.kaf'), bar = sr.querySelector('.kaf-bar'), chips = sr.querySelector('.kaf-chips');
+    if (!wrap || !bar || !chips) return null;
+    if (!kafRootObserved && window.MutationObserver) {
+      kafRootObserved = true; // если панель перерисует себя целиком, вернём свой вход на место
+      try { new MutationObserver(schedulePlace).observe(sr, { childList: true }); } catch (e) { }
+    }
+    return { wrap: wrap, bar: bar, chips: chips };
+  }
+  function kafRow() {
+    var k = kafParts();
+    if (!k) return null;
+    var last = k.chips.lastElementChild;
     if (last && last === chipHost) last = last.previousElementSibling;
     if (!last) return null;
     if (!kafObserved && window.MutationObserver) {
       kafObserved = true; // счётчики в фильтрах заполняются позже и меняют ширину: проверяем, помещается ли кнопка
-      try { new MutationObserver(schedulePlace).observe(chips, { childList: true, subtree: true, characterData: true }); } catch (e) { }
+      try { new MutationObserver(schedulePlace).observe(k.chips, { childList: true, subtree: true, characterData: true }); } catch (e) { }
     }
-    return { bar: bar, chips: chips, last: last };
+    return { bar: k.bar, chips: k.chips, last: last };
   }
   function makeChip() {
     chipHost = document.createElement('span');
@@ -238,7 +252,7 @@ function knavStart(E, CSS) {
     CR.addEventListener('pointerenter', loadData, true);
   }
   function placeEntry() {
-    if (!stripAnchor || stripOff) return;
+    if (!stripAnchor || !stripHost) return;
     var wide = window.innerWidth >= 720, row = wide ? kafRow() : null;
     if (wide && !row && now() - bootAt < 3000) return; // панель фильтров ещё рисуется: подождём, а не покажем строку зря
     if (row) {
@@ -262,41 +276,19 @@ function knavStart(E, CSS) {
     }
     if (chipHost && chipHost.parentNode) chipHost.parentNode.removeChild(chipHost);
     inlineOn = false;
-    stripHost.style.display = 'block';
-    layoutStrip();
-  }
-
-  /* Место для строки. Под панелью фильтров афиша оставляет пустой отступ: в нём стоят подписи над карточками
-   * («Концерт сегодня | Сцена») и заголовок месяца. Строка встаёт сразу под видимой частью панели (8 px),
-   * а этот отступ целиком переносится под неё, поэтому подписи остаются на своих местах. */
-  function contentBottom(el, ar) {
-    var max = -1, n = 0, roots = [el];
-    if (el.shadowRoot) roots.push(el.shadowRoot);
-    for (var k = 0; k < roots.length; k++) {
-      var list = roots[k].querySelectorAll('*');
-      for (var i = 0; i < list.length && n < 500; i++, n++) {
-        var r = list[i].getBoundingClientRect();
-        if (!r.width || !r.height || r.height >= ar.height - 1 || r.bottom > ar.bottom + 1) continue;
-        var cs = getComputedStyle(list[i]);
-        if (cs.position === 'fixed' || cs.visibility === 'hidden') continue;
-        if (r.bottom > max) max = r.bottom;
-      }
+    // телефон: строка внутри панели фильтров сразу после её серого блока; без панели: после блока-якоря
+    var k = kafParts();
+    if (k) {
+      if (stripHost.parentNode !== k.wrap || stripHost.previousElementSibling !== k.bar) k.wrap.insertBefore(stripHost, k.bar.nextSibling);
+    } else if (stripHost.parentNode !== stripAnchor.parentNode || stripHost.previousElementSibling !== stripAnchor) {
+      stripAnchor.parentNode.insertBefore(stripHost, stripAnchor.nextSibling);
     }
-    return max < 0 ? ar.bottom : max;
-  }
-  function layoutStrip() {
-    if (!stripHost || !stripAnchor || stripOff) return;
-    var hs = stripHost.style;
-    hs.marginTop = '0px'; hs.marginBottom = '0px';
-    var ar = stripAnchor.getBoundingClientRect();
-    if (!ar.height) return;
-    var reserved = Math.max(0, Math.min(140, Math.round(ar.bottom - contentBottom(stripAnchor, ar))));
-    hs.marginTop = (8 - reserved) + 'px';
-    hs.marginBottom = reserved + 'px';
+    stripHost.style.display = 'block';
   }
 
   /* ---------- данные ---------- */
-  function loadData() {
+  function loadData(retry) {
+    if (retry && state.failed) { state.failed = false; state.loading = null; }
     if (state.ready || state.loading) return state.loading;
     var bucket = Math.floor(now() / 3e5); // тот же ключ кэша, что у Smart Search: индекс берётся из кэша браузера
     var q = function (u) { return u + (u.indexOf('?') < 0 ? '?' : '&') + 'kss_t=' + bucket; };
@@ -340,7 +332,7 @@ function knavStart(E, CSS) {
   function renderStep() {
     var s = STEPS[state.step];
     var html = '<div class="fade"><p class="eyebrow">Шаг ' + (state.step + 1) + ' из 4</p><h2 class="q" id="knav-q">' + s.q + '</h2><p class="help">' + s.help + '</p>';
-    if (state.failed) html += '<div class="note err">Не удалось загрузить афишу. Попробуйте ещё раз чуть позже или откройте <a href="' + esc((cfg.site || '') + '/') + '">полную афишу</a>.</div>';
+    if (state.failed) html += '<div class="note err">Не удалось загрузить афишу.<br><button type="button" data-act="retry">Повторить</button> <a href="' + esc((cfg.site || '') + '/') + '">Открыть афишу</a></div>';
     else if (s.key === 'mood') html += moodStep();
     else if (!state.ready) html += '<div class="note">Загружаем афишу…</div>';
     else if (s.key === 'when') html += whenStep();
@@ -356,18 +348,29 @@ function knavStart(E, CSS) {
 
   function moodStep() {
     var h = state.editing ? '' : '<button type="button" class="skip-all" data-act="skip-all">Не знаю, покажите лучшее' + ICON.arrow + '</button>';
-    h += '<div class="moods' + (state.a.moods.length ? ' has-sel' : '') + '" role="group" aria-label="Настроение">';
+    var full = state.a.moods.length >= 2;
+    h += '<div class="moods' + (state.a.moods.length ? ' has-sel' : '') + (full ? ' full' : '') + '" role="group" aria-label="Настроение">';
     E.MOODS.forEach(function (m) {
       var on = state.a.moods.indexOf(m.id) !== -1, lvl = ENERGY[m.id] || 3, bars = '';
       var n = state.ready ? count(with_({ moods: [m.id] })) : '';
       for (var i = 1; i <= 5; i++) bars += '<i class="' + (i <= lvl ? 'on' : '') + '" style="height:' + (4 + i * 2) + 'px"></i>';
-      h += '<button type="button" class="mood" data-act="mood" data-v="' + m.id + '" aria-pressed="' + on + '" aria-label="' + esc(m.label + ', ' + m.hint + (n !== '' ? ', ' + n + ' ' + plural(n, 'концерт', 'концерта', 'концертов') : '')) + '">' +
+      h += '<button type="button" class="mood" data-act="mood" data-v="' + m.id + '" aria-pressed="' + on + '"' + (full && !on ? ' aria-disabled="true"' : '') + ' aria-label="' + esc(m.label + ', ' + m.hint + (n !== '' ? ', ' + n + ' ' + plural(n, 'концерт', 'концерта', 'концертов') : '')) + '">' +
         img(state.moodImg[m.id], 'big') + '<span class="lvl" aria-hidden="true">' + bars + '</span>' + (n !== '' ? '<span class="n">' + n + '</span>' : '') +
         '<span class="ok">' + ICON.check + '</span><span class="mt"><b>' + esc(m.label) + '</b><small>' + esc(m.hint) + '</small></span></button>';
     });
     return h + '</div>';
   }
 
+  var moodHintT = 0;
+  function moodLimitHint() {
+    var help = body.querySelector('.help');
+    if (!help) return;
+    help.textContent = 'Можно выбрать не больше двух. Снимите одно, чтобы выбрать другое.';
+    help.classList.add('warn');
+    live.textContent = help.textContent;
+    clearTimeout(moodHintT);
+    moodHintT = setTimeout(function () { var h = body.querySelector('.help'); if (h) { h.textContent = STEPS[0].help; h.classList.remove('warn'); } }, 2500);
+  }
   function whenStep() {
     var c = E.clock(now(), state.off), h = '<div class="group"><div class="chips" role="group" aria-label="Когда">';
     E.WHEN.forEach(function (w) {
@@ -460,8 +463,10 @@ function knavStart(E, CSS) {
   }
 
   function renderFoot() {
+    var cur = STEPS[state.step];
+    if (!cur) return; // уже показана подборка: отложенная перерисовка от слайдера бюджета не нужна
     var last = state.step === STEPS.length - 1;
-    var optional = STEPS[state.step].key === 'sound' && !state.a.instruments.length && !state.a.formats.length;
+    var optional = cur.key === 'sound' && !state.a.instruments.length && !state.a.formats.length;
     var label = state.editing ? 'Обновить' : (last ? 'Подобрать' : (optional ? 'Пропустить' : 'Далее'));
     var counter;
     if (!state.ready) counter = '<div class="counter"><div class="cnt-t"><b>…</b><span>' + (state.failed ? 'афиша недоступна' : 'загружаем афишу') + '</span></div></div>';
@@ -498,18 +503,35 @@ function knavStart(E, CSS) {
     if (a.experience) out.push([3, { new: 'Впервые на джазе', regular: 'Хожу иногда', expert: 'Хожу часто' }[a.experience]]);
     if (a.company) out.push([3, E.COMPANY.filter(function (x) { return x.id === a.company; })[0].label]);
     if (a.budget) out.push([3, 'до ' + rub(a.budget)]);
-    return '<div class="answers" aria-label="Ваши ответы">' + out.map(function (c) { return '<button type="button" class="chip" data-act="goto" data-v="' + c[0] + '">' + esc(c[1]) + '</button>'; }).join('') +
-      '<button type="button" class="chip edit" data-act="goto" data-v="0">' + ICON.pen + ' Изменить</button></div>';
+    return '<p class="answers-t">Ваши ответы, нажмите любой, чтобы изменить</p><div class="answers" aria-label="Ваши ответы">' + out.map(function (c) { return '<button type="button" class="chip" data-act="goto" data-v="' + c[0] + '">' + ICON.pen + esc(c[1]) + '</button>'; }).join('') + '</div>';
   }
   function cta(p, small) {
     var id = ' data-id="' + esc(p.ev.id) + '"';
-    if (p.buy === 'ticket') return '<button type="button" class="cta" data-act="buy"' + id + '>' + (small ? 'Купить' : 'Купить билет' + ICON.arrow) + '</button>';
-    if (p.buy === 'registration') return '<button type="button" class="cta" data-act="buy"' + id + '>Записаться' + (small ? '' : ICON.arrow) + '</button>';
+    var tc = MODE !== 'prebuilt' && p.ev.tc ? ' tc-event="' + esc(p.ev.tc) + '"' : '';
+    if (p.buy === 'ticket') return '<button type="button" class="cta" data-act="buy"' + id + tc + '>' + (small ? 'Купить' : 'Купить билет' + ICON.arrow) + '</button>';
+    if (p.buy === 'registration') return '<button type="button" class="cta" data-act="buy"' + id + tc + '>Записаться' + (small ? '' : ICON.arrow) + '</button>';
     if (p.buy === 'table') return '<button type="button" class="cta alt" data-act="table"' + id + '>' + (small ? 'Стол' : 'Забронировать стол') + '</button>';
     return '<a class="cta ghost" href="' + esc(eventUrl(p.ev)) + '" data-act="page"' + id + '>Подробнее</a>';
   }
-  function why(p) { return p.reason ? '<div class="why">' + ICON.spark + '<span>' + esc(p.reason) + '</span></div>' : ''; }
-  function tags(p) { return p.relaxed.length ? '<div class="tags">' + p.relaxed.map(function (t) { return '<span class="tag">' + esc(t) + '</span>'; }).join('') + '</div>' : ''; }
+  /* «Почему вам»: совпадения по пунктам, отличия от ответов отдельной строкой, обычными словами. */
+  var MISS = {
+    'другое время': 'Другое время суток, чем вы выбрали',
+    'соседняя дата': 'Соседняя дата, не тот день',
+    'ближайшая подходящая дата': 'Ближайшая подходящая дата',
+    'чуть дороже бюджета': 'Чуть дороже вашего бюджета',
+    'дороже бюджета': 'Дороже вашего бюджета',
+    'другое настроение': 'Настроение не то, что вы выбрали',
+    'без выбранного звучания': 'Выбранного звучания в составе нет'
+  };
+  function why(p) {
+    var ok = p.reason ? p.reason.split(' · ') : [], miss = (p.relaxed || []).map(function (t) { return MISS[t] || t; });
+    if (!ok.length && !miss.length) return '';
+    var h = '<ul class="why">';
+    ok.forEach(function (t, i) { h += '<li class="ok">' + ICON.check + '<span>' + esc(i ? t.charAt(0).toUpperCase() + t.slice(1) : t) + '</span></li>'; });
+    miss.forEach(function (t) { h += '<li class="miss">' + ICON.miss + '<span>' + esc(t) + '</span></li>'; });
+    return h + '</ul>';
+  }
+  function tags() { return ''; }
   function link(p) { return '<a href="' + esc(eventUrl(p.ev)) + '" data-act="page" data-id="' + esc(p.ev.id) + '">' + esc(p.ev.title) + '</a>'; }
   function stageLine(p) { return p.stage ? '<span class="dot" style="background:' + STAGE_COLOR[p.ev.stage] + '"></span>' + esc(p.stage.short) : ''; }
 
@@ -518,7 +540,7 @@ function knavStart(E, CSS) {
     var timeB = ev.midnight ? 'Полночь' : ev.time;
     var timeS = ev.midnight ? 'в ночь с ' + WD_GEN[dow] + ' на ' + WD_ACC[(dow + 1) % 7] : 'начало концерта';
     return '<article class="ticket fade"><div class="t-pic">' + img(ev, 'big') +
-      '<div class="t-top">' + (p.best ? '<span class="badge best">Лучшее совпадение</span>' : '') + (p.date.rel ? '<span class="badge rel">' + p.date.rel + '</span>' : '') + '</div>' +
+      '<div class="t-top">' + (p.best ? '<span class="badge best">Ближе всего к ответам</span>' : '') + (p.date.rel ? '<span class="badge rel">' + p.date.rel + '</span>' : '') + '</div>' +
       '<div class="t-cap"><span class="t-stage">' + stageLine(p) + '</span><h3 class="t-title">' + link(p) + '</h3></div></div>' +
       '<div class="perf" aria-hidden="true"></div><div class="stub"><div class="stub-row">' +
       '<div class="t-date' + (p.date.rel ? ' rel' : '') + '"><b>' + d + '</b><span>' + mo + '<br>' + WD[dow] + '</span></div><span class="vr"></span>' +
@@ -528,32 +550,51 @@ function knavStart(E, CSS) {
   }
   function rowTicket(p) {
     var ev = p.ev, d = +ev.date.slice(8, 10), mo = MONTH_SHORT[+ev.date.slice(5, 7) - 1], dow = E.dowOf(ev.date);
-    return '<article class="ticket row fade"><div class="t-pic">' + img(ev, 'thumb') + '<div class="t-d"><b>' + d + '</b><span>' + mo + ' · ' + WD[dow] + '</span></div></div>' +
-      '<div class="vperf" aria-hidden="true"></div><div class="r-in"><div class="r-meta">' + (p.date.rel ? '<span class="rl">' + p.date.rel + '</span>' : '') +
-      '<span>' + (ev.midnight ? 'полночь' : ev.time) + '</span>' + (p.stage ? '<span>·</span>' + stageLine(p) : '') + '</div>' +
-      '<h3 class="r-title">' + link(p) + '</h3>' + why(p) + tags(p) +
-      '<div class="r-buy"><b>' + esc(p.price.main) + '</b>' + cta(p, true) + '</div></div></article>';
+    var timeB = ev.midnight ? 'Полночь' : ev.time;
+    var timeS = ev.midnight ? 'в ночь с ' + WD_GEN[dow] + ' на ' + WD_ACC[(dow + 1) % 7] : 'начало концерта';
+    return '<article class="ticket sec fade"><div class="t-pic">' + img(ev, 'big') +
+      '<div class="t-top">' + (p.date.rel ? '<span class="badge rel">' + p.date.rel + '</span>' : '') + '</div>' +
+      '<div class="t-cap"><span class="t-stage">' + stageLine(p) + '</span><h3 class="t-title">' + link(p) + '</h3></div></div>' +
+      '<div class="perf" aria-hidden="true"></div><div class="stub"><div class="stub-row">' +
+      '<div class="t-date' + (p.date.rel ? ' rel' : '') + '"><b>' + d + '</b><span>' + mo + '<br>' + WD[dow] + '</span></div><span class="vr"></span>' +
+      '<div class="t-time"><b>' + timeB + '</b><span>' + timeS + '</span></div>' +
+      '<div class="t-price"><b>' + esc(p.price.main) + '</b>' + (p.price.sub ? '<span>' + esc(p.price.sub) + '</span>' : '') + '</div></div>' +
+      why(p) + cta(p, false) + '</div></article>';
   }
   function resultHelp(r, empty) {
-    if (empty) return 'Три ближайших вечера, на которые стоит прийти. Ответьте на вопросы, и подборка станет точнее.';
-    if (r.exact > 3) return 'Три разных вечера из ' + r.exact + ' ' + plural(r.exact, 'подходящего', 'подходящих', 'подходящих') + '. Первый совпадает лучше всего.';
-    if (r.exact === 3) return 'Под ваши ответы подошли ровно три вечера.';
+    var n = r.picks.length, word = n === 1 ? 'вечер' : 'вечера';
+    if (empty) return (n === 3 ? 'Три ближайших вечера' : 'Ближайшие вечера') + ', на которые стоит прийти. Ответьте на вопросы, и подборка станет точнее.';
+    if (r.exact > n) return (n === 3 ? 'Три разных ' : n + ' ') + word + ' из ' + r.exact + ' ' + plural(r.exact, 'подходящего', 'подходящих', 'подходящих') + ' под ваши ответы. Первый ближе всего.';
+    if (r.exact === n && n > 1) return 'Под ваши ответы подошли ровно ' + (n === 3 ? 'три' : 'два') + ' вечера.';
+    if (r.exact === n && n === 1) return 'Под ваши ответы подошёл один вечер.';
     if (r.exact > 0) return 'Точно подошло: ' + r.exact + '. Остальные близкие, на билете отмечено, чем отличаются.';
     return 'Точных совпадений нет. Вот самые близкие к вашим ответам вечера.';
   }
   function isEmpty(a) { return !a.moods.length && !a.when && !a.times.length && !a.instruments.length && !a.formats.length && !a.experience && !a.company && !a.budget; }
 
   function renderResults() {
-    var r = state.result, a = state.a, empty = isEmpty(a);
-    var h = '<div class="fade"><p class="eyebrow">' + (empty ? 'Выбор клуба' : 'Подборка готова') + '</p><h2 class="q" id="knav-q">' + (empty ? 'Не пропустите' : 'Три вечера для вас') + '</h2>';
+    var r = state.result, a = state.a, empty = isEmpty(a), n = r.picks.length;
+    if (!n) {
+      body.innerHTML = '<div class="fade"><p class="eyebrow">Подборка</p><h2 class="q" id="knav-q">Пока ничего не нашли</h2>' +
+        '<p class="help">' + (state.events.length ? 'Под эти ответы в афише нет концертов. Попробуйте другие дни или любой бюджет.' : 'В афише пока нет предстоящих концертов.') + '</p>' +
+        (empty ? '' : answerChips()) +
+        '<div class="links"><button type="button" data-act="restart">Пройти заново</button><a href="' + esc((cfg.site || '') + '/') + '" data-act="afisha">Открыть афишу</a></div></div>';
+      foot.hidden = true; setProgress(-1); btnBack.classList.remove('hide');
+      return;
+    }
+    var title = empty ? 'Не пропустите' : (n === 1 ? 'Один вечер для вас' : (n === 2 ? 'Два вечера для вас' : 'Три вечера для вас'));
+    var h = '<div class="fade"><p class="eyebrow">' + (empty ? 'Выбор клуба' : 'Подборка готова') + '</p><h2 class="q" id="knav-q">' + title + '</h2>';
     h += '<p class="help">' + resultHelp(r, empty) + '</p>' + (empty ? '' : answerChips());
-    r.notes.forEach(function (n) { h += '<div class="note">' + esc(n.text) + (n.action ? '<br><button type="button" data-act="note">' + esc(n.action.label) + '</button>' : '') + '</div>'; });
+    r.notes.forEach(function (n) {
+      if (n.kind === 'relaxed' && r.exact > 0) return; // то же уже сказано строкой под заголовком
+      h += '<div class="note">' + esc(n.text) + (n.action ? '<br><button type="button" data-act="note">' + esc(n.action.label) + '</button>' : '') + '</div>';
+    });
     h += '<div class="cards">';
     r.picks.forEach(function (p, i) { h += i === 0 ? heroTicket(p) : rowTicket(p); });
     state.extra.forEach(function (p) { h += rowTicket(p); });
     h += '</div>';
     if (r.reserve.length > state.extra.length) h += '<button type="button" class="more" data-act="more">Ещё варианты</button>';
-    h += '<div class="links"><a href="' + esc((cfg.site || '') + E.afishaLink(state.a, now(), opt())) + '" data-act="afisha">Открыть афишу с этими фильтрами</a><button type="button" data-act="restart">Пройти заново</button></div></div>';
+    h += '<div class="links"><a href="' + esc((cfg.site || '') + E.afishaLink(state.a, now(), opt())) + '" data-act="afisha">Афиша на эти даты и цену</a><button type="button" data-act="restart">Пройти заново</button></div></div>';
     body.innerHTML = h;
     foot.hidden = true;
     setProgress(-1);
@@ -576,24 +617,22 @@ function knavStart(E, CSS) {
     sheetBox.innerHTML = h + '<button type="button" class="close-s" data-act="sheet-close">Вернуться к подборке</button></div></div>';
   }
   // окно Ticketscloud открывается так же, как с кнопок сайта: скрытой кнопкой с атрибутом tc-event
-  function buyTicket(p) {
-    if (MODE === 'prebuilt' || !p.ev.tc || !window.ticketsCloudWidget) {
-      if (MODE === 'prebuilt') { openSheet('ticket', p); return; }
-      window.location.href = eventUrl(p.ev); return;
-    }
-    close(true);
-    var b = document.createElement('button');
-    b.type = 'button'; b.setAttribute('tc-event', p.ev.tc); b.setAttribute('aria-hidden', 'true'); b.tabIndex = -1;
-    b.style.cssText = 'position:fixed;left:-9999px;top:0;width:1px;height:1px;opacity:0;pointer-events:none';
-    document.body.appendChild(b);
-    b.click();
-    setTimeout(function () { if (b.parentNode) b.parentNode.removeChild(b); }, 3000);
+  /* Покупка. Кнопка «Купить билет» несёт атрибут tc-event, и виджет Ticketscloud открывает окно покупки сам,
+   * по настоящему нажатию посетителя: на компьютере он слушает click, на телефоне touchend (и глушит click).
+   * Навигатор при этом остаётся открытым под окном покупки: закрыл окно, снова видишь подборку.
+   * Если виджета на странице нет, ведём на страницу концерта. */
+  var lastBuyAt = 0;
+  function buyTicket(p, viaTouch) {
+    if (MODE === 'prebuilt') { openSheet('ticket', p); return; }
+    var tcReady = !!(p.ev.tc && window.ticketsCloudWidget);
+    if (now() - lastBuyAt > 400) { lastBuyAt = now(); track('buy_click', { id: p.ev.id, t: p.ev.title.slice(0, 90), tc: p.ev.tc, touch: !!viaTouch }); }
+    if (!tcReady && !viaTouch) window.location.href = eventUrl(p.ev);
   }
 
   /* ---------- навигация ---------- */
   function go(step) {
     state.step = step;
-    if (step === 'results') { renderResults(); return; }
+    if (step === 'results') { renderResults(); body.scrollTop = 0; return; }
     renderStep();
     if (!state.editing) track('step_' + (step + 1));
   }
@@ -617,13 +656,15 @@ function knavStart(E, CSS) {
   }
 
   var savedOverflow = '', pushed = false;
+  var opener = null;
   function open(source) {
     if (state.open) return;
     state.open = true;
+    try { var ae = document.activeElement; while (ae && ae.shadowRoot && ae.shadowRoot.activeElement) ae = ae.shadowRoot.activeElement; opener = ae && ae !== document.body ? ae : null; } catch (e) { opener = null; }
     navEl.hidden = false;
     savedOverflow = document.documentElement.style.overflow;
     document.documentElement.style.overflow = 'hidden';
-    if (launcherEl) launcherEl.classList.add('away');
+    setShown(false);
     loadData();
     rerender();
     if (state.step === 0 && !state.editing) track('step_1');
@@ -637,8 +678,9 @@ function knavStart(E, CSS) {
     navEl.hidden = true;
     sheetBox.innerHTML = '';
     document.documentElement.style.overflow = savedOverflow;
-    lastY = window.scrollY;
-    setAway(restAway());
+    syncLauncher();
+    try { if (opener && opener.isConnected && typeof opener.focus === 'function') opener.focus({ preventScroll: true }); } catch (e) { }
+    opener = null;
     if (pushed) { pushed = false; try { if (history.state && history.state.knav) history.back(); } catch (e) { } }
     if (!silent) track('close', { step: state.step });
   }
@@ -650,11 +692,11 @@ function knavStart(E, CSS) {
     var act = t.getAttribute('data-act'), v = t.getAttribute('data-v'), a = state.a;
     if (act === 'sheet-close' && e.target.closest('[data-stop]') && !e.target.closest('.close-s')) return;
     switch (act) {
-      case 'open': open('launcher'); break;
-      case 'hide-launcher': minimize(); break;
-      case 'restore-launcher': restore(); break;
+      case 'open': case 'hide-launcher': case 'restore-launcher': launcherAct(act); break;
       case 'close': close(); break;
-      case 'mood': a.moods = toggle(a.moods, v, 2); refresh(); break;
+      case 'mood':
+        if (a.moods.indexOf(v) === -1 && a.moods.length >= 2) { moodLimitHint(); break; }
+        a.moods = toggle(a.moods, v, 2); refresh(); break;
       case 'when': a.when = a.when === v ? null : v; a.date = null; refresh(); break;
       case 'date': if (a.when === 'date' && a.date === v) { a.when = null; a.date = null; } else { a.when = 'date'; a.date = v; } refresh(); break;
       case 'time': a.times = toggle(a.times, v); refresh(); break;
@@ -672,6 +714,7 @@ function knavStart(E, CSS) {
         else if (state.step > 0) go(state.step - 1);
         break;
       case 'skip-all': if (state.ready) { track('skip'); showResults('skip'); } break;
+      case 'retry': loadData(true); rerender(); break;
       case 'goto': state.editing = true; go(+v); track('edit_answer', { step: +v + 1 }); break;
       case 'note':
         var n = state.result.notes.filter(function (x) { return x.action; })[0];
@@ -687,7 +730,7 @@ function knavStart(E, CSS) {
       case 'restart': state.a = EMPTY(); state.editing = false; go(0); break;
       case 'buy':
         var p1 = findPick(t.getAttribute('data-id'));
-        if (p1) { track('buy_click', { id: p1.ev.id, t: p1.ev.title.slice(0, 90), tc: p1.ev.tc }); buyTicket(p1); }
+        if (p1) buyTicket(p1, false);
         break;
       case 'table':
         var p2 = findPick(t.getAttribute('data-id'));
@@ -703,6 +746,13 @@ function knavStart(E, CSS) {
       case 'sheet-close': sheetBox.innerHTML = ''; break;
     }
   });
+  // телефон: виджет Ticketscloud срабатывает на touchend и отменяет click, поэтому нажатие учитываем здесь
+  R.addEventListener('touchend', function (e) {
+    var t = e.target && e.target.closest ? e.target.closest('[data-act=buy]') : null;
+    if (!t) return;
+    var p = findPick(t.getAttribute('data-id'));
+    if (p && p.ev.tc && window.ticketsCloudWidget) buyTicket(p, true);
+  }, { passive: true });
   R.addEventListener('error', function (e) { // нет фото нужного размера: берём обычное, иначе убираем
     var im = e.target;
     if (!im || im.tagName !== 'IMG') return;
@@ -717,6 +767,18 @@ function knavStart(E, CSS) {
     if (e.key !== 'Escape' || !state.open) return;
     if (sheetBox.innerHTML) sheetBox.innerHTML = ''; else close();
   });
+  // Tab не уходит из окна: по кругу внутри листа бронирования, если он открыт, иначе внутри панели
+  R.addEventListener('keydown', function (e) {
+    if (e.key !== 'Tab' || !state.open) return;
+    var scope = sheetBox.querySelector('.sheet') || navEl;
+    var list = Array.prototype.filter.call(scope.querySelectorAll('button, a[href], input, [tabindex]:not([tabindex="-1"])'), function (el) {
+      return !el.disabled && el.getAttribute('aria-disabled') !== 'true' && el.offsetParent !== null && !el.closest('[hidden]');
+    });
+    if (!list.length) return;
+    var cur = R.activeElement, i = list.indexOf(cur);
+    if (e.shiftKey && (i <= 0)) { e.preventDefault(); list[list.length - 1].focus(); }
+    else if (!e.shiftKey && (i === -1 || i === list.length - 1)) { e.preventDefault(); list[0].focus(); }
+  });
 
   /* ---------- кнопка в углу ----------
    * Появляется после прокрутки (на главной, когда пролистали фильтры) и дальше стоит на месте, как у прежнего виджета.
@@ -724,17 +786,28 @@ function knavStart(E, CSS) {
    * при первом появлении за визит рядом на 4 секунды всплывает подпись «Подобрать концерт».
    * На коротких страницах, где листать почти некуда, видна сразу. */
   var SCROLL_MODE = cfg.launcherMode === 'scroll';
-  var lastY = window.scrollY;
+  var zoneAt = 0, zoneV = 300;
   function topZone() {
-    var el = inlineOn ? stripAnchor : (stripHost && !stripOff ? stripHost : null);
-    if (el) { var r = el.getBoundingClientRect(); if (r.height) return Math.max(260, r.bottom + window.scrollY); }
-    return 300;
+    if (now() - zoneAt < 300) return zoneV;
+    zoneAt = now();
+    var el = inlineOn ? stripAnchor : stripHost, v = 300;
+    if (el) { var r = el.getBoundingClientRect(); if (r.height) v = Math.max(260, r.bottom + window.scrollY); }
+    zoneV = v;
+    return v;
   }
   function showAt() {
     var room = document.documentElement.scrollHeight - window.innerHeight;
     return room < 120 ? -1 : Math.min(200, room * 0.4);
   }
-  function restAway() { var y = window.scrollY; return SCROLL_MODE ? y <= showAt() : y <= topZone(); }
+  /* Порог с запасом: показать, когда пролистали порог на 30 px, спрятать, только когда вернулись на 120 px выше него.
+   * Иначе у границы кнопка мигала бы при каждом касании экрана. */
+  var shown = false;
+  function wantShown() {
+    var y = window.scrollY;
+    if (SCROLL_MODE) { var s = showAt(); return s < 0 ? true : (shown ? y > s - 80 : y > s); }
+    var z = topZone();
+    return shown ? y > z - 120 : y > z + 30;
+  }
   var roundMQ = window.matchMedia ? window.matchMedia('(max-width: 719px)') : null, hintT = 0;
   function syncRound() { if (launcherEl) launcherEl.classList.toggle('round', !!(roundMQ && roundMQ.matches)); }
   syncRound();
@@ -745,12 +818,20 @@ function knavStart(E, CSS) {
     clearTimeout(hintT);
     hintT = setTimeout(function () { launcherEl.classList.remove('hinting'); }, 4000);
   }
-  function syncLauncher() { if (!state.open) setAway(restAway()); }
+  function syncLauncher() { if (!state.open) setShown(wantShown()); }
 
   /* Свои закреплённые кнопки сайта не закрываем: если в углу экрана уже есть элемент страницы
-   * (круглая кнопка «на главную» на страницах концертов, нижняя панель покупки), кнопка навигатора встаёт над ним. */
+   * (круглая кнопка «на главную» на страницах концертов, нижняя панель покупки), кнопка навигатора встаёт над ним.
+   * Меряется при появлении кнопки и не чаще раза в секунду. */
   var lift = 0, liftAt = 0;
+  function isMine(el) {
+    if (!el) return false;
+    if (el === host || el === stripHost || el === chipHost) return true;
+    var rt = el.getRootNode ? el.getRootNode() : null;
+    return !!rt && (rt === R || (stripHost && rt === stripHost.shadowRoot) || (chipHost && rt === chipHost.shadowRoot));
+  }
   function pinnedParent(el) {
+    if (isMine(el)) return null; // своя кнопка, строка и подсказка: не помеха
     for (var n = el; n && n !== document.body && n !== document.documentElement; n = n.parentElement) {
       if (n === host) return null;
       var cs = getComputedStyle(n);
@@ -761,43 +842,76 @@ function knavStart(E, CSS) {
   }
   function measureLift() {
     if (!launcherEl) return;
-    liftAt = Date.now();
+    liftAt = now();
     var W = window.innerWidth, H = window.innerHeight, lw = launcherEl.offsetWidth || 200, lh = launcherEl.offsetHeight || 50, base = 16, need = 0;
-    for (var pass = 0; pass < 3; pass++) {
-      var bottom = H - base - need, top = bottom - lh, hit = need;
-      var xs = [W - 16 - lw + 8, W - 16 - lw / 2, W - 24], ys = [top + 6, top + lh / 2, bottom - 6];
-      for (var i = 0; i < xs.length; i++) for (var j = 0; j < ys.length; j++) {
-        var list = document.elementsFromPoint(xs[i], ys[j]) || [];
-        for (var k = 0; k < list.length; k++) {
-          var f = pinnedParent(list[k]);
-          if (!f) continue;
-          var r = f.getBoundingClientRect();
-          if (r.height > H * 0.5 || r.top < H * 0.45 || r.bottom < top) continue; // фон и оверлеи на весь экран не в счёт
-          hit = Math.max(hit, Math.ceil(H - r.top + 10 - base));
+    try {
+      for (var pass = 0; pass < 3; pass++) {
+        var bottom = H - base - need, top = bottom - lh, hit = need;
+        var xs = [W - 16 - lw + 8, W - 16 - lw / 2, W - 24], ys = [top + 6, top + lh / 2, bottom - 6];
+        for (var i = 0; i < xs.length; i++) for (var j = 0; j < ys.length; j++) {
+          var list = document.elementsFromPoint(xs[i], ys[j]) || [];
+          for (var k = 0; k < list.length; k++) {
+            var f = pinnedParent(list[k]);
+            if (!f) continue;
+            var r = f.getBoundingClientRect();
+            if (r.height > H * 0.5 || r.top < H * 0.45 || r.bottom < top) continue; // фон и оверлеи на весь экран не в счёт
+            hit = Math.max(hit, Math.ceil(H - r.top + 10 - base));
+          }
         }
+        if (hit <= need) break;
+        need = hit;
       }
-      if (hit <= need) break;
-      need = hit;
-    }
+    } catch (e) { need = lift; }
     need = Math.min(need, Math.round(H * 0.4));
     if (need !== lift) { lift = need; launcherEl.style.setProperty('--lift', need + 'px'); }
   }
-  function setAway(on) {
+  function setShown(on) {
     if (!launcherEl) return;
-    var was = launcherEl.classList.contains('away');
-    if (!on && (was || Date.now() - liftAt > 400)) measureLift();
-    if (on !== was) launcherEl.classList.toggle('away', on);
-    if (!on && was) setTimeout(hintOnce, 350);
-    if (on) { clearTimeout(hintT); launcherEl.classList.remove('hinting'); }
+    if (on && (!shown || now() - liftAt > 1000)) measureLift();
+    if (on !== shown) { shown = on; launcherEl.classList.toggle('away', !on); }
+    if (on && !launcherEl.__hinted) { launcherEl.__hinted = true; setTimeout(hintOnce, 350); }
+    if (!on) { clearTimeout(hintT); launcherEl.classList.remove('hinting'); }
   }
+  function setAway(on) { setShown(!on); }
   if (launcherEl) {
+    var ticking = false;
     window.addEventListener('scroll', function () {
-      if (state.open) return;
-      setAway(restAway());
+      if (state.open || ticking) return;
+      ticking = true;
+      requestAnimationFrame(function () { ticking = false; if (!state.open) setShown(wantShown()); });
     }, { passive: true });
     syncLauncher();
     window.addEventListener('load', syncLauncher);
-    window.addEventListener('resize', function () { liftAt = 0; syncRound(); syncLauncher(); }, { passive: true });
+    var resizeT = 0;
+    window.addEventListener('resize', function () {
+      clearTimeout(resizeT);
+      resizeT = setTimeout(function () { liftAt = 0; syncRound(); syncLauncher(); }, 150);
+    }, { passive: true });
+
+    /* Нажатие пальцем: на iPhone click по закреплённой кнопке иногда теряется, если экран сдвинулся между
+     * касанием и отпусканием (панель адреса Safari). Поэтому короткое касание без сдвига срабатывает само,
+     * а синтетический click после него отменяется, чтобы не сработать дважды. */
+    var touch = null;
+    launcherEl.addEventListener('touchstart', function (e) {
+      var t = e.touches && e.touches[0];
+      touch = t ? { x: t.clientX, y: t.clientY, at: now() } : null;
+    }, { passive: true });
+    launcherEl.addEventListener('touchend', function (e) {
+      var t0 = touch, t = e.changedTouches && e.changedTouches[0];
+      touch = null;
+      if (!t0 || !t || now() - t0.at > 700) return;
+      var dx = t.clientX - t0.x, dy = t.clientY - t0.y;
+      if (dx * dx + dy * dy > 15 * 15) return;
+      var el = e.target && e.target.closest ? e.target.closest('[data-act]') : null;
+      if (!el) return;
+      if (e.cancelable) e.preventDefault();
+      launcherAct(el.getAttribute('data-act'));
+    }, { passive: false });
+  }
+  function launcherAct(act) {
+    if (act === 'open') open('launcher');
+    else if (act === 'hide-launcher') minimize();
+    else if (act === 'restore-launcher') restore();
   }
 
   var toastT = 0;
@@ -807,33 +921,24 @@ function knavStart(E, CSS) {
     var t = document.createElement('div');
     t.className = 'toast';
     t.setAttribute('role', 'status');
-    t.innerHTML = '<span>' + esc(text) + '</span><button type="button">Вернуть</button>';
+    t.innerHTML = '<span>' + esc(text) + '</span>' + (undo ? '<button type="button">Вернуть</button>' : '');
     if (launcherEl) measureLift();
     t.style.setProperty('--lift', lift + 'px'); // над своими закреплёнными кнопками сайта, как и кнопка навигатора
     wrap.appendChild(t);
     function done() { clearTimeout(toastT); if (t.parentNode) t.parentNode.removeChild(t); }
-    t.querySelector('button').addEventListener('click', function () { done(); undo(); });
+    if (undo) t.querySelector('button').addEventListener('click', function () { done(); undo(); });
     clearTimeout(toastT);
-    toastT = setTimeout(done, 6000);
+    toastT = setTimeout(done, undo ? 6000 : 2500);
   }
-  function hideStrip() {
-    if (!stripHost || stripOff) return;
-    stripOff = true;
-    setHidden('entry', true);
-    track('dismiss', { what: 'strip' });
-    var st = stripHost.style, h = stripHost.offsetHeight, mt = parseFloat(st.marginTop) || 0;
-    st.overflow = 'hidden'; st.height = h + 'px'; st.transition = 'height .25s ease, margin-top .25s ease, opacity .2s ease';
-    requestAnimationFrame(function () { st.height = '0px'; st.marginTop = (mt - 8) + 'px'; st.opacity = '0'; });
-    var gone = setTimeout(function () { st.display = 'none'; }, 280);
-    toast('Подсказка скрыта', function () {
-      clearTimeout(gone);
-      stripOff = false;
-      setHidden('entry', false);
-      track('dismiss_undo', { what: 'strip' });
-      st.display = 'block';
-      requestAnimationFrame(function () { st.height = h + 'px'; st.marginTop = mt + 'px'; st.opacity = '1'; });
-      setTimeout(function () { st.height = ''; st.overflow = ''; st.transition = ''; layoutStrip(); }, 300);
-    });
+  /* Крестик на строке не удаляет её, а сворачивает в значок справа; значок возвращает строку. Выбор помнится. */
+  function setStripOff(off) {
+    if (!stripHost || stripOff === off) return;
+    stripOff = off;
+    stripHost.classList.toggle('knav-strip-off', off);
+    setHidden('entry', off);
+    track(off ? 'dismiss' : 'dismiss_undo', { what: 'strip' });
+    zoneAt = 0;
+    if (!off) toast('Подсказка возвращена');
   }
   function minimize() {
     if (!launcherEl || mini) return;

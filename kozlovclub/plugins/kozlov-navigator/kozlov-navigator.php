@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Kozlov Navigator
  * Description: Джаз-навигатор: квиз подбирает посетителю три концерта клуба по настроению, дате, звучанию и бюджету. Данные берёт из Kozlov Smart Search, работает в изолированном Shadow DOM, ведёт статистику.
- * Version: 1.0.7
+ * Version: 1.0.13
  * Author: Клуб Алексея Козлова
  * Requires at least: 6.3
  * Requires PHP: 7.4
@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'KNAV_VERSION', '1.0.7' );
+define( 'KNAV_VERSION', '1.0.13' );
 define( 'KNAV_DB_VERSION', '1' );
 define( 'KNAV_FILE', __FILE__ );
 define( 'KNAV_DIR', plugin_dir_path( __FILE__ ) );

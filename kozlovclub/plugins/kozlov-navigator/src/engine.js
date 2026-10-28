@@ -116,7 +116,8 @@
     { id: 'sax', label: 'Саксофон', stems: ['саксофон', 'sax'] },
     { id: 'piano', label: 'Фортепиано', stems: ['фортепиан', 'пианист', 'рояль', 'рояле', 'piano'] },
     { id: 'guitar', label: 'Гитара', stems: ['гитар', 'guitar', 'фингерстайл'] },
-    { id: 'trumpet', label: 'Труба', stems: ['труба', 'трубе', 'трубы', 'трубой', 'флюгельгорн', 'trumpet'] },
+    // только целые слова: «труба» как начало слова ловила «трубадур» (Il trovatore в анонсах классики)
+    { id: 'trumpet', label: 'Труба', stems: ['=труба', '=трубе', '=трубы', '=трубу', '=трубой', '=трубач', '=трубача', '=трубачу', '=трубачом', '=трубаче', '=трубачи', '=трубачей', '=трубачами', 'флюгельгорн', 'trumpet'] },
     { id: 'bass', label: 'Контрабас', stems: ['контрабас', 'басист', 'бас-гитар', 'bass'] },
     { id: 'drums', label: 'Ударные', stems: ['ударн', 'барабан', 'drum'] },
     { id: 'violin', label: 'Скрипка', stems: ['скрипк', 'скрипач', 'violin'] },
@@ -595,7 +596,7 @@
   }
   function priceLabel(ev) {
     if (ev.entry === 'free') return { main: 'Вход свободный', sub: '' };
-    if (ev.price === null) return { main: ev.priceText || 'Цена на сайте', sub: '' };
+    if (ev.price === null) return { main: ev.priceText || 'Цена уточняется', sub: ev.priceText ? '' : 'на странице концерта' };
     if (ev.entry === 'deposit') return { main: 'Депозит ' + rub(ev.price), sub: 'за гостя, идёт в счёт меню' };
     return { main: 'от ' + rub(ev.price), sub: '' };
   }
