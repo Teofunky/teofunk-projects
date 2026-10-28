@@ -159,7 +159,8 @@ function knavStart(E, CSS) {
   wrap.innerHTML =
     (cfg.launcher === false ? '' : '<div class="lw away"><button type="button" class="launcher" data-act="open" aria-label="Джаз-навигатор: подобрать концерт"><span class="ic">' + EQ + '</span><span class="lbl">Подобрать концерт</span></button>' +
       (DISMISS ? '<button type="button" class="launcher-x" data-act="hide-launcher" aria-label="Свернуть кнопку навигатора">' + XSVG + '</button>' +
-        '<button type="button" class="kmini" data-act="restore-launcher" aria-label="Вернуть кнопку «Подобрать концерт»" title="Вернуть кнопку «Подобрать концерт»"><span class="eq"><i></i><i></i><i></i><i></i></span></button>' : '') + '</div>') +
+        '<button type="button" class="kmini" data-act="restore-launcher" aria-label="Вернуть кнопку «Подобрать концерт»" title="Вернуть кнопку «Подобрать концерт»"><span class="eq"><i></i><i></i><i></i><i></i></span></button>' : '') +
+      '<span class="hint" aria-hidden="true">Подобрать концерт</span></div>') +
     '<div class="nav" role="dialog" aria-modal="true" aria-labelledby="knav-q" hidden><div class="panel">' +
     '<div class="head"><button type="button" class="icon-btn hide" data-act="back" aria-label="Назад">' + ICON.back + '</button>' +
     '<div class="brand"><span class="eq"><i></i><i></i><i></i><i></i></span>Джаз-навигатор</div>' +
@@ -718,8 +719,9 @@ function knavStart(E, CSS) {
   });
 
   /* ---------- кнопка в углу ----------
-   * Появляется после прокрутки (на главной, когда пролистали фильтры) и дальше остаётся в углу, как у прежнего виджета.
-   * Пока листают вниз, сжимается в кружок со значком, чтобы не закрывать карточки; при прокрутке вверх снова с надписью.
+   * Появляется после прокрутки (на главной, когда пролистали фильтры) и дальше стоит на месте, как у прежнего виджета.
+   * Компьютер: тёмная кнопка с надписью. Телефон: красный кружок 52 px, размер не меняется, чтобы ничего не прыгало;
+   * при первом появлении за визит рядом на 4 секунды всплывает подпись «Подобрать концерт».
    * На коротких страницах, где листать почти некуда, видна сразу. */
   var SCROLL_MODE = cfg.launcherMode === 'scroll';
   var lastY = window.scrollY;
@@ -733,8 +735,16 @@ function knavStart(E, CSS) {
     return room < 120 ? -1 : Math.min(200, room * 0.4);
   }
   function restAway() { var y = window.scrollY; return SCROLL_MODE ? y <= showAt() : y <= topZone(); }
-  var compact = false;
-  function setCompact(on) { on = on && !mini; if (launcherEl && on !== compact) { compact = on; launcherEl.classList.toggle('compact', on); } }
+  var roundMQ = window.matchMedia ? window.matchMedia('(max-width: 719px)') : null, hintT = 0;
+  function syncRound() { if (launcherEl) launcherEl.classList.toggle('round', !!(roundMQ && roundMQ.matches)); }
+  syncRound();
+  function hintOnce() {
+    if (!launcherEl || mini || !launcherEl.classList.contains('round')) return;
+    try { if (sessionStorage.getItem('knav_hint')) return; sessionStorage.setItem('knav_hint', '1'); } catch (e) { }
+    launcherEl.classList.add('hinting');
+    clearTimeout(hintT);
+    hintT = setTimeout(function () { launcherEl.classList.remove('hinting'); }, 4000);
+  }
   function syncLauncher() { if (!state.open) setAway(restAway()); }
 
   /* Свои закреплённые кнопки сайта не закрываем: если в углу экрана уже есть элемент страницы
@@ -777,20 +787,17 @@ function knavStart(E, CSS) {
     var was = launcherEl.classList.contains('away');
     if (!on && (was || Date.now() - liftAt > 400)) measureLift();
     if (on !== was) launcherEl.classList.toggle('away', on);
+    if (!on && was) setTimeout(hintOnce, 350);
+    if (on) { clearTimeout(hintT); launcherEl.classList.remove('hinting'); }
   }
   if (launcherEl) {
     window.addEventListener('scroll', function () {
       if (state.open) return;
-      var y = window.scrollY, away = restAway();
-      setAway(away);
-      if (away) setCompact(false);
-      else if (y > lastY + 6) setCompact(true);
-      else if (y < lastY - 6) setCompact(false);
-      lastY = y;
+      setAway(restAway());
     }, { passive: true });
     syncLauncher();
     window.addEventListener('load', syncLauncher);
-    window.addEventListener('resize', function () { liftAt = 0; syncLauncher(); }, { passive: true });
+    window.addEventListener('resize', function () { liftAt = 0; syncRound(); syncLauncher(); }, { passive: true });
   }
 
   var toastT = 0;
@@ -832,7 +839,7 @@ function knavStart(E, CSS) {
     if (!launcherEl || mini) return;
     mini = true;
     launcherEl.classList.add('mini');
-    setCompact(false);
+    launcherEl.classList.remove('hinting');
     setHidden('launcher', true);
     track('dismiss', { what: 'launcher' });
     liftAt = 0;
@@ -842,7 +849,6 @@ function knavStart(E, CSS) {
     if (!launcherEl || !mini) return;
     mini = false;
     launcherEl.classList.remove('mini');
-    setCompact(false);
     setHidden('launcher', false);
     track('dismiss_undo', { what: 'launcher' });
     liftAt = 0;

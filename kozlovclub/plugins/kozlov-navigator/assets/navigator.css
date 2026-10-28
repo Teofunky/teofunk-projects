@@ -76,18 +76,17 @@
 .lw { position: fixed; right: calc(16px + env(safe-area-inset-right, 0px)); bottom: calc(16px + var(--lift, 0px) + env(safe-area-inset-bottom, 0px)); z-index: 99990;
   display: flex; transition: transform .3s cubic-bezier(.2,.8,.2,1), opacity .2s ease, bottom .25s ease; }
 .launcher { position: relative; display: inline-flex; align-items: center; gap: 10px; height: 50px; padding: 0 18px 0 6px; border-radius: 999px; background: var(--ink); color: #fff;
-  font: 700 14px/1 var(--fd); letter-spacing: .09em; text-transform: uppercase; box-shadow: 0 10px 28px rgba(12,15,23,.3); transition: padding .3s ease, gap .3s ease; }
-.launcher .lbl { display: inline-block; max-width: 240px; overflow: hidden; white-space: nowrap; transition: max-width .3s ease, opacity .2s ease; }
-/* листают вниз: кружок со значком, карточки не закрывает */
-.lw.compact .launcher { padding: 0 6px; gap: 0; }
-.lw.compact .launcher .lbl { max-width: 0; opacity: 0; }
-.lw.compact .launcher-x { opacity: 0; transform: scale(.6); pointer-events: none; }
-/* свёрнута крестиком: маленький значок в углу, нажатие возвращает кнопку */
+  font: 700 14px/1 var(--fd); letter-spacing: .09em; text-transform: uppercase; box-shadow: 0 10px 28px rgba(12,15,23,.3); }
+.launcher .lbl { white-space: nowrap; }
+/* свёрнута крестиком: язычок у правого края экрана, нажатие возвращает кнопку */
 .kmini { display: none; }
-.lw.mini .launcher, .lw.mini .launcher-x { display: none; }
-.lw.mini .kmini { display: inline-flex; width: 40px; height: 40px; border-radius: 50%; align-items: center; justify-content: center; background: #fff; color: var(--accent);
-  box-shadow: 0 4px 14px rgba(12,15,23,.18), 0 0 0 1px rgba(12,15,23,.08); opacity: .9; transition: opacity .15s, transform .15s; }
-.lw.mini .kmini:hover { opacity: 1; transform: scale(1.06); }
+.lw.mini { right: 0; }
+.lw.mini .launcher, .lw.mini .launcher-x, .lw.mini .hint { display: none; }
+.lw.mini .kmini { display: inline-flex; width: 30px; height: 44px; padding-left: 3px; border-radius: 22px 0 0 22px; align-items: center; justify-content: center; background: #fff; color: var(--accent);
+  box-shadow: -3px 4px 14px rgba(12,15,23,.16), 0 0 0 1px rgba(12,15,23,.08); transition: width .15s; }
+.lw.mini .kmini .eq { height: 12px; gap: 1.5px; }
+.lw.mini .kmini .eq i { width: 2.5px; }
+.lw.mini .kmini:hover { width: 36px; }
 /* крестик на кнопке: маленький значок, область нажатия 40 px */
 .launcher-x { position: absolute; top: -9px; right: -7px; width: 24px; height: 24px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
   background: #fff; color: var(--ink); box-shadow: 0 2px 8px rgba(12,15,23,.22), 0 0 0 1px rgba(12,15,23,.08); transition: transform .15s, opacity .2s; }
@@ -98,6 +97,18 @@
 .launcher { animation: kn-glow 4s ease-in-out infinite; }
 .launcher .ic::after { content: ""; position: absolute; inset: -4px; border-radius: 50%; border: 1.5px solid var(--accent); opacity: .45; animation: kn-ring 2.4s ease-out infinite; pointer-events: none; }
 @keyframes kn-ring { 0% { transform: scale(.9); opacity: .6; } 100% { transform: scale(1.7); opacity: 0; } }
+/* телефон: всегда круглая кнопка 52 px без надписи. Размер не меняется при прокрутке, карточки закрывает минимально */
+.lw.round .launcher { width: 52px; height: 52px; padding: 0; gap: 0; justify-content: center; animation: none; box-shadow: 0 6px 18px rgba(12,15,23,.32); }
+.lw.round .launcher .lbl { display: none; }
+.lw.round .launcher .ic { width: 40px; height: 40px; }
+.lw.round .launcher-x { top: -5px; right: -5px; width: 21px; height: 21px; }
+.lw.round .launcher-x svg { width: 10px; height: 10px; }
+/* подсказка рядом с кнопкой: один раз за визит, потом исчезает сама */
+.hint { position: absolute; right: calc(100% + 12px); top: 50%; transform: translate(8px, -50%); opacity: 0; pointer-events: none; white-space: nowrap; padding: 10px 13px; border-radius: 10px;
+  background: var(--ink); color: #fff; font: 700 13px/1 var(--fd); letter-spacing: .08em; text-transform: uppercase; box-shadow: 0 8px 22px rgba(12,15,23,.25); transition: opacity .3s ease, transform .3s ease; }
+.hint::after { content: ""; position: absolute; right: -4px; top: 50%; width: 10px; height: 10px; margin-top: -5px; background: var(--ink); transform: rotate(45deg); border-radius: 2px; }
+.lw:not(.round) .hint { display: none; }
+.lw.hinting .hint { opacity: 1; transform: translate(0, -50%); }
 @keyframes kn-glow { 0%, 100% { box-shadow: 0 10px 28px rgba(12,15,23,.3), 0 0 0 1px rgba(243,72,65,.16) inset; } 50% { box-shadow: 0 14px 38px -4px rgba(243,72,65,.5), 0 0 0 1px rgba(243,72,65,.38) inset; } }
 .lw.away { transform: translateY(calc(100% + 40px + var(--lift, 0px) + env(safe-area-inset-bottom, 0px))); opacity: 0; pointer-events: none; }
 .lw.away * { pointer-events: none; }
