@@ -171,20 +171,24 @@ function knavStart(E, CSS) {
   var launcherOff = false;
   if (launcherEl && isHidden('launcher')) { launcherOff = true; launcherEl.hidden = true; }
 
-  // полоса входа под фильтрами афиши (если панель есть на странице)
-  var stripHost = null, stripOff = false;
+  /* ---------- вход у фильтров афиши ----------
+   * Компьютер: красная кнопка «Подобрать концерт» в той же строке, что фильтры, сразу после «Сцена»
+   * (вставляется в панель Smart Search своим Shadow DOM, стили панели не трогает). Если места мало,
+   * надпись короче («Подобрать»), ещё меньше места: только значок. Телефон (уже 720 px): строка под панелью. */
+  var stripHost = null, stripOff = false, stripAnchor = null, chipHost = null, inlineOn = false, bootAt = now();
   if (cfg.strip !== false && cfg.stripAfter && !isHidden('strip')) {
-    var anchor = null;
-    try { anchor = document.querySelector(cfg.stripAfter); } catch (e) { }
-    if (anchor && anchor.parentNode) {
+    try { stripAnchor = document.querySelector(cfg.stripAfter); } catch (e) { }
+    if (stripAnchor && stripAnchor.parentNode) {
       stripHost = document.createElement('div');
       stripHost.className = 'knav-strip-host';
-      anchor.parentNode.insertBefore(stripHost, anchor.nextSibling);
+      stripHost.style.display = window.innerWidth >= 720 ? 'none' : 'block'; // на компьютере сначала пробуем строку фильтров
+      stripAnchor.parentNode.insertBefore(stripHost, stripAnchor.nextSibling);
       var SR = makeRoot(stripHost);
       var sw = document.createElement('div');
       sw.className = 'kn';
-      sw.innerHTML = '<div class="strip-wrap"><button type="button" class="strip" data-act="open"><span class="ic">' + EQ + '</span><span><b>Не знаете, что выбрать?</b><small>Подберём концерт под настроение за 30 секунд</small></span>' +
-        '<svg class="go" width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>' +
+      sw.innerHTML = '<div class="strip-wrap"><button type="button" class="strip" data-act="open"><span class="ic">' + EQ + '</span>' +
+        '<span class="s-t">Не знаете, что выбрать?<small> Подберём концерт под настроение за 30 секунд</small></span>' +
+        '<span class="s-cta">Подобрать<span class="long"> концерт</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span></button>' +
         (DISMISS ? '<button type="button" class="strip-x" data-act="hide-strip" aria-label="Скрыть подсказку навигатора"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button>' : '') + '</div>';
       SR.appendChild(sw);
       SR.addEventListener('click', function (e) {
@@ -192,7 +196,99 @@ function knavStart(E, CSS) {
         else if (e.target.closest('[data-act=open]')) open('strip');
       });
       SR.addEventListener('pointerenter', loadData, true);
+      placeEntry();
+      [300, 1000, 2500, 3200].forEach(function (t) { setTimeout(placeEntry, t); });
+      window.addEventListener('load', schedulePlace);
+      window.addEventListener('resize', schedulePlace, { passive: true });
+      if (window.ResizeObserver) { try { new ResizeObserver(schedulePlace).observe(stripAnchor); } catch (e) { } }
     }
+  }
+
+  var placeT = 0, kafObserved = false;
+  function schedulePlace() { clearTimeout(placeT); placeT = setTimeout(placeEntry, 80); }
+  function kafRow() {
+    var sr = stripAnchor && stripAnchor.shadowRoot;
+    if (!sr) return null;
+    var bar = sr.querySelector('.kaf-bar'), chips = sr.querySelector('.kaf-chips');
+    if (!bar || !chips) return null;
+    var last = chips.lastElementChild;
+    if (last && last === chipHost) last = last.previousElementSibling;
+    if (!last) return null;
+    if (!kafObserved && window.MutationObserver) {
+      kafObserved = true; // счётчики в фильтрах заполняются позже и меняют ширину: проверяем, помещается ли кнопка
+      try { new MutationObserver(schedulePlace).observe(chips, { childList: true, subtree: true, characterData: true }); } catch (e) { }
+    }
+    return { bar: bar, chips: chips, last: last };
+  }
+  function makeChip() {
+    chipHost = document.createElement('span');
+    chipHost.className = 'knav-chip-host';
+    chipHost.style.cssText = 'display:flex;flex:0 0 auto;align-self:center;margin:0;padding:0;border:0;background:none;min-width:0';
+    var CR = makeRoot(chipHost);
+    var cw = document.createElement('div');
+    cw.className = 'kn';
+    cw.innerHTML = '<button type="button" class="kchip" data-act="open" aria-label="Не знаете, что выбрать? Подобрать концерт">' +
+      '<span class="ic">' + EQ + '</span><span class="kl">Подобрать<span class="kl2"> концерт</span></span></button>';
+    CR.appendChild(cw);
+    CR.addEventListener('click', function (e) { if (e.target.closest('[data-act=open]')) open('chip'); });
+    CR.addEventListener('pointerenter', loadData, true);
+  }
+  function placeEntry() {
+    if (!stripAnchor || stripOff) return;
+    var wide = window.innerWidth >= 720, row = wide ? kafRow() : null;
+    if (wide && !row && now() - bootAt < 3000) return; // панель фильтров ещё рисуется: подождём, а не покажем строку зря
+    if (row) {
+      if (!chipHost) makeChip();
+      /* Варианты по порядку: отдельным элементом в строке панели (полная надпись, короче, значок),
+       * затем последним фильтром в группе фильтров, если они переносятся на вторую строку.
+       * Подходит вариант, при котором кнопка стоит в одной строке со «Сцена» и панель не стала выше. */
+      if (chipHost.parentNode) chipHost.parentNode.removeChild(chipHost);
+      var h0 = row.bar.getBoundingClientRect().height;
+      var btn = chipHost.shadowRoot.querySelector('.kchip'), fit = false;
+      var tries = [[row.bar, ''], [row.bar, 'short'], [row.bar, 'icon'], [row.chips, ''], [row.chips, 'short']];
+      for (var i = 0; i < tries.length && !fit; i++) {
+        if (tries[i][0] === row.bar) row.bar.insertBefore(chipHost, row.chips.nextSibling); else row.chips.appendChild(chipHost);
+        btn.className = 'kchip' + (tries[i][1] ? ' ' + tries[i][1] : '');
+        fit = Math.abs(row.last.getBoundingClientRect().top - chipHost.getBoundingClientRect().top) < 6 && row.bar.getBoundingClientRect().height <= h0 + 1;
+      }
+      if (!fit) { row.bar.insertBefore(chipHost, row.chips.nextSibling); btn.className = 'kchip'; } // места нет: своей строкой внутри панели, слева
+      inlineOn = true;
+      stripHost.style.display = 'none';
+      return;
+    }
+    if (chipHost && chipHost.parentNode) chipHost.parentNode.removeChild(chipHost);
+    inlineOn = false;
+    stripHost.style.display = 'block';
+    layoutStrip();
+  }
+
+  /* Место для строки. Под панелью фильтров афиша оставляет пустой отступ: в нём стоят подписи над карточками
+   * («Концерт сегодня | Сцена») и заголовок месяца. Строка встаёт сразу под видимой частью панели (8 px),
+   * а этот отступ целиком переносится под неё, поэтому подписи остаются на своих местах. */
+  function contentBottom(el, ar) {
+    var max = -1, n = 0, roots = [el];
+    if (el.shadowRoot) roots.push(el.shadowRoot);
+    for (var k = 0; k < roots.length; k++) {
+      var list = roots[k].querySelectorAll('*');
+      for (var i = 0; i < list.length && n < 500; i++, n++) {
+        var r = list[i].getBoundingClientRect();
+        if (!r.width || !r.height || r.height >= ar.height - 1 || r.bottom > ar.bottom + 1) continue;
+        var cs = getComputedStyle(list[i]);
+        if (cs.position === 'fixed' || cs.visibility === 'hidden') continue;
+        if (r.bottom > max) max = r.bottom;
+      }
+    }
+    return max < 0 ? ar.bottom : max;
+  }
+  function layoutStrip() {
+    if (!stripHost || !stripAnchor || stripOff) return;
+    var hs = stripHost.style;
+    hs.marginTop = '0px'; hs.marginBottom = '0px';
+    var ar = stripAnchor.getBoundingClientRect();
+    if (!ar.height) return;
+    var reserved = Math.max(0, Math.min(140, Math.round(ar.bottom - contentBottom(stripAnchor, ar))));
+    hs.marginTop = (8 - reserved) + 'px';
+    hs.marginBottom = reserved + 'px';
   }
 
   /* ---------- данные ---------- */
@@ -625,7 +721,8 @@ function knavStart(E, CSS) {
   var SCROLL_MODE = cfg.launcherMode === 'scroll';
   var lastY = window.scrollY;
   function topZone() {
-    if (stripHost && !stripOff) { var r = stripHost.getBoundingClientRect(); return Math.max(260, r.bottom + window.scrollY); }
+    var el = inlineOn ? stripAnchor : (stripHost && !stripOff ? stripHost : null);
+    if (el) { var r = el.getBoundingClientRect(); if (r.height) return Math.max(260, r.bottom + window.scrollY); }
     return 300;
   }
   function showAt() {
@@ -716,18 +813,18 @@ function knavStart(E, CSS) {
     stripOff = true;
     setHidden('strip', true);
     track('dismiss', { what: 'strip' });
-    var st = stripHost.style, h = stripHost.offsetHeight;
-    st.overflow = 'hidden'; st.height = h + 'px'; st.transition = 'height .25s ease, opacity .2s ease';
-    requestAnimationFrame(function () { st.height = '0px'; st.opacity = '0'; });
+    var st = stripHost.style, h = stripHost.offsetHeight, mt = parseFloat(st.marginTop) || 0;
+    st.overflow = 'hidden'; st.height = h + 'px'; st.transition = 'height .25s ease, margin-top .25s ease, opacity .2s ease';
+    requestAnimationFrame(function () { st.height = '0px'; st.marginTop = (mt - 8) + 'px'; st.opacity = '0'; });
     var gone = setTimeout(function () { st.display = 'none'; }, 280);
     toast('Подсказка скрыта', function () {
       clearTimeout(gone);
       stripOff = false;
       setHidden('strip', false);
       track('dismiss_undo', { what: 'strip' });
-      st.display = '';
-      requestAnimationFrame(function () { st.height = h + 'px'; st.opacity = '1'; });
-      setTimeout(function () { st.height = ''; st.overflow = ''; st.transition = ''; }, 300);
+      st.display = 'block';
+      requestAnimationFrame(function () { st.height = h + 'px'; st.marginTop = mt + 'px'; st.opacity = '1'; });
+      setTimeout(function () { st.height = ''; st.overflow = ''; st.transition = ''; layoutStrip(); }, 300);
     });
   }
   function hideLauncher() {

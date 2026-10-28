@@ -212,8 +212,8 @@ class KNAV_Stats {
 			$src  = is_array( $d ) && ! empty( $d['src'] ) ? (string) $d['src'] : 'launcher';
 			$path = is_array( $d ) && isset( $d['path'] ) ? (string) $d['path'] : '/';
 			$home = '' === trim( $path, '/' );
-			if ( 'strip' === $src ) {
-				$key = 'strip';
+			if ( 'strip' === $src || 'chip' === $src ) {
+				$key = $src;
 			} elseif ( 'link' === $src ) {
 				$key = 'link';
 			} elseif ( 'auto' === $src ) {

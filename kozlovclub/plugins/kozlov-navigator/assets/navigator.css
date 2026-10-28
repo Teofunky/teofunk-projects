@@ -35,18 +35,42 @@
 .eq.live i:nth-child(2) { animation-delay: -.3s; } .eq.live i:nth-child(3) { animation-delay: -.6s; } .eq.live i:nth-child(4) { animation-delay: -.15s; }
 @keyframes kn-eq { 0%, 100% { transform: scaleY(.45); } 50% { transform: scaleY(1); } }
 
-/* ---------- полоса входа под фильтрами ---------- */
-.strip-wrap { margin: 10px 0 0; display: flex; align-items: stretch; border-radius: 18px; background: var(--ink); color: #fff; overflow: hidden; }
-.strip { flex: 1; min-width: 0; display: flex; align-items: center; gap: 14px; padding: 12px 14px; text-align: left; border-radius: 18px; }
-.strip .ic { width: 44px; height: 44px; border-radius: 12px; background: var(--accent); display: inline-flex; align-items: center; justify-content: center; flex: none; }
-.strip b { display: block; font: 700 16px/1.1 var(--fd); letter-spacing: .04em; text-transform: uppercase; }
-.strip small { display: block; color: rgba(255,255,255,.7); font-size: 13px; margin-top: 3px; }
-.strip .go { margin-left: auto; flex: none; opacity: .8; }
-.strip:hover .go { opacity: 1; transform: translateX(2px); }
-/* крестик: посетитель скрывает полосу у себя */
-.strip-x { flex: none; width: 46px; display: inline-flex; align-items: center; justify-content: center; color: rgba(255,255,255,.5); border-left: 1px solid rgba(255,255,255,.12); border-radius: 0 18px 18px 0; transition: color .15s, background .15s; }
-.strip-x:hover { color: #fff; background: rgba(255,255,255,.07); }
-.kn .strip-x:focus-visible, .kn .strip:focus-visible { outline-offset: -3px; }
+/* ---------- строка входа под фильтрами ----------
+ * Выглядит как вторая строка панели поиска: тот же светлый фон, скругление и высота элементов 40 px.
+ * Стоит в отступе под панелью и не сдвигает подписи карточек афиши (отступы считает ui.js). */
+.strip-wrap { display: flex; align-items: center; gap: 2px; padding: 6px; border-radius: 12px; background: #f2f1ef; color: #020817; }
+.strip { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 0 0 0 6px; border-radius: 20px; text-align: left; font: 500 15px/1.2 Roboto, Arial, sans-serif; }
+.strip .ic { width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: #fff; display: inline-flex; align-items: center; justify-content: center; flex: none; }
+.strip .ic .eq { height: 11px; gap: 1.5px; }
+.strip .ic .eq i { width: 2.5px; }
+.strip .s-t { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.strip .s-t small { font: 400 14px/1.2 Roboto, Arial, sans-serif; color: #676d78; }
+.strip .s-cta { flex: none; display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 16px; border-radius: 20px; background: var(--accent); color: #fff; font: 500 14px/1 Roboto, Arial, sans-serif; transition: background .15s; }
+.strip:hover .s-cta { background: var(--accent-press); }
+.strip-x { flex: none; width: 34px; height: 40px; display: inline-flex; align-items: center; justify-content: center; border-radius: 20px; color: #8a8f98; transition: color .15s, background .15s; }
+.strip-x:hover { color: #020817; background: rgba(2,8,23,.05); }
+@media (max-width: 700px) { .strip .s-t small { display: none; } }
+@media (max-width: 480px) {
+  .strip { gap: 8px; padding-left: 8px; font-size: 14px; }
+  .strip .ic, .strip .s-cta .long, .strip .s-cta svg { display: none; }
+  .strip .s-cta { padding: 0 14px; }
+}
+
+/* кнопка в строке фильтров (компьютер): по размеру как фильтры панели, цвет как «Купить билет» */
+.kchip { position: relative; display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 18px 0 6px; border-radius: 20px; background: var(--accent); color: #fff;
+  font: 500 15px/1 Roboto, Arial, sans-serif; white-space: nowrap; transition: background .15s; }
+.kchip:hover { background: var(--accent-press); }
+.kchip .ic { width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,.2); display: inline-flex; align-items: center; justify-content: center; flex: none; }
+.kchip .ic .eq { height: 11px; gap: 1.5px; }
+.kchip .ic .eq i { width: 2.5px; }
+.kchip.short .kl2 { display: none; }
+.kchip.icon { width: 40px; padding: 0; justify-content: center; }
+.kchip.icon .kl { display: none; }
+.kchip.icon .ic { background: none; }
+/* только значок: подпись появляется при наведении */
+.kchip.icon::after { content: "Подобрать концерт"; position: absolute; top: calc(100% + 8px); right: 0; padding: 8px 12px; border-radius: 8px; background: #0c0f17; color: #fff;
+  font: 500 13px/1 Roboto, Arial, sans-serif; white-space: nowrap; opacity: 0; transform: translateY(-4px); pointer-events: none; transition: opacity .15s, transform .15s; z-index: 5; }
+.kchip.icon:hover::after, .kchip.icon:focus-visible::after { opacity: 1; transform: none; }
 
 /* ---------- кнопка на странице ---------- */
 .lw { position: fixed; right: calc(16px + env(safe-area-inset-right, 0px)); bottom: calc(16px + var(--lift, 0px) + env(safe-area-inset-bottom, 0px)); z-index: 99990;
