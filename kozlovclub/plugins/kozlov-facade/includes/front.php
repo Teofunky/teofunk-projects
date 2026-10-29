@@ -54,10 +54,10 @@ function kzf_enqueue() {
 }
 
 /**
- * In <head>: on phones, keep the old slider invisible from the very first paint while the block gets ready,
- * so the visitor never sees the old slider flash and jump. Its space stays reserved.
- * Safety: the slider comes back by itself after 6 s unless the block has mounted; front.js also gives it
- * back at once whenever it decides not to mount.
+ * In <head>: on phones the old slider stays invisible from the very first paint while the block gets ready,
+ * so it never flashes and jumps. Pure CSS, so it works even if scripts are deferred or moved by an optimizer.
+ * Its space stays reserved. Safety: it comes back by itself after 6 s (CSS animation) unless the block has
+ * mounted; front.js gives it back at once (class kzf-off) whenever it decides not to mount.
  */
 add_action( 'wp_head', 'kzf_head_early', 1 );
 function kzf_head_early() {
@@ -65,10 +65,7 @@ function kzf_head_early() {
 		if ( ! kzf_should_render() || ! kzf_display_slides() ) {
 			return;
 		}
-		?>
-<style id="kzf-early">@media (max-width: 767px){html.kzf-wait .content_home .slider-wrapper{visibility:hidden!important}}</style>
-<script id="kzf-early-js">(function(){try{var d=document.documentElement;if(/[?&]kzf=off\b/.test(location.search)||!window.matchMedia||!window.fetch||!matchMedia("(max-width: 767px)").matches)return;d.classList.add("kzf-wait");setTimeout(function(){d.classList.remove("kzf-wait")},6000)}catch(e){}})();</script>
-		<?php
+		echo '<style id="kzf-early">@media (max-width: 767px){html:not(.kzf-off):not(.kzf-on) .content_home .slider-wrapper{opacity:0;visibility:hidden;animation:kzf-back 0s linear 6s forwards}}@keyframes kzf-back{to{opacity:1;visibility:visible}}</style>' . "\n";
 	} catch ( Throwable $e ) {
 		return;
 	}
@@ -96,10 +93,15 @@ function kzf_render_root() {
 	}
 }
 
+/** True for text typed in capitals («ПРИСТЕГНИТЕ РЕМНИ!»): such a subtitle is set upright and small. */
+function kzf_all_caps( $text ) {
+	return (bool) preg_match( '/\p{Lu}{3}/u', $text ) && mb_strtoupper( $text, 'UTF-8' ) === $text;
+}
+
 function kzf_print_block( $slides ) {
 	$n = count( $slides );
 	?>
-<div id="kzf-root" class="kzf-root" hidden>
+<div id="kzf-root" class="kzf-root" data-kzf-ver="<?php echo esc_attr( KZF_VER ); ?>" hidden>
 	<div class="kzf-hero"></div>
 	<?php if ( $n ) : ?>
 	<section class="kzf-card" aria-label="Афиша и новости клуба" style="--kzf-dots: <?php echo (int) ( $n > 1 ? $n : 0 ); ?>">
@@ -119,7 +121,7 @@ function kzf_print_block( $slides ) {
 						<?php if ( $s['title'] ) : ?>
 						<h2 class="kzf-title<?php echo ( mb_strlen( $s['title'] ) > 48 ) ? ' kzf-long' : ''; ?>"><?php if ( $s['link'] ) : ?><a href="<?php echo esc_url( $s['link'] ); ?>"><?php echo esc_html( $s['title'] ); ?></a><?php else : ?><?php echo esc_html( $s['title'] ); ?><?php endif; ?></h2>
 						<?php endif; ?>
-						<?php if ( $s['subtitle'] ) : ?><div class="kzf-sub"><?php echo esc_html( $s['subtitle'] ); ?></div><?php endif; ?>
+						<?php if ( $s['subtitle'] ) : ?><div class="kzf-sub<?php echo kzf_all_caps( $s['subtitle'] ) ? ' kzf-caps' : ''; ?>"><?php echo esc_html( $s['subtitle'] ); ?></div><?php endif; ?>
 						<?php if ( $s['meta'] ) : ?><div class="kzf-meta"><?php echo esc_html( $s['meta'] ); ?></div><?php endif; ?>
 					</div>
 				</div>

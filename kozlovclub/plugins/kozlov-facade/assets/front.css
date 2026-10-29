@@ -1,13 +1,14 @@
 /* Kozlov Living Facade: block and card on the home page, phones only.
    Everything is scoped to #kzf-root and kzf- classes; nothing here touches the theme
-   except hiding the old slider, and only after the block has mounted successfully.
-   The background is the site's own (front.js copies it from the page), so header and house are one sheet. */
+   except two things while the block is mounted on a phone: the old slider is hidden, and the site
+   header takes the facade's paper colour while the house is on screen, so header and house are one sheet. */
 
 @media (min-width: 768px) {
   #kzf-root { display: none !important; }
 }
 @media (max-width: 767px) {
   html.kzf-on .content_home .slider-wrapper { display: none !important; }
+  html.kzf-on.kzf-top header.header, html.kzf-on.kzf-top header.header > .inner { background-color: #faf8f4 !important; }
 }
 
 #kzf-root[hidden] { display: none !important; }
@@ -18,15 +19,14 @@
   width: 100%;
   margin: 0 0 12px;
   padding: 0 0 2px;
-  background: var(--kzf-bg, #fff);
+  background: #faf8f4;
   color: #2b2522;
+  box-sizing: border-box;
   overflow: hidden;
   -webkit-text-size-adjust: 100%;
 }
 #kzf-root *, #kzf-root *::before, #kzf-root *::after { box-sizing: border-box; }
 #kzf-root a, #kzf-root button { -webkit-tap-highlight-color: transparent; }
-/* parts of the drawing that hide lines behind them (walls, clouds, balcony) take the page colour too */
-#kzf-root svg [fill="#faf8f4"] { fill: var(--kzf-bg, #fff); }
 /* while the drawing loads, its place is kept so nothing below jumps */
 #kzf-root .kzf-hero:empty { aspect-ratio: var(--kzf-ratio, 1.0156); }
 /* the card frame is drawn together with the house */
@@ -100,6 +100,7 @@
 #kzf-root .kzf-title a { color: inherit; text-decoration: none; }
 #kzf-root .kzf-title.kzf-long { font-size: 15px; }
 #kzf-root .kzf-sub { font-size: 14px; line-height: 1.3; font-style: italic; color: #2b2522; }
+#kzf-root .kzf-sub.kzf-caps { font-style: normal; font-size: 12px; font-weight: 500; letter-spacing: 0.06em; }
 #kzf-root .kzf-meta { font-size: 13px; line-height: 1.3; color: #6b625c; }
 #kzf-root .kzf-buy, #kzf-root .kzf-act {
   appearance: none; -webkit-appearance: none; width: 100%; margin: auto 0 0; height: auto; min-height: 44px; padding: 10px 12px; flex: 0 0 auto;

@@ -29,3 +29,4 @@
 @media (max-width: 782px) {
   .kzf-admin .kzf-fields, .kzf-admin .kzf-fields > .kzf-only { grid-template-columns: minmax(0, 1fr) !important; }
 }
+.kzf-admin h1 .kzf-ver { font-size: 13px; font-weight: 400; color: #646970; margin-left: 8px; }

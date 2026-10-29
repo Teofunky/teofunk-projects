@@ -183,12 +183,16 @@ function kzf_cost_text( $raw ) {
 	return kzf_price_text( $text );
 }
 
-/** The club's stages, by the codes the site itself uses in its afisha links (?sort=main_scene …). */
+/**
+ * The club's stages. On kozlovclub.ru the stage of a concert is a set of Magic Fields checkboxes
+ * on the announcement: location_main_scene, location_the_beat, location_mansarda, location_myasnitskaya
+ * (checked on the live site in October 2026, the Event Schema plugin reads the same fields).
+ */
 function kzf_stage_names() {
 	return array(
 		'main_scene'   => 'Главная сцена',
 		'the_beat'     => 'The Beat',
-		'mansard'      => 'Мансарда',
+		'mansarda'     => 'Мансарда',
 		'myasnitskaya' => 'Сцена на Мясницкой, 15',
 	);
 }
@@ -198,8 +202,10 @@ function kzf_stage_match( $value ) {
 	if ( ! is_string( $value ) ) {
 		return '';
 	}
-	$value = kzf_ru_text( wp_strip_all_tags( $value ) );
-	$key   = mb_strtolower( $value );
+	$key = mb_strtolower( kzf_ru_text( wp_strip_all_tags( $value ) ) );
+	if ( 'mansard' === $key ) {
+		$key = 'mansarda'; // the code used in the afisha links
+	}
 	foreach ( kzf_stage_names() as $code => $name ) {
 		if ( $key === $code || $key === mb_strtolower( $name ) ) {
 			return $name;
@@ -208,20 +214,14 @@ function kzf_stage_match( $value ) {
 	return '';
 }
 
-/**
- * Stage of a concert. Only the four known stages are accepted: a field of the concert holding a stage
- * code or name, then a calendar category or tag named after a stage, then the calendar's venue field.
- */
+/** Stage of a concert: the checked stage box; else a calendar category named after a stage; else the venue field. */
 function kzf_stage( $post_id, $row ) {
-	$meta = get_post_meta( $post_id );
-	if ( is_array( $meta ) ) {
-		foreach ( $meta as $values ) {
-			foreach ( (array) $values as $v ) {
-				$s = kzf_stage_match( $v );
-				if ( $s ) {
-					return $s;
-				}
-			}
+	foreach ( kzf_stage_names() as $code => $name ) {
+		$v = get_post_meta( $post_id, 'location_' . $code, true );
+		$v = is_array( $v ) ? reset( $v ) : $v;
+		$v = strtolower( trim( (string) $v ) );
+		if ( '' !== $v && ! in_array( $v, array( '0', 'false', 'no', 'off' ), true ) ) {
+			return $name;
 		}
 	}
 	foreach ( (array) get_object_taxonomies( (string) get_post_type( $post_id ) ) as $tax ) {
@@ -237,6 +237,22 @@ function kzf_stage( $post_id, $row ) {
 		}
 	}
 	return ( $row && isset( $row['venue'] ) ) ? kzf_stage_match( (string) $row['venue'] ) : '';
+}
+
+/**
+ * The calendar stores the time an editor typed, counted in the event's zone (on this site usually "UTC").
+ * That typed time is Moscow time, as the site shows it. Returns the real moment (unix time).
+ */
+function kzf_club_time( $ts, $tzname ) {
+	try {
+		$tz = new DateTimeZone( '' === $tzname ? 'UTC' : $tzname );
+	} catch ( Exception $e ) {
+		$tz = new DateTimeZone( 'UTC' );
+	}
+	$d = new DateTime( '@' . (int) $ts );
+	$d->setTimezone( $tz );
+	$m = new DateTime( $d->format( 'Y-m-d H:i:s' ), new DateTimeZone( 'Europe/Moscow' ) );
+	return $m->getTimestamp();
 }
 
 function kzf_ru_date( $ts, $tz ) {
@@ -284,15 +300,10 @@ function kzf_event_data( $url ) {
 
 	$row = kzf_ai1ec_row( $id );
 	if ( $row && ! empty( $row['start'] ) ) {
-		$tzname = isset( $row['timezone_name'] ) ? trim( (string) $row['timezone_name'] ) : '';
-		try {
-			$tz = ( '' === $tzname ) ? new DateTimeZone( 'UTC' ) : new DateTimeZone( $tzname );
-		} catch ( Exception $e ) {
-			$tz = new DateTimeZone( 'UTC' );
-		}
-		$out['start'] = (int) $row['start'];
-		$out['end']   = isset( $row['end'] ) ? (int) $row['end'] : 0;
-		$out['when']  = kzf_ru_date( (int) $row['start'], $tz );
+		$tzname       = isset( $row['timezone_name'] ) ? trim( (string) $row['timezone_name'] ) : '';
+		$out['start'] = kzf_club_time( (int) $row['start'], $tzname );
+		$out['end']   = ! empty( $row['end'] ) ? kzf_club_time( (int) $row['end'], $tzname ) : 0;
+		$out['when']  = kzf_ru_date( $out['start'], new DateTimeZone( 'Europe/Moscow' ) );
 		$out['price'] = kzf_cost_text( isset( $row['cost'] ) ? $row['cost'] : '' );
 	}
 	$out['stage'] = kzf_stage( $id, $row );
@@ -461,8 +472,8 @@ add_action( 'save_post', 'kzf_flush_display_cache', 10, 0 );
 /** Cards for the front end, cached for 10 minutes (events disappear on time within that step). */
 function kzf_display_slides() {
 	$cached = get_transient( 'kzf_display' );
-	if ( is_array( $cached ) ) {
-		return $cached;
+	if ( is_array( $cached ) && isset( $cached['v'], $cached['slides'] ) && KZF_VER === $cached['v'] && is_array( $cached['slides'] ) ) {
+		return $cached['slides']; // cards built by another plugin version are never reused
 	}
 	$out = array();
 	foreach ( kzf_slides() as $s ) {
@@ -475,6 +486,6 @@ function kzf_display_slides() {
 			continue; // one broken slide never takes the block down
 		}
 	}
-	set_transient( 'kzf_display', $out, 10 * MINUTE_IN_SECONDS );
+	set_transient( 'kzf_display', array( 'v' => KZF_VER, 'slides' => $out ), 10 * MINUTE_IN_SECONDS );
 	return $out;
 }

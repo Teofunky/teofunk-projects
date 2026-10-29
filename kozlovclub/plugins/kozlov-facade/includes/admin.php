@@ -163,7 +163,7 @@ function kzf_admin_page() {
 	$slides = kzf_slides();
 	?>
 	<div class="wrap kzf-admin">
-		<h1>Живой фасад</h1>
+		<h1>Живой фасад <span class="kzf-ver">версия <?php echo esc_html( KZF_VER ); ?></span></h1>
 		<p class="kzf-lead">Анимированный фасад клуба с карточками вместо слайдера на главной. Только на телефонах (до 767 px), компьютерная версия не меняется. Под блоком остаётся всё, что есть на странице сейчас.</p>
 		<?php if ( isset( $_GET['updated'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>
 			<div class="notice notice-success is-dismissible"><p>Сохранено. Если на сайте включён кэш страниц, сбросьте его.</p></div>

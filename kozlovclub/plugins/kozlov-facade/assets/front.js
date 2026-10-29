@@ -3,8 +3,9 @@
    - phones only (max-width 767px); desktop is left exactly as it is
    - ?kzf=off in the address switches the block off for this visit
    - nothing replaces the slider unless there is at least one card and the block stylesheet has loaded
-   - the old slider is kept invisible from the first paint (class kzf-wait, set in <head>) and is given
-     back at once whenever the block does not mount; any later error puts everything back
+   - the old slider is kept invisible from the first paint (CSS printed in <head>) and is given back at
+     once (class kzf-off) whenever the block does not mount; any later error puts everything back
+   - while the house is on screen the site header takes the facade's paper colour (class kzf-top)
    - a ticket button that Ticketscloud does not pick up falls back to the concert page */
 (function () {
   "use strict";
@@ -13,11 +14,11 @@
   var CFG = window.KZF_CONFIG;
   var root = document.getElementById("kzf-root");
 
-  function release() { html.classList.remove("kzf-wait"); }
+  function release() { html.classList.add("kzf-off"); }
 
   function giveUp(e) {
     try {
-      html.classList.remove("kzf-on");
+      html.classList.remove("kzf-on", "kzf-top");
       release();
       if (root) {
         root.hidden = true;
@@ -39,20 +40,38 @@
     })();
   }
 
-  // the house sits on the same colour as the site header, so header and facade read as one sheet
-  function solid(el) {
-    var c = el ? window.getComputedStyle(el).backgroundColor : "";
-    return c && c !== "transparent" && !/rgba\(.*,\s*0\s*\)$/.test(c) ? c : "";
+  var header = document.querySelector("header.header") || document.querySelector(".header");
+
+  // one paper sheet: the facade runs edge to edge and up to the header, with no white strips
+  function fitSheet() {
+    try {
+      var st = root.style;
+      st.marginLeft = st.paddingLeft = st.paddingRight = st.width = st.marginTop = st.paddingTop = "";
+      var vw = html.clientWidth;
+      var r = root.getBoundingClientRect();
+      var left = Math.round(r.left), right = Math.round(vw - r.right);
+      if (left > 0 && left <= 48 && right >= 0 && right <= 48) {
+        st.marginLeft = -left + "px";
+        st.paddingLeft = left + "px";
+        st.paddingRight = right + "px";
+        st.width = vw + "px";
+      }
+      if (header && window.pageYOffset < 4) {
+        var gap = Math.round(root.getBoundingClientRect().top - header.getBoundingClientRect().bottom);
+        if (gap > 0 && gap <= 60) { st.marginTop = -gap + "px"; st.paddingTop = gap + "px"; }
+      }
+    } catch (e) { /* the block simply stays boxed */ }
   }
-  function pageBackground(from) {
-    var c = solid(document.querySelector(".header"));
-    if (c) return c;
-    for (var el = from; el && el.nodeType === 1; el = el.parentElement) {
-      c = solid(el);
-      if (c) return c;
-    }
-    return "#fff";
+
+  // the header is paper-coloured while the house is under it, white again further down the page
+  var headerTick = false;
+  function syncHeader() {
+    headerTick = false;
+    if (!header || !html.classList.contains("kzf-on")) return;
+    var under = root.getBoundingClientRect().bottom > header.getBoundingClientRect().bottom + 8;
+    html.classList.toggle("kzf-top", under);
   }
+  function onScroll() { if (!headerTick) { headerTick = true; window.requestAnimationFrame(syncHeader); } }
 
   var slider;
   try {
@@ -76,12 +95,15 @@
   // 1. as soon as the block stylesheet is there: the block takes the slider's place, card first
   whenCss("--kzf-front-css", 4000, function () {
     try {
-      root.style.setProperty("--kzf-bg", pageBackground(slider.parentNode));
       if (CFG.viewW && CFG.viewH) root.style.setProperty("--kzf-ratio", CFG.viewW + " / " + CFG.viewH);
       slider.parentNode.insertBefore(root, slider);
       root.hidden = false;
       html.classList.add("kzf-on");
-      release();
+      fitSheet();
+      syncHeader();
+      window.addEventListener("scroll", onScroll, { passive: true });
+      window.addEventListener("resize", function () { fitSheet(); syncHeader(); });
+      window.addEventListener("load", fitSheet);
     } catch (e) { giveUp(e); return; }
 
     // 2. the house draws itself once the drawing and its stylesheet are in

@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Kozlov Living Facade
  * Description: Живой фасад клуба вместо слайдера на главной, только на телефонах. Свой список слайдов (мероприятия, картинки со ссылками, Джазета). Режимы: выключен, только редакторы, все посетители с телефонов. Десктоп не меняется.
- * Version: 1.2.0
+ * Version: 1.3.0
  * Author: Kozlov Club
  * Requires at least: 5.6
  * Requires PHP: 7.4
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'KZF_VER', '1.2.0' );
+define( 'KZF_VER', '1.3.0' );
 define( 'KZF_FILE', __FILE__ );
 define( 'KZF_DIR', plugin_dir_path( __FILE__ ) );
 define( 'KZF_URL', plugin_dir_url( __FILE__ ) );
@@ -53,6 +53,28 @@ function kzf_activate() {
 		wp_schedule_event( time() + 60, 'hourly', 'kzf_refresh_gazeta' );
 	}
 	kzf_flush_display_cache();
+}
+
+/**
+ * Updating by uploading a new zip does not run the activation hook. On the first request after an update:
+ * drop cards cached by the old version, make sure the hourly Джазета job exists and runs soon.
+ */
+add_action( 'plugins_loaded', 'kzf_maybe_upgrade' );
+function kzf_maybe_upgrade() {
+	try {
+		if ( get_option( 'kzf_ver' ) === KZF_VER ) {
+			return;
+		}
+		update_option( 'kzf_ver', KZF_VER, true );
+		kzf_flush_display_cache();
+		if ( ! wp_next_scheduled( 'kzf_refresh_gazeta' ) ) {
+			wp_schedule_event( time() + 30, 'hourly', 'kzf_refresh_gazeta' );
+		} else {
+			wp_schedule_single_event( time() + 30, 'kzf_refresh_gazeta' ); // fresh issue soon, in the background
+		}
+	} catch ( Throwable $e ) {
+		return;
+	}
 }
 
 function kzf_deactivate() {
