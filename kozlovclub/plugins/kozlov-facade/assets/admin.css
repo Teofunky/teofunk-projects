@@ -2,6 +2,7 @@
 .kzf-admin .kzf-hint { max-width: 760px; color: #50575e; }
 .kzf-admin .kzf-modes { display: grid; gap: 8px; margin: 8px 0 4px; }
 .kzf-admin .kzf-check { display: block; margin: 12px 0 4px; }
+.kzf-admin .kzf-tckey { max-width: 520px; margin: 14px 0 4px; }
 .kzf-admin .kzf-list { display: grid; gap: 12px; max-width: 900px; }
 .kzf-admin .kzf-row-admin { background: #fff; border: 1px solid #c3c4c7; border-left: 4px solid #cb3a2a; padding: 12px 14px; }
 .kzf-admin .kzf-row-head { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 10px; }

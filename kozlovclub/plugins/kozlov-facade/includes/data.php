@@ -1,7 +1,8 @@
 <?php
 /**
  * Settings, slides and how each slide turns into what the card shows.
- * Storage: two options (kzf_settings, kzf_slides). No tables of its own.
+ * Storage: options only (kzf_settings, kzf_slides, kzf_gazeta_cache) and one transient. No tables.
+ * Page generation never makes HTTP requests: Джазета is refreshed by WP-Cron and on save.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -15,6 +16,7 @@ function kzf_default_settings() {
 	return array(
 		'mode'        => 'editors',
 		'street_sync' => 1,
+		'tc_meta_key' => '',
 	);
 }
 
@@ -62,11 +64,18 @@ function kzf_sanitize_slide( $raw, $from_request = false ) {
 	);
 }
 
+/** Only links on this site are accepted for the Джазета source. */
+function kzf_same_site( $url ) {
+	$home = wp_parse_url( home_url( '/' ), PHP_URL_HOST );
+	$host = wp_parse_url( $url, PHP_URL_HOST );
+	return $url && $home && $host && strtolower( $home ) === strtolower( $host );
+}
+
 /* ------------------------------------------------------------------ events */
 
 /** Find the event post behind a link like https://kozlovclub.ru/event/some-slug/ */
 function kzf_event_post_id( $url ) {
-	if ( ! $url ) {
+	if ( ! $url || ! kzf_same_site( $url ) ) {
 		return 0;
 	}
 	$id = url_to_postid( $url );
@@ -78,7 +87,10 @@ function kzf_event_post_id( $url ) {
 		return 0;
 	}
 	$slug  = basename( $path );
-	$types = array_values( array_diff( get_post_types( array( 'public' => true ) ), array( 'attachment' ) ) );
+	$types = array_values( array_diff( get_post_types( array( 'public' => true ) ), array( 'attachment', 'page', 'post' ) ) );
+	if ( ! $types ) {
+		return 0;
+	}
 	$found = get_posts(
 		array(
 			'name'             => $slug,
@@ -92,7 +104,7 @@ function kzf_event_post_id( $url ) {
 	return $found ? (int) $found[0] : 0;
 }
 
-/** Start time, timezone and price from the All-in-One Event Calendar table, when it exists. */
+/** Start, end, venue and price from the All-in-One Event Calendar table, when it exists. */
 function kzf_ai1ec_row( $post_id ) {
 	global $wpdb;
 	static $has_table = null;
@@ -109,26 +121,34 @@ function kzf_ai1ec_row( $post_id ) {
 	return is_array( $row ) ? $row : null;
 }
 
-/** Ticketscloud event id: a 24-character hex value in the event's custom fields. */
-function kzf_guess_tc_id( $post_id ) {
-	$meta = get_post_meta( $post_id );
-	if ( ! is_array( $meta ) ) {
-		return '';
+/**
+ * Ticketscloud event id. Taken only from a field we can name:
+ * the key set in the plugin settings, or else a field whose name says it is Ticketscloud.
+ * Returns array( id, key ) or array( '', '' ). Never guesses from unrelated fields.
+ */
+function kzf_tc_id( $post_id ) {
+	$valid = function ( $v ) {
+		return is_string( $v ) && preg_match( '/^[a-f0-9]{24}$/', trim( $v ) ) ? trim( $v ) : '';
+	};
+	$key = trim( (string) kzf_settings()['tc_meta_key'] );
+	if ( '' !== $key ) {
+		return array( $valid( get_post_meta( $post_id, $key, true ) ), $key );
 	}
-	$best = '';
-	foreach ( $meta as $key => $values ) {
-		foreach ( (array) $values as $v ) {
-			if ( is_string( $v ) && preg_match( '/^[a-f0-9]{24}$/', trim( $v ) ) ) {
-				if ( preg_match( '/tc|ticket/i', $key ) ) {
-					return trim( $v );
-				}
-				if ( ! $best ) {
-					$best = trim( $v );
+	$meta = get_post_meta( $post_id );
+	if ( is_array( $meta ) ) {
+		foreach ( $meta as $k => $values ) {
+			if ( ! preg_match( '/ticketscloud|tc[_-]?event|tc[_-]?id/i', $k ) ) {
+				continue;
+			}
+			foreach ( (array) $values as $v ) {
+				$id = $valid( $v );
+				if ( $id ) {
+					return array( $id, $k );
 				}
 			}
 		}
 	}
-	return $best;
+	return array( '', '' );
 }
 
 function kzf_ru_date( $ts, $tz ) {
@@ -145,7 +165,7 @@ function kzf_price_text( $cost ) {
 		return '';
 	}
 	$num = preg_replace( '/[^\d]/', '', $cost );
-	if ( $num !== '' && preg_match( '/^\D*\d[\d\s]*\D*$/u', $cost ) ) {
+	if ( '' !== $num && preg_match( '/^\D*\d[\d\s]*\D*$/u', $cost ) ) {
 		return 'от ' . number_format( (int) $num, 0, '', ' ' ) . ' ₽';
 	}
 	return $cost;
@@ -157,16 +177,19 @@ function kzf_event_data( $url ) {
 	if ( ! $id || 'publish' !== get_post_status( $id ) ) {
 		return null;
 	}
+	list( $tc, $tc_key ) = kzf_tc_id( $id );
 	$out = array(
 		'post_id' => $id,
 		'title'   => wp_strip_all_tags( get_the_title( $id ) ),
 		'link'    => get_permalink( $id ),
 		'image'   => '',
 		'start'   => 0,
+		'end'     => 0,
 		'when'    => '',
 		'stage'   => '',
 		'price'   => '',
-		'tc_id'   => kzf_guess_tc_id( $id ),
+		'tc_id'   => $tc,
+		'tc_key'  => $tc_key,
 	);
 	$size         = has_image_size( 'slider-thumb' ) ? 'slider-thumb' : 'medium';
 	$out['image'] = (string) get_the_post_thumbnail_url( $id, $size );
@@ -180,64 +203,93 @@ function kzf_event_data( $url ) {
 			$tz = new DateTimeZone( 'UTC' );
 		}
 		$out['start'] = (int) $row['start'];
+		$out['end']   = isset( $row['end'] ) ? (int) $row['end'] : 0;
 		$out['when']  = kzf_ru_date( (int) $row['start'], $tz );
 		$out['price'] = kzf_price_text( isset( $row['cost'] ) ? $row['cost'] : '' );
-	}
-	foreach ( array( 'events_categories', 'events_tags' ) as $tax ) {
-		if ( ! $out['stage'] && taxonomy_exists( $tax ) ) {
-			$terms = get_the_terms( $id, $tax );
-			if ( is_array( $terms ) && $terms ) {
-				$out['stage'] = $terms[0]->name;
-			}
-		}
+		$out['stage'] = isset( $row['venue'] ) ? trim( wp_strip_all_tags( (string) $row['venue'] ) ) : '';
 	}
 	return $out;
 }
 
-/* ------------------------------------------------------------------ Джазета */
-
-/** Latest issue: number, date and the lead headline, read from the /gazeta/ page (cached 30 min). */
-function kzf_gazeta( $url ) {
-	$key    = 'kzf_gazeta_' . md5( $url );
-	$cached = get_transient( $key );
-	if ( is_array( $cached ) ) {
-		return $cached;
+/** The moment an event card should disappear: the real end (plus half an hour), else start + 4 h. */
+function kzf_event_gone_at( $e ) {
+	if ( $e['end'] && $e['end'] > $e['start'] ) {
+		return $e['end'] + 30 * MINUTE_IN_SECONDS;
 	}
-	$out = array( 'no' => '', 'date' => '', 'headline' => '' );
+	return $e['start'] ? $e['start'] + 4 * HOUR_IN_SECONDS : 0;
+}
+
+/* ------------------------------------------------------------------ Джазета (cached, refreshed off the page) */
+
+function kzf_gazeta_url( $link ) {
+	return ( $link && kzf_same_site( $link ) ) ? $link : home_url( '/gazeta/' );
+}
+
+/** Read the last stored issue. Never fetches. */
+function kzf_gazeta_cached( $url ) {
+	$all = get_option( 'kzf_gazeta_cache', array() );
+	$key = md5( $url );
+	return ( is_array( $all ) && isset( $all[ $key ] ) && is_array( $all[ $key ] ) ) ? $all[ $key ] : null;
+}
+
+/** Fetch the issue page and store number, date and lead headline. Runs from cron and on save. */
+function kzf_gazeta_refresh( $url ) {
+	if ( ! kzf_same_site( $url ) ) {
+		return null;
+	}
 	$res = wp_remote_get(
 		$url,
 		array(
-			'timeout'     => 4,
+			'timeout'     => 8,
 			'redirection' => 2,
 			'headers'     => array( 'Cookie' => 'beget=begetok' ),
 			'user-agent'  => 'KozlovFacade/' . KZF_VER . '; ' . home_url( '/' ),
 		)
 	);
-	if ( ! is_wp_error( $res ) && 200 === (int) wp_remote_retrieve_response_code( $res ) ) {
-		$html = (string) wp_remote_retrieve_body( $res );
-		if ( preg_match( '#<title>(.*?)</title>#su', $html, $m ) ) {
-			$t = html_entity_decode( wp_strip_all_tags( $m[1] ), ENT_QUOTES, 'UTF-8' );
-			if ( preg_match( '/№\s*([0-9]+)/u', $t, $n ) ) {
-				$out['no'] = '№ ' . $n[1];
-			}
-			if ( preg_match( '/(\d{1,2})\s+([а-яё]+)\s+\d{4}/u', $t, $d ) ) {
-				$out['date'] = $d[1] . ' ' . $d[2];
-			}
+	if ( is_wp_error( $res ) || 200 !== (int) wp_remote_retrieve_response_code( $res ) ) {
+		return null;
+	}
+	$html = (string) wp_remote_retrieve_body( $res );
+	$out  = array( 'no' => '', 'date' => '', 'headline' => '', 'at' => time() );
+	if ( preg_match( '#<title>(.*?)</title>#su', $html, $m ) ) {
+		$t = html_entity_decode( wp_strip_all_tags( $m[1] ), ENT_QUOTES, 'UTF-8' );
+		if ( preg_match( '/№\s*([0-9]+)/u', $t, $n ) ) {
+			$out['no'] = '№ ' . $n[1];
 		}
-		$skip = array( 'оформление', 'коротко о номере', 'скрытая партитура', 'архив', 'подписка' );
-		if ( preg_match_all( '#<h2[^>]*>(.*?)</h2>#su', $html, $hs ) ) {
-			foreach ( $hs[1] as $h ) {
-				$h = trim( preg_replace( '/\s+/u', ' ', html_entity_decode( wp_strip_all_tags( $h ), ENT_QUOTES, 'UTF-8' ) ) );
-				if ( mb_strlen( $h ) > 20 && ! in_array( mb_strtolower( $h ), $skip, true ) ) {
-					$out['headline'] = $h;
-					break;
-				}
+		if ( preg_match( '/(\d{1,2})\s+([а-яё]+)\s+\d{4}/u', $t, $d ) ) {
+			$out['date'] = $d[1] . ' ' . $d[2];
+		}
+	}
+	$skip = array( 'оформление', 'коротко о номере', 'скрытая партитура', 'архив', 'подписка' );
+	if ( preg_match_all( '#<h2[^>]*>(.*?)</h2>#su', $html, $hs ) ) {
+		foreach ( $hs[1] as $h ) {
+			$h = trim( preg_replace( '/\s+/u', ' ', html_entity_decode( wp_strip_all_tags( $h ), ENT_QUOTES, 'UTF-8' ) ) );
+			if ( mb_strlen( $h ) > 20 && ! in_array( mb_strtolower( $h ), $skip, true ) ) {
+				$out['headline'] = $h;
+				break;
 			}
 		}
 	}
-	set_transient( $key, $out, $out['headline'] ? 30 * MINUTE_IN_SECONDS : 5 * MINUTE_IN_SECONDS );
+	if ( ! $out['headline'] ) {
+		return null; // keep the previous good issue
+	}
+	$all                = get_option( 'kzf_gazeta_cache', array() );
+	$all                = is_array( $all ) ? $all : array();
+	$all[ md5( $url ) ] = $out;
+	update_option( 'kzf_gazeta_cache', $all, false );
 	return $out;
 }
+
+/** Cron task and save hook: refresh every Джазета slide's issue. */
+function kzf_refresh_all_gazeta() {
+	foreach ( kzf_slides() as $s ) {
+		if ( is_array( $s ) && isset( $s['type'] ) && 'gazeta' === $s['type'] ) {
+			kzf_gazeta_refresh( kzf_gazeta_url( isset( $s['link'] ) ? $s['link'] : '' ) );
+		}
+	}
+	kzf_flush_display_cache();
+}
+add_action( 'kzf_refresh_gazeta', 'kzf_refresh_all_gazeta' );
 
 /* ------------------------------------------------------------------ what the card shows */
 
@@ -261,6 +313,7 @@ function kzf_resolve( $s, $now = null ) {
 		'link'     => $s['link'],
 		'button'   => $s['button_text'],
 		'tc_id'    => $s['tc_id'],
+		'tc_key'   => $s['tc_id'] ? 'вручную' : '',
 		'paper'    => null,
 	);
 
@@ -269,7 +322,8 @@ function kzf_resolve( $s, $now = null ) {
 		if ( ! $e ) {
 			return null;
 		}
-		if ( ! $s['hide_after'] && $e['start'] && $e['start'] + 6 * HOUR_IN_SECONDS < $now ) {
+		$gone = kzf_event_gone_at( $e );
+		if ( ! $s['hide_after'] && $gone && $gone < $now ) {
 			return null;
 		}
 		$title = $e['title'];
@@ -284,17 +338,20 @@ function kzf_resolve( $s, $now = null ) {
 		$v['meta']     = $v['meta'] ? $v['meta'] : implode( ' · ', array_filter( array( $e['stage'], $e['price'] ) ) );
 		$v['image']    = $v['image'] ? $v['image'] : $e['image'];
 		$v['link']     = $e['link'];
-		$v['tc_id']    = $v['tc_id'] ? $v['tc_id'] : $e['tc_id'];
-		$v['button']   = $v['button'] ? $v['button'] : 'Купить билет';
+		if ( ! $v['tc_id'] ) {
+			$v['tc_id']  = $e['tc_id'];
+			$v['tc_key'] = $e['tc_key'];
+		}
+		$v['button'] = $v['button'] ? $v['button'] : 'Купить билет';
 	} elseif ( 'gazeta' === $s['type'] ) {
-		$url = $s['link'] ? $s['link'] : home_url( '/gazeta/' );
-		$g   = kzf_gazeta( $url );
+		$url = kzf_gazeta_url( $s['link'] );
+		$g   = kzf_gazeta_cached( $url );
 		$v['label']  = $v['label'] ? $v['label'] : 'Джазета · свежий номер';
-		$v['title']  = $v['title'] ? $v['title'] : $g['headline'];
-		$v['when']   = $v['when'] ? $v['when'] : $g['date'];
+		$v['title']  = $v['title'] ? $v['title'] : ( $g ? $g['headline'] : '' );
+		$v['when']   = $v['when'] ? $v['when'] : ( $g ? $g['date'] : '' );
 		$v['link']   = $url;
 		$v['button'] = $v['button'] ? $v['button'] : 'Читать номер';
-		$v['paper']  = array( 'no' => $g['no'], 'date' => $g['date'] );
+		$v['paper']  = array( 'no' => $g ? $g['no'] : '', 'date' => $g ? $g['date'] : '' );
 		if ( ! $v['title'] ) {
 			return null;
 		}
@@ -307,7 +364,18 @@ function kzf_resolve( $s, $now = null ) {
 	return $v;
 }
 
+function kzf_flush_display_cache() {
+	delete_transient( 'kzf_display' );
+}
+// an edited concert (new date, price, photo) reaches the card at once, not after the 10-minute cache
+add_action( 'save_post', 'kzf_flush_display_cache', 10, 0 );
+
+/** Cards for the front end, cached for 10 minutes (events disappear on time within that step). */
 function kzf_display_slides() {
+	$cached = get_transient( 'kzf_display' );
+	if ( is_array( $cached ) ) {
+		return $cached;
+	}
 	$out = array();
 	foreach ( kzf_slides() as $s ) {
 		try {
@@ -319,5 +387,6 @@ function kzf_display_slides() {
 			continue; // one broken slide never takes the block down
 		}
 	}
+	set_transient( 'kzf_display', $out, 10 * MINUTE_IN_SECONDS );
 	return $out;
 }

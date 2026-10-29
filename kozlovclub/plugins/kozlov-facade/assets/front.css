@@ -10,6 +10,7 @@
 }
 
 #kzf-root[hidden] { display: none !important; }
+#kzf-root { --kzf-front-css: 1; }
 #kzf-root.kzf-root {
   display: block;
   position: relative;
@@ -23,10 +24,16 @@
 }
 #kzf-root *, #kzf-root *::before, #kzf-root *::after { box-sizing: border-box; }
 #kzf-root a, #kzf-root button { -webkit-tap-highlight-color: transparent; }
-#kzf-root .kzf-hero { display: block; width: 100%; line-height: 0; }
+/* the house leaves room for the site header and the card (about 330px), so the ticket button stays on
+   the first screen; never wider than 480px, never smaller than 240px (phone held sideways) */
+#kzf-root .kzf-hero {
+  display: block; width: 100%; margin: 0 auto; line-height: 0;
+  max-width: min(480px, max(240px, calc((100vh - 330px) * 1.0156)));
+  max-width: min(480px, max(240px, calc((100svh - 330px) * 1.0156)));
+}
 
 /* the card: swipeable slides, each labelled by what it is */
-#kzf-root .kzf-card { position: relative; height: 222px; margin: 0 16px 16px; }
+#kzf-root .kzf-card { position: relative; width: calc(100% - 32px); max-width: 448px; margin: 0 auto 16px; }
 #kzf-root .kzf-frame span { position: absolute; display: block; background: #2b2522; pointer-events: none; }
 #kzf-root .kzf-f1 { top: 0; left: var(--kzf-door, 34px); right: 0; height: 1.2px; transform-origin: 0 50%; }
 #kzf-root .kzf-f2 { top: 0; right: 0; bottom: 0; width: 1.2px; transform-origin: 50% 0; }
@@ -35,15 +42,15 @@
 #kzf-root .kzf-f5 { top: 0; left: 0; width: var(--kzf-door, 34px); height: 1.2px; transform-origin: 0 50%; }
 
 #kzf-root .kzf-track {
-  display: flex; width: 100%; height: 100%;
+  display: flex; align-items: stretch; width: 100%;
   overflow-x: auto; overflow-y: hidden;
   scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain;
   -webkit-overflow-scrolling: touch;
 }
 #kzf-root .kzf-track::-webkit-scrollbar { display: none; }
 #kzf-root .kzf-slide {
-  flex: 0 0 100%; height: 100%; margin: 0; scroll-snap-align: start;
-  padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 10px;
+  flex: 0 0 100%; min-width: 0; margin: 0; scroll-snap-align: start;
+  padding: 14px 14px 14px; display: flex; flex-direction: column; gap: 10px;
 }
 #kzf-root .kzf-dots { position: absolute; top: 4px; right: 6px; display: flex; }
 #kzf-root .kzf-dot {
@@ -58,7 +65,7 @@
 #kzf-root .kzf-dot:focus-visible { outline: 2px solid #cb3a2a; outline-offset: -2px; }
 
 #kzf-root .kzf-eyebrow {
-  margin: 0; padding-right: 70px; font-size: 11px; line-height: 1.3; font-weight: 600;
+  margin: 0; padding-right: calc(var(--kzf-dots, 4) * 20px); font-size: 11px; line-height: 1.3; font-weight: 600;
   letter-spacing: 0.12em; text-transform: uppercase; color: #cb3a2a;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
@@ -86,7 +93,7 @@
 #kzf-root .kzf-sub { font-size: 14px; line-height: 1.3; font-style: italic; color: #2b2522; }
 #kzf-root .kzf-meta { font-size: 13px; line-height: 1.3; color: #6b625c; }
 #kzf-root .kzf-buy, #kzf-root .kzf-act {
-  appearance: none; -webkit-appearance: none; width: 100%; margin: auto 0 0; height: 44px; padding: 0 12px;
+  appearance: none; -webkit-appearance: none; width: 100%; margin: auto 0 0; height: auto; min-height: 44px; padding: 10px 12px; flex: 0 0 auto;
   display: flex; align-items: center; justify-content: center;
   font-family: inherit; font-size: 15px; line-height: 1; font-weight: 600; letter-spacing: 0.02em; text-transform: none;
   text-decoration: none; border-radius: 0; box-shadow: none; cursor: pointer;
@@ -104,7 +111,15 @@
   #kzf-root.kzf-run .kzf-f3 { transform: scaleX(0); animation: kzf-sx 0.3s linear 3.01s forwards; }
   #kzf-root.kzf-run .kzf-f4 { transform: scaleY(0); animation: kzf-sy 0.16s linear 3.31s forwards; }
   #kzf-root.kzf-run .kzf-f5 { transform: scaleX(0); animation: kzf-sx 0.1s linear 3.47s forwards; }
-  #kzf-root.kzf-run .kzf-track, #kzf-root.kzf-run .kzf-dots { opacity: 0; animation: kzf-fade 0.6s ease 2.95s forwards; }
 }
 @keyframes kzf-sx { to { transform: scaleX(1); } }
 @keyframes kzf-sy { to { transform: scaleY(1); } }
+
+@media (max-width: 359px) {
+  #kzf-root .kzf-photo, #kzf-root .kzf-paper { flex-basis: 76px; width: 76px; height: 96px; }
+  #kzf-root .kzf-paper .kzf-pn { font-size: 13px; }
+  #kzf-root .kzf-paper .kzf-pr { width: 44px; }
+  #kzf-root .kzf-paper .kzf-pd { font-size: 10px; }
+  #kzf-root .kzf-title { font-size: 16px; }
+  #kzf-root .kzf-slide { padding: 12px 12px 12px; }
+}

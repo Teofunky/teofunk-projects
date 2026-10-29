@@ -54,16 +54,21 @@ function kzf_enqueue() {
 
 add_action( 'wp_footer', 'kzf_render_root', 5 );
 function kzf_render_root() {
+	$level = ob_get_level();
 	try {
 		if ( ! kzf_should_render() ) {
 			return;
 		}
 		$slides = kzf_display_slides();
+		if ( ! $slides ) {
+			return; // no cards: the old slider stays, nothing is printed
+		}
 		ob_start();
 		kzf_print_block( $slides );
-		echo ob_get_clean(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside
+		$html = ob_get_clean();
+		echo $html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside
 	} catch ( Throwable $e ) {
-		if ( ob_get_level() ) {
+		while ( ob_get_level() > $level ) { // close only the buffer this function opened
 			ob_end_clean();
 		}
 	}
@@ -75,7 +80,7 @@ function kzf_print_block( $slides ) {
 <div id="kzf-root" class="kzf-root" hidden>
 	<div class="kzf-hero"></div>
 	<?php if ( $n ) : ?>
-	<section class="kzf-card" aria-label="Афиша и новости клуба">
+	<section class="kzf-card" aria-label="Афиша и новости клуба" style="--kzf-dots: <?php echo (int) ( $n > 1 ? $n : 0 ); ?>">
 		<div class="kzf-frame" aria-hidden="true"><span class="kzf-f1"></span><span class="kzf-f2"></span><span class="kzf-f3"></span><span class="kzf-f4"></span><span class="kzf-f5"></span></div>
 		<div class="kzf-track">
 		<?php foreach ( $slides as $i => $s ) : ?>
@@ -97,7 +102,7 @@ function kzf_print_block( $slides ) {
 					</div>
 				</div>
 				<?php if ( 'event' === $s['kind'] && $s['tc_id'] ) : ?>
-					<button class="kzf-buy" type="button" tc-event="<?php echo esc_attr( $s['tc_id'] ); ?>"><?php echo esc_html( $s['button'] ); ?></button>
+					<button class="kzf-buy" type="button" tc-event="<?php echo esc_attr( $s['tc_id'] ); ?>" data-href="<?php echo esc_url( $s['link'] ); ?>"><?php echo esc_html( $s['button'] ); ?></button>
 				<?php elseif ( 'event' === $s['kind'] ) : ?>
 					<a class="kzf-buy" href="<?php echo esc_url( $s['link'] ); ?>"><?php echo esc_html( $s['button'] ); ?></a>
 				<?php elseif ( $s['link'] ) : ?>

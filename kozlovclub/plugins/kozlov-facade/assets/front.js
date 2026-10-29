@@ -2,7 +2,9 @@
    Safety rules:
    - phones only (max-width 767px); desktop is left exactly as it is
    - ?kzf=off in the address switches the block off for this visit
-   - the old slider is hidden only after the block has mounted; any error puts everything back */
+   - nothing replaces the slider unless there is at least one card and both stylesheets have loaded
+   - the old slider is hidden only after the block has mounted; any error puts everything back
+   - a ticket button that Ticketscloud does not pick up falls back to the concert page */
 (function () {
   "use strict";
 
@@ -24,6 +26,8 @@
     var slider = document.querySelector(".content_home .slider-wrapper");
     if (!slider || !slider.parentNode) return;
     if (!window.fetch) return;
+    if (!root.querySelector(".kzf-slide")) return;          // no cards: keep the old slider
+    if (!cssReady("--kzf-front-css")) return;               // block stylesheet missing: keep the old slider
 
     window.fetch(CFG.heroUrl, { credentials: "same-origin" })
       .then(function (r) { if (!r.ok) throw new Error("hero " + r.status); return r.text(); })
@@ -37,21 +41,42 @@
     if (window.console) console.warn("[kzf]", e);
   }
 
-  function mount(slider, svgText) {
+  function cssReady(marker) {
     try {
-      var heroBox = root.querySelector(".kzf-hero");
-      heroBox.innerHTML = svgText;
-      var svg = heroBox.querySelector("svg");
-      if (!svg) throw new Error("no svg");
+      return window.getComputedStyle(root).getPropertyValue(marker).trim() === "1";
+    } catch (e) { return false; }
+  }
 
-      slider.parentNode.insertBefore(root, slider);
-      root.hidden = false;
-      document.documentElement.classList.add("kzf-on");
-      start(svg);
-    } catch (e) {
+  // wait for the drawing's stylesheet (up to 4 s), otherwise keep the old slider
+  function whenHeroCss(done, fail) {
+    var t0 = Date.now();
+    (function check() {
+      if (cssReady("--kzf-hero-css")) return done();
+      if (Date.now() - t0 > 4000) return fail(new Error("hero.css not loaded"));
+      setTimeout(check, 120);
+    })();
+  }
+
+  function mount(slider, svgText) {
+    whenHeroCss(function () {
+      try {
+        var heroBox = root.querySelector(".kzf-hero");
+        heroBox.innerHTML = svgText;
+        var svg = heroBox.querySelector("svg");
+        if (!svg) throw new Error("no svg");
+
+        slider.parentNode.insertBefore(root, slider);
+        root.hidden = false;
+        document.documentElement.classList.add("kzf-on");
+        start(svg);
+      } catch (e) {
+        giveUp();
+        if (window.console) console.warn("[kzf]", e);
+      }
+    }, function (e) {
       giveUp();
       if (window.console) console.warn("[kzf]", e);
-    }
+    });
   }
 
   function start(svg) {
@@ -59,9 +84,12 @@
     var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     // the line from the club door to the card frame
+    var card = root.querySelector(".kzf-card");
     function placeDoor() {
-      var w = root.clientWidth || 390;
-      var x = (CFG.doorX / CFG.viewW) * w - 16;
+      if (!card) return;
+      var s = svg.getBoundingClientRect();
+      var c = card.getBoundingClientRect();
+      var x = s.left + (CFG.doorX / CFG.viewW) * s.width - c.left;
       root.style.setProperty("--kzf-door", Math.max(8, Math.round(x)) + "px");
     }
     placeDoor();
@@ -122,6 +150,36 @@
     document.addEventListener("visibilitychange", function () {
       root.classList.toggle("kzf-paused", document.hidden);
       try { if (document.hidden) svg.pauseAnimations(); else svg.unpauseAnimations(); } catch (e) { /* older engines */ }
+    });
+
+    // a ticket window usually sits fixed over the middle of the screen
+    function overlayAtCenter() {
+      var el = document.elementFromPoint(window.innerWidth / 2, window.innerHeight / 2);
+      while (el && el !== document.body && el !== document.documentElement) {
+        if (root.contains(el)) return false;
+        if (window.getComputedStyle(el).position === "fixed") return true;
+        el = el.parentElement;
+      }
+      return false;
+    }
+
+    // tickets: Ticketscloud opens its own window; if nothing opens, go to the concert page
+    Array.prototype.forEach.call(root.querySelectorAll(".kzf-buy[tc-event]"), function (btn) {
+      btn.addEventListener("click", function () {
+        var href = btn.getAttribute("data-href");
+        if (!href) return;
+        var before = document.querySelectorAll('iframe[src*="ticketscloud"]').length;
+        setTimeout(function () {
+          var frames = document.querySelectorAll('iframe[src*="ticketscloud"]');
+          var shown = false;
+          Array.prototype.forEach.call(frames, function (f) {
+            var r = f.getBoundingClientRect();
+            if (r.width > 40 && r.height > 40) shown = true;
+          });
+          if (!shown) shown = overlayAtCenter();
+          if (!shown && frames.length <= before) window.location.href = href;
+        }, 1800);
+      });
     });
 
     // card slides

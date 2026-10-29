@@ -125,3 +125,4 @@
   .kzf-root.kzf-run .kzf-conn { stroke-dasharray: 1 1; stroke-dashoffset: 1; animation: kzf-draw 0.35s linear 2.2s forwards; }
 }
 .kzf-root.kzf-paused *, .kzf-root.kzf-paused { animation-play-state: paused !important; }
+#kzf-root { --kzf-hero-css: 1; }

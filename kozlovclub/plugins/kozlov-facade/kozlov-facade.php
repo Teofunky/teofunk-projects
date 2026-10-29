@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Kozlov Living Facade
  * Description: Живой фасад клуба вместо слайдера на главной, только на телефонах. Свой список слайдов (мероприятия, картинки со ссылками, Джазета). Режимы: выключен, только редакторы, все посетители с телефонов. Десктоп не меняется.
- * Version: 1.0.0
+ * Version: 1.1.0
  * Author: Kozlov Club
  * Requires at least: 5.6
  * Requires PHP: 7.4
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'KZF_VER', '1.0.0' );
+define( 'KZF_VER', '1.1.0' );
 define( 'KZF_FILE', __FILE__ );
 define( 'KZF_DIR', plugin_dir_path( __FILE__ ) );
 define( 'KZF_URL', plugin_dir_url( __FILE__ ) );
@@ -26,6 +26,7 @@ if ( is_admin() ) {
 }
 
 register_activation_hook( __FILE__, 'kzf_activate' );
+register_deactivation_hook( __FILE__, 'kzf_deactivate' );
 
 /**
  * First install: editors-only mode and a starter set of slides taken from the current home slider.
@@ -48,4 +49,13 @@ function kzf_activate() {
 			'no'
 		);
 	}
+	if ( ! wp_next_scheduled( 'kzf_refresh_gazeta' ) ) {
+		wp_schedule_event( time() + 60, 'hourly', 'kzf_refresh_gazeta' );
+	}
+	kzf_flush_display_cache();
+}
+
+function kzf_deactivate() {
+	wp_clear_scheduled_hook( 'kzf_refresh_gazeta' );
+	kzf_flush_display_cache();
 }

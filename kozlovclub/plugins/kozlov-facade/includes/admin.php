@@ -35,6 +35,7 @@ function kzf_admin_save() {
 	$mode                    = isset( $_POST['kzf_mode'] ) ? sanitize_key( wp_unslash( $_POST['kzf_mode'] ) ) : 'off';
 	$settings['mode']        = in_array( $mode, KZF_MODES, true ) ? $mode : 'off';
 	$settings['street_sync'] = empty( $_POST['kzf_street_sync'] ) ? 0 : 1;
+	$settings['tc_meta_key'] = isset( $_POST['kzf_tc_meta_key'] ) ? preg_replace( '/[^A-Za-z0-9_\-]/', '', sanitize_text_field( wp_unslash( $_POST['kzf_tc_meta_key'] ) ) ) : '';
 	update_option( 'kzf_settings', $settings, false );
 
 	$slides = array();
@@ -49,10 +50,10 @@ function kzf_admin_save() {
 	}
 	update_option( 'kzf_slides', $slides, false );
 
-	foreach ( $slides as $s ) { // fresh Джазета on the next view
-		if ( 'gazeta' === $s['type'] ) {
-			delete_transient( 'kzf_gazeta_' . md5( $s['link'] ? $s['link'] : home_url( '/gazeta/' ) ) );
-		}
+	kzf_refresh_all_gazeta(); // fetch the current issue now, off the public page; also clears the card cache
+	kzf_flush_display_cache();
+	if ( ! wp_next_scheduled( 'kzf_refresh_gazeta' ) ) {
+		wp_schedule_event( time() + HOUR_IN_SECONDS, 'hourly', 'kzf_refresh_gazeta' );
 	}
 
 	wp_safe_redirect( add_query_arg( array( 'page' => 'kzf', 'updated' => 1 ), admin_url( 'admin.php' ) ) );
@@ -123,7 +124,7 @@ function kzf_slide_row( $slide, $i ) {
 				<?php kzf_field( $s, $i, 'link', 'Ссылка', 'url', 'https://kozlovclub.ru/...', 'Для Джазеты пусто: /gazeta/.' ); ?>
 				<?php kzf_field( $s, $i, 'button_text', 'Текст кнопки', 'text', 'Подробнее' ); ?>
 			</div>
-			<?php kzf_field( $s, $i, 'hide_after', 'Скрыть после', 'date', '', 'Мероприятие скрывается само после начала. Для остального задайте дату.' ); ?>
+			<?php kzf_field( $s, $i, 'hide_after', 'Скрыть после', 'date', '', 'Мероприятие скрывается само после окончания концерта. Для остального задайте дату.' ); ?>
 		</div>
 		<?php
 		if ( 'event' === $type && $s['event_url'] ) {
@@ -131,9 +132,21 @@ function kzf_slide_row( $slide, $i ) {
 			echo '<div class="kzf-preview">';
 			if ( $r ) {
 				echo '<strong>Покажется так:</strong> ' . esc_html( implode( ' · ', array_filter( array( $r['when'], $r['title'], $r['subtitle'], $r['meta'] ) ) ) );
-				echo $r['tc_id'] ? ' · <span class="kzf-ok">билеты через Ticketscloud</span>' : ' · <span class="kzf-warn">Ticketscloud ID не найден, кнопка ведёт на страницу концерта</span>';
+				echo $r['tc_id']
+					? ' · <span class="kzf-ok">Ticketscloud ' . esc_html( $r['tc_id'] ) . ' (поле: ' . esc_html( $r['tc_key'] ) . ')</span>'
+					: ' · <span class="kzf-warn">Ticketscloud ID не найден: кнопка ведёт на страницу концерта. Впишите ID вручную или укажите поле в настройках.</span>';
 			} else {
 				echo '<span class="kzf-warn">Мероприятие не найдено или уже прошло: слайд не покажется.</span>';
+			}
+			echo '</div>';
+		} elseif ( 'gazeta' === $type ) {
+			$g = kzf_gazeta_cached( kzf_gazeta_url( $s['link'] ) );
+			echo '<div class="kzf-preview">';
+			if ( $g ) {
+				echo '<strong>Свежий номер:</strong> ' . esc_html( trim( $g['no'] . ' · ' . $g['date'] . ' · ' . $g['headline'], ' ·' ) );
+				echo ' <span class="kzf-ok">(обновлено ' . esc_html( wp_date( 'd.m H:i', (int) $g['at'] ) ) . ', дальше раз в час)</span>';
+			} else {
+				echo '<span class="kzf-warn">Номер ещё не загружен. Нажмите «Сохранить»: страница /gazeta/ будет прочитана сразу. Пока номера нет, карточка не показывается (или впишите заголовок вручную).</span>';
 			}
 			echo '</div>';
 		}
@@ -168,6 +181,9 @@ function kzf_admin_page() {
 			</fieldset>
 			<p class="kzf-hint">Быстро выключить для себя: добавьте <code>?kzf=off</code> к адресу главной. Если блок не смог загрузиться, автоматически показывается обычный слайдер.</p>
 			<label class="kzf-check"><input type="checkbox" name="kzf_street_sync" value="1" <?php checked( $set['street_sync'] ); ?>> Саксофонист играет вместе с уличным, в :00 и :30 по Москве</label>
+			<label class="kzf-f kzf-tckey"><span>Поле мероприятия с Ticketscloud ID</span>
+				<input type="text" name="kzf_tc_meta_key" value="<?php echo esc_attr( $set['tc_meta_key'] ); ?>" placeholder="например, tc_event_id">
+				<em>Пусто: ищется только поле, в названии которого есть ticketscloud, tc_event или tc_id. Чужие поля не используются. В карточке мероприятия ниже видно, какое поле нашлось.</em></label>
 
 			<h2>Карточки под домом</h2>
 			<p class="kzf-hint">Листаются пальцем, по порядку этого списка. Мероприятие: достаточно ссылки. Картинка со ссылкой: для всего остального (фестиваль, мастер-класс, новость).</p>
