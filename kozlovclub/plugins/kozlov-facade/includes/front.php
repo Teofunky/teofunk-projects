@@ -1,0 +1,120 @@
+<?php
+/**
+ * Front end: the block is printed (hidden) on the home page for the allowed audience;
+ * the script mounts it above the slider on phones only. Any failure leaves the page as it was.
+ */
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/** Who sees the block right now. */
+function kzf_should_render() {
+	static $ok = null;
+	if ( null !== $ok ) {
+		return $ok;
+	}
+	$ok = false;
+	if ( is_admin() || wp_doing_ajax() || ! is_front_page() || is_feed() ) {
+		return $ok;
+	}
+	$mode = kzf_settings()['mode'];
+	if ( 'all' === $mode ) {
+		$ok = true;
+	} elseif ( 'editors' === $mode ) {
+		$ok = is_user_logged_in() && current_user_can( 'edit_others_posts' );
+	}
+	return $ok;
+}
+
+add_action( 'wp_enqueue_scripts', 'kzf_enqueue', 20 );
+function kzf_enqueue() {
+	try {
+		if ( ! kzf_should_render() ) {
+			return;
+		}
+		$meta = json_decode( (string) file_get_contents( KZF_DIR . 'assets/hero.json' ), true );
+		if ( ! is_array( $meta ) ) {
+			return;
+		}
+		wp_enqueue_style( 'kzf-front', KZF_URL . 'assets/front.css', array(), KZF_VER, 'all' );
+		wp_enqueue_style( 'kzf-hero', KZF_URL . 'assets/hero.css', array(), KZF_VER, '(max-width: 767px)' );
+		wp_enqueue_script( 'kzf-front', KZF_URL . 'assets/front.js', array(), KZF_VER, true );
+		$cfg = array(
+			'heroUrl'    => KZF_URL . 'assets/hero.svg?ver=' . KZF_VER,
+			'doorX'      => (float) $meta['door_x'],
+			'viewW'      => (float) $meta['W'],
+			'streetSync' => (bool) kzf_settings()['street_sync'],
+		);
+		wp_add_inline_script( 'kzf-front', 'window.KZF_CONFIG=' . wp_json_encode( $cfg ) . ';', 'before' );
+	} catch ( Throwable $e ) {
+		return; // never break the page
+	}
+}
+
+add_action( 'wp_footer', 'kzf_render_root', 5 );
+function kzf_render_root() {
+	try {
+		if ( ! kzf_should_render() ) {
+			return;
+		}
+		$slides = kzf_display_slides();
+		ob_start();
+		kzf_print_block( $slides );
+		echo ob_get_clean(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside
+	} catch ( Throwable $e ) {
+		if ( ob_get_level() ) {
+			ob_end_clean();
+		}
+	}
+}
+
+function kzf_print_block( $slides ) {
+	$n = count( $slides );
+	?>
+<div id="kzf-root" class="kzf-root" hidden>
+	<div class="kzf-hero"></div>
+	<?php if ( $n ) : ?>
+	<section class="kzf-card" aria-label="Афиша и новости клуба">
+		<div class="kzf-frame" aria-hidden="true"><span class="kzf-f1"></span><span class="kzf-f2"></span><span class="kzf-f3"></span><span class="kzf-f4"></span><span class="kzf-f5"></span></div>
+		<div class="kzf-track">
+		<?php foreach ( $slides as $i => $s ) : ?>
+			<article class="kzf-slide" aria-label="<?php echo esc_attr( ( $i + 1 ) . ' из ' . $n ); ?>">
+				<?php if ( $s['label'] ) : ?><div class="kzf-eyebrow"><?php echo esc_html( $s['label'] ); ?></div><?php endif; ?>
+				<div class="kzf-row">
+					<?php if ( $s['paper'] && ! $s['image'] ) : ?>
+						<a class="kzf-paper" href="<?php echo esc_url( $s['link'] ); ?>" tabindex="-1" aria-hidden="true"><span class="kzf-pn">Ежедневная<br>Джазета</span><span class="kzf-pr"></span><span class="kzf-pd"><?php echo esc_html( trim( $s['paper']['no'] . ( $s['paper']['date'] ? ' · ' . $s['paper']['date'] : '' ) ) ); ?></span></a>
+					<?php elseif ( $s['image'] ) : ?>
+						<a class="kzf-photo" href="<?php echo esc_url( $s['link'] ? $s['link'] : '#' ); ?>" tabindex="-1" aria-hidden="true"><img src="<?php echo esc_url( $s['image'] ); ?>" alt="" loading="lazy" decoding="async"></a>
+					<?php endif; ?>
+					<div class="kzf-info">
+						<?php if ( $s['when'] ) : ?><div class="kzf-when"><?php echo esc_html( $s['when'] ); ?></div><?php endif; ?>
+						<?php if ( $s['title'] ) : ?>
+						<h2 class="kzf-title<?php echo ( mb_strlen( $s['title'] ) > 48 ) ? ' kzf-long' : ''; ?>"><?php if ( $s['link'] ) : ?><a href="<?php echo esc_url( $s['link'] ); ?>"><?php echo esc_html( $s['title'] ); ?></a><?php else : ?><?php echo esc_html( $s['title'] ); ?><?php endif; ?></h2>
+						<?php endif; ?>
+						<?php if ( $s['subtitle'] ) : ?><div class="kzf-sub"><?php echo esc_html( $s['subtitle'] ); ?></div><?php endif; ?>
+						<?php if ( $s['meta'] ) : ?><div class="kzf-meta"><?php echo esc_html( $s['meta'] ); ?></div><?php endif; ?>
+					</div>
+				</div>
+				<?php if ( 'event' === $s['kind'] && $s['tc_id'] ) : ?>
+					<button class="kzf-buy" type="button" tc-event="<?php echo esc_attr( $s['tc_id'] ); ?>"><?php echo esc_html( $s['button'] ); ?></button>
+				<?php elseif ( 'event' === $s['kind'] ) : ?>
+					<a class="kzf-buy" href="<?php echo esc_url( $s['link'] ); ?>"><?php echo esc_html( $s['button'] ); ?></a>
+				<?php elseif ( $s['link'] ) : ?>
+					<a class="kzf-act" href="<?php echo esc_url( $s['link'] ); ?>"><?php echo esc_html( $s['button'] ); ?></a>
+				<?php endif; ?>
+			</article>
+		<?php endforeach; ?>
+		</div>
+		<?php if ( $n > 1 ) : ?>
+		<div class="kzf-dots" role="group" aria-label="Слайды">
+			<?php for ( $i = 0; $i < $n; $i++ ) : ?>
+			<button class="kzf-dot" type="button" aria-label="<?php echo esc_attr( 'Слайд ' . ( $i + 1 ) ); ?>" aria-current="<?php echo 0 === $i ? 'true' : 'false'; ?>"></button>
+			<?php endfor; ?>
+		</div>
+		<?php endif; ?>
+	</section>
+	<?php endif; ?>
+</div>
+	<?php
+}

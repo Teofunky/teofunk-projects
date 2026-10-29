@@ -1,0 +1,30 @@
+.kzf-admin .kzf-lead { max-width: 760px; font-size: 14px; }
+.kzf-admin .kzf-hint { max-width: 760px; color: #50575e; }
+.kzf-admin .kzf-modes { display: grid; gap: 8px; margin: 8px 0 4px; }
+.kzf-admin .kzf-check { display: block; margin: 12px 0 4px; }
+.kzf-admin .kzf-list { display: grid; gap: 12px; max-width: 900px; }
+.kzf-admin .kzf-row-admin { background: #fff; border: 1px solid #c3c4c7; border-left: 4px solid #cb3a2a; padding: 12px 14px; }
+.kzf-admin .kzf-row-head { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 10px; }
+.kzf-admin .kzf-num { font-weight: 600; min-width: 20px; }
+.kzf-admin .kzf-tools { margin-left: auto; display: flex; gap: 6px; align-items: center; }
+.kzf-admin .kzf-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 16px; }
+.kzf-admin .kzf-fields > .kzf-only { display: none; grid-column: 1 / -1; }
+.kzf-admin .kzf-fields > .kzf-only[data-for~="event"],
+.kzf-admin .kzf-fields > .kzf-only[data-for~="image"],
+.kzf-admin .kzf-fields > .kzf-only[data-for~="gazeta"] { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 16px; }
+.kzf-admin .kzf-row-admin[data-type="event"] .kzf-only[data-for~="event"],
+.kzf-admin .kzf-row-admin[data-type="image"] .kzf-only[data-for~="image"],
+.kzf-admin .kzf-row-admin[data-type="gazeta"] .kzf-only[data-for~="gazeta"] { display: grid; }
+.kzf-admin .kzf-f { display: flex; flex-direction: column; gap: 4px; }
+.kzf-admin .kzf-f > span { font-weight: 600; }
+.kzf-admin .kzf-f input[type=text], .kzf-admin .kzf-f input[type=url], .kzf-admin .kzf-f input[type=date] { width: 100%; }
+.kzf-admin .kzf-f em { color: #646970; font-style: normal; font-size: 12px; }
+.kzf-admin .kzf-media { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 10px; }
+.kzf-admin .kzf-media > span { flex-basis: 100%; }
+.kzf-admin .kzf-thumb { width: 60px; height: 80px; object-fit: cover; border: 1px solid #dcdcde; }
+.kzf-admin .kzf-preview { margin-top: 10px; padding: 8px 10px; background: #f6f7f7; }
+.kzf-admin .kzf-ok { color: #00782e; }
+.kzf-admin .kzf-warn { color: #b32d2e; }
+@media (max-width: 782px) {
+  .kzf-admin .kzf-fields, .kzf-admin .kzf-fields > .kzf-only { grid-template-columns: minmax(0, 1fr) !important; }
+}

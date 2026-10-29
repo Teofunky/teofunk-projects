@@ -1,0 +1,110 @@
+/* Kozlov Living Facade: block and card on the home page, phones only.
+   Everything is scoped to #kzf-root and kzf- classes; nothing here touches the theme
+   except hiding the old slider, and only after the block has mounted successfully. */
+
+@media (min-width: 768px) {
+  #kzf-root { display: none !important; }
+}
+@media (max-width: 767px) {
+  html.kzf-on .content_home .slider-wrapper { display: none !important; }
+}
+
+#kzf-root[hidden] { display: none !important; }
+#kzf-root.kzf-root {
+  display: block;
+  position: relative;
+  width: 100%;
+  margin: 0 0 12px;
+  padding: 0 0 2px;
+  background: #faf8f4;
+  color: #2b2522;
+  overflow: hidden;
+  -webkit-text-size-adjust: 100%;
+}
+#kzf-root *, #kzf-root *::before, #kzf-root *::after { box-sizing: border-box; }
+#kzf-root a, #kzf-root button { -webkit-tap-highlight-color: transparent; }
+#kzf-root .kzf-hero { display: block; width: 100%; line-height: 0; }
+
+/* the card: swipeable slides, each labelled by what it is */
+#kzf-root .kzf-card { position: relative; height: 222px; margin: 0 16px 16px; }
+#kzf-root .kzf-frame span { position: absolute; display: block; background: #2b2522; pointer-events: none; }
+#kzf-root .kzf-f1 { top: 0; left: var(--kzf-door, 34px); right: 0; height: 1.2px; transform-origin: 0 50%; }
+#kzf-root .kzf-f2 { top: 0; right: 0; bottom: 0; width: 1.2px; transform-origin: 50% 0; }
+#kzf-root .kzf-f3 { left: 0; right: 0; bottom: 0; height: 1.2px; transform-origin: 100% 50%; }
+#kzf-root .kzf-f4 { top: 0; left: 0; bottom: 0; width: 1.2px; transform-origin: 50% 100%; }
+#kzf-root .kzf-f5 { top: 0; left: 0; width: var(--kzf-door, 34px); height: 1.2px; transform-origin: 0 50%; }
+
+#kzf-root .kzf-track {
+  display: flex; width: 100%; height: 100%;
+  overflow-x: auto; overflow-y: hidden;
+  scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+#kzf-root .kzf-track::-webkit-scrollbar { display: none; }
+#kzf-root .kzf-slide {
+  flex: 0 0 100%; height: 100%; margin: 0; scroll-snap-align: start;
+  padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 10px;
+}
+#kzf-root .kzf-dots { position: absolute; top: 4px; right: 6px; display: flex; }
+#kzf-root .kzf-dot {
+  appearance: none; -webkit-appearance: none; width: 20px; height: 28px; margin: 0; padding: 0;
+  border: 0; border-radius: 0; background: transparent; box-shadow: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+#kzf-root .kzf-dot::before {
+  content: ""; width: 6px; height: 6px; border-radius: 50%; border: 1px solid #2b2522;
+}
+#kzf-root .kzf-dot[aria-current="true"]::before { background: #cb3a2a; border-color: #cb3a2a; }
+#kzf-root .kzf-dot:focus-visible { outline: 2px solid #cb3a2a; outline-offset: -2px; }
+
+#kzf-root .kzf-eyebrow {
+  margin: 0; padding-right: 70px; font-size: 11px; line-height: 1.3; font-weight: 600;
+  letter-spacing: 0.12em; text-transform: uppercase; color: #cb3a2a;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+#kzf-root .kzf-row { display: flex; gap: 14px; align-items: flex-start; min-height: 0; }
+#kzf-root .kzf-photo {
+  flex: 0 0 92px; width: 92px; height: 112px; display: block; overflow: hidden; background: #ece6dc;
+}
+#kzf-root .kzf-photo img { display: block; width: 100%; height: 100%; max-width: none; object-fit: cover; margin: 0; }
+#kzf-root .kzf-paper {
+  flex: 0 0 92px; width: 92px; height: 112px; border: 1px solid #2b2522; text-decoration: none; color: #2b2522;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center;
+}
+#kzf-root .kzf-paper .kzf-pn { font-family: Georgia, "Times New Roman", serif; font-size: 16px; line-height: 1.05; }
+#kzf-root .kzf-paper .kzf-pr { width: 56px; border-top: 1px solid #2b2522; }
+#kzf-root .kzf-paper .kzf-pd { font-size: 11px; color: #6b625c; }
+#kzf-root .kzf-info { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+#kzf-root .kzf-when { font-size: 13px; line-height: 1.3; font-weight: 500; color: #6b625c; font-variant-numeric: tabular-nums; }
+#kzf-root .kzf-title {
+  margin: 0; padding: 0; font-family: inherit; font-size: 18px; line-height: 1.2; font-weight: 600;
+  text-transform: none; letter-spacing: -0.01em; color: #2b2522;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+#kzf-root .kzf-title a { color: inherit; text-decoration: none; }
+#kzf-root .kzf-title.kzf-long { font-size: 15px; }
+#kzf-root .kzf-sub { font-size: 14px; line-height: 1.3; font-style: italic; color: #2b2522; }
+#kzf-root .kzf-meta { font-size: 13px; line-height: 1.3; color: #6b625c; }
+#kzf-root .kzf-buy, #kzf-root .kzf-act {
+  appearance: none; -webkit-appearance: none; width: 100%; margin: auto 0 0; height: 44px; padding: 0 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: inherit; font-size: 15px; line-height: 1; font-weight: 600; letter-spacing: 0.02em; text-transform: none;
+  text-decoration: none; border-radius: 0; box-shadow: none; cursor: pointer;
+}
+#kzf-root .kzf-buy { background: #cb3a2a; color: #fff; border: 0; }
+#kzf-root .kzf-buy:active { background: #a52c1f; }
+#kzf-root .kzf-act { background: transparent; color: #2b2522; border: 1px solid #2b2522; }
+#kzf-root .kzf-act:active { background: #2b2522; color: #faf8f4; }
+#kzf-root .kzf-buy:focus-visible, #kzf-root .kzf-act:focus-visible { outline: 2px solid #2b2522; outline-offset: 2px; }
+
+/* intro timing for the card follows the house: the line arrives from the club door, then the card */
+@media (prefers-reduced-motion: no-preference) {
+  #kzf-root.kzf-run .kzf-f1 { transform: scaleX(0); animation: kzf-sx 0.3s linear 2.55s forwards; }
+  #kzf-root.kzf-run .kzf-f2 { transform: scaleY(0); animation: kzf-sy 0.16s linear 2.85s forwards; }
+  #kzf-root.kzf-run .kzf-f3 { transform: scaleX(0); animation: kzf-sx 0.3s linear 3.01s forwards; }
+  #kzf-root.kzf-run .kzf-f4 { transform: scaleY(0); animation: kzf-sy 0.16s linear 3.31s forwards; }
+  #kzf-root.kzf-run .kzf-f5 { transform: scaleX(0); animation: kzf-sx 0.1s linear 3.47s forwards; }
+  #kzf-root.kzf-run .kzf-track, #kzf-root.kzf-run .kzf-dots { opacity: 0; animation: kzf-fade 0.6s ease 2.95s forwards; }
+}
+@keyframes kzf-sx { to { transform: scaleX(1); } }
+@keyframes kzf-sy { to { transform: scaleY(1); } }
