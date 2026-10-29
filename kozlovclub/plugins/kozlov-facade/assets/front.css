@@ -1,6 +1,7 @@
 /* Kozlov Living Facade: block and card on the home page, phones only.
    Everything is scoped to #kzf-root and kzf- classes; nothing here touches the theme
-   except hiding the old slider, and only after the block has mounted successfully. */
+   except hiding the old slider, and only after the block has mounted successfully.
+   The background is the site's own (front.js copies it from the page), so header and house are one sheet. */
 
 @media (min-width: 768px) {
   #kzf-root { display: none !important; }
@@ -17,13 +18,21 @@
   width: 100%;
   margin: 0 0 12px;
   padding: 0 0 2px;
-  background: #faf8f4;
+  background: var(--kzf-bg, #fff);
   color: #2b2522;
   overflow: hidden;
   -webkit-text-size-adjust: 100%;
 }
 #kzf-root *, #kzf-root *::before, #kzf-root *::after { box-sizing: border-box; }
 #kzf-root a, #kzf-root button { -webkit-tap-highlight-color: transparent; }
+/* parts of the drawing that hide lines behind them (walls, clouds, balcony) take the page colour too */
+#kzf-root svg [fill="#faf8f4"] { fill: var(--kzf-bg, #fff); }
+/* while the drawing loads, its place is kept so nothing below jumps */
+#kzf-root .kzf-hero:empty { aspect-ratio: var(--kzf-ratio, 1.0156); }
+/* the card frame is drawn together with the house */
+#kzf-root:not(.kzf-run) .kzf-frame { visibility: hidden; }
+/* a new song: the lit windows fade out first, then light up again one by one */
+#kzf-root.kzf-dim .kzf-glow, #kzf-root.kzf-dim .kzf-who { opacity: 0 !important; transition: opacity 0.35s ease; }
 /* the house leaves room for the site header and the card (about 330px), so the ticket button stays on
    the first screen; never wider than 480px, never smaller than 240px (phone held sideways) */
 #kzf-root .kzf-hero {

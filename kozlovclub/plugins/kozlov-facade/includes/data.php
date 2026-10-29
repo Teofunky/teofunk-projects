@@ -151,6 +151,94 @@ function kzf_tc_id( $post_id ) {
 	return array( '', '' );
 }
 
+/** Russian part of a WPGlobus string: "[:ru]…[:en]…" or "{:ru}…{:}{:en}…{:}". Plain text passes through. */
+function kzf_ru_text( $s ) {
+	$s = (string) $s;
+	if ( preg_match( '/\{:ru\}(.*?)\{:\}/su', $s, $m ) || preg_match( '/\[:ru\](.*?)(?=\[:[a-z]{0,2}\]|$)/su', $s, $m ) ) {
+		$s = $m[1];
+	}
+	$s = preg_replace( '/\{:[a-z]{0,2}\}|\[:[a-z]{0,2}\]/u', '', $s );
+	return trim( preg_replace( '/\s+/u', ' ', $s ) );
+}
+
+/**
+ * Price from the calendar's cost field. The calendar keeps it serialized,
+ * e.g. a:2:{s:4:"cost";s:..:"[:ru]от 1500 руб.[:en]…";s:7:"is_free";b:0;}
+ */
+function kzf_cost_text( $raw ) {
+	$v    = is_string( $raw ) ? trim( $raw ) : $raw;
+	$free = false;
+	if ( is_string( $v ) && preg_match( '/^a:\d+:\{/', $v ) ) {
+		$u = @unserialize( $v, array( 'allowed_classes' => false ) ); // phpcs:ignore -- calendar data, objects refused
+		$v = is_array( $u ) ? $u : '';
+	}
+	if ( is_array( $v ) ) {
+		$free = ! empty( $v['is_free'] );
+		$v    = isset( $v['cost'] ) && is_scalar( $v['cost'] ) ? $v['cost'] : '';
+	}
+	$text = kzf_ru_text( is_scalar( $v ) ? $v : '' );
+	if ( '' === $text ) {
+		return $free ? 'Вход свободный' : '';
+	}
+	return kzf_price_text( $text );
+}
+
+/** The club's stages, by the codes the site itself uses in its afisha links (?sort=main_scene …). */
+function kzf_stage_names() {
+	return array(
+		'main_scene'   => 'Главная сцена',
+		'the_beat'     => 'The Beat',
+		'mansard'      => 'Мансарда',
+		'myasnitskaya' => 'Сцена на Мясницкой, 15',
+	);
+}
+
+/** One of the known stage names if the value names a stage (by code or by name), else ''. */
+function kzf_stage_match( $value ) {
+	if ( ! is_string( $value ) ) {
+		return '';
+	}
+	$value = kzf_ru_text( wp_strip_all_tags( $value ) );
+	$key   = mb_strtolower( $value );
+	foreach ( kzf_stage_names() as $code => $name ) {
+		if ( $key === $code || $key === mb_strtolower( $name ) ) {
+			return $name;
+		}
+	}
+	return '';
+}
+
+/**
+ * Stage of a concert. Only the four known stages are accepted: a field of the concert holding a stage
+ * code or name, then a calendar category or tag named after a stage, then the calendar's venue field.
+ */
+function kzf_stage( $post_id, $row ) {
+	$meta = get_post_meta( $post_id );
+	if ( is_array( $meta ) ) {
+		foreach ( $meta as $values ) {
+			foreach ( (array) $values as $v ) {
+				$s = kzf_stage_match( $v );
+				if ( $s ) {
+					return $s;
+				}
+			}
+		}
+	}
+	foreach ( (array) get_object_taxonomies( (string) get_post_type( $post_id ) ) as $tax ) {
+		$terms = get_the_terms( $post_id, $tax );
+		if ( is_array( $terms ) ) {
+			foreach ( $terms as $t ) {
+				$s = kzf_stage_match( $t->slug );
+				$s = $s ? $s : kzf_stage_match( $t->name );
+				if ( $s ) {
+					return $s;
+				}
+			}
+		}
+	}
+	return ( $row && isset( $row['venue'] ) ) ? kzf_stage_match( (string) $row['venue'] ) : '';
+}
+
 function kzf_ru_date( $ts, $tz ) {
 	$days   = array( 'Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб' );
 	$months = array( 1 => 'января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря' );
@@ -180,7 +268,7 @@ function kzf_event_data( $url ) {
 	list( $tc, $tc_key ) = kzf_tc_id( $id );
 	$out = array(
 		'post_id' => $id,
-		'title'   => wp_strip_all_tags( get_the_title( $id ) ),
+		'title'   => kzf_ru_text( html_entity_decode( wp_strip_all_tags( get_the_title( $id ) ), ENT_QUOTES, 'UTF-8' ) ),
 		'link'    => get_permalink( $id ),
 		'image'   => '',
 		'start'   => 0,
@@ -205,9 +293,9 @@ function kzf_event_data( $url ) {
 		$out['start'] = (int) $row['start'];
 		$out['end']   = isset( $row['end'] ) ? (int) $row['end'] : 0;
 		$out['when']  = kzf_ru_date( (int) $row['start'], $tz );
-		$out['price'] = kzf_price_text( isset( $row['cost'] ) ? $row['cost'] : '' );
-		$out['stage'] = isset( $row['venue'] ) ? trim( wp_strip_all_tags( (string) $row['venue'] ) ) : '';
+		$out['price'] = kzf_cost_text( isset( $row['cost'] ) ? $row['cost'] : '' );
 	}
+	$out['stage'] = kzf_stage( $id, $row );
 	return $out;
 }
 

@@ -44,11 +44,33 @@ function kzf_enqueue() {
 			'heroUrl'    => KZF_URL . 'assets/hero.svg?ver=' . KZF_VER,
 			'doorX'      => (float) $meta['door_x'],
 			'viewW'      => (float) $meta['W'],
+			'viewH'      => (float) $meta['H'],
 			'streetSync' => (bool) kzf_settings()['street_sync'],
 		);
 		wp_add_inline_script( 'kzf-front', 'window.KZF_CONFIG=' . wp_json_encode( $cfg ) . ';', 'before' );
 	} catch ( Throwable $e ) {
 		return; // never break the page
+	}
+}
+
+/**
+ * In <head>: on phones, keep the old slider invisible from the very first paint while the block gets ready,
+ * so the visitor never sees the old slider flash and jump. Its space stays reserved.
+ * Safety: the slider comes back by itself after 6 s unless the block has mounted; front.js also gives it
+ * back at once whenever it decides not to mount.
+ */
+add_action( 'wp_head', 'kzf_head_early', 1 );
+function kzf_head_early() {
+	try {
+		if ( ! kzf_should_render() || ! kzf_display_slides() ) {
+			return;
+		}
+		?>
+<style id="kzf-early">@media (max-width: 767px){html.kzf-wait .content_home .slider-wrapper{visibility:hidden!important}}</style>
+<script id="kzf-early-js">(function(){try{var d=document.documentElement;if(/[?&]kzf=off\b/.test(location.search)||!window.matchMedia||!window.fetch||!matchMedia("(max-width: 767px)").matches)return;d.classList.add("kzf-wait");setTimeout(function(){d.classList.remove("kzf-wait")},6000)}catch(e){}})();</script>
+		<?php
+	} catch ( Throwable $e ) {
+		return;
 	}
 }
 

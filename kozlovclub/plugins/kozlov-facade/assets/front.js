@@ -2,85 +2,104 @@
    Safety rules:
    - phones only (max-width 767px); desktop is left exactly as it is
    - ?kzf=off in the address switches the block off for this visit
-   - nothing replaces the slider unless there is at least one card and both stylesheets have loaded
-   - the old slider is hidden only after the block has mounted; any error puts everything back
+   - nothing replaces the slider unless there is at least one card and the block stylesheet has loaded
+   - the old slider is kept invisible from the first paint (class kzf-wait, set in <head>) and is given
+     back at once whenever the block does not mount; any later error puts everything back
    - a ticket button that Ticketscloud does not pick up falls back to the concert page */
 (function () {
   "use strict";
 
+  var html = document.documentElement;
   var CFG = window.KZF_CONFIG;
   var root = document.getElementById("kzf-root");
-  if (!CFG || !root) return;
 
-  function giveUp() {
+  function release() { html.classList.remove("kzf-wait"); }
+
+  function giveUp(e) {
     try {
-      document.documentElement.classList.remove("kzf-on");
-      root.hidden = true;
-      root.classList.remove("kzf-run", "kzf-playing", "kzf-lit");
-    } catch (e) { /* nothing else to undo */ }
+      html.classList.remove("kzf-on");
+      release();
+      if (root) {
+        root.hidden = true;
+        root.classList.remove("kzf-run", "kzf-playing", "kzf-lit", "kzf-dim");
+      }
+    } catch (x) { /* nothing else to undo */ }
+    if (e && window.console) console.warn("[kzf]", e);
   }
 
-  try {
-    if (/[?&]kzf=off\b/.test(window.location.search)) return;
-    if (!window.matchMedia || !window.matchMedia("(max-width: 767px)").matches) return;
-    var slider = document.querySelector(".content_home .slider-wrapper");
-    if (!slider || !slider.parentNode) return;
-    if (!window.fetch) return;
-    if (!root.querySelector(".kzf-slide")) return;          // no cards: keep the old slider
-    if (!cssReady("--kzf-front-css")) return;               // block stylesheet missing: keep the old slider
-
-    window.fetch(CFG.heroUrl, { credentials: "same-origin" })
-      .then(function (r) { if (!r.ok) throw new Error("hero " + r.status); return r.text(); })
-      .then(function (svgText) {
-        if (svgText.indexOf("<svg") === -1) throw new Error("hero markup");
-        mount(slider, svgText);
-      })
-      .catch(function (e) { giveUp(); if (window.console) console.warn("[kzf]", e); });
-  } catch (e) {
-    giveUp();
-    if (window.console) console.warn("[kzf]", e);
-  }
-
-  function cssReady(marker) {
-    try {
-      return window.getComputedStyle(root).getPropertyValue(marker).trim() === "1";
-    } catch (e) { return false; }
-  }
-
-  // wait for the drawing's stylesheet (up to 4 s), otherwise keep the old slider
-  function whenHeroCss(done, fail) {
+  // wait until a stylesheet marker shows up on the root (up to `ms`)
+  function whenCss(marker, ms, done, fail) {
     var t0 = Date.now();
     (function check() {
-      if (cssReady("--kzf-hero-css")) return done();
-      if (Date.now() - t0 > 4000) return fail(new Error("hero.css not loaded"));
-      setTimeout(check, 120);
+      var ok = false;
+      try { ok = window.getComputedStyle(root).getPropertyValue(marker).trim() === "1"; } catch (e) { ok = false; }
+      if (ok) return done();
+      if (Date.now() - t0 > ms) return fail(new Error(marker + " not loaded"));
+      setTimeout(check, 100);
     })();
   }
 
-  function mount(slider, svgText) {
-    whenHeroCss(function () {
-      try {
-        var heroBox = root.querySelector(".kzf-hero");
-        heroBox.innerHTML = svgText;
-        var svg = heroBox.querySelector("svg");
-        if (!svg) throw new Error("no svg");
-
-        slider.parentNode.insertBefore(root, slider);
-        root.hidden = false;
-        document.documentElement.classList.add("kzf-on");
-        start(svg);
-      } catch (e) {
-        giveUp();
-        if (window.console) console.warn("[kzf]", e);
-      }
-    }, function (e) {
-      giveUp();
-      if (window.console) console.warn("[kzf]", e);
-    });
+  // the house sits on the same colour as the site header, so header and facade read as one sheet
+  function solid(el) {
+    var c = el ? window.getComputedStyle(el).backgroundColor : "";
+    return c && c !== "transparent" && !/rgba\(.*,\s*0\s*\)$/.test(c) ? c : "";
+  }
+  function pageBackground(from) {
+    var c = solid(document.querySelector(".header"));
+    if (c) return c;
+    for (var el = from; el && el.nodeType === 1; el = el.parentElement) {
+      c = solid(el);
+      if (c) return c;
+    }
+    return "#fff";
   }
 
+  var slider;
+  try {
+    if (!CFG || !root) { release(); return; }
+    if (/[?&]kzf=off\b/.test(window.location.search)) { release(); return; }
+    if (!window.matchMedia || !window.matchMedia("(max-width: 767px)").matches) { release(); return; }
+    slider = document.querySelector(".content_home .slider-wrapper");
+    if (!slider || !slider.parentNode || !window.fetch) { release(); return; }
+    if (!root.querySelector(".kzf-slide")) { release(); return; }   // no cards: keep the old slider
+  } catch (e) {
+    giveUp(e);
+    return;
+  }
+
+  // the drawing is fetched while the page finishes
+  var svgPromise = window.fetch(CFG.heroUrl, { credentials: "same-origin" })
+    .then(function (r) { if (!r.ok) throw new Error("hero " + r.status); return r.text(); })
+    .then(function (t) { if (t.indexOf("<svg") === -1) throw new Error("hero markup"); return t; });
+  svgPromise.catch(function () { /* handled below */ });
+
+  // 1. as soon as the block stylesheet is there: the block takes the slider's place, card first
+  whenCss("--kzf-front-css", 4000, function () {
+    try {
+      root.style.setProperty("--kzf-bg", pageBackground(slider.parentNode));
+      if (CFG.viewW && CFG.viewH) root.style.setProperty("--kzf-ratio", CFG.viewW + " / " + CFG.viewH);
+      slider.parentNode.insertBefore(root, slider);
+      root.hidden = false;
+      html.classList.add("kzf-on");
+      release();
+    } catch (e) { giveUp(e); return; }
+
+    // 2. the house draws itself once the drawing and its stylesheet are in
+    svgPromise.then(function (svgText) {
+      whenCss("--kzf-hero-css", 4000, function () {
+        try {
+          var heroBox = root.querySelector(".kzf-hero");
+          heroBox.innerHTML = svgText;
+          var svg = heroBox.querySelector("svg");
+          if (!svg) throw new Error("no svg");
+          start(svg);
+        } catch (e) { giveUp(e); }
+      }, giveUp);
+    }).catch(giveUp);
+  }, giveUp);
+
   function start(svg) {
-    var playTimer = null, endTimer = null;
+    var endTimer = null, dimTimer = null;
     var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     // the line from the club door to the card frame
@@ -95,20 +114,32 @@
     placeDoor();
     window.addEventListener("resize", placeDoor);
 
-    function play() {
-      clearTimeout(endTimer);
-      var wasLit = root.classList.contains("kzf-lit");
-      root.classList.remove("kzf-playing");
+    // the song: windows light up one by one and their people play; afterwards the lights stay on
+    function sing() {
+      Array.prototype.forEach.call(svg.querySelectorAll(".kzf-glow.kzf-on, .kzf-who.kzf-on"), function (el) {
+        el.classList.remove("kzf-on", "kzf-solo");
+      });
+      root.classList.remove("kzf-dim", "kzf-lit", "kzf-playing");
       void root.offsetWidth;
       root.classList.add("kzf-playing");
       endTimer = setTimeout(function () {
         root.classList.add("kzf-lit");
         root.classList.remove("kzf-playing");
-      }, wasLit ? 6200 : 7800);
+      }, 7800);
+    }
+    // every new song starts from dark windows; lit ones fade out first
+    function play() {
+      clearTimeout(endTimer);
+      clearTimeout(dimTimer);
+      var anyLit = root.classList.contains("kzf-lit") || root.classList.contains("kzf-playing") ||
+        !!svg.querySelector(".kzf-glow.kzf-on");
+      if (!anyLit || reduced) { sing(); return; }
+      root.classList.add("kzf-dim");
+      dimTimer = setTimeout(sing, 380);
     }
 
     root.classList.add("kzf-run");
-    playTimer = setTimeout(play, reduced ? 0 : 3700);
+    setTimeout(play, reduced ? 0 : 3700);
 
     // a tapped window lights up and its people play
     function solo(w) {
