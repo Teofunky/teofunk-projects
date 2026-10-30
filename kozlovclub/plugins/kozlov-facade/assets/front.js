@@ -121,7 +121,6 @@
   }, giveUp);
 
   function start(svg) {
-    var endTimer = null, dimTimer = null;
     var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     // the line from the club door to the card frame
@@ -136,45 +135,83 @@
     placeDoor();
     window.addEventListener("resize", placeDoor);
 
-    // the song: windows light up one by one and their people play; afterwards the lights stay on
-    function sing() {
-      Array.prototype.forEach.call(svg.querySelectorAll(".kzf-glow.kzf-on, .kzf-who.kzf-on"), function (el) {
+    // The show. Load: the house draws itself (3.7 s), the saxophonist plays: a wave of light runs
+    // through the windows, the people wake and the walls take a pale watercolour. From then on the
+    // band plays without stopping and the guests drink and clink now and then (up to 4 windows),
+    // like the swifts and clouds that never stop.
+    // Tap on the saxophonist: the house fades and redraws fast (1.3 s), card and sky stay, then the wave.
+    // On the hour and half hour (Moscow): only the wave, the house is not redrawn.
+    var T = { end: null, dim: null, play: null, out: null };
+    var guests = Array.prototype.slice.call(svg.querySelectorAll(".kzf-who.kzf-guest"));
+    function clearAll() { Object.keys(T).forEach(function (k) { clearTimeout(T[k]); }); }
+    function resetPeople() {
+      Array.prototype.forEach.call(svg.querySelectorAll(".kzf-on, .kzf-solo"), function (el) {
         el.classList.remove("kzf-on", "kzf-solo");
       });
-      root.classList.remove("kzf-dim", "kzf-lit", "kzf-playing");
+    }
+    function sing() {
+      resetPeople();
+      root.classList.remove("kzf-dim", "kzf-lit", "kzf-playing", "kzf-alive");
       void root.offsetWidth;
-      root.classList.add("kzf-playing");
-      endTimer = setTimeout(function () {
+      if (reduced) { root.classList.add("kzf-lit"); return; }
+      root.classList.add("kzf-playing", "kzf-alive");
+      T.end = setTimeout(function () {
         root.classList.add("kzf-lit");
         root.classList.remove("kzf-playing");
       }, 7800);
     }
-    // every new song starts from dark windows; lit ones fade out first
     function play() {
-      clearTimeout(endTimer);
-      clearTimeout(dimTimer);
-      var anyLit = root.classList.contains("kzf-lit") || root.classList.contains("kzf-playing") ||
-        !!svg.querySelector(".kzf-glow.kzf-on");
-      if (!anyLit || reduced) { sing(); return; }
+      clearAll();
+      if (!root.classList.contains("kzf-lit") && !root.classList.contains("kzf-playing")) { sing(); return; }
       root.classList.add("kzf-dim");
-      dimTimer = setTimeout(sing, 380);
+      root.classList.remove("kzf-alive");
+      T.dim = setTimeout(sing, 380);
     }
+    function run(fast) {
+      clearAll();
+      resetPeople();
+      root.classList.remove("kzf-run", "kzf-playing", "kzf-lit", "kzf-dim", "kzf-alive", "kzf-out");
+      root.classList.toggle("kzf-keep", !!fast);
+      root.style.setProperty("--k", fast ? "0.42" : "1");
+      root.style.setProperty("--kd", fast ? "0.6" : "1");
+      void root.offsetWidth;
+      root.classList.add("kzf-run");
+      T.play = setTimeout(sing, reduced ? 0 : (fast ? 1300 : 3700));
+    }
+    function replay() {
+      if (reduced) { play(); return; }
+      clearAll();
+      root.classList.add("kzf-out");
+      T.out = setTimeout(function () { run(true); }, 260);
+    }
+    run(false);
 
-    root.classList.add("kzf-run");
-    setTimeout(play, reduced ? 0 : 3700);
+    // guests: now and then one of them drinks or clinks glasses
+    function act(who) {
+      who._kzfLast = Date.now();
+      who.classList.remove("kzf-solo");
+      void who.getBoundingClientRect();
+      who.classList.add("kzf-solo");
+      clearTimeout(who._kzfT);
+      who._kzfT = setTimeout(function () { who.classList.remove("kzf-solo"); }, 3200);
+    }
+    setInterval(function () {
+      if (reduced || document.hidden || root.classList.contains("kzf-paused") || !root.classList.contains("kzf-lit")) return;
+      var now = Date.now();
+      var busy = guests.filter(function (g) { return g.classList.contains("kzf-solo"); }).length;
+      if (busy >= 4) return;
+      var free = guests.filter(function (g) { return !g.classList.contains("kzf-solo") && now - (g._kzfLast || 0) > 5000; });
+      if (free.length) act(free[Math.floor(Math.random() * free.length)]);
+    }, 1200);
 
-    // a tapped window lights up and its people play
+    // a tapped window lights up and its people move
     function solo(w) {
       var who = svg.querySelector('.kzf-who[data-w="' + w + '"]');
       var glow = svg.querySelector('.kzf-glow[data-w="' + w + '"]');
       if (!who) return;
       if (glow) glow.classList.add("kzf-on");
       who.classList.add("kzf-on");
-      who.classList.remove("kzf-solo");
-      void who.getBoundingClientRect();
-      who.classList.add("kzf-solo");
-      clearTimeout(who._kzfT);
-      who._kzfT = setTimeout(function () { who.classList.remove("kzf-solo"); }, 3400);
+      act(who);
     }
     function bindTap(el, fn) {
       el.addEventListener("click", fn);
@@ -183,7 +220,7 @@
       });
     }
     Array.prototype.forEach.call(svg.querySelectorAll(".kzf-hit"), function (h) {
-      if (h.classList.contains("kzf-saxhit")) bindTap(h, play);
+      if (h.classList.contains("kzf-saxhit")) bindTap(h, replay);
       else bindTap(h, function () { solo(h.getAttribute("data-w")); });
     });
 
@@ -199,11 +236,17 @@
       }, 15000);
     }
 
-    // no work while the tab is hidden
-    document.addEventListener("visibilitychange", function () {
-      root.classList.toggle("kzf-paused", document.hidden);
-      try { if (document.hidden) svg.pauseAnimations(); else svg.unpauseAnimations(); } catch (e) { /* older engines */ }
-    });
+    // no motion while nobody sees it: tab hidden or the block scrolled away
+    var offscreen = false;
+    function syncPause() {
+      var stop = document.hidden || offscreen;
+      root.classList.toggle("kzf-paused", stop);
+      try { if (stop) svg.pauseAnimations(); else svg.unpauseAnimations(); } catch (e) { /* older engines */ }
+    }
+    document.addEventListener("visibilitychange", syncPause);
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(function (es) { offscreen = !es[0].isIntersecting; syncPause(); }).observe(root);
+    }
 
     // a ticket window usually sits fixed over the middle of the screen
     function overlayAtCenter() {
