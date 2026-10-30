@@ -56,8 +56,9 @@ function kzf_enqueue() {
 /**
  * In <head>: on phones the old slider stays invisible from the very first paint while the block gets ready,
  * so it never flashes and jumps. Pure CSS, so it works even if scripts are deferred or moved by an optimizer.
- * Its space stays reserved. Safety: it comes back by itself after 6 s (CSS animation) unless the block has
- * mounted; front.js gives it back at once (class kzf-off) whenever it decides not to mount.
+ * Its space stays reserved. Safety: a tiny script printed with the block gives it back 2.5 s after the
+ * page has been read unless the block has mounted; if no script runs at all, CSS gives it back after 4 s;
+ * front.js gives it back at once (class kzf-off) whenever it decides not to mount.
  */
 add_action( 'wp_head', 'kzf_head_early', 1 );
 function kzf_head_early() {
@@ -65,7 +66,7 @@ function kzf_head_early() {
 		if ( ! kzf_should_render() || ! kzf_display_slides() ) {
 			return;
 		}
-		echo '<style id="kzf-early">@media (max-width: 767px){html:not(.kzf-off):not(.kzf-on) .content_home .slider-wrapper{opacity:0;visibility:hidden;animation:kzf-back 0s linear 6s forwards}}@keyframes kzf-back{to{opacity:1;visibility:visible}}</style>' . "\n";
+		echo '<style id="kzf-early">@media (max-width: 767px){html:not(.kzf-off):not(.kzf-on) .content_home .slider-wrapper{opacity:0;visibility:hidden;animation:kzf-back 0s linear 4s forwards}}@keyframes kzf-back{to{opacity:1;visibility:visible}}</style>' . "\n";
 	} catch ( Throwable $e ) {
 		return;
 	}
@@ -108,7 +109,7 @@ function kzf_print_block( $slides ) {
 		<div class="kzf-frame" aria-hidden="true"><span class="kzf-f1"></span><span class="kzf-f2"></span><span class="kzf-f3"></span><span class="kzf-f4"></span><span class="kzf-f5"></span></div>
 		<div class="kzf-track">
 		<?php foreach ( $slides as $i => $s ) : ?>
-			<article class="kzf-slide" aria-label="<?php echo esc_attr( ( $i + 1 ) . ' из ' . $n ); ?>">
+			<article class="kzf-slide" aria-label="<?php echo esc_attr( ( $i + 1 ) . ' из ' . $n ); ?>"<?php echo ! empty( $s['until'] ) ? ' data-kzf-until="' . esc_attr( (int) $s['until'] ) . '"' : ''; ?>>
 				<?php if ( $s['label'] ) : ?><div class="kzf-eyebrow"><?php echo esc_html( $s['label'] ); ?></div><?php endif; ?>
 				<div class="kzf-row">
 					<?php if ( $s['paper'] && ! $s['image'] ) : ?>
@@ -126,7 +127,7 @@ function kzf_print_block( $slides ) {
 					</div>
 				</div>
 				<?php if ( 'event' === $s['kind'] && $s['tc_id'] ) : ?>
-					<button class="kzf-buy" type="button" tc-event="<?php echo esc_attr( $s['tc_id'] ); ?>" data-href="<?php echo esc_url( $s['link'] ); ?>"><?php echo esc_html( $s['button'] ); ?></button>
+					<button class="kzf-buy tc-background-tomato" type="button" tc-event="<?php echo esc_attr( $s['tc_id'] ); ?>" data-href="<?php echo esc_url( $s['link'] ); ?>"><?php echo esc_html( $s['button'] ); ?></button>
 				<?php elseif ( 'event' === $s['kind'] ) : ?>
 					<a class="kzf-buy" href="<?php echo esc_url( $s['link'] ); ?>"><?php echo esc_html( $s['button'] ); ?></a>
 				<?php elseif ( $s['link'] ) : ?>
@@ -145,5 +146,6 @@ function kzf_print_block( $slides ) {
 	</section>
 	<?php endif; ?>
 </div>
+<script>(function(){setTimeout(function(){var d=document.documentElement;if(!d.classList.contains("kzf-on"))d.classList.add("kzf-off")},2500)})();</script>
 	<?php
 }

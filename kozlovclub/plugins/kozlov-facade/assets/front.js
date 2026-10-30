@@ -73,6 +73,32 @@
   }
   function onScroll() { if (!headerTick) { headerTick = true; window.requestAnimationFrame(syncHeader); } }
 
+  // a card whose concert is over is removed here as well: the home page may come from a page cache
+  // that was saved before the concert ended. Returns how many cards are left.
+  function pruneExpired() {
+    var now = Date.now() / 1000;
+    var slides = Array.prototype.slice.call(root.querySelectorAll(".kzf-slide"));
+    var dots = Array.prototype.slice.call(root.querySelectorAll(".kzf-dot"));
+    var gone = false;
+    slides.forEach(function (sl, i) {
+      var until = parseInt(sl.getAttribute("data-kzf-until") || "0", 10);
+      if (until && until < now) {
+        sl.parentNode.removeChild(sl);
+        if (dots[i] && dots[i].parentNode) dots[i].parentNode.removeChild(dots[i]);
+        gone = true;
+      }
+    });
+    var left = root.querySelectorAll(".kzf-slide").length;
+    if (gone) {
+      var box = root.querySelector(".kzf-dots");
+      if (box && left < 2) box.parentNode.removeChild(box);
+      var card = root.querySelector(".kzf-card");
+      if (card) card.style.setProperty("--kzf-dots", left > 1 ? left : 0);
+      Array.prototype.forEach.call(root.querySelectorAll(".kzf-slide"), function (sl, i) { sl.setAttribute("aria-label", (i + 1) + " из " + left); });
+    }
+    return left;
+  }
+
   var slider;
   try {
     if (!CFG || !root) { release(); return; }
@@ -80,6 +106,7 @@
     if (!window.matchMedia || !window.matchMedia("(max-width: 767px)").matches) { release(); return; }
     slider = document.querySelector(".content_home .slider-wrapper");
     if (!slider || !slider.parentNode || !window.fetch) { release(); return; }
+    pruneExpired();
     if (!root.querySelector(".kzf-slide")) { release(); return; }   // no cards: keep the old slider
   } catch (e) {
     giveUp(e);
@@ -93,7 +120,7 @@
   svgPromise.catch(function () { /* handled below */ });
 
   // 1. as soon as the block stylesheet is there: the block takes the slider's place, card first
-  whenCss("--kzf-front-css", 4000, function () {
+  whenCss("--kzf-front-css", 2500, function () {
     try {
       if (CFG.viewW && CFG.viewH) root.style.setProperty("--kzf-ratio", CFG.viewW + " / " + CFG.viewH);
       slider.parentNode.insertBefore(root, slider);
@@ -108,7 +135,7 @@
 
     // 2. the house draws itself once the drawing and its stylesheet are in
     svgPromise.then(function (svgText) {
-      whenCss("--kzf-hero-css", 4000, function () {
+      whenCss("--kzf-hero-css", 2500, function () {
         try {
           var heroBox = root.querySelector(".kzf-hero");
           heroBox.innerHTML = svgText;
@@ -236,6 +263,8 @@
       }, 15000);
     }
 
+    setInterval(function () { if (!pruneExpired()) giveUp(); }, 60000);
+
     // no motion while nobody sees it: tab hidden or the block scrolled away
     var offscreen = false;
     function syncPause() {
@@ -248,33 +277,43 @@
       new IntersectionObserver(function (es) { offscreen = !es[0].isIntersecting; syncPause(); }).observe(root);
     }
 
-    // a ticket window usually sits fixed over the middle of the screen
-    function overlayAtCenter() {
-      var el = document.elementFromPoint(window.innerWidth / 2, window.innerHeight / 2);
-      while (el && el !== document.body && el !== document.documentElement) {
-        if (root.contains(el)) return false;
-        if (window.getComputedStyle(el).position === "fixed") return true;
-        el = el.parentElement;
-      }
-      return false;
+    // tickets. The buttons carry tc-event like the theme's own, the Ticketscloud script on the page opens
+    // its window. No script on the page: straight to the concert page. Script there: watch what the click
+    // adds to the page for 4 s; only a frame or a window of the widget counts (ticketscloud / tc in its
+    // name, or something covering most of the screen). Nothing like that: go to the concert page.
+    // looked up at the moment of the click: on the site the widget script is printed among the footer scripts
+    function tcScript() { return !!document.querySelector('script[src*="ticketscloud"], #tcwidget-js'); }
+    function looksLikeTicketWindow(el) {
+      if (!el || el.nodeType !== 1 || root.contains(el) || !document.documentElement.contains(el)) return false;
+      if (el.tagName === "IFRAME") return true;
+      var name = (el.id || "") + " " + (typeof el.className === "string" ? el.className : "") + " " + (el.getAttribute("src") || "");
+      if (/ticketscloud|(^|[\s_-])tc[\s_-]/i.test(" " + name + " ")) return true;
+      var r = el.getBoundingClientRect(), cs = window.getComputedStyle(el);
+      return (cs.position === "fixed" || cs.position === "absolute") && r.width * r.height > window.innerWidth * window.innerHeight * 0.5;
     }
-
-    // tickets: Ticketscloud opens its own window; if nothing opens, go to the concert page
     Array.prototype.forEach.call(root.querySelectorAll(".kzf-buy[tc-event]"), function (btn) {
       btn.addEventListener("click", function () {
         var href = btn.getAttribute("data-href");
         if (!href) return;
-        var before = document.querySelectorAll('iframe[src*="ticketscloud"]').length;
-        setTimeout(function () {
-          var frames = document.querySelectorAll('iframe[src*="ticketscloud"]');
-          var shown = false;
-          Array.prototype.forEach.call(frames, function (f) {
-            var r = f.getBoundingClientRect();
-            if (r.width > 40 && r.height > 40) shown = true;
+        if (!tcScript()) { window.location.href = href; return; }
+        // checked both when something is added (a window the visitor closes within 4 s still counts)
+        // and at the end (a window whose size or class is set a moment after it is added)
+        var added = [], opened = false;
+        function isWindow(n) {
+          if (looksLikeTicketWindow(n)) return true;
+          return n && n.querySelectorAll ? Array.prototype.some.call(n.querySelectorAll("iframe"), looksLikeTicketWindow) : false;
+        }
+        var mo = window.MutationObserver ? new MutationObserver(function (list) {
+          list.forEach(function (m) {
+            Array.prototype.forEach.call(m.addedNodes, function (n) { added.push(n); if (!opened && isWindow(n)) opened = true; });
           });
-          if (!shown) shown = overlayAtCenter();
-          if (!shown && frames.length <= before) window.location.href = href;
-        }, 1800);
+        }) : null;
+        if (mo) mo.observe(document.body, { childList: true, subtree: true });
+        setTimeout(function () {
+          if (mo) mo.disconnect();
+          if (!opened) opened = added.some(isWindow);
+          if (!opened) window.location.href = href;
+        }, 4000);
       });
     });
 

@@ -245,7 +245,7 @@ function kzf_stage( $post_id, $row ) {
  */
 function kzf_club_time( $ts, $tzname ) {
 	try {
-		$tz = new DateTimeZone( '' === $tzname ? 'UTC' : $tzname );
+		$tz = ( '' === $tzname ) ? wp_timezone() : new DateTimeZone( $tzname );   // no zone: the calendar uses the site's zone
 	} catch ( Exception $e ) {
 		$tz = new DateTimeZone( 'UTC' );
 	}
@@ -295,8 +295,12 @@ function kzf_event_data( $url ) {
 		'tc_id'   => $tc,
 		'tc_key'  => $tc_key,
 	);
-	$size         = has_image_size( 'slider-thumb' ) ? 'slider-thumb' : 'medium';
-	$out['image'] = (string) get_the_post_thumbnail_url( $id, $size );
+	$size             = has_image_size( 'slider-thumb' ) ? 'slider-thumb' : 'medium';
+	$out['image']     = (string) get_the_post_thumbnail_url( $id, $size );
+	$out['image_src'] = $out['image'] ? 'изображение записи' : '';
+	if ( ! $out['image'] ) {
+		list( $out['image'], $out['image_src'] ) = kzf_mf_image( $id );
+	}
 
 	$row = kzf_ai1ec_row( $id );
 	if ( $row && ! empty( $row['start'] ) ) {
@@ -308,6 +312,49 @@ function kzf_event_data( $url ) {
 	}
 	$out['stage'] = kzf_stage( $id, $row );
 	return $out;
+}
+
+/**
+ * The announcement picture from Magic Fields when the post has no featured image.
+ * The site keeps it as a file name in /wp-content/files_mf/ (field anons_thumb on the concert page),
+ * or as an attachment id. Returns array( url, field name ) or array( '', '' ).
+ */
+function kzf_mf_image( $post_id ) {
+	$meta = get_post_meta( $post_id );
+	if ( ! is_array( $meta ) ) {
+		return array( '', '' );
+	}
+	$keys = array_keys( $meta );
+	usort( $keys, function ( $a, $b ) {           // the known field first, then other picture-like names
+		return ( 'anons_thumb' === $b ) - ( 'anons_thumb' === $a );
+	} );
+	foreach ( $keys as $k ) {
+		if ( 'anons_thumb' !== $k && ! preg_match( '/thumb|image|photo|foto|pic|img/i', $k ) ) {
+			continue;
+		}
+		foreach ( (array) $meta[ $k ] as $v ) {
+			$v = is_string( $v ) ? trim( $v ) : '';
+			if ( '' === $v ) {
+				continue;
+			}
+			if ( ctype_digit( $v ) ) {
+				$url = (string) wp_get_attachment_image_url( (int) $v, 'medium' );
+				if ( $url ) {
+					return array( $url, $k );
+				}
+				continue;
+			}
+			if ( ! preg_match( '/\.(jpe?g|png|webp|gif)$/i', $v ) ) {
+				continue;
+			}
+			if ( preg_match( '#^https?://#i', $v ) ) {
+				return kzf_same_site( $v ) ? array( $v, $k ) : array( '', '' );
+			}
+			$path = ( false === strpos( $v, '/' ) ) ? content_url( '/files_mf/' . rawurlencode( $v ) ) : home_url( '/' . ltrim( $v, '/' ) );
+			return array( $path, $k );
+		}
+	}
+	return array( '', '' );
 }
 
 /** The moment an event card should disappear: the real end (plus half an hour), else start + 4 h. */
@@ -349,34 +396,69 @@ function kzf_gazeta_refresh( $url ) {
 		return null;
 	}
 	$html = (string) wp_remote_retrieve_body( $res );
+	$out  = kzf_gazeta_parse( $html );
+	if ( ! $out ) {
+		return null; // keep the previous good issue
+	}
+	$old = kzf_gazeta_cached( $url );
+	$all                = get_option( 'kzf_gazeta_cache', array() );
+	$all                = is_array( $all ) ? $all : array();
+	$all[ md5( $url ) ] = $out;
+	update_option( 'kzf_gazeta_cache', $all, false );
+	if ( ! $old || $old['no'] !== $out['no'] || $old['headline'] !== $out['headline'] ) {
+		kzf_flush_display_cache();
+		kzf_purge_front_cache();   // a new issue: the cached home page must not keep the old one
+	}
+	return $out;
+}
+
+/**
+ * Number, date and lead headline of an issue page. Read in order of reliability:
+ * og:title (Ежедневная Джазета · № 009 · 29 октября 2026), the first "headline" in the page's
+ * structured data (the lead story), then the story titles, then any longer h2.
+ */
+function kzf_gazeta_parse( $html ) {
 	$out  = array( 'no' => '', 'date' => '', 'headline' => '', 'at' => time() );
-	if ( preg_match( '#<title>(.*?)</title>#su', $html, $m ) ) {
-		$t = html_entity_decode( wp_strip_all_tags( $m[1] ), ENT_QUOTES, 'UTF-8' );
-		if ( preg_match( '/№\s*([0-9]+)/u', $t, $n ) ) {
-			$out['no'] = '№ ' . $n[1];
-		}
-		if ( preg_match( '/(\d{1,2})\s+([а-яё]+)\s+\d{4}/u', $t, $d ) ) {
-			$out['date'] = $d[1] . ' ' . $d[2];
+	$name = '';
+	if ( preg_match( '#<meta[^>]+property=["\']og:title["\'][^>]+content=["\']([^"\']+)#iu', $html, $m ) ) {
+		$name = html_entity_decode( $m[1], ENT_QUOTES, 'UTF-8' );
+	} elseif ( preg_match( '#<title>(.*?)</title>#su', $html, $m ) ) {
+		$name = html_entity_decode( wp_strip_all_tags( $m[1] ), ENT_QUOTES, 'UTF-8' );
+	}
+	if ( preg_match( '/№\s*([0-9]+)/u', $name, $n ) ) {
+		$out['no'] = '№ ' . $n[1];
+	}
+	if ( preg_match( '/(\d{1,2})\s+([а-яё]+)\s+\d{4}/u', $name, $d ) ) {
+		$out['date'] = $d[1] . ' ' . $d[2];
+	}
+	$clean = function ( $t ) {
+		return trim( preg_replace( '/\s+/u', ' ', html_entity_decode( wp_strip_all_tags( (string) $t ), ENT_QUOTES, 'UTF-8' ) ) );
+	};
+	if ( preg_match_all( '#<script[^>]+application/ld\+json[^>]*>(.*?)</script>#su', $html, $blocks ) ) {
+		foreach ( $blocks[1] as $json ) {
+			if ( preg_match( '/"headline"\s*:\s*("(?:[^"\\\\]|\\\\.)*")/u', $json, $h ) ) {
+				$t = $clean( json_decode( $h[1] ) );
+				if ( mb_strlen( $t ) > 12 ) {
+					$out['headline'] = $t;
+					break;
+				}
+			}
 		}
 	}
-	$skip = array( 'оформление', 'коротко о номере', 'скрытая партитура', 'архив', 'подписка' );
-	if ( preg_match_all( '#<h2[^>]*>(.*?)</h2>#su', $html, $hs ) ) {
+	if ( ! $out['headline'] && preg_match( '#<h2[^>]*class=["\'][^"\']*story__title[^"\']*["\'][^>]*>(.*?)</h2>#su', $html, $h ) ) {
+		$out['headline'] = $clean( $h[1] );
+	}
+	if ( ! $out['headline'] && preg_match_all( '#<h2[^>]*>(.*?)</h2>#su', $html, $hs ) ) {
+		$skip = array( 'оформление', 'коротко о номере', 'скрытая партитура', 'архив', 'подписка' );
 		foreach ( $hs[1] as $h ) {
-			$h = trim( preg_replace( '/\s+/u', ' ', html_entity_decode( wp_strip_all_tags( $h ), ENT_QUOTES, 'UTF-8' ) ) );
+			$h = $clean( $h );
 			if ( mb_strlen( $h ) > 20 && ! in_array( mb_strtolower( $h ), $skip, true ) ) {
 				$out['headline'] = $h;
 				break;
 			}
 		}
 	}
-	if ( ! $out['headline'] ) {
-		return null; // keep the previous good issue
-	}
-	$all                = get_option( 'kzf_gazeta_cache', array() );
-	$all                = is_array( $all ) ? $all : array();
-	$all[ md5( $url ) ] = $out;
-	update_option( 'kzf_gazeta_cache', $all, false );
-	return $out;
+	return $out['headline'] ? $out : null;
 }
 
 /** Cron task and save hook: refresh every Джазета slide's issue. */
@@ -392,16 +474,26 @@ add_action( 'kzf_refresh_gazeta', 'kzf_refresh_all_gazeta' );
 
 /* ------------------------------------------------------------------ what the card shows */
 
+/** End of a calendar day (YYYY-MM-DD) in the site's time zone. */
+function kzf_day_end( $date ) {
+	try {
+		return ( new DateTime( $date . ' 23:59:59', wp_timezone() ) )->getTimestamp();
+	} catch ( Exception $e ) {
+		return 0;
+	}
+}
+
 /** One slide resolved to display fields, or null when it should not show. */
 function kzf_resolve( $s, $now = null ) {
 	$now = $now ? $now : time();
 	if ( empty( $s['enabled'] ) ) {
 		return null;
 	}
-	if ( ! empty( $s['hide_after'] ) && strtotime( $s['hide_after'] . ' 23:59:59' ) < $now ) {
+	if ( ! empty( $s['hide_after'] ) && kzf_day_end( $s['hide_after'] ) < $now ) {
 		return null;
 	}
 	$v = array(
+		'until'    => $s['hide_after'] ? kzf_day_end( $s['hide_after'] ) : 0,
 		'kind'     => $s['type'],
 		'label'    => $s['label'],
 		'when'     => $s['date_text'],
@@ -441,7 +533,9 @@ function kzf_resolve( $s, $now = null ) {
 			$v['tc_id']  = $e['tc_id'];
 			$v['tc_key'] = $e['tc_key'];
 		}
-		$v['button'] = $v['button'] ? $v['button'] : 'Купить билет';
+		$v['button']    = $v['button'] ? $v['button'] : 'Купить билет';
+		$v['until']     = $s['hide_after'] ? kzf_day_end( $s['hide_after'] ) : (int) $gone;
+		$v['image_src'] = $v['image'] === $e['image'] ? $e['image_src'] : 'вручную';
 	} elseif ( 'gazeta' === $s['type'] ) {
 		$url = kzf_gazeta_url( $s['link'] );
 		$g   = kzf_gazeta_cached( $url );
@@ -466,8 +560,56 @@ function kzf_resolve( $s, $now = null ) {
 function kzf_flush_display_cache() {
 	delete_transient( 'kzf_display' );
 }
+
+/**
+ * The site serves the home page from W3 Total Cache (disk). When the cards change (saved,
+ * a concert has ended, a new Джазета issue) the cached home page is purged, only that page.
+ * Other page caches can listen to the kzf_front_changed action.
+ */
+function kzf_purge_front_cache() {
+	try {
+		$home = home_url( '/' );
+		if ( function_exists( 'w3tc_flush_url' ) ) {
+			w3tc_flush_url( $home );
+		}
+		do_action( 'kzf_front_changed', $home );
+	} catch ( Throwable $e ) {
+		return;
+	}
+}
+
+/** One job at the moment the next card expires: rebuild the cards and purge the cached home page. */
+function kzf_schedule_expiry( $slides ) {
+	$next = 0;
+	foreach ( $slides as $v ) {
+		if ( ! empty( $v['until'] ) && $v['until'] > time() && ( ! $next || $v['until'] < $next ) ) {
+			$next = (int) $v['until'];
+		}
+	}
+	$have = wp_next_scheduled( 'kzf_expire' );
+	if ( $next && ( ! $have || abs( $have - ( $next + 60 ) ) > 60 ) ) {
+		wp_clear_scheduled_hook( 'kzf_expire' );
+		wp_schedule_single_event( $next + 60, 'kzf_expire' );
+	}
+}
+add_action( 'kzf_expire', 'kzf_on_expire' );
+function kzf_on_expire() {
+	kzf_flush_display_cache();
+	kzf_schedule_expiry( kzf_display_slides() );
+	kzf_purge_front_cache();
+}
 // an edited concert (new date, price, photo) reaches the card at once, not after the 10-minute cache
-add_action( 'save_post', 'kzf_flush_display_cache', 10, 0 );
+add_action( 'save_post', 'kzf_on_save_post', 10, 1 );
+function kzf_on_save_post( $post_id ) {
+	kzf_flush_display_cache();
+	try {
+		if ( 'ai1ec_event' === get_post_type( $post_id ) ) {
+			kzf_purge_front_cache(); // the cached home page gets the corrected card
+		}
+	} catch ( Throwable $e ) {
+		return;
+	}
+}
 
 /** Cards for the front end, cached for 10 minutes (events disappear on time within that step). */
 function kzf_display_slides() {
@@ -487,5 +629,10 @@ function kzf_display_slides() {
 		}
 	}
 	set_transient( 'kzf_display', array( 'v' => KZF_VER, 'slides' => $out ), 10 * MINUTE_IN_SECONDS );
+	try {
+		kzf_schedule_expiry( $out );
+	} catch ( Throwable $e ) {
+		unset( $e ); // the browser also hides ended cards by itself
+	}
 	return $out;
 }

@@ -1,6 +1,6 @@
 <?php
 /**
- * Removing the plugin removes everything it created: four options, one cache entry, one cron job.
+ * Removing the plugin removes everything it created: five options, one cache entry, two scheduled jobs.
  * Theme files, tables and posts were never touched.
  */
 if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
@@ -22,5 +22,7 @@ delete_option( 'kzf_settings' );
 delete_option( 'kzf_slides' );
 delete_option( 'kzf_gazeta_cache' );
 delete_option( 'kzf_ver' );
+delete_option( 'kzf_notice' );
 delete_transient( 'kzf_display' );
 wp_clear_scheduled_hook( 'kzf_refresh_gazeta' );
+wp_clear_scheduled_hook( 'kzf_expire' );

@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Kozlov Living Facade
  * Description: Живой фасад клуба вместо слайдера на главной, только на телефонах. Свой список слайдов (мероприятия, картинки со ссылками, Джазета). Режимы: выключен, только редакторы, все посетители с телефонов. Десктоп не меняется.
- * Version: 1.4.1
+ * Version: 1.4.2
  * Author: Kozlov Club
  * Requires at least: 5.6
  * Requires PHP: 7.4
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'KZF_VER', '1.4.1' );
+define( 'KZF_VER', '1.4.2' );
 define( 'KZF_FILE', __FILE__ );
 define( 'KZF_DIR', plugin_dir_path( __FILE__ ) );
 define( 'KZF_URL', plugin_dir_url( __FILE__ ) );
@@ -58,6 +58,8 @@ function kzf_activate() {
 /**
  * Updating by uploading a new zip does not run the activation hook. On the first request after an update:
  * drop cards cached by the old version, make sure the hourly Джазета job exists and runs soon.
+ * Safety: a version change never goes straight to every visitor. If the facade was on for everyone,
+ * it is switched to editors-only and the settings page says so; one click on «Сохранить» turns it back.
  */
 add_action( 'plugins_loaded', 'kzf_maybe_upgrade' );
 function kzf_maybe_upgrade() {
@@ -66,7 +68,14 @@ function kzf_maybe_upgrade() {
 			return;
 		}
 		update_option( 'kzf_ver', KZF_VER, true );
+		$set = kzf_settings();
+		if ( 'all' === $set['mode'] ) {
+			$set['mode'] = 'editors';
+			update_option( 'kzf_settings', $set, false );
+			update_option( 'kzf_notice', 'Фасад обновлён до версии ' . KZF_VER . ' и пока виден только редакторам. Проверьте главную на телефоне под своим логином, затем выберите «Все посетители с телефонов» и сохраните.', false );
+		}
 		kzf_flush_display_cache();
+		kzf_purge_front_cache();
 		if ( ! wp_next_scheduled( 'kzf_refresh_gazeta' ) ) {
 			wp_schedule_event( time() + 30, 'hourly', 'kzf_refresh_gazeta' );
 		} else {
@@ -79,5 +88,7 @@ function kzf_maybe_upgrade() {
 
 function kzf_deactivate() {
 	wp_clear_scheduled_hook( 'kzf_refresh_gazeta' );
+	wp_clear_scheduled_hook( 'kzf_expire' );
+	kzf_purge_front_cache();
 	kzf_flush_display_cache();
 }

@@ -24,6 +24,24 @@ function kzf_admin_assets( $hook ) {
 	wp_enqueue_script( 'kzf-admin', KZF_URL . 'assets/admin.js', array(), KZF_VER, true );
 }
 
+/** After an update that switched the facade to editors-only: a reminder on every admin screen. */
+add_action( 'admin_notices', 'kzf_admin_notice' );
+function kzf_admin_notice() {
+	try {
+		$n = get_option( 'kzf_notice' );
+		if ( ! $n || ! current_user_can( KZF_CAP ) ) {
+			return;
+		}
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		if ( $screen && false !== strpos( (string) $screen->id, 'kzf' ) ) {
+			return; // the settings page shows it itself
+		}
+		echo '<div class="notice notice-warning"><p>' . esc_html( (string) $n ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=kzf' ) ) . '">Открыть «Живой фасад»</a></p></div>';
+	} catch ( Throwable $e ) {
+		return;
+	}
+}
+
 add_action( 'admin_post_kzf_save', 'kzf_admin_save' );
 function kzf_admin_save() {
 	if ( ! current_user_can( KZF_CAP ) ) {
@@ -52,6 +70,9 @@ function kzf_admin_save() {
 
 	kzf_refresh_all_gazeta(); // fetch the current issue now, off the public page; also clears the card cache
 	kzf_flush_display_cache();
+	kzf_display_slides();      // rebuild the cards now: this also plans the next "concert is over" clean-up
+	kzf_purge_front_cache();   // the cached copy of the home page (W3 Total Cache) is dropped
+	delete_option( 'kzf_notice' );
 	if ( ! wp_next_scheduled( 'kzf_refresh_gazeta' ) ) {
 		wp_schedule_event( time() + HOUR_IN_SECONDS, 'hourly', 'kzf_refresh_gazeta' );
 	}
@@ -132,6 +153,12 @@ function kzf_slide_row( $slide, $i ) {
 			echo '<div class="kzf-preview">';
 			if ( $r ) {
 				echo '<strong>Покажется так:</strong> ' . esc_html( implode( ' · ', array_filter( array( $r['when'], $r['title'], $r['subtitle'], $r['meta'] ) ) ) );
+				echo $r['image']
+					? ' · <span class="kzf-ok">фото: ' . esc_html( $r['image_src'] ) . '</span>'
+					: ' · <span class="kzf-warn">фото не найдено: будет карточка без фото. Задайте изображение записи концерта.</span>';
+				if ( ! empty( $r['until'] ) ) {
+					echo ' · <span>скроется ' . esc_html( wp_date( 'd.m H:i', (int) $r['until'] ) ) . '</span>';
+				}
 				echo $r['tc_id']
 					? ' · <span class="kzf-ok">Ticketscloud ' . esc_html( $r['tc_id'] ) . ' (поле: ' . esc_html( $r['tc_key'] ) . ')</span>'
 					: ' · <span class="kzf-warn">Ticketscloud ID не найден: кнопка ведёт на страницу концерта. Впишите ID вручную или укажите поле в настройках.</span>';
@@ -166,7 +193,10 @@ function kzf_admin_page() {
 		<h1>Живой фасад <span class="kzf-ver">версия <?php echo esc_html( KZF_VER ); ?></span></h1>
 		<p class="kzf-lead">Анимированный фасад клуба с карточками вместо слайдера на главной. Только на телефонах (до 767 px), компьютерная версия не меняется. Под блоком остаётся всё, что есть на странице сейчас.</p>
 		<?php if ( isset( $_GET['updated'] ) ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>
-			<div class="notice notice-success is-dismissible"><p>Сохранено. Если на сайте включён кэш страниц, сбросьте его.</p></div>
+			<div class="notice notice-success is-dismissible"><p>Сохранено. Кэш главной страницы в W3 Total Cache сброшен автоматически. Если стоит другой кэш (Cloudflare и т.п.), сбросьте его сами.</p></div>
+		<?php endif; ?>
+		<?php if ( get_option( 'kzf_notice' ) ) : ?>
+			<div class="notice notice-warning"><p><?php echo esc_html( (string) get_option( 'kzf_notice' ) ); ?></p></div>
 		<?php endif; ?>
 
 		<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
