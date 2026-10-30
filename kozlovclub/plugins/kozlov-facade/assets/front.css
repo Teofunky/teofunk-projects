@@ -125,3 +125,18 @@
   #kzf-root .kzf-slide { padding: 10px 12px 12px; }
 }
 
+/* 1.4.6: the card is the finale of the drawing (as in the first prototype): one pen line leaves the
+   centre of the club door, runs round the card and comes back to the door, then the card's text appears.
+   The script draws the line (svg.kzf-pen) and marks the block kzf-penned; without it the plain frame stays. */
+#kzf-root .kzf-pen { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; z-index: 1; }
+#kzf-root .kzf-pen path { fill: none; stroke: #2b2522; stroke-width: 1.2; stroke-linejoin: miter; stroke-linecap: round; }
+#kzf-root.kzf-penned .kzf-frame { display: none; }
+@media (prefers-reduced-motion: no-preference) {
+  #kzf-root.kzf-penned:not(.kzf-run) .kzf-pen path { stroke-dasharray: 1 1; stroke-dashoffset: 1; }
+  #kzf-root.kzf-penned:not(.kzf-run) .kzf-track, #kzf-root.kzf-penned:not(.kzf-run) .kzf-dots { opacity: 0; }
+  #kzf-root.kzf-penned.kzf-run .kzf-pen path { stroke-dasharray: 1 1; stroke-dashoffset: 1; animation: kzf-pen calc(1.1s * var(--kd, 1)) cubic-bezier(0.45, 0, 0.2, 1) calc(2.2s * var(--k, 1)) forwards; }
+  #kzf-root.kzf-penned.kzf-run .kzf-track, #kzf-root.kzf-penned.kzf-run .kzf-dots { opacity: 0; animation: kzf-cardin calc(0.6s * var(--kd, 1)) ease calc(2.9s * var(--k, 1)) forwards; }
+  #kzf-root.kzf-penned.kzf-keep .kzf-pen path, #kzf-root.kzf-penned.kzf-keep .kzf-track, #kzf-root.kzf-penned.kzf-keep .kzf-dots { animation: none; stroke-dashoffset: 0; opacity: 1; }
+}
+@keyframes kzf-pen { to { stroke-dashoffset: 0; } }
+@keyframes kzf-cardin { to { opacity: 1; } }

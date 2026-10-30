@@ -43,6 +43,7 @@ function kzf_enqueue() {
 		$cfg = array(
 			'heroUrl'    => KZF_URL . 'assets/hero.svg?ver=' . KZF_VER,
 			'doorX'      => (float) $meta['door_x'],
+			'doorY'      => isset( $meta['door_y'] ) ? (float) $meta['door_y'] : null,
 			'viewW'      => (float) $meta['W'],
 			'viewH'      => (float) $meta['H'],
 			'streetSync' => (bool) kzf_settings()['street_sync'],

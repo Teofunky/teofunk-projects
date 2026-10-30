@@ -22,7 +22,7 @@
       release();
       if (root) {
         root.hidden = true;
-        root.classList.remove("kzf-run", "kzf-playing", "kzf-lit", "kzf-dim");
+        root.classList.remove("kzf-run", "kzf-playing", "kzf-lit", "kzf-dim", "kzf-penned");
       }
     } catch (x) { /* nothing else to undo */ }
     if (e && window.console) console.warn("[kzf]", e);
@@ -61,6 +61,44 @@
     }
     if (document.readyState === "complete") quiet();
     else window.addEventListener("load", quiet);
+  }
+
+  // The pen line of the finale: from the middle of the club door down to the card, round it clockwise
+  // and back to the door (1.4.6). Built when the block takes the slider's place, from the reserved
+  // drawing box, so the card text can wait for it. Until the drawing starts the card stays empty; if the
+  // drawing has not started 10 s after that, the old slider comes back (same as any other failure).
+  var pen = null, penPath = null, started = false;
+  function makePen() {
+    var card = root.querySelector(".kzf-card");
+    if (!card || !document.createElementNS || CFG.doorY == null) return;
+    var NS = "http://www.w3.org/2000/svg";
+    pen = document.createElementNS(NS, "svg");
+    penPath = document.createElementNS(NS, "path");
+    pen.setAttribute("class", "kzf-pen");
+    pen.setAttribute("aria-hidden", "true");
+    pen.setAttribute("focusable", "false");
+    penPath.setAttribute("pathLength", "1");
+    pen.appendChild(penPath);
+    card.appendChild(pen);
+    placePen();
+    root.classList.add("kzf-penned");
+    window.addEventListener("resize", placePen);
+    window.addEventListener("load", placePen);
+    if (window.ResizeObserver) new ResizeObserver(placePen).observe(card);
+    setTimeout(function () { if (!started) giveUp(new Error("drawing did not start")); }, 10000);
+  }
+  function placePen() {
+    if (!pen) return;
+    var box = root.querySelector(".kzf-hero svg") || root.querySelector(".kzf-hero");
+    var card = root.querySelector(".kzf-card");
+    var s = box.getBoundingClientRect(), c = card.getBoundingClientRect();
+    if (!s.width || !c.width) return;
+    var W = c.width, H = c.height, h = 0.6;
+    var dx = Math.min(W - 8, Math.max(8, Math.round(CFG.doorX / CFG.viewW * s.width + s.left - c.left))) + 0.5;
+    var dy = CFG.doorY / CFG.viewH * s.height + s.top - c.top;
+    pen.setAttribute("width", Math.round(W));
+    pen.setAttribute("height", Math.round(H));
+    penPath.setAttribute("d", "M" + dx + " " + dy.toFixed(1) + " V" + h + " H" + (W - h).toFixed(1) + " V" + (H - h).toFixed(1) + " H" + h + " V" + h + " H" + dx);
   }
 
   var header = document.querySelector("header.header") || document.querySelector(".header");
@@ -151,6 +189,7 @@
       html.classList.add("kzf-on");
       fitSheet();
       syncHeader();
+      makePen();
       window.addEventListener("scroll", onScroll, { passive: true });
       window.addEventListener("resize", function () { fitSheet(); syncHeader(); });
       window.addEventListener("load", fitSheet);
@@ -175,18 +214,8 @@
 
   function start(svg) {
     var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    // the line from the club door to the card frame
-    var card = root.querySelector(".kzf-card");
-    function placeDoor() {
-      if (!card) return;
-      var s = svg.getBoundingClientRect();
-      var c = card.getBoundingClientRect();
-      var x = s.left + (CFG.doorX / CFG.viewW) * s.width - c.left;
-      root.style.setProperty("--kzf-door", Math.max(8, Math.round(x)) + "px");
-    }
-    placeDoor();
-    window.addEventListener("resize", placeDoor);
+    started = true;
+    placePen();
 
     // The show. Load: the house draws itself (3.7 s), the saxophonist plays: a wave of light runs
     // through the windows, the people wake and the walls take a pale watercolour. From then on the
