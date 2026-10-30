@@ -29,8 +29,6 @@
 #kzf-root a, #kzf-root button { -webkit-tap-highlight-color: transparent; }
 /* while the drawing loads, its place is kept so nothing below jumps */
 #kzf-root .kzf-hero:empty { aspect-ratio: var(--kzf-ratio, 1.804); }
-/* the card frame is drawn together with the house */
-#kzf-root:not(.kzf-run) .kzf-frame { visibility: hidden; }
 /* a new song: the lit windows fade out first, then light up again one by one */
 #kzf-root.kzf-dim .kzf-glow, #kzf-root.kzf-dim .kzf-who { opacity: 0 !important; transition: opacity 0.35s ease; }
 /* the house leaves room for the site header and the card (about 330px), so the ticket button stays on
@@ -44,11 +42,12 @@
 /* the card: swipeable slides, each labelled by what it is */
 #kzf-root .kzf-card { position: relative; width: calc(100% - 32px); max-width: 448px; margin: 0 auto 16px; }
 #kzf-root .kzf-frame span { position: absolute; display: block; background: #2b2522; pointer-events: none; }
-#kzf-root .kzf-f1 { top: 0; left: var(--kzf-door, 34px); right: 0; height: 1.2px; transform-origin: 0 50%; }
-#kzf-root .kzf-f2 { top: 0; right: 0; bottom: 0; width: 1.2px; transform-origin: 50% 0; }
-#kzf-root .kzf-f3 { left: 0; right: 0; bottom: 0; height: 1.2px; transform-origin: 100% 50%; }
-#kzf-root .kzf-f4 { top: 0; left: 0; bottom: 0; width: 1.2px; transform-origin: 50% 100%; }
-#kzf-root .kzf-f5 { top: 0; left: 0; width: var(--kzf-door, 34px); height: 1.2px; transform-origin: 0 50%; }
+/* a plain thin frame around the card, there from the start (no line from the door since 1.4.3) */
+#kzf-root .kzf-f1 { top: 0; left: 0; right: 0; height: 1.2px; }
+#kzf-root .kzf-f2 { top: 0; right: 0; bottom: 0; width: 1.2px; }
+#kzf-root .kzf-f3 { left: 0; right: 0; bottom: 0; height: 1.2px; }
+#kzf-root .kzf-f4 { top: 0; left: 0; bottom: 0; width: 1.2px; }
+#kzf-root .kzf-frame .kzf-f5 { display: none; }
 
 #kzf-root .kzf-track {
   display: flex; align-items: stretch; width: 100%;
@@ -116,17 +115,6 @@
 #kzf-root .kzf-act:active { background: #2b2522; color: #faf8f4; }
 #kzf-root .kzf-buy:focus-visible, #kzf-root .kzf-act:focus-visible { outline: 2px solid #2b2522; outline-offset: 2px; }
 
-/* intro timing for the card follows the house: the line arrives from the club door, then the card */
-@media (prefers-reduced-motion: no-preference) {
-  #kzf-root.kzf-run .kzf-f1 { transform: scaleX(0); animation: kzf-sx 0.3s linear 2.55s forwards; }
-  #kzf-root.kzf-run .kzf-f2 { transform: scaleY(0); animation: kzf-sy 0.16s linear 2.85s forwards; }
-  #kzf-root.kzf-run .kzf-f3 { transform: scaleX(0); animation: kzf-sx 0.3s linear 3.01s forwards; }
-  #kzf-root.kzf-run .kzf-f4 { transform: scaleY(0); animation: kzf-sy 0.16s linear 3.31s forwards; }
-  #kzf-root.kzf-run .kzf-f5 { transform: scaleX(0); animation: kzf-sx 0.1s linear 3.47s forwards; }
-}
-@keyframes kzf-sx { to { transform: scaleX(1); } }
-@keyframes kzf-sy { to { transform: scaleY(1); } }
-
 @media (max-width: 359px) {
   #kzf-root .kzf-photo { flex-basis: 80px; width: 80px; height: 80px; }
   #kzf-root .kzf-paper { flex-basis: 76px; width: 76px; height: 90px; }
@@ -137,4 +125,3 @@
   #kzf-root .kzf-slide { padding: 10px 12px 12px; }
 }
 
-#kzf-root.kzf-keep .kzf-frame span { animation: none !important; transform: none !important; }

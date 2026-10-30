@@ -165,9 +165,5 @@
   .kzf-alive .kzf-who.kzf-guest .kzf-leanA, .kzf-alive .kzf-who.kzf-guest .kzf-leanB { animation: kzf-lean 4.4s ease-in-out calc(var(--p) * -2) infinite; }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .kzf-root.kzf-run .kzf-conn { stroke-dasharray: 1 1; stroke-dashoffset: 1; animation: kzf-draw 0.35s linear 2.2s forwards; }
-}
 .kzf-root.kzf-paused *, .kzf-root.kzf-paused { animation-play-state: paused !important; }
-.kzf-root.kzf-keep .kzf-conn { animation: none !important; stroke-dasharray: none !important; stroke-dashoffset: 0 !important; }
 #kzf-root { --kzf-hero-css: 1; }
