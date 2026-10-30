@@ -165,5 +165,5 @@
   .kzf-alive .kzf-who.kzf-guest .kzf-leanA, .kzf-alive .kzf-who.kzf-guest .kzf-leanB { animation: kzf-lean 4.4s ease-in-out calc(var(--p) * -2) infinite; }
 }
 
-.kzf-root.kzf-paused *, .kzf-root.kzf-paused { animation-play-state: paused !important; }
+.kzf-root.kzf-paused *, .kzf-root.kzf-paused, .kzf-root.kzf-hold *, .kzf-root.kzf-hold { animation-play-state: paused !important; }
 #kzf-root { --kzf-hero-css: 1; }

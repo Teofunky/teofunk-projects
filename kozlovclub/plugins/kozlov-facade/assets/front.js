@@ -40,6 +40,29 @@
     })();
   }
 
+  // The house is drawn only once the page has loaded and the phone is free: on the home page the
+  // site's own scripts and the long afisha keep the phone busy for the first seconds, and a drawing
+  // started in that time stutters (measured on a copy of the live page: pauses of 0.2-1 s).
+  // Free = the page has loaded and 8 frames in a row came on time. Never waits more than 5 s.
+  function whenCalm(done) {
+    var fired = false, t0 = Date.now();
+    function go() { if (!fired) { fired = true; done(); } }
+    setTimeout(go, 5000);
+    function quiet() {
+      if (!window.requestAnimationFrame) { go(); return; }
+      var good = 0, last = 0;
+      window.requestAnimationFrame(function tick(t) {
+        if (fired) return;
+        good = (last && t - last < 40) ? good + 1 : 0;
+        last = t;
+        if (good >= 8) { go(); return; }
+        window.requestAnimationFrame(tick);
+      });
+    }
+    if (document.readyState === "complete") quiet();
+    else window.addEventListener("load", quiet);
+  }
+
   var header = document.querySelector("header.header") || document.querySelector(".header");
 
   // one paper sheet: the facade runs edge to edge and up to the header, with no white strips
@@ -136,13 +159,16 @@
     // 2. the house draws itself once the drawing and its stylesheet are in
     svgPromise.then(function (svgText) {
       whenCss("--kzf-hero-css", 2500, function () {
-        try {
-          var heroBox = root.querySelector(".kzf-hero");
-          heroBox.innerHTML = svgText;
-          var svg = heroBox.querySelector("svg");
-          if (!svg) throw new Error("no svg");
-          start(svg);
-        } catch (e) { giveUp(e); }
+        var still = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        (still ? function (f) { f(); } : whenCalm)(function () {
+          try {
+            var heroBox = root.querySelector(".kzf-hero");
+            heroBox.innerHTML = svgText;
+            var svg = heroBox.querySelector("svg");
+            if (!svg) throw new Error("no svg");
+            start(svg);
+          } catch (e) { giveUp(e); }
+        });
       }, giveUp);
     }).catch(giveUp);
   }, giveUp);
@@ -168,9 +194,13 @@
     // like the swifts and clouds that never stop.
     // Tap on the saxophonist: the house fades and redraws fast (1.3 s), card and sky stay, then the wave.
     // On the hour and half hour (Moscow): only the wave, the house is not redrawn.
-    var T = { end: null, dim: null, play: null, out: null };
+    var T = { end: null, dim: null, play: null, out: null, token: null };
     var guests = Array.prototype.slice.call(svg.querySelectorAll(".kzf-who.kzf-guest"));
-    function clearAll() { Object.keys(T).forEach(function (k) { clearTimeout(T[k]); }); }
+    function clearAll() {
+      T.token = null;
+      root.classList.remove("kzf-hold");   // never left holding if something else takes over
+      ["end", "dim", "play", "out"].forEach(function (k) { clearTimeout(T[k]); });
+    }
     function resetPeople() {
       Array.prototype.forEach.call(svg.querySelectorAll(".kzf-on, .kzf-solo"), function (el) {
         el.classList.remove("kzf-on", "kzf-solo");
@@ -194,6 +224,13 @@
       root.classList.remove("kzf-alive");
       T.dim = setTimeout(sing, 380);
     }
+    // Smooth start: the drawing is set up with its motion held at zero (kzf-hold) and released two
+    // frames later. The heavy first frame (hundreds of lines get their styles, the picture is painted
+    // for the first time) then happens before the clock starts, so the first strokes do not jump.
+    function afterFrames(n, fn) {
+      if (!window.requestAnimationFrame) { setTimeout(fn, 50); return; }
+      (function step() { if (n-- <= 0) fn(); else window.requestAnimationFrame(step); })();
+    }
     function run(fast) {
       clearAll();
       resetPeople();
@@ -202,8 +239,13 @@
       root.style.setProperty("--k", fast ? "0.42" : "1");
       root.style.setProperty("--kd", fast ? "0.6" : "1");
       void root.offsetWidth;
-      root.classList.add("kzf-run");
-      T.play = setTimeout(sing, reduced ? 0 : (fast ? 1300 : 3700));
+      root.classList.add("kzf-hold", "kzf-run");
+      var token = T.token = {};
+      afterFrames(2, function () {
+        if (T.token !== token) return;
+        root.classList.remove("kzf-hold");
+        T.play = setTimeout(sing, reduced ? 0 : (fast ? 1300 : 3700));
+      });
     }
     function replay() {
       if (reduced) { play(); return; }
