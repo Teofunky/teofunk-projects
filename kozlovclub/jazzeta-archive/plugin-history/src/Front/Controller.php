@@ -51,6 +51,7 @@ final class Controller
             Sitemap::render($view, (string) get_query_var('es_key'), (int) get_query_var('es_page'));
             exit;
         }
+        self::enforceTrailingSlash();
         $key = (string) get_query_var('es_key');
         $page = max(1, min(1000000, (int) get_query_var('es_page', 1)));
 
@@ -466,6 +467,38 @@ final class Controller
             }
         }
         return null;
+    }
+
+    /**
+     * 0.5.10: one address per page. «/gazeta/2026-10-21» and «/gazeta/2026-10-21/» both answered 200, and
+     * search engines count that as two pages; now the address without the slash is a 301 to the canonical
+     * one (the query string, e.g. ?q= of the search page, is kept). Query-string addresses (?es_view=) and
+     * sitemaps are left alone.
+     */
+    private static function enforceTrailingSlash(): void
+    {
+        if (!get_option('permalink_structure') || headers_sent()) {
+            return;
+        }
+        $uri = isset($_SERVER['REQUEST_URI']) && is_string($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
+        $rawPath = (string) wp_parse_url($uri, PHP_URL_PATH);
+        if ($rawPath === '' || substr($rawPath, -1) === '/' || !preg_match('~^/' . Request::BASE . '(?:/|$)~', Request::path())) {
+            return;
+        }
+        if (!preg_match('~^[A-Za-z0-9_\-./%]+$~', $rawPath)) {
+            return;
+        }
+        $home = wp_parse_url(home_url('/'));
+        if (empty($home['scheme']) || empty($home['host'])) {
+            return;
+        }
+        $origin = $home['scheme'] . '://' . $home['host'] . (isset($home['port']) ? ':' . $home['port'] : '');
+        $query = (string) wp_parse_url($uri, PHP_URL_QUERY);
+        $target = $origin . $rawPath . '/' . ($query !== '' ? '?' . $query : '');
+        header('Cache-Control: no-cache, max-age=0, must-revalidate');
+        if (wp_safe_redirect($target, 301, 'Kozlov Gazeta')) {
+            exit;
+        }
     }
 
     private static function legacyRedirect(array $issue): void

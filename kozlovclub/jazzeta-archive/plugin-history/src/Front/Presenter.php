@@ -310,10 +310,12 @@ final class Presenter
         if ($opts['preview'] && !Validator::isLocalImage($url)) {
             return null;
         }
+        $attachmentId = function_exists('attachment_url_to_postid') ? (int) attachment_url_to_postid($url) : 0;
+        $attachmentAlt = $attachmentId > 0 ? trim((string) get_post_meta($attachmentId, '_wp_attachment_image_alt', true)) : '';
         return [
-            'attachment_id' => function_exists('attachment_url_to_postid') ? (int) attachment_url_to_postid($url) : 0,
+            'attachment_id' => $attachmentId,
             'url' => $url,
-            'alt' => $headline,
+            'alt' => $attachmentAlt !== '' ? $attachmentAlt : $headline,
             'credit' => Text::typograph(Credit::clean((string) ($media['credit'] ?? ''))),
             'credit_html' => self::creditHtml(Credit::segments((string) ($media['credit'] ?? ''), $pictureSources)),
             'focus' => $focus,
