@@ -29,6 +29,9 @@ class Kozlov_Event_Schema_Admin {
 	/** Сколько строк показывать в таблице «Ближайшие концерты». */
 	const LIST_LIMIT = 60;
 
+	/** Сколько прошедших концертов показывать в выборке «Для поисковиков» (title и description меняются и у них). */
+	const PAST_LIMIT = 40;
+
 	/**
 	 * Хуки.
 	 */
@@ -55,19 +58,25 @@ class Kozlov_Event_Schema_Admin {
 			array(
 				'type'              => 'array',
 				'sanitize_callback' => array( __CLASS__, 'sanitize' ),
-				'default'           => array( 'enabled' => 0 ),
+				'default'           => array(
+					'enabled'  => 0,
+					'seo_meta' => 0,
+				),
 			)
 		);
 	}
 
 	/**
-	 * Только один флажок.
+	 * Два флажка.
 	 *
 	 * @param mixed $input Данные формы.
 	 * @return array
 	 */
 	public static function sanitize( $input ) {
-		return array( 'enabled' => ( is_array( $input ) && ! empty( $input['enabled'] ) ) ? 1 : 0 );
+		return array(
+			'enabled'  => ( is_array( $input ) && ! empty( $input['enabled'] ) ) ? 1 : 0,
+			'seo_meta' => ( is_array( $input ) && ! empty( $input['seo_meta'] ) ) ? 1 : 0,
+		);
 	}
 
 	/**
@@ -105,14 +114,20 @@ class Kozlov_Event_Schema_Admin {
 	 * Выключатель.
 	 */
 	private static function render_settings() {
-		$enabled = kozlov_event_schema_is_enabled();
+		$enabled  = kozlov_event_schema_is_enabled();
+		$seo_meta = kozlov_event_schema_is_enabled( 'seo_meta' );
 		echo '<p>Плагин добавляет в &lt;head&gt; страниц будущих концертов один блок JSON-LD (MusicEvent) с датой, сценой, адресом, ценой, жанрами, картинкой и исполнителями. Данные берутся из полей анонса, которые уже заполняют редакторы; исполнители из строки вида «На сцену выйдут: Имя Фамилия (инструмент), …». Тема и афиша не меняются. Если концерт отменён, отложен или перенесён, или исполнителей нужно указать вручную, используйте блок «Для поисковиков» справа в редакторе анонса.</p>';
 		echo '<form method="post" action="options.php">';
 		settings_fields( self::GROUP );
 		echo '<table class="form-table" role="presentation"><tr><th scope="row">Разметка на сайте</th><td>';
 		echo '<label><input type="checkbox" name="' . esc_attr( KOZLOV_EVENT_SCHEMA_OPTION ) . '[enabled]" value="1" ' . checked( $enabled, true, false ) . '> Выводить разметку на страницах концертов</label>';
-		echo '<p class="description">Сейчас: <strong>' . ( $enabled ? 'включена' : 'выключена' ) . '</strong>. После включения или выключения очистите кэш страниц (Performance → Purge All Caches), иначе изменения появятся по мере обновления кэша.</p>';
+		echo '<p class="description">Сейчас: <strong>' . ( $enabled ? 'включена' : 'выключена' ) . '</strong>.</p>';
+		echo '</td></tr>';
+		echo '<tr><th scope="row">Title и description</th><td>';
+		echo '<label><input type="checkbox" name="' . esc_attr( KOZLOV_EVENT_SCHEMA_OPTION ) . '[seo_meta]" value="1" ' . checked( $seo_meta, true, false ) . '> Собирать title и meta description страниц концертов автоматически</label>';
+		echo '<p class="description">Сейчас: <strong>' . ( $seo_meta ? 'включено' : 'выключено' ) . '</strong>. Вместо ключевых слов из поля Yoast на странице концерта будут title вида «Анна Бутурлина, 11 ноября | Клуб Алексея Козлова» и description вида «Анна Бутурлина: концерт 11 ноября в 20:00, Сцена на Мясницкой, 15. Клуб Алексея Козлова. Билеты от 1500 ₽. Джаз, вокал.» (то же для Open Graph и Telegram). Поля Yoast в анонсах не меняются; свой вариант для отдельного концерта можно вписать в блоке «Для поисковиков». Ниже в столбце «Для поисковиков» видно, что получится у каждого концерта.</p>';
 		echo '</td></tr></table>';
+		echo '<p class="description">После включения или выключения очистите кэш страниц (Performance → Purge All Caches), иначе изменения появятся по мере обновления кэша.</p>';
 		submit_button( 'Сохранить' );
 		echo '</form>';
 	}
@@ -138,6 +153,10 @@ class Kozlov_Event_Schema_Admin {
 		echo empty( $front['data'] ) ? 'На сайте разметка для него <strong>не выводится</strong>.' : 'На сайте выводится этот блок (когда разметка включена).';
 		echo '</p>';
 		self::render_issue_list( $result['issues'] );
+		$meta = Kozlov_Event_Schema_Meta::for_post( $post );
+		echo '<h3>Для поисковиков' . ( kozlov_event_schema_is_enabled( 'seo_meta' ) ? '' : ' (сейчас выключено, на сайте остаются значения Yoast)' ) . '</h3>';
+		echo '<p><strong>Title</strong> (' . (int) Kozlov_Event_Schema_Meta::length( $meta['title'] ) . ' зн.' . ( $meta['title_auto'] ? '' : ', вписан вручную' ) . '): ' . esc_html( $meta['title'] ) . '<br>';
+		echo '<strong>Description</strong> (' . (int) Kozlov_Event_Schema_Meta::length( $meta['description'] ) . ' зн.' . ( $meta['desc_auto'] ? '' : ', вписан вручную' ) . '): ' . esc_html( $meta['description'] ) . '</p>';
 		if ( empty( $result['data'] ) ) {
 			return;
 		}
@@ -279,6 +298,67 @@ class Kozlov_Event_Schema_Admin {
 
 		echo '<h3>Ближайшие концерты (первые ' . (int) min( self::LIST_LIMIT, count( $all ) ) . ')</h3>';
 		self::render_table( array_slice( $all, 0, self::LIST_LIMIT ), $statuses, $labels, false );
+
+		self::render_past_sample( $table, $since );
+	}
+
+	/**
+	 * Выборка прошедших концертов: разметка для них не выводится, но title и description (если модуль включён)
+	 * меняются и у них, поэтому их тоже нужно видеть. Берутся последние по дате и несколько случайных из глубины архива.
+	 *
+	 * @param string $table Имя таблицы календаря.
+	 * @param int    $since Граница «ближайших» (unix).
+	 */
+	private static function render_past_sample( $table, $since ) {
+		global $wpdb;
+
+		$half = (int) ( self::PAST_LIMIT / 2 );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery
+		$recent = $wpdb->get_col( $wpdb->prepare( "SELECT e.`post_id` FROM `{$table}` e INNER JOIN `{$wpdb->posts}` p ON p.ID = e.post_id WHERE p.post_type = %s AND p.post_status = 'publish' AND e.`start` < %d ORDER BY e.`start` DESC LIMIT %d", Kozlov_Event_Schema_Builder::POST_TYPE, $since, $half ) );
+		// Случайные из архива: список ID (только числа) и выбор в PHP, без ORDER BY RAND() на большой таблице.
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery
+		$all_past = $wpdb->get_col( $wpdb->prepare( "SELECT e.`post_id` FROM `{$table}` e INNER JOIN `{$wpdb->posts}` p ON p.ID = e.post_id WHERE p.post_type = %s AND p.post_status = 'publish' AND e.`start` < %d", Kozlov_Event_Schema_Builder::POST_TYPE, $since ) );
+		$all_past = array_values( array_diff( array_map( 'intval', (array) $all_past ), array_map( 'intval', (array) $recent ) ) );
+		$random   = array();
+		if ( count( $all_past ) > $half ) {
+			foreach ( (array) array_rand( $all_past, $half ) as $key ) {
+				$random[] = $all_past[ $key ];
+			}
+		} else {
+			$random = $all_past;
+		}
+		$ids = array_values( array_unique( array_map( 'intval', array_merge( (array) $recent, $random ) ) ) );
+		if ( empty( $ids ) ) {
+			return;
+		}
+		$posts = get_posts(
+			array(
+				'post__in'         => $ids,
+				'post_type'        => Kozlov_Event_Schema_Builder::POST_TYPE,
+				'post_status'      => 'publish',
+				'posts_per_page'   => count( $ids ),
+				'orderby'          => 'post__in',
+				'no_found_rows'    => true,
+				'suppress_filters' => true,
+			)
+		);
+		Kozlov_Event_Schema_Builder::prefetch_rows( $ids );
+
+		echo '<h3>Прошедшие концерты, выборка (' . (int) count( $posts ) . ': последние ' . (int) $half . ' и случайные из архива)</h3>';
+		echo '<p class="description">Разметка для прошедших не выводится, а title и description при включённом модуле меняются и у них: без цены, с годом и пометкой «Уже прошёл». Обновите страницу, чтобы увидеть другую случайную выборку.</p>';
+		echo '<table class="widefat striped" style="max-width:1200px;"><thead><tr><th>Дата</th><th>Концерт</th><th>Для поисковиков</th></tr></thead><tbody>';
+		foreach ( $posts as $post ) {
+			$row   = Kozlov_Event_Schema_Builder::get_row( $post->ID );
+			$times = $row ? Kozlov_Event_Schema_Builder::event_times( $row ) : null;
+			$meta  = Kozlov_Event_Schema_Meta::for_post( $post );
+			$edit  = get_edit_post_link( $post->ID, 'raw' );
+			echo '<tr>';
+			echo '<td>' . esc_html( $times ? $times['display'] : '' ) . '</td>';
+			echo '<td>' . ( $edit ? '<a href="' . esc_url( $edit ) . '">' : '' ) . esc_html( Kozlov_Event_Schema_Builder::plain_text( $post->post_title ) ) . ( $edit ? '</a>' : '' ) . '</td>';
+			echo '<td style="font-size:12px;line-height:1.4;">' . esc_html( $meta['title'] ) . ' <span style="color:#50575e;">(' . (int) Kozlov_Event_Schema_Meta::length( $meta['title'] ) . ')</span><br><span style="color:#50575e;">' . esc_html( $meta['description'] ) . ' (' . (int) Kozlov_Event_Schema_Meta::length( $meta['description'] ) . ')</span></td>';
+			echo '</tr>';
+		}
+		echo '</tbody></table>';
 	}
 
 	/**
@@ -291,7 +371,7 @@ class Kozlov_Event_Schema_Admin {
 	 */
 	private static function render_table( array $rows, array $statuses, array $labels, $show_issues ) {
 		echo '<table class="widefat striped" style="max-width:1200px;"><thead><tr>';
-		echo '<th>Дата</th><th>Концерт</th><th>Статус</th><th>Сцена</th><th>Стоимость</th><th>Исполнители</th><th>Разметка</th>';
+		echo '<th>Дата</th><th>Концерт</th><th>Статус</th><th>Сцена</th><th>Стоимость</th><th>Исполнители</th><th>Разметка</th><th>Для поисковиков</th>';
 		if ( $show_issues ) {
 			echo '<th>Что не так</th>';
 		}
@@ -337,6 +417,8 @@ class Kozlov_Event_Schema_Admin {
 				$mark .= ' (' . $info['schedule'] . ')';
 			}
 			echo '<td>' . esc_html( $mark ) . ' · <a href="' . esc_url( $preview ) . '">показать</a></td>';
+			$meta = Kozlov_Event_Schema_Meta::for_post( $post );
+			echo '<td style="font-size:12px;line-height:1.4;"><span title="Title">' . esc_html( $meta['title'] ) . '</span><br><span title="Description" style="color:#50575e;">' . esc_html( $meta['description'] ) . '</span></td>';
 			if ( $show_issues ) {
 				$texts = array();
 				foreach ( $row['shown'] as $code ) {

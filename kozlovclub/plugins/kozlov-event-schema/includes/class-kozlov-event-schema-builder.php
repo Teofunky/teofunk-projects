@@ -876,6 +876,10 @@ class Kozlov_Event_Schema_Builder {
 			$source = self::source_timezone( isset( $row['timezone_name'] ) ? $row['timezone_name'] : '' );
 			$club   = new DateTimeZone( self::CLUB_TZ );
 			$start  = self::wall_clock( $start_ts, $source, $club );
+			// Ночной концерт хранится в афише как 23:59, чтобы остаться в своём вечере; реальное начало 00:00.
+			if ( ! $allday && '23:59' === $start->format( 'H:i' ) ) {
+				$start->modify( '+1 minute' );
+			}
 			$end    = null;
 			$long   = false;
 			if ( ! $instant && $end_ts > 0 ) {

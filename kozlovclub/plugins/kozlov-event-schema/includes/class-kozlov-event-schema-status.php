@@ -3,8 +3,9 @@
  * Небольшой блок «Для поисковиков» в правой колонке редактора анонса.
  *
  * Пишет только собственные скрытые поля плагина и только когда редактор сам их заполнил:
- * статус (_kozlov_event_status, прежняя дата _kozlov_event_previous_start)
- * и исполнителей (_kozlov_event_performers). Пустое значение поле удаляет.
+ * статус (_kozlov_event_status, прежняя дата _kozlov_event_previous_start),
+ * исполнителей (_kozlov_event_performers), title и description для поисковиков
+ * (_kozlov_event_seo_title, _kozlov_event_seo_desc). Пустое значение поле удаляет.
  *
  * @package Kozlov_Event_Schema
  */
@@ -31,6 +32,14 @@ class Kozlov_Event_Schema_Status {
 	const PREVIOUS_FIELD = 'kozlov_event_schema_previous';
 
 	const PERFORMERS_FIELD = 'kozlov_event_schema_performers';
+
+	const SEO_TITLE_FIELD = 'kozlov_event_schema_seo_title';
+
+	const SEO_DESC_FIELD = 'kozlov_event_schema_seo_desc';
+
+	/** Ограничение длины ручных title и description (знаков): с запасом к рекомендуемым 65 и 160. */
+	const SEO_TITLE_MAX = 100;
+	const SEO_DESC_MAX  = 200;
 
 	/** Ограничение длины поля исполнителей (знаков). */
 	const PERFORMERS_MAX = 2000;
@@ -95,6 +104,21 @@ class Kozlov_Event_Schema_Status {
 				echo '<p class="description">' . ( empty( $names ) ? 'В тексте анонса состав не найден.' : 'Найдено в тексте: ' . esc_html( implode( ', ', $names ) ) . '.' ) . '</p>';
 			}
 			echo '<p class="description">Пусто: состав берётся из строки вида «На сцену выйдут: Имя Фамилия (инструмент), …». Чтобы указать вручную, впишите по одному исполнителю или коллективу на строке. «-»: не указывать исполнителей.</p>';
+
+			// Title и description.
+			$auto         = Kozlov_Event_Schema_Meta::build( $post );
+			$manual_title = (string) get_post_meta( $post->ID, Kozlov_Event_Schema_Meta::TITLE_META, true );
+			$manual_desc  = (string) get_post_meta( $post->ID, Kozlov_Event_Schema_Meta::DESC_META, true );
+			echo '<hr><p style="margin:8px 0 4px;"><strong>Заголовок и описание в поиске</strong></p>';
+			echo '<p class="description">Для прошедших, отменённых и отложенных концертов текст меняется сам: без цены, с пометкой о состоянии.</p>';
+			if ( ! kozlov_event_schema_is_enabled( 'seo_meta' ) ) {
+				echo '<p class="description">Сейчас выключено в «Настройки → Разметка концертов»: на сайте остаются значения Yoast.</p>';
+			}
+			echo '<p style="margin:6px 0 2px;"><label for="kozlov-event-schema-seo-title">Title</label></p>';
+			echo '<input type="text" id="kozlov-event-schema-seo-title" name="' . esc_attr( self::SEO_TITLE_FIELD ) . '" value="' . esc_attr( $manual_title ) . '" style="width:100%" placeholder="' . esc_attr( $auto['title'] ) . '">';
+			echo '<p style="margin:6px 0 2px;"><label for="kozlov-event-schema-seo-desc">Description</label></p>';
+			echo '<textarea id="kozlov-event-schema-seo-desc" name="' . esc_attr( self::SEO_DESC_FIELD ) . '" rows="4" style="width:100%" placeholder="' . esc_attr( $auto['description'] ) . '">' . esc_textarea( $manual_desc ) . '</textarea>';
+			echo '<p class="description">Пусто: собирается автоматически из названия, даты, сцены, цены и жанров (серым показано, что получится сейчас). Впишите свой текст, только если автоматический не годится. Title до 65 знаков, description до 160 (поля обрезаются на 100 и 200).</p>';
 		} catch ( Throwable $e ) {
 			return;
 		}
@@ -158,9 +182,41 @@ class Kozlov_Event_Schema_Status {
 					update_post_meta( $post_id, Kozlov_Event_Schema_Builder::PERFORMERS_META, wp_slash( $performers ) );
 				}
 			}
+
+			// Title и description для поисковиков (то же правило: нет поля в запросе, ничего не трогаем).
+			$seo_fields = array(
+				self::SEO_TITLE_FIELD => Kozlov_Event_Schema_Meta::TITLE_META,
+				self::SEO_DESC_FIELD  => Kozlov_Event_Schema_Meta::DESC_META,
+			);
+			foreach ( $seo_fields as $field => $meta_key ) {
+				if ( ! isset( $_POST[ $field ] ) ) {
+					continue;
+				}
+				$text = self::clean_seo_text( sanitize_textarea_field( wp_unslash( $_POST[ $field ] ) ), self::SEO_TITLE_FIELD === $field ? self::SEO_TITLE_MAX : self::SEO_DESC_MAX );
+				if ( '' === $text ) {
+					delete_post_meta( $post_id, $meta_key );
+				} else {
+					update_post_meta( $post_id, $meta_key, wp_slash( $text ) );
+				}
+			}
 		} catch ( Throwable $e ) {
 			return;
 		}
+	}
+
+	/**
+	 * Ручные title и description: одна строка, без лишних пробелов, не длиннее $max.
+	 *
+	 * @param string $text Текст из формы (уже без тегов).
+	 * @param int    $max  Максимум знаков.
+	 * @return string
+	 */
+	public static function clean_seo_text( $text, $max ) {
+		$text = trim( (string) preg_replace( '/\s+/u', ' ', (string) $text ) );
+		if ( function_exists( 'mb_substr' ) ) {
+			$text = mb_substr( $text, 0, (int) $max, 'UTF-8' );
+		}
+		return trim( $text );
 	}
 
 	/**

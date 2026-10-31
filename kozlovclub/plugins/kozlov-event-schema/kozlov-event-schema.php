@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name:       Kozlov Event Schema
- * Description:       Разметка schema.org MusicEvent (JSON-LD) для страниц концертов. Читает данные анонсов, тему и афишу не меняет; хранит только свою настройку и необязательные поля «статус» и «исполнители», если их заполнил редактор. Включается в «Настройки → Разметка концертов».
- * Version:           1.2.0
+ * Description:       Разметка schema.org MusicEvent (JSON-LD) и title/description для поисковиков на страницах концертов. Читает данные анонсов, тему и афишу не меняет; хранит только свои настройки и необязательные поля блока «Для поисковиков», если их заполнил редактор. Включается в «Настройки → Разметка концертов».
+ * Version:           1.3.0
  * Requires at least: 5.3
  * Requires PHP:      7.2
  * Author:            Kozlov Club
@@ -21,12 +21,13 @@ if ( defined( 'KOZLOV_EVENT_SCHEMA_VERSION' ) ) {
 	return;
 }
 
-define( 'KOZLOV_EVENT_SCHEMA_VERSION', '1.2.0' );
+define( 'KOZLOV_EVENT_SCHEMA_VERSION', '1.3.0' );
 define( 'KOZLOV_EVENT_SCHEMA_OPTION', 'kozlov_event_schema_settings' );
 define( 'KOZLOV_EVENT_SCHEMA_DIR', plugin_dir_path( __FILE__ ) );
 define( 'KOZLOV_EVENT_SCHEMA_FILE', __FILE__ );
 
 require_once KOZLOV_EVENT_SCHEMA_DIR . 'includes/class-kozlov-event-schema-builder.php';
+require_once KOZLOV_EVENT_SCHEMA_DIR . 'includes/class-kozlov-event-schema-meta.php';
 
 if ( is_admin() ) {
 	require_once KOZLOV_EVENT_SCHEMA_DIR . 'includes/class-kozlov-event-schema-admin.php';
@@ -38,23 +39,33 @@ if ( is_admin() ) {
 register_activation_hook( __FILE__, 'kozlov_event_schema_activate' );
 
 /**
- * При первой активации разметка ВЫКЛЮЧЕНА: сначала проверка в админке, потом включение.
+ * При первой активации всё ВЫКЛЮЧЕНО: сначала проверка в админке, потом включение.
  */
 function kozlov_event_schema_activate() {
 	if ( false === get_option( KOZLOV_EVENT_SCHEMA_OPTION ) ) {
-		add_option( KOZLOV_EVENT_SCHEMA_OPTION, array( 'enabled' => 0 ) );
+		add_option(
+			KOZLOV_EVENT_SCHEMA_OPTION,
+			array(
+				'enabled'  => 0,
+				'seo_meta' => 0,
+			)
+		);
 	}
 }
 
 /**
- * Включена ли разметка на сайте.
+ * Включена ли функция плагина.
  *
+ * @param string $key 'enabled' (разметка JSON-LD) или 'seo_meta' (title и description).
  * @return bool
  */
-function kozlov_event_schema_is_enabled() {
+function kozlov_event_schema_is_enabled( $key = 'enabled' ) {
 	$settings = get_option( KOZLOV_EVENT_SCHEMA_OPTION );
-	return is_array( $settings ) && ! empty( $settings['enabled'] );
+	return is_array( $settings ) && ! empty( $settings[ $key ] );
 }
+
+// Title и description для поисковиков: фильтры Yoast подключаются после загрузки всех плагинов.
+add_action( 'plugins_loaded', array( 'Kozlov_Event_Schema_Meta', 'init' ) );
 
 add_action( 'wp_head', 'kozlov_event_schema_output', 99 );
 
