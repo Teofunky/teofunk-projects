@@ -42,6 +42,7 @@ function kzf_enqueue() {
 		wp_enqueue_script( 'kzf-front', KZF_URL . 'assets/front.js', array(), KZF_VER, true );
 		$cfg = array(
 			'heroUrl'    => KZF_URL . 'assets/hero.svg?ver=' . KZF_VER,
+			'assetsUrl'  => KZF_URL . 'assets/',
 			'doorX'      => (float) $meta['door_x'],
 			'viewW'      => (float) $meta['W'],
 			'viewH'      => (float) $meta['H'],
@@ -54,7 +55,7 @@ function kzf_enqueue() {
 }
 
 /**
- * In <head>: on phones the old slider stays invisible from the very first paint while the block gets ready,
+ * In <head>: the drawing is preloaded, and on phones the old slider stays invisible from the very first paint while the block gets ready,
  * so it never flashes and jumps. Pure CSS, so it works even if scripts are deferred or moved by an optimizer.
  * Its space stays reserved. Safety: a tiny script printed with the block gives it back 2.5 s after the
  * page has been read unless the block has mounted; if no script runs at all, CSS gives it back after 4 s;
@@ -67,6 +68,9 @@ function kzf_head_early() {
 			return;
 		}
 		echo '<style id="kzf-early">@media (max-width: 767px){html:not(.kzf-off):not(.kzf-on) .content_home .slider-wrapper{opacity:0;visibility:hidden;animation:kzf-back 0s linear 4s forwards}}@keyframes kzf-back{to{opacity:1;visibility:visible}}</style>' . "\n";
+		// the drawing starts downloading with the page itself, not when the footer script runs
+		// (same mode and credentials as the fetch() in front.js, so the browser reuses this download)
+		echo '<link rel="preload" href="' . esc_url( KZF_URL . 'assets/hero.svg?ver=' . KZF_VER ) . '" as="fetch" crossorigin="anonymous" media="(max-width: 767px)">' . "\n";
 	} catch ( Throwable $e ) {
 		return;
 	}

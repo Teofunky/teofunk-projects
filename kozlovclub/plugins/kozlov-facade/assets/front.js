@@ -6,7 +6,9 @@
    - the old slider is kept invisible from the first paint (CSS printed in <head>) and is given back at
      once (class kzf-off) whenever the block does not mount; any later error puts everything back
    - while the house is on screen the site header takes the facade's paper colour (class kzf-top)
-   - a ticket button that Ticketscloud does not pick up falls back to the concert page */
+   - a ticket button that Ticketscloud does not pick up falls back to the concert page
+   1.4.8: the drawing is parsed and painted at rest before the animation starts; the picture has no masks
+   and lives on its own compositor layer; swifts are CSS (no SMIL), they and the clouds stand still while the house is drawn. */
 (function () {
   "use strict";
 
@@ -156,18 +158,25 @@
       window.addEventListener("load", fitSheet);
     } catch (e) { giveUp(e); return; }
 
-    // 2. the house draws itself once the drawing and its stylesheet are in
+    // 2. the drawing goes into the page as soon as it and its stylesheet are in. In its resting state it
+    //    shows nothing but paper, so the browser parses, styles and paints it while the page is still
+    //    busy; the drawing itself starts later, when the phone is free, and then only has to start clocks.
     svgPromise.then(function (svgText) {
       whenCss("--kzf-hero-css", 2500, function () {
+        var svg;
+        try {
+          var heroBox = root.querySelector(".kzf-hero");
+          heroBox.innerHTML = svgText;
+          svg = heroBox.querySelector("svg");
+          if (!svg) throw new Error("no svg");
+          // the watercolour of the walls is a separate picture: it is needed only when the lights go on
+          var wash = svg.querySelector("image[data-kzf-src]");
+          var base = CFG.assetsUrl || String(CFG.heroUrl).replace(/[^\/]*$/, "");
+          if (wash) wash.setAttribute("href", base + wash.getAttribute("data-kzf-src") + "?ver=" + (root.getAttribute("data-kzf-ver") || ""));
+        } catch (e) { giveUp(e); return; }
         var still = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
         (still ? function (f) { f(); } : whenCalm)(function () {
-          try {
-            var heroBox = root.querySelector(".kzf-hero");
-            heroBox.innerHTML = svgText;
-            var svg = heroBox.querySelector("svg");
-            if (!svg) throw new Error("no svg");
-            start(svg);
-          } catch (e) { giveUp(e); }
+          try { start(svg); } catch (e) { giveUp(e); }
         });
       }, giveUp);
     }).catch(giveUp);

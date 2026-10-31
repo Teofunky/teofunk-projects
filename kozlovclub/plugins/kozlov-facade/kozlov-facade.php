@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Kozlov Living Facade
  * Description: Живой фасад клуба вместо слайдера на главной, только на телефонах. Свой список слайдов (мероприятия, картинки со ссылками, Джазета). Режимы: выключен, только редакторы, все посетители с телефонов. Десктоп не меняется.
- * Version: 1.4.7
+ * Version: 1.4.8
  * Author: Kozlov Club
  * Requires at least: 5.6
  * Requires PHP: 7.4
@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'KZF_VER', '1.4.7' );
+define( 'KZF_VER', '1.4.8' );
 define( 'KZF_FILE', __FILE__ );
 define( 'KZF_DIR', plugin_dir_path( __FILE__ ) );
 define( 'KZF_URL', plugin_dir_url( __FILE__ ) );
