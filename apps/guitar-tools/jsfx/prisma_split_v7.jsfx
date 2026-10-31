@@ -1,0 +1,215 @@
+desc:Prisma Time Split v7 (ВЧ-мощность, подтверждение фронта, look-ahead)
+author:proof-of-sound prototype v7
+about:
+  Аудио задерживается на Look-ahead. Детектор работает по незадержанному
+  сигналу, поэтому маска может открыться до прихода транзиента.
+  Атака = x*m, Хвост = x*(1-m). Задержка сообщается REAPER через PDC.
+
+  v7, механика детектора:
+  1. Два последовательных однополюсных ФВЧ подавляют основной тон и низкие
+     гармоники круче, чем один фильтр v6.
+  2. Детектор сравнивает квадрат ВЧ-составляющей (мощность), а не мгновенную
+     амплитуду полного сигнала, с её значением в прошлом.
+  3. После ВЧ-фронта детектор ждёт короткое Подтверждение. Если за это время
+     полный сигнал не превысил Порог входа, кандидат отклоняется. Это отделяет
+     новую ноту от ВЧ-импульса фильтра при резком глушении предыдущей.
+  4. Срабатывание идёт по фронту условия и затем блокируется Мин. интервалом.
+
+  Метод рассчитан прежде всего на отчётливую атаку медиатором. Мягкая
+  пальцевая атака содержит меньше ВЧ и может потребовать меньшей Частоты
+  среза или меньшего Прироста ВЧ. Единой настройки для обоих способов игры
+  этот прототип не гарантирует: это необходимо проверять на реальном DI.
+
+  Кроссфейд спада хвоста независим от окна атаки и действительно может быть
+  выставлен в 8-15 мс для проверки флэма на внешнем фуззе.
+  Для полного захвата начала ноты сумма задержки детектора и Кроссфейда
+  подъёма должна оставаться меньше Look-ahead.
+
+  ВАЖНО: режим Split пишет хвост в каналы 3-4. У трека должно быть 4 канала
+  (Track Channels: 4), после чего хвост нужно отправить отдельным send.
+
+  Счётчик показывает принятые фронты детектора, а не гарантированное число
+  физических ударов медиатора.
+
+in_pin:Input L
+in_pin:Input R
+out_pin:Attack L
+out_pin:Attack R
+out_pin:Sustain L
+out_pin:Sustain R
+
+slider1:gate_db=-55<-90,0,0.1>Порог подтверждения по полному сигналу (dB)
+slider2:rise_db=6<1,24,0.1>Прирост ВЧ-мощности за опорное окно (dB)
+slider3:hf_hz=1500<200,6000,10>Частота среза детектора (Hz)
+slider4:ref_ms=8<2,50,0.5>Опорное окно (ms)
+slider5:rel_ms=25<5,200,1>Спад ВЧ-огибающей (ms)
+slider6:confirm_ms=1<0.1,4,0.1>Подтверждение после ВЧ-фронта (ms)
+slider7:window_ms=12<1,150,0.1>Окно атаки (ms)
+slider8:look_ms=4<0.5,20,0.1>Look-ahead (ms)
+slider9:xfup_ms=2<0.05,20,0.05>Кроссфейд подъёма (ms, не больше Look-ahead)
+slider10:xfdn_ms=8<0.05,60,0.05>Кроссфейд спада хвоста (ms)
+slider11:lockout_ms=20<1,400,1>Мин. интервал между атаками (ms)
+slider12:mode=0<0,3,1{Split 1-2 атака / 3-4 хвост,Только атака,Только хвост,Sum (проверка null)}>Режим
+slider13:reset=0<0,1,1{-,Сброс счётчиков}>Счётчики
+
+@init
+BUFL  = 0;
+BUFR  = 65536;
+BUFMASK = 65535;
+EBUF  = 131072;
+EMASK = 65535;
+
+wp = 0; ep = 0;
+m = 0; tgt = 0;
+
+lp10 = 0; lp11 = 0;
+lp20 = 0; lp21 = 0;
+envhf = 0;
+
+timer = 0; lock = 0;
+hf_prev = 0;
+pending = 0; post_energy = 0;
+
+trigcount = 0; rejectcount = 0; trigflash = 0;
+
+@slider
+gate = 10^(gate_db/20);
+
+// envhf хранит мощность, поэтому перевод dB в отношение мощности делается /10.
+rise_r = 10^(rise_db/10);
+
+la_smp = min(BUFMASK-1, max(1, floor(look_ms*0.001*srate)));
+win_smp = max(1, window_ms*0.001*srate);
+lock_smp = lockout_ms*0.001*srate;
+ref_smp = min(EMASK-1, max(1, floor(ref_ms*0.001*srate)));
+confirm_smp = max(1, floor(confirm_ms*0.001*srate));
+
+rise_inc = 1/max(1, min(xfup_ms, look_ms)*0.001*srate);
+fall_inc = 1/max(1, xfdn_ms*0.001*srate);
+
+// Два каскада однополюсного ФВЧ: hp = x - lowpass(x).
+alp = exp(-2*$pi*hf_hz/srate);
+
+// Быстрая атака и умеренный спад огибающей ВЧ-мощности.
+ca = exp(-1/(0.0002*srate));
+cr = exp(-1/(rel_ms*0.001*srate));
+
+// Технический нижний предел кандидата: на 40 dB ниже порога по мощности.
+hf_floor = gate*gate*0.0001;
+
+pdc_delay = la_smp;
+pdc_bot_ch = 0;
+pdc_top_ch = 4;
+
+reset == 1 ? (
+  trigcount = 0;
+  rejectcount = 0;
+  slider13 = 0;
+  sliderchange(slider13);
+);
+
+@sample
+d = max(abs(spl0), abs(spl1));
+
+// Первый каскад ФВЧ.
+lp10 = alp*lp10 + (1-alp)*spl0;
+lp11 = alp*lp11 + (1-alp)*spl1;
+hp0 = spl0-lp10;
+hp1 = spl1-lp11;
+
+// Второй каскад ФВЧ.
+lp20 = alp*lp20 + (1-alp)*hp0;
+lp21 = alp*lp21 + (1-alp)*hp1;
+hp0 -= lp20;
+hp1 -= lp21;
+
+// Квадрат амплитуды является мерой мгновенной мощности.
+hfpow = max(hp0*hp0, hp1*hp1);
+envhf = hfpow > envhf ? ca*envhf + (1-ca)*hfpow
+                      : cr*envhf + (1-cr)*hfpow;
+
+EBUF[ep] = envhf;
+erp = (ep - ref_smp + EMASK + 1) & EMASK;
+envref = EBUF[erp];
+ep = (ep + 1) & EMASK;
+
+lock > 0 ? lock -= 1;
+
+hf_onset = (envhf > hf_floor && envhf > envref*rise_r);
+new_candidate = (hf_onset && hf_prev == 0 && lock <= 0 && pending <= 0);
+hf_prev = hf_onset;
+
+new_candidate ? (
+  pending = confirm_smp;
+  post_energy = 0;
+) : pending > 0 ? (
+  // Сэмпл самого ВЧ-фронта исключён: проверяется то, что следует за ним.
+  post_energy += d*d;
+  pending -= 1;
+
+  pending <= 0 ? (
+    // RMS без sqrt: mean(d^2) > gate^2.
+    post_energy > gate*gate*confirm_smp ? (
+      timer = la_smp + win_smp;
+      lock = lock_smp;
+      trigcount += 1;
+      trigflash = srate*0.05;
+    ) : (
+      rejectcount += 1;
+    );
+  );
+);
+
+timer > 0 ? (timer -= 1; tgt = 1) : (tgt = 0);
+
+m < tgt ? (m = min(tgt, m + rise_inc))
+        : (m = max(tgt, m - fall_inc));
+
+BUFL[wp] = spl0;
+BUFR[wp] = spl1;
+rp = (wp - la_smp + BUFMASK + 1) & BUFMASK;
+dl = BUFL[rp];
+dr = BUFR[rp];
+wp = (wp + 1) & BUFMASK;
+
+a0 = dl*m;      a1 = dr*m;
+s0 = dl*(1-m);  s1 = dr*(1-m);
+
+mode == 0 ? (spl0=a0; spl1=a1; spl2=s0; spl3=s1) :
+mode == 1 ? (spl0=a0; spl1=a1; spl2=0;  spl3=0)  :
+mode == 2 ? (spl0=s0; spl1=s1; spl2=0;  spl3=0)  :
+            (spl0=a0+s0; spl1=a1+s1; spl2=0; spl3=0);
+
+trigflash > 0 ? trigflash -= 1;
+
+@gfx 500 190
+gfx_set(0.10,0.10,0.11,1); gfx_rect(0,0,gfx_w,gfx_h);
+
+gfx_set(0.30,0.30,0.32,1);
+gfx_rect(20,34,gfx_w-40,26);
+bw = (gfx_w-40)*m;
+gfx_set(0.30,0.62,0.95,1); gfx_rect(20,34,bw,26);
+gfx_set(0.95,0.70,0.25,1); gfx_rect(20+bw,34,(gfx_w-40)-bw,26);
+
+gfx_set(0.85,0.85,0.85,1);
+gfx_x=20; gfx_y=16; gfx_drawstr("ATTACK");
+gfx_x=gfx_w-95; gfx_y=16; gfx_drawstr("SUSTAIN");
+
+trigflash > 0 ? gfx_set(1,0.25,0.25,1) : gfx_set(0.25,0.25,0.25,1);
+gfx_circle(gfx_w-34,84,8,1);
+
+gfx_set(0.70,0.70,0.70,1);
+gfx_x=20; gfx_y=76; gfx_drawstr("Атак: ");
+gfx_drawnumber(trigcount,0);
+gfx_x=130; gfx_y=76; gfx_drawstr("Отклонено: ");
+gfx_drawnumber(rejectcount,0);
+
+gfx_set(0.55,0.55,0.55,1);
+gfx_x=20; gfx_y=106;
+gfx_drawstr("Пропуски медиатора: опусти Прирост ВЧ или Частоту среза.");
+gfx_x=20; gfx_y=124;
+gfx_drawstr("Ложные фронты: подними Прирост ВЧ или Подтверждение.");
+gfx_x=20; gfx_y=142;
+gfx_drawstr("Флэм на фуззе: Кроссфейд спада хвоста 8-15 ms.");
+gfx_x=20; gfx_y=160;
+gfx_drawstr("Пальцы: отдельная настройка; подбирай только по реальному DI.");

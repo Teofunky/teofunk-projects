@@ -1,0 +1,126 @@
+desc:Prisma Time Split v2 (look-ahead, комплементарное разделение атака/хвост)
+author:proof-of-sound prototype v2
+about:
+  Аудио задерживается на Look-ahead. Детектор onset работает по НЕзадержанному
+  сигналу, поэтому маска успевает открыться ДО прихода транзиента.
+  Атака = x*m, Хвост = x*(1-m). Задержка компенсируется через PDC.
+
+  ВАЖНО: null-тест в режиме Sum проверяет только маршрутизацию и уровни,
+  но НЕ качество детекции. Качество детекции проверяется счётчиком атак:
+  число срабатываний должно совпасть с числом реально сыгранных нот.
+
+in_pin:Input L
+in_pin:Input R
+out_pin:Attack L
+out_pin:Attack R
+out_pin:Sustain L
+out_pin:Sustain R
+
+slider1:thresh_db=-45<-80,0,0.1>Порог onset (dB)
+slider2:ratio_db=5<0.5,20,0.1>Превышение над фоном (dB)
+slider3:window_ms=12<1,150,0.1>Окно атаки (ms)
+slider4:look_ms=4<0.5,20,0.1>Look-ahead (ms)
+slider5:xfade_ms=2<0.05,20,0.05>Кроссфейд (ms)
+slider6:lockout_ms=40<5,400,1>Блокировка ретриггера (ms)
+slider7:mode=0<0,3,1{Split 1-2 атака / 3-4 хвост,Только атака,Только хвост,Sum (проверка null)}>Режим
+slider8:reset=0<0,1,1{-,Сброс счётчика}>Счётчик
+
+@init
+BUFL = 0;
+BUFR = 65536;
+BUFMASK = 65535;
+wp = 0;
+m = 0; tgt = 0;
+envf = 0; envs = 0;
+timer = 0; lock = 0;
+trigcount = 0; trigflash = 0;
+
+@slider
+thresh = 10^(thresh_db/20);
+ratio  = 10^(ratio_db/20);
+
+la_smp  = max(1, floor(look_ms*0.001*srate));
+win_smp = max(1, window_ms*0.001*srate);
+lock_smp = lockout_ms*0.001*srate;
+
+// подъём маски обязан уложиться в look-ahead,
+// спад обязан уложиться в половину окна атаки
+xf_rise = min(xfade_ms, look_ms);
+xf_fall = min(xfade_ms, window_ms*0.5);
+rise_inc = 1/max(1, xf_rise*0.001*srate);
+fall_inc = 1/max(1, xf_fall*0.001*srate);
+
+caf = exp(-1/(0.0003*srate));
+crf = exp(-1/(0.0250*srate));
+cas = exp(-1/(0.0600*srate));
+crs = exp(-1/(0.2500*srate));
+
+// компенсация задержки хостом
+pdc_delay = la_smp;
+pdc_bot_ch = 0;
+pdc_top_ch = 4;
+
+reset == 1 ? ( trigcount = 0; slider8 = 0; sliderchange(slider8); );
+
+@sample
+d = max(abs(spl0), abs(spl1));
+
+envf = d > envf ? caf*envf + (1-caf)*d : crf*envf + (1-crf)*d;
+envs = d > envs ? cas*envs + (1-cas)*d : crs*envs + (1-crs)*d;
+
+lock > 0 ? lock -= 1;
+
+(envf > thresh && envf > envs*ratio && lock <= 0) ? (
+  timer = la_smp + win_smp;   // маска открыта на время подлёта плюс окно
+  lock  = lock_smp;
+  trigcount += 1;
+  trigflash = srate*0.05;
+);
+
+timer > 0 ? ( timer -= 1; tgt = 1; ) : ( tgt = 0 );
+
+m < tgt ? ( m = min(tgt, m + rise_inc) ) : ( m = max(tgt, m - fall_inc) );
+
+// кольцевой буфер: пишем текущий, читаем задержанный
+BUFL[wp] = spl0;
+BUFR[wp] = spl1;
+rp = (wp - la_smp) & BUFMASK;
+dl = BUFL[rp];
+dr = BUFR[rp];
+wp = (wp + 1) & BUFMASK;
+
+a0 = dl*m;      a1 = dr*m;
+s0 = dl*(1-m);  s1 = dr*(1-m);
+
+mode == 0 ? ( spl0=a0; spl1=a1; spl2=s0; spl3=s1; ) :
+mode == 1 ? ( spl0=a0; spl1=a1; spl2=0;  spl3=0;  ) :
+mode == 2 ? ( spl0=s0; spl1=s1; spl2=0;  spl3=0;  ) :
+            ( spl0=a0+s0; spl1=a1+s1; spl2=0; spl3=0; );
+
+trigflash > 0 ? trigflash -= 1;
+
+@gfx 440 140
+gfx_set(0.10,0.10,0.11,1); gfx_rect(0,0,gfx_w,gfx_h);
+
+gfx_set(0.30,0.30,0.32,1);
+gfx_rect(20, 34, gfx_w-40, 26);
+bw = (gfx_w-40)*m;
+gfx_set(0.30,0.62,0.95,1); gfx_rect(20, 34, bw, 26);
+gfx_set(0.95,0.70,0.25,1); gfx_rect(20+bw, 34, (gfx_w-40)-bw, 26);
+
+gfx_set(0.85,0.85,0.85,1);
+gfx_x=20; gfx_y=16; gfx_drawstr("ATTACK");
+gfx_x=gfx_w-95; gfx_y=16; gfx_drawstr("SUSTAIN");
+
+trigflash > 0 ? gfx_set(1,0.25,0.25,1) : gfx_set(0.25,0.25,0.25,1);
+gfx_circle(gfx_w-32, 84, 8, 1);
+
+gfx_set(0.70,0.70,0.70,1);
+gfx_x=20; gfx_y=76; gfx_drawstr("Срабатываний: ");
+gfx_drawnumber(trigcount, 0);
+
+gfx_set(0.55,0.55,0.55,1);
+gfx_x=20; gfx_y=96;
+gfx_drawstr("Сравни это число с числом сыгранных нот.");
+gfx_x=20; gfx_y=114;
+gfx_drawstr("Подъём маски ограничен look-ahead, спад ограничен окном.");

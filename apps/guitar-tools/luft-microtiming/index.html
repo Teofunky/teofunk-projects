@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ЛЮФТ — микротайминг для гитары</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ground:#16130F;
+  --panel:#1E1913;
+  --panel-2:#251F18;
+  --line:#332B22;
+  --cold:#5C7383;
+  --bone:#E6DFD4;
+  --warm:#E8A33D;
+  --hot:#E4572E;
+  --muted:#8A8078;
+  --faint:#5E564E;
+  --mono:'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --cond:'IBM Plex Sans Condensed', 'IBM Plex Mono', system-ui, sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--ground); color:var(--bone);
+  font-family:var(--mono); font-size:13px; line-height:1.5;
+  -webkit-font-smoothing:antialiased; padding:0 0 56px;
+}
+.wrap{max-width:1080px;margin:0 auto;padding:0 18px}
+
+header{
+  border-bottom:1px solid var(--line);
+  padding:22px 0 16px; margin-bottom:20px;
+  display:flex; align-items:baseline; gap:14px; flex-wrap:wrap;
+}
+h1{font-weight:600;font-size:21px;letter-spacing:.34em;margin:0;text-transform:uppercase}
+.tag{color:var(--muted);font-size:11px;letter-spacing:.13em;text-transform:uppercase}
+.tag b{color:var(--warm);font-weight:500}
+
+section{
+  background:var(--panel); border:1px solid var(--line);
+  border-radius:3px; padding:15px 17px 17px; margin-bottom:13px;
+}
+.shead{
+  display:flex;align-items:center;gap:10px;
+  font-family:var(--cond);font-weight:600;font-size:12px;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--muted);
+  margin-bottom:13px;
+}
+.shead .rule{flex:1;height:1px;background:var(--line);min-width:12px}
+.shead .note{
+  font-family:var(--mono);letter-spacing:0;text-transform:none;
+  font-size:11px;color:var(--cold);font-weight:400;
+}
+@media (max-width:700px){.shead .note{display:none}}
+
+.row{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+.row + .row{margin-top:9px}
+button{
+  font-family:var(--mono);font-size:12px;
+  background:var(--panel-2);color:var(--bone);
+  border:1px solid var(--line);border-radius:2px;
+  padding:8px 13px;cursor:pointer;letter-spacing:.05em;
+  transition:border-color .15s,color .15s,background .15s;
+}
+button:hover:not(:disabled){border-color:var(--warm);color:var(--warm)}
+button:focus-visible{outline:2px solid var(--warm);outline-offset:2px}
+button:disabled{opacity:.34;cursor:default}
+button.on{background:var(--warm);color:#1A1206;border-color:var(--warm);font-weight:500}
+button.on:hover{color:#1A1206}
+button.rec{border-color:var(--hot);color:var(--hot)}
+button.rec.armed{background:var(--hot);color:#1A1206}
+button.primary{border-color:var(--cold)}
+.spacer{margin-left:auto}
+
+label.field{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:11px;letter-spacing:.1em;text-transform:uppercase}
+input[type=number],select{
+  font-family:var(--mono);font-size:13px;
+  background:var(--ground);color:var(--bone);
+  border:1px solid var(--line);border-radius:2px;padding:7px 8px;width:72px;
+}
+select{width:auto}
+input[type=number]:focus,select:focus{outline:none;border-color:var(--warm)}
+
+.knobs{display:grid;grid-template-columns:repeat(auto-fit,minmax(212px,1fr));gap:13px 22px}
+.knobs.mt{margin-top:14px}
+.knob label{display:flex;justify-content:space-between;gap:8px;font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.knob .val{color:var(--warm);letter-spacing:0;text-transform:none;font-variant-numeric:tabular-nums;white-space:nowrap}
+.knob .hint{font-size:10px;color:var(--faint);letter-spacing:0;text-transform:none;margin-top:3px;line-height:1.4}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:2px;background:var(--line);border-radius:2px;outline:none;margin:5px 0 0}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--warm);cursor:pointer;border:2px solid var(--ground)}
+input[type=range]::-moz-range-thumb{width:13px;height:13px;border-radius:50%;background:var(--warm);cursor:pointer;border:2px solid var(--ground)}
+input[type=range]:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 3px rgba(232,163,61,.35)}
+
+.scope{background:#100E0B;border:1px solid var(--line);border-radius:2px;position:relative;overflow:hidden}
+.scope + .scope{margin-top:9px}
+canvas{display:block;width:100%}
+.scope .cap{position:absolute;left:9px;top:6px;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:#4A423A;pointer-events:none}
+
+.stat{display:flex;gap:22px;flex-wrap:wrap;margin-top:12px;font-size:11px}
+.stat div{color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.stat b{display:block;font-size:17px;color:var(--bone);letter-spacing:0;text-transform:none;font-weight:400;font-variant-numeric:tabular-nums;margin-top:2px}
+.stat b.warm{color:var(--warm)}
+
+.msg{margin-top:11px;font-size:11.5px;color:var(--cold);min-height:17px}
+.msg.err{color:var(--hot)}
+.msg.ok{color:var(--warm)}
+
+.locked{opacity:.36;pointer-events:none}
+footer{color:var(--faint);font-size:11px;margin-top:22px;line-height:1.75}
+footer b{color:var(--muted);font-weight:400}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Люфт</h1>
+  <span class="tag">микротайминг для гитары · <b id="seedTag">—</b></span>
+</header>
+
+<section id="secSource">
+  <div class="shead">Источник<span class="rule"></span><span class="note">играй в наушниках, чтобы клик не лез в микрофон</span></div>
+  <div class="row">
+    <label class="field">BPM <input type="number" id="bpm" value="100" min="40" max="240"></label>
+    <label class="field">Доля <select id="div"><option value="2">восьмые</option><option value="4">шестнадцатые</option></select></label>
+    <label class="field">Тактов <input type="number" id="bars" value="4" min="1" max="32"></label>
+    <label class="field">Отсчёт <input type="number" id="countin" value="1" min="0" max="2"></label>
+  </div>
+  <div class="row">
+    <button id="btnRec" class="rec">● Записать</button>
+    <button id="btnFile" class="primary">Загрузить файл</button>
+    <input type="file" id="fileIn" accept="audio/*" hidden>
+    <button id="btnDemo">Взять пример</button>
+  </div>
+  <div class="msg" id="msg">Задай темп и запиши партию под метроном. Или загрузи готовый файл — тогда просто укажи BPM, с которым он записан.</div>
+</section>
+
+<section id="secGrid" class="locked">
+  <div class="shead">Разбор<span class="rule"></span><span class="note">холодное — сетка, тёплое — как прозвучит</span></div>
+  <div class="scope"><span class="cap">лента</span><canvas id="cvRibbon" data-h="190"></canvas></div>
+  <div class="scope"><span class="cap">куда попали слабые доли</span><canvas id="cvSpread" data-h="106"></canvas></div>
+  <div class="knobs mt">
+    <div class="knob">
+      <label>Чувствительность <span class="val" id="vSens">1.40</span></label>
+      <input type="range" id="sens" min="0.6" max="3.2" step="0.05" value="1.4">
+      <div class="hint">Выше — ловит меньше нот. Цель для боя: одна атака на удар</div>
+    </div>
+    <div class="knob">
+      <label>Сдвиг сетки <span class="val" id="vAlign">0 мс</span></label>
+      <input type="range" id="align" min="-150" max="150" step="1" value="0">
+      <div class="hint">Компенсация задержки входа. Крути, пока клик не сядет на ноты</div>
+    </div>
+  </div>
+  <div class="stat">
+    <div>Нот найдено<b id="stN">—</b></div>
+    <div>Сыграно от сетки<b id="stDev">—</b></div>
+    <div>Стало от сетки<b id="stNew" class="warm">—</b></div>
+    <div>Средний ratio<b id="stRatio" class="warm">—</b></div>
+  </div>
+</section>
+
+<section id="secFeel" class="locked">
+  <div class="shead">Характер<span class="rule"></span><span class="note">ratio 50% — ровно, 66.7% — триоль</span></div>
+  <div class="row">
+    <button class="preset" data-p="straight">Ровно</button>
+    <button class="preset" data-p="srv">Шаффл SRV</button>
+    <button class="preset on" data-p="hendrix">Хендрикс</button>
+    <button class="preset" data-p="drunk">Развал</button>
+    <button id="btnRegen" class="primary spacer">⟳ Пересобрать</button>
+  </div>
+  <div class="knobs mt">
+    <div class="knob">
+      <label>Ratio <span class="val" id="vFeel">60.0%</span></label>
+      <input type="range" id="feel" min="50" max="76" step="0.5" value="60">
+      <div class="hint">Куда тянет слабую долю</div>
+    </div>
+    <div class="knob">
+      <label>Приверженность <span class="val" id="vCommit">45%</span></label>
+      <input type="range" id="commit" min="0" max="100" step="1" value="45">
+      <div class="hint">Как часто нота вообще слушается ratio. 100% — драм-машина</div>
+    </div>
+    <div class="knob">
+      <label>Постоянство <span class="val" id="vCons">35%</span></label>
+      <input type="range" id="cons" min="0" max="100" step="1" value="35">
+      <div class="hint">Держит ощущение или переопределяется каждую фразу</div>
+    </div>
+    <div class="knob">
+      <label>Неопределённость <span class="val" id="vAmb">55%</span></label>
+      <input type="range" id="amb" min="0" max="100" step="1" value="55">
+      <div class="hint">Тянет ноты в зону 57.5%, где ухо не может решить</div>
+    </div>
+    <div class="knob">
+      <label>Дрожание <span class="val" id="vJit">7.0 мс</span></label>
+      <input type="range" id="jit" min="0" max="25" step="0.5" value="7">
+      <div class="hint">Разброс поверх всего остального</div>
+    </div>
+    <div class="knob">
+      <label>Впереди / позади <span class="val" id="vPush">0 мс</span></label>
+      <input type="range" id="push" min="-30" max="30" step="1" value="0">
+      <div class="hint">Общий сдвиг всей партии относительно клика</div>
+    </div>
+  </div>
+</section>
+
+<section id="secPlay" class="locked">
+  <div class="shead">Слушать<span class="rule"></span></div>
+  <div class="row">
+    <button id="btnPlay" class="primary">▶ Играть</button>
+    <button id="btnAB">Слушать оригинал</button>
+    <button id="btnClick" class="on">Клик</button>
+    <button id="btnLoop">Цикл</button>
+    <button id="btnWav" class="spacer">Скачать WAV</button>
+    <button id="btnJson">Скачать настройки</button>
+  </div>
+</section>
+
+<footer>
+  <b>Как проверять.</b> Включи клик, поставь Приверженность 100% и Ratio 66% — услышишь механический шаффл. Потом опусти Приверженность до 45% и жми Пересобрать: каждый раз новый вариант, но одного характера. Это и есть разница между SRV и Хендриксом.<br>
+  <b>Если клик не совпадает с нотами.</b> Крути Сдвиг сетки — это задержка звукового входа, у каждого интерфейса своя.
+</footer>
+
+</div>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const AC = window.AudioContext || window.webkitAudioContext;
+const ctx = new AC();
+
+const S = {
+  buffer:null, onsets:[], newT:[], ratios:[],
+  gridOffset:0, seed:(Math.random()*1e9)|0,
+  playing:false, ab:'groove', click:true, loop:false, busy:false,
+  nodes:[], t0:0, raf:0, dur:0
+};
+
+const MAX_ANALYSIS_SEC = 90;
+const MAX_ONSETS = 1500;
+
+/* ============ FFT ============ */
+function fft(re,im){
+  const n=re.length;
+  for(let i=1,j=0;i<n;i++){
+    let bit=n>>1;
+    for(;j&bit;bit>>=1) j^=bit;
+    j^=bit;
+    if(i<j){let t=re[i];re[i]=re[j];re[j]=t;t=im[i];im[i]=im[j];im[j]=t;}
+  }
+  for(let len=2;len<=n;len<<=1){
+    const ang=-2*Math.PI/len, wr=Math.cos(ang), wi=Math.sin(ang), h=len>>1;
+    for(let i=0;i<n;i+=len){
+      let cr=1,ci=0;
+      for(let k=0;k<h;k++){
+        const ur=re[i+k],ui=im[i+k];
+        const xr=re[i+k+h],xi=im[i+k+h];
+        const vr=xr*cr-xi*ci, vi=xr*ci+xi*cr;
+        re[i+k]=ur+vr; im[i+k]=ui+vi;
+        re[i+k+h]=ur-vr; im[i+k+h]=ui-vi;
+        const ncr=cr*wr-ci*wi; ci=cr*wi+ci*wr; cr=ncr;
+      }
+    }
+  }
+}
+
+/* ============ спектральный поток ============ */
+const N_FFT=1024, HOP=256;
+let fluxCache=null;
+
+function computeFlux(buf){
+  const sr=buf.sampleRate;
+  const raw=Math.min(buf.length, Math.floor(MAX_ANALYSIS_SEC*sr));
+  const nch=buf.numberOfChannels;
+  // Тишина впереди: без неё первая нота лежит уже в нулевом кадре,
+  // нарастания нет, и она никогда не детектится.
+  const PAD=N_FFT;
+  const L=raw+PAD;
+  const mono=new Float32Array(L);
+  for(let c=0;c<nch;c++){
+    const d=buf.getChannelData(c);
+    for(let i=0;i<raw;i++) mono[PAD+i]+=d[i]/nch;
+  }
+  const win=new Float32Array(N_FFT);
+  for(let i=0;i<N_FFT;i++) win[i]=0.5-0.5*Math.cos(2*Math.PI*i/(N_FFT-1));
+
+  const nFrames=Math.max(0,Math.floor((L-N_FFT)/HOP)+1);
+  const half=N_FFT>>1;
+  const topBin=Math.max(4,Math.min(half, Math.floor(6000/(sr/N_FFT))));
+  const flux=new Float32Array(nFrames);
+  const prev=new Float32Array(topBin);
+  const re=new Float32Array(N_FFT), im=new Float32Array(N_FFT);
+
+  for(let f=0;f<nFrames;f++){
+    const off=f*HOP;
+    for(let i=0;i<N_FFT;i++){ re[i]=mono[off+i]*win[i]; im[i]=0; }
+    fft(re,im);
+    let s=0;
+    for(let b=0;b<topBin;b++){
+      const m=Math.log1p(24*Math.hypot(re[b],im[b]));
+      const d=m-prev[b];
+      if(d>0) s+=d;
+      prev[b]=m;
+    }
+    flux[f]=s;
+  }
+  let mx=0;
+  for(let i=0;i<nFrames;i++) if(flux[i]>mx) mx=flux[i];
+  if(mx>0) for(let i=0;i<nFrames;i++) flux[i]/=mx;
+
+  // Огибающая для уточнения атак. Окно 256 сэмплов (5.8 мс) — длиннее периода
+  // самой низкой струны, иначе «нарастание» находится внутри каждой волны.
+  // Шаг 64 сэмпла сохраняет разрешение 1.45 мс.
+  const BLK=64, ENVW=256, nb=Math.max(1,Math.floor((L-ENVW)/BLK));
+  const env=new Float32Array(nb);
+  for(let b=0;b<nb;b++){
+    let s=0;
+    for(let i=0;i<ENVW;i++){ const v=mono[b*BLK+i]; s+=v*v; }
+    env[b]=Math.sqrt(s/ENVW);
+  }
+  fluxCache={flux, sr, env, BLK, nb, PAD};
+  return fluxCache;
+}
+
+function pickOnsets(sensitivity){
+  if(!fluxCache) return [];
+  const {flux, sr, env, BLK, nb, PAD}=fluxCache;
+  const n=flux.length;
+  const W=9;
+  const delta=0.012*sensitivity;
+  const mult=0.55+0.42*sensitivity;
+
+  // Минимальный интервал берём из сетки: играя под метроном, две ноты
+  // не могут стоять ближе половины деления. Это убивает призраки от
+  // наложения затухающих нот, которые порогом не отсекаются.
+  const minGapSec=Math.min(0.25, Math.max(0.045, 0.55*beatDur()/subdiv()));
+  const minGapFrames=Math.ceil(minGapSec*sr/HOP);
+
+  const out=[];
+  let last=-1e9, lastFlux=0;
+  for(let i=1;i<n-1;i++){
+    if(!(flux[i]>flux[i-1] && flux[i]>=flux[i+1])) continue;
+    let sum=0,cnt=0;
+    for(let k=i-W;k<=i+W;k++){ if(k<0||k>=n) continue; sum+=flux[k]; cnt++; }
+    if(flux[i] < (sum/cnt)*mult+delta) continue;
+    const gap=i-last;
+    if(gap<minGapFrames) continue;
+    // Подавление эха: сразу после атаки новый пик должен быть сопоставим
+    // по силе. Требование спадает до нуля за два минимальных интервала.
+    const relax=Math.min(1,(gap-minGapFrames)/minGapFrames);
+    if(flux[i] < lastFlux*(0.62-0.62*relax)) continue;
+    // Уточнение до сэмпла. Сначала находим самый крутой участок фронта,
+    // потом отступаем назад к его подножию — это и есть момент атаки.
+    const centre=i*HOP+(N_FFT>>1);
+    const D=4;                                   // производная на базе ~5.8 мс
+    const bA=Math.max(D, Math.floor((centre-0.026*sr)/BLK));
+    const bB=Math.min(nb-1-D, Math.ceil((centre+0.014*sr)/BLK));
+    if(bB<=bA) continue;
+    let bMax=bA, dMax=-Infinity;
+    for(let b=bA;b<=bB;b++){
+      const d=env[b]-env[b-D];
+      if(d>dMax){ dMax=d; bMax=b; }
+    }
+    // Спускаемся по фронту до локального минимума. Порог в широком окне
+    // здесь не годится: если предыдущая нота ещё звучит, подножие
+    // упирается в край окна и атака уезжает на десятки миллисекунд назад.
+    const maxBack=Math.ceil(0.016*sr/BLK);
+    const stop=Math.max(1, bMax-maxBack);
+    let foot=bMax;
+    while(foot>stop && env[foot-1]<env[foot]) foot--;
+
+    const lo=env[foot];
+    const hi=env[Math.min(nb-1,bMax+D)];
+    const rise=hi-lo;
+    // Затухающий хвост фронта не даёт — сюда он не попадает.
+    if(!(rise>0) || rise<hi*0.10) continue;
+
+    // Окно огибающей смотрит вперёд на ENVW, поэтому рост виден раньше
+    // реальной атаки — компенсируем тремя блоками.
+    const best=Math.min(nb-1, foot+3);
+
+    last=i; lastFlux=flux[i];
+    // Атака в самом начале файла может уточниться на пару миллисекунд
+    // левее нуля — её нужно прижать к нулю, а не выбросить.
+    const tSec=(best*BLK-PAD)/sr;
+    if(tSec<-0.030) continue;
+    const t=Math.max(0,tSec);
+    if(out.length && t<=out[out.length-1]) continue;
+    out.push(t);
+    if(out.length>=MAX_ONSETS) break;
+  }
+  return out;
+}
+
+/* ============ сетка ============ */
+const beatDur = () => 60/(Math.max(20,+$('bpm').value||100));
+const subdiv  = () => +$('div').value;
+const alignSec= () => (+$('align').value)/1000;
+
+function autoAlign(){
+  if(!S.onsets.length){ S.gridOffset=0; return; }
+  const step=beatDur()/subdiv();
+  const first=S.onsets[0];
+  S.gridOffset = first - Math.round(first/step)*step;
+}
+
+/* ============ генератор грува ============ */
+function mulberry32(a){
+  return function(){
+    a|=0; a=a+0x6D2B79F5|0;
+    let t=Math.imul(a^a>>>15,1|a);
+    t=t+Math.imul(t^t>>>7,61|t)^t;
+    return ((t^t>>>14)>>>0)/4294967296;
+  };
+}
+function gauss(rng){
+  let u=0,v=0;
+  while(u===0)u=rng();
+  while(v===0)v=rng();
+  return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);
+}
+
+function buildGroove(){
+  const rng=mulberry32(S.seed);
+  const bd=beatDur(), Sd=subdiv();
+  const pairSpan=2/Sd;
+  const subDur=bd/Sd;
+
+  const target=+$('feel').value/100;
+  const commit=+$('commit').value/100;
+  const cons  =+$('cons').value/100;
+  const amb   =+$('amb').value/100;
+  const jit   =+$('jit').value/1000;
+  const push  =+$('push').value/1000;
+  const off   =S.gridOffset+alignSec();
+
+  const pull=0.02+cons*0.55;
+  const drift=(1-cons)*0.075;
+
+  let feel=target;
+  S.newT=[]; S.ratios=[];
+
+  for(let i=0;i<S.onsets.length;i++){
+    const t=S.onsets[i]-off;
+    const k=Math.round(t/subDur);
+    const beatIdx=Math.floor(k/Sd);
+    const inBeat=((k%Sd)+Sd)%Sd;
+    const p=Math.floor(inBeat/2), j=inBeat%2;
+
+    feel += (target-feel)*pull + gauss(rng)*drift;
+    feel = Math.min(0.80, Math.max(0.42, feel));
+
+    let ratio = (rng()<commit) ? feel : 0.5;
+    if(j===1){
+      const a=amb*rng();
+      ratio = ratio*(1-a) + 0.575*a;
+      S.ratios.push(ratio);
+    }
+
+    const posBeats = beatIdx + p*pairSpan + (j? ratio*pairSpan : 0);
+    let nt = off + posBeats*bd + push + gauss(rng)*jit;
+
+    // страховка: слабая доля гуляет широко, сильная — почти нет
+    const idealBeats = beatIdx + p*pairSpan + (j? 0.5*pairSpan : 0);
+    const ideal = off + idealBeats*bd;
+    const lim = (j? 0.85 : 0.34)*subDur;
+    if(nt>ideal+lim) nt=ideal+lim;
+    if(nt<ideal-lim) nt=ideal-lim;
+    if(i>0 && nt < S.newT[i-1]+0.028) nt=S.newT[i-1]+0.028;
+    if(nt<0.002) nt=0.002;
+    S.newT.push(nt);
+  }
+  $('seedTag').textContent='seed '+S.seed;
+  updateStats();
+  invalidate();
+  draw();
+}
+
+function updateStats(){
+  const n=S.onsets.length;
+  $('stN').textContent = n || '—';
+  if(!n){ $('stDev').textContent='—'; $('stNew').textContent='—'; $('stRatio').textContent='—'; return; }
+  const step=beatDur()/subdiv();
+  const off=S.gridOffset+alignSec();
+  let d1=0,d2=0;
+  for(let i=0;i<n;i++){
+    const t=S.onsets[i]-off;
+    const g=Math.round(t/step)*step;
+    d1+=Math.abs(t-g);
+    d2+=Math.abs((S.newT[i]-off)-g);
+  }
+  $('stDev').textContent=(d1/n*1000).toFixed(1)+' мс';
+  $('stNew').textContent=(d2/n*1000).toFixed(1)+' мс';
+  const r=S.ratios;
+  $('stRatio').textContent = r.length ? (r.reduce((a,b)=>a+b,0)/r.length*100).toFixed(1)+'%' : '—';
+}
+
+/* ============ холсты ============
+   Размер берётся из data-h, а не из атрибута height — иначе холст
+   удваивается на каждой перерисовке. Статика кэшируется отдельным слоем. */
+function fitCanvas(cv){
+  const dpr=Math.min(2, window.devicePixelRatio||1);
+  const w=Math.floor(cv.clientWidth||cv.parentElement.clientWidth||0);
+  const h=+cv.dataset.h;
+  if(w<=0) return null;
+  const pw=Math.floor(w*dpr), ph=Math.floor(h*dpr);
+  if(cv.width!==pw || cv.height!==ph){
+    cv.width=pw; cv.height=ph;
+    cv.style.height=h+'px';
+  }
+  const c=cv.getContext('2d');
+  c.setTransform(dpr,0,0,dpr,0,0);
+  return {c,w,h,dpr};
+}
+
+const layer=document.createElement('canvas');
+let layerDirty=true, layerW=0, layerH=0;
+function invalidate(){ layerDirty=true; }
+
+const FONT='9px ui-monospace, Menlo, Consolas, monospace';
+const PAD=14;
+
+function mix(a,b,t){
+  const p=h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
+  const A=p(a),B=p(b);
+  return 'rgb('+A.map((v,i)=>Math.round(v+(B[i]-v)*t)).join(',')+')';
+}
+function heatColor(t){
+  t=Math.max(0,Math.min(1,t));
+  return t<0.5 ? mix('#5C7383','#E8A33D',t*2) : mix('#E8A33D','#E4572E',(t-0.5)*2);
+}
+
+function renderLayer(w,h,dpr){
+  const pw=Math.floor(w*dpr), ph=Math.floor(h*dpr);
+  if(layer.width!==pw||layer.height!==ph){ layer.width=pw; layer.height=ph; }
+  const c=layer.getContext('2d');
+  c.setTransform(dpr,0,0,dpr,0,0);
+  c.clearRect(0,0,w,h);
+  layerW=w; layerH=h; layerDirty=false;
+  if(!S.buffer) return;
+
+  const W=w-PAD*2;
+  if(W<=0) return;
+  const dur=Math.max(0.001, S.dur||S.buffer.duration);
+  const x=t=>PAD+(t/dur)*W;
+  const bd=beatDur(), Sd=subdiv();
+  const off=S.gridOffset+alignSec();
+  const step=bd/Sd;
+
+  // сетка
+  c.lineWidth=1;
+  const kStart=Math.floor((0-off)/step)-1;
+  for(let k=kStart;;k++){
+    const t=off+k*step;
+    if(t>dur) break;
+    if(t<0) continue;
+    const down=(((k%(Sd*4))+Sd*4)%(Sd*4))===0;
+    const beat=(((k%Sd)+Sd)%Sd)===0;
+    c.strokeStyle = down?'#6E8896' : beat?'#3E4E57' : '#282017';
+    c.beginPath(); c.moveTo(x(t)+.5,17); c.lineTo(x(t)+.5,h-15); c.stroke();
+  }
+
+  // волна
+  const data=S.buffer.getChannelData(0);
+  const mid=h*0.5, amp=h*0.40;
+  const total=Math.min(data.length, Math.floor(dur*S.buffer.sampleRate));
+  c.strokeStyle='#241E17'; c.beginPath();
+  for(let px=0;px<W;px++){
+    const i0=Math.floor(px/W*total), i1=Math.max(i0+1,Math.floor((px+1)/W*total));
+    let mx=0;
+    for(let i=i0;i<i1 && i<data.length;i++){ const v=Math.abs(data[i]); if(v>mx)mx=v; }
+    if(mx<=0) continue;
+    c.moveTo(PAD+px+.5, mid-mx*amp); c.lineTo(PAD+px+.5, mid+mx*amp);
+  }
+  c.stroke();
+
+  // точки
+  const yGrid=h*0.29, yNew=h*0.73;
+  for(let i=0;i<S.onsets.length;i++){
+    const t=S.onsets[i]-off;
+    const g=Math.round(t/step)*step+off;
+    const nt=S.newT[i]!==undefined?S.newT[i]:S.onsets[i];
+    const col=heatColor(Math.abs(nt-g)/(step*0.5));
+    c.strokeStyle='#42545E'; c.lineWidth=1;
+    c.beginPath(); c.arc(x(g),yGrid,3,0,Math.PI*2); c.stroke();
+    c.strokeStyle=col; c.globalAlpha=0.45;
+    c.beginPath(); c.moveTo(x(g),yGrid+4); c.lineTo(x(nt),yNew-4); c.stroke();
+    c.globalAlpha=1;
+    c.fillStyle=col;
+    c.beginPath(); c.arc(x(nt),yNew,3.2,0,Math.PI*2); c.fill();
+  }
+}
+
+function drawRibbon(){
+  const f=fitCanvas($('cvRibbon'));
+  if(!f) return;
+  const {c,w,h,dpr}=f;
+  c.clearRect(0,0,w,h);
+  if(!S.buffer) return;
+  if(layerDirty || layerW!==w || layerH!==h) renderLayer(w,h,dpr);
+  c.drawImage(layer,0,0,w,h);
+  if(S.playing){
+    const dur=Math.max(0.001,S.dur||S.buffer.duration);
+    const el=ctx.currentTime-S.t0;
+    if(el>=0 && el<=dur){
+      const W=w-PAD*2;
+      const px=PAD+(el/dur)*W;
+      c.strokeStyle='#E8A33D'; c.globalAlpha=.85; c.lineWidth=1;
+      c.beginPath(); c.moveTo(px+.5,8); c.lineTo(px+.5,h-8); c.stroke();
+      c.globalAlpha=1;
+    }
+  }
+}
+
+function drawSpread(){
+  const f=fitCanvas($('cvSpread'));
+  if(!f) return;
+  const {c,w,h}=f;
+  c.clearRect(0,0,w,h);
+  const W=w-PAD*2;
+  if(W<=0) return;
+  const lo=0.46, hi=0.80;
+  const x=r=>PAD+((r-lo)/(hi-lo))*W;
+  const base=h-24;
+  c.font=FONT; c.textAlign='center'; c.lineWidth=1;
+  for(const [r,lab] of [[0.5,'50 · ровно'],[0.575,'57.5'],[0.667,'66.7 · триоль'],[0.75,'75']]){
+    c.strokeStyle=(r===0.5||r===0.667)?'#3E4E57':'#282017';
+    c.beginPath(); c.moveTo(x(r)+.5,20); c.lineTo(x(r)+.5,base); c.stroke();
+    c.fillStyle='#5E564E'; c.fillText(lab,x(r),base+14);
+  }
+  if(!S.ratios.length) return;
+  const B=68, bins=new Array(B).fill(0);
+  for(const r of S.ratios){
+    const b=Math.floor((r-lo)/(hi-lo)*B);
+    if(b>=0&&b<B) bins[b]++;
+  }
+  let mx=0; for(const v of bins) if(v>mx) mx=v;
+  if(!mx) return;
+  const bw=W/B, top=24;
+  for(let b=0;b<B;b++){
+    if(!bins[b]) continue;
+    const hgt=(bins[b]/mx)*(base-top);
+    const r=lo+(b+0.5)/B*(hi-lo);
+    c.fillStyle=heatColor(Math.abs(r-0.5)/0.25);
+    c.fillRect(PAD+b*bw+0.5, base-hgt, Math.max(1,bw-1), hgt);
+  }
+}
+
+function draw(){ drawRibbon(); drawSpread(); }
+
+/* ============ планировщик ============ */
+const PRE=0.006, TAIL=0.030;
+
+function scheduleGroove(actx,dest,when0,sink){
+  const buf=S.buffer;
+  const n=S.onsets.length;
+  for(let i=0;i<n;i++){
+    const on=S.onsets[i];
+    const startSrc=Math.max(0,on-PRE);
+    const endSrc=Math.min(buf.duration, (i<n-1? S.onsets[i+1]+TAIL : buf.duration));
+    const dur=endSrc-startSrc;
+    if(dur<=0.005) continue;
+
+    const at=when0+Math.max(0,S.newT[i]-PRE);
+    let end=at+dur;
+    if(i<n-1) end=Math.min(end, when0+S.newT[i+1]+TAIL);
+    if(end<at+0.008) end=at+0.008;
+
+    const src=actx.createBufferSource(); src.buffer=buf;
+    const g=actx.createGain();
+    g.gain.setValueAtTime(0,at);
+    g.gain.linearRampToValueAtTime(1,at+0.004);
+    const fadeStart=Math.max(at+0.005,end-0.022);
+    g.gain.setValueAtTime(1,fadeStart);
+    g.gain.linearRampToValueAtTime(0,end);
+    src.connect(g); g.connect(dest);
+    src.start(at,startSrc,Math.min(dur,end-at+0.01));
+    src.stop(end+0.005);
+    if(sink) sink.push(src);
+  }
+}
+function scheduleOriginal(actx,dest,when0,sink){
+  const src=actx.createBufferSource(); src.buffer=S.buffer;
+  src.connect(dest); src.start(when0);
+  if(sink) sink.push(src);
+}
+function scheduleClick(actx,dest,when0,dur,sink){
+  const bd=beatDur();
+  const off=S.gridOffset+alignSec();
+  const start=Math.ceil((0-off)/bd);
+  for(let b=Math.max(0,start);;b++){
+    const t=off+b*bd;
+    if(t>dur) break;
+    if(t<0) continue;
+    const o=actx.createOscillator(), g=actx.createGain();
+    o.type='sine';
+    o.frequency.value=(b%4===0)?1500:950;
+    g.gain.setValueAtTime(0.0001,when0+t);
+    g.gain.exponentialRampToValueAtTime(0.16,when0+t+0.002);
+    g.gain.exponentialRampToValueAtTime(0.0001,when0+t+0.05);
+    o.connect(g); g.connect(dest);
+    o.start(when0+t); o.stop(when0+t+0.07);
+    if(sink) sink.push(o);
+  }
+}
+
+function stopAll(){
+  for(const n of S.nodes){ try{n.stop()}catch(e){} }
+  S.nodes=[];
+  S.playing=false;
+  cancelAnimationFrame(S.raf);
+  $('btnPlay').textContent='▶ Играть';
+  $('btnPlay').classList.remove('on');
+  drawRibbon();
+}
+
+function play(){
+  if(S.playing){ stopAll(); return; }
+  if(!S.buffer) return;
+  ctx.resume();
+  const when0=ctx.currentTime+0.1;
+  S.t0=when0;
+  const lastNew=S.newT.length?S.newT[S.newT.length-1]:0;
+  S.dur=Math.max(S.buffer.duration, lastNew+0.6);
+  if(S.ab==='groove') scheduleGroove(ctx,ctx.destination,when0,S.nodes);
+  else scheduleOriginal(ctx,ctx.destination,when0,S.nodes);
+  if(S.click) scheduleClick(ctx,ctx.destination,when0,S.dur,S.nodes);
+  S.playing=true;
+  $('btnPlay').textContent='■ Стоп';
+  $('btnPlay').classList.add('on');
+  const tick=()=>{
+    if(!S.playing) return;
+    if(ctx.currentTime-S.t0 > S.dur){
+      const again=S.loop;
+      stopAll();
+      if(again) play();
+      return;
+    }
+    drawRibbon();
+    S.raf=requestAnimationFrame(tick);
+  };
+  S.raf=requestAnimationFrame(tick);
+}
+
+/* ============ запись ============ */
+let mediaRec=null;
+async function record(){
+  if(mediaRec && mediaRec.state==='recording'){ mediaRec.stop(); return; }
+  if(S.busy) return;
+  if(!navigator.mediaDevices || typeof MediaRecorder==='undefined'){
+    say('Браузер не умеет записывать с микрофона. Загрузи файл.',true); return;
+  }
+  let stream;
+  try{
+    stream=await navigator.mediaDevices.getUserMedia({audio:{
+      echoCancellation:false, noiseSuppression:false, autoGainControl:false
+    }});
+  }catch(e){
+    say('Микрофон недоступен. Разреши доступ в настройках браузера или загрузи файл.',true);
+    return;
+  }
+  try{ await ctx.resume(); }catch(e){}
+
+  const bd=beatDur(), ci=+$('countin').value||0, bars=+$('bars').value||4;
+  const chunks=[];
+  try{ mediaRec=new MediaRecorder(stream); }
+  catch(e){ say('MediaRecorder не поддерживается. Загрузи файл.',true); stream.getTracks().forEach(t=>t.stop()); return; }
+
+  mediaRec.ondataavailable=e=>{ if(e.data && e.data.size) chunks.push(e.data); };
+
+  // Пишем ВСЁ, включая отсчёт, и режем ровно тот отрезок, который знаем.
+  mediaRec.start();
+  const tRec=ctx.currentTime;
+  const lead=0.35;
+  const t0=tRec+lead;
+  const beats=(ci+bars)*4;
+
+  for(let b=0;b<beats;b++){
+    const o=ctx.createOscillator(), g=ctx.createGain();
+    o.type='sine';
+    o.frequency.value=(b%4===0)?1500:950;
+    const t=t0+b*bd;
+    g.gain.setValueAtTime(0.0001,t);
+    g.gain.exponentialRampToValueAtTime(b<ci*4?0.28:0.18,t+0.002);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+0.055);
+    o.connect(g); g.connect(ctx.destination);
+    o.start(t); o.stop(t+0.08);
+  }
+
+  const trimSec=lead+ci*4*bd;
+  $('btnRec').classList.add('armed');
+  $('btnRec').textContent= ci? 'отсчёт…' : '■ Идёт запись';
+  say(ci? 'Отсчёт. Играй ровно под клик.' : 'Пошла запись.');
+  if(ci) setTimeout(()=>{ if(mediaRec && mediaRec.state==='recording') $('btnRec').textContent='■ Идёт запись'; }, ci*4*bd*1000+lead*1000);
+
+  mediaRec.onstop=async()=>{
+    stream.getTracks().forEach(t=>t.stop());
+    $('btnRec').classList.remove('armed');
+    $('btnRec').textContent='● Записать';
+    if(!chunks.length){ say('Запись пустая.',true); return; }
+    try{
+      const ab=await new Blob(chunks).arrayBuffer();
+      const buf=await ctx.decodeAudioData(ab);
+      loadBuffer(trimBuffer(buf,trimSec));
+    }catch(e){ say('Не удалось декодировать запись: '+e.message,true); }
+  };
+
+  setTimeout(()=>{ if(mediaRec && mediaRec.state==='recording') mediaRec.stop(); },
+             (lead+beats*bd+0.5)*1000);
+}
+
+function trimBuffer(buf,from){
+  const sr=buf.sampleRate;
+  const start=Math.min(buf.length-1, Math.max(0,Math.floor(from*sr)));
+  const len=Math.max(1,buf.length-start);
+  const out=ctx.createBuffer(buf.numberOfChannels,len,sr);
+  for(let c=0;c<buf.numberOfChannels;c++){
+    out.getChannelData(c).set(buf.getChannelData(c).subarray(start));
+  }
+  return out;
+}
+
+/* ============ загрузка ============ */
+function loadBuffer(buf){
+  if(!buf || !buf.length){ say('Пустой файл.',true); return; }
+  stopAll();
+  S.buffer=buf;
+  S.dur=buf.duration;
+  S.busy=true;
+  say('Разбираю…');
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    try{
+      computeFlux(buf);
+      S.onsets=pickOnsets(+$('sens').value);
+      autoAlign();
+      buildGroove();
+      ['secGrid','secFeel','secPlay'].forEach(id=>$(id).classList.remove('locked'));
+      if(!S.onsets.length) say('Атаки не найдены. Опусти Чувствительность.',true);
+      else if(buf.duration>MAX_ANALYSIS_SEC) say(S.onsets.length+' нот. Разобраны первые '+MAX_ANALYSIS_SEC+' секунд.');
+      else say(S.onsets.length+' нот. Крути ручки, жми Пересобрать, слушай.');
+    }catch(e){ say('Ошибка разбора: '+e.message,true); }
+    S.busy=false;
+  }));
+}
+
+function reanalyse(){
+  if(!fluxCache||!S.buffer) return;
+  S.onsets=pickOnsets(+$('sens').value);
+  autoAlign();
+  buildGroove();
+}
+
+/* ============ экспорт ============ */
+async function exportWav(){
+  if(!S.buffer) return;
+  const last=S.newT.length?S.newT[S.newT.length-1]:0;
+  const dur=Math.max(S.buffer.duration,last+0.8);
+  const nc=S.buffer.numberOfChannels||1;
+  const OAC=window.OfflineAudioContext||window.webkitOfflineAudioContext;
+  const off=new OAC(nc, Math.ceil(dur*S.buffer.sampleRate), S.buffer.sampleRate);
+  scheduleGroove(off, off.destination, 0, null);
+  try{
+    const rendered=await off.startRendering();
+    download(encodeWav(rendered),'luft-'+S.seed+'.wav');
+    say('WAV сохранён. seed '+S.seed,false,true);
+  }catch(e){ say('Не удалось отрендерить: '+e.message,true); }
+}
+
+function encodeWav(buf){
+  const nc=buf.numberOfChannels, len=buf.length;
+  const ab=new ArrayBuffer(44+len*nc*2);
+  const v=new DataView(ab);
+  const wr=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))};
+  wr(0,'RIFF'); v.setUint32(4,36+len*nc*2,true); wr(8,'WAVE');
+  wr(12,'fmt '); v.setUint32(16,16,true); v.setUint16(20,1,true);
+  v.setUint16(22,nc,true); v.setUint32(24,buf.sampleRate,true);
+  v.setUint32(28,buf.sampleRate*nc*2,true); v.setUint16(32,nc*2,true); v.setUint16(34,16,true);
+  wr(36,'data'); v.setUint32(40,len*nc*2,true);
+  const chs=[]; for(let c=0;c<nc;c++) chs.push(buf.getChannelData(c));
+  let o=44;
+  for(let i=0;i<len;i++) for(let c=0;c<nc;c++){
+    let s=Math.max(-1,Math.min(1,chs[c][i]));
+    v.setInt16(o, s<0?s*0x8000:s*0x7FFF, true); o+=2;
+  }
+  return new Blob([ab],{type:'audio/wav'});
+}
+
+function download(blob,name){
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download=name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),3000);
+}
+
+/* ============ пресеты ============ */
+const PRESETS={
+  straight:{feel:50, commit:100, cons:100, amb:0,  jit:2,  push:0},
+  srv:     {feel:65, commit:92,  cons:88,  amb:6,  jit:4,  push:-6},
+  hendrix: {feel:60, commit:45,  cons:35,  amb:55, jit:7,  push:0},
+  drunk:   {feel:62, commit:60,  cons:18,  amb:35, jit:16, push:8}
+};
+function applyPreset(name){
+  const p=PRESETS[name]; if(!p) return;
+  for(const k in p) $(k).value=p[k];
+  document.querySelectorAll('.preset').forEach(b=>b.classList.toggle('on',b.dataset.p===name));
+  syncLabels();
+  if(S.buffer) buildGroove();
+}
+function syncLabels(){
+  $('vFeel').textContent   = (+$('feel').value).toFixed(1)+'%';
+  $('vCommit').textContent = $('commit').value+'%';
+  $('vCons').textContent   = $('cons').value+'%';
+  $('vAmb').textContent    = $('amb').value+'%';
+  $('vJit').textContent    = (+$('jit').value).toFixed(1)+' мс';
+  $('vPush').textContent   = $('push').value+' мс';
+  $('vSens').textContent   = (+$('sens').value).toFixed(2);
+  $('vAlign').textContent  = $('align').value+' мс';
+}
+function say(t,err,ok){
+  const m=$('msg'); m.textContent=t;
+  m.classList.toggle('err',!!err);
+  m.classList.toggle('ok',!!ok);
+}
+
+/* ============ пример ============ */
+function demo(){
+  const bd=beatDur(), Sd=subdiv(), bars=Math.max(1,+$('bars').value||4);
+  const sr=44100, dur=bars*4*bd+0.9;
+  const buf=ctx.createBuffer(1,Math.ceil(dur*sr),sr);
+  const d=buf.getChannelData(0);
+  const notes=[220,220,293.66,220,349.23,329.63,220,246.94];
+  const slots=bars*4*Sd;
+  let n=0;
+  for(let k=0;k<slots;k++){
+    if(Sd===4 && (k%8===5 || k%8===6)) continue;   // дырки, чтобы был рифф, а не гамма
+    const t=k*bd/Sd;
+    const f=notes[n++%notes.length];
+    const ring=Math.min(0.45, 2.2*bd/Sd);
+    const st=Math.floor(t*sr), L=Math.floor(ring*sr);
+    const decay=2.6/ring;
+    for(let i=0;i<L && st+i<d.length;i++){
+      const e=Math.exp(-i/sr*decay)*(1-Math.exp(-i/sr*900));
+      const ph=2*Math.PI*f*i/sr;
+      d[st+i]+= e*0.22*(Math.sin(ph)+0.45*Math.sin(2*ph)+0.22*Math.sin(3*ph));
+    }
+  }
+  for(let i=0;i<d.length;i++) d[i]=Math.max(-1,Math.min(1,d[i]));
+  loadBuffer(buf);
+  setTimeout(()=>say('Пример: рифф, выровненный по сетке идеально. Оживляй.'),80);
+}
+
+/* ============ связка ============ */
+['feel','commit','cons','amb','jit','push'].forEach(id=>{
+  $(id).addEventListener('input',()=>{
+    syncLabels();
+    document.querySelectorAll('.preset').forEach(b=>b.classList.remove('on'));
+    if(S.buffer) buildGroove();
+  });
+});
+$('sens').addEventListener('input',()=>{ syncLabels(); if(S.buffer) reanalyse(); });
+$('align').addEventListener('input',()=>{ syncLabels(); if(S.buffer) buildGroove(); });
+['bpm','div','bars'].forEach(id=>{
+  $(id).addEventListener('change',()=>{ if(S.buffer) reanalyse(); });
+});
+document.querySelectorAll('.preset').forEach(b=>b.addEventListener('click',()=>applyPreset(b.dataset.p)));
+$('btnRegen').addEventListener('click',()=>{ S.seed=(Math.random()*1e9)|0; if(S.buffer) buildGroove(); });
+$('btnRec').addEventListener('click',record);
+$('btnFile').addEventListener('click',()=>$('fileIn').click());
+$('btnDemo').addEventListener('click',demo);
+$('fileIn').addEventListener('change',async e=>{
+  const f=e.target.files[0]; if(!f) return;
+  say('Читаю файл…');
+  try{ loadBuffer(await ctx.decodeAudioData(await f.arrayBuffer())); }
+  catch(err){ say('Формат не читается. Попробуй WAV или MP3.',true); }
+  e.target.value='';
+});
+$('btnPlay').addEventListener('click',play);
+$('btnAB').addEventListener('click',()=>{
+  S.ab = S.ab==='groove' ? 'orig' : 'groove';
+  $('btnAB').textContent = S.ab==='groove' ? 'Слушать оригинал' : 'Слушать со сдвигом';
+  $('btnAB').classList.toggle('on', S.ab==='orig');
+  if(S.playing){ stopAll(); play(); }
+});
+$('btnClick').addEventListener('click',()=>{
+  S.click=!S.click; $('btnClick').classList.toggle('on',S.click);
+  if(S.playing){ stopAll(); play(); }
+});
+$('btnLoop').addEventListener('click',()=>{
+  S.loop=!S.loop; $('btnLoop').classList.toggle('on',S.loop);
+});
+$('btnWav').addEventListener('click',exportWav);
+$('btnJson').addEventListener('click',()=>{
+  if(!S.buffer) return;
+  const p={seed:S.seed,bpm:+$('bpm').value,subdivision:subdiv(),
+    ratio:+$('feel').value,commitment:+$('commit').value,consistency:+$('cons').value,
+    ambiguity:+$('amb').value,jitterMs:+$('jit').value,pushMs:+$('push').value,
+    gridOffsetSec:+S.gridOffset.toFixed(5),alignMs:+$('align').value,
+    deltasMs:S.newT.map((t,i)=>+((t-S.onsets[i])*1000).toFixed(2))};
+  download(new Blob([JSON.stringify(p,null,2)],{type:'application/json'}),'luft-'+S.seed+'.json');
+});
+
+let rz=0;
+window.addEventListener('resize',()=>{
+  clearTimeout(rz);
+  rz=setTimeout(()=>{ invalidate(); draw(); },120);
+});
+
+syncLabels();
+$('seedTag').textContent='seed '+S.seed;
+</script>
+</body>
+</html>

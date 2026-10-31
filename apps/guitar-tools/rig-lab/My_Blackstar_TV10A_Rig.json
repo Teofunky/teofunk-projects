@@ -1,0 +1,472 @@
+{
+  "devices": [
+    {
+      "id": "tuner",
+      "name": "M-VAVE Tuner",
+      "brand": "M-VAVE",
+      "cat": "Тюнер",
+      "color": "#171d27",
+      "controls": {
+        "Mode": "Chromatic"
+      },
+      "rec": "Первым в цепи или перед Whammy. Если тюнер заметно меняет тембр в байпасе, проверь его буфер.",
+      "tip": "Тюнер удобнее иметь до эффектов, чтобы получать чистый сигнал.",
+      "img": "",
+      "alt": "",
+      "form": "std",
+      "offline": ""
+    },
+    {
+      "id": "wahEHX",
+      "name": "Crying Tone Wah",
+      "brand": "Electro-Harmonix",
+      "cat": "Фильтр",
+      "color": "#bf2019",
+      "controls": {
+        "Sweep": "по ноге"
+      },
+      "rec": "Попробуй непосредственно перед TS808: wah будет управлять спектром, а TS808 уплотнит пики. Сравни с wah после перегруза — там он звучит острее.",
+      "tip": "Новая EHX Next Step Crying Tone; пока добавлена в библиотеку, а не в рабочую цепь.",
+      "img": "",
+      "alt": "",
+      "form": "wah",
+      "offline": ""
+    },
+    {
+      "id": "wah535",
+      "name": "Cry Baby 535Q",
+      "brand": "Dunlop",
+      "cat": "Фильтр",
+      "color": "#191d21",
+      "controls": {
+        "Range": "середина",
+        "Q": "11:00",
+        "Boost": "выкл."
+      },
+      "rec": "Перед TS808 — более классический вокальный wah. При повышенной яркости попробуй уменьшить Q/Boost.",
+      "tip": "Если слышен шум или потеря громкости — отдельно сравни bypass и включённую педаль.",
+      "img": "",
+      "alt": "",
+      "form": "wah",
+      "offline": ""
+    },
+    {
+      "id": "whammy",
+      "name": "Whammy 5",
+      "brand": "DigiTech",
+      "cat": "Питч",
+      "color": "#c52626",
+      "controls": {
+        "Mode": "Classic",
+        "Interval": "Octave"
+      },
+      "rec": "Для точного отслеживания обычно лучше раньше перегрузов; проверь после тюнера, до TS808.",
+      "tip": "Whammy — эффект высоты тона, перестановка относительно драйва меняет характер отслеживания.",
+      "img": "",
+      "alt": "",
+      "form": "tall",
+      "offline": ""
+    },
+    {
+      "id": "spectrum",
+      "name": "Spectrum",
+      "brand": "Source Audio",
+      "cat": "Фильтр",
+      "color": "#2d6b9c",
+      "controls": {
+        "Filter": "Envelope",
+        "Sensitivity": "под атаку",
+        "Mix": "50%"
+      },
+      "rec": "Для выразительного auto-wah чаще поставь до драйва. Для синтезаторного характера сравни после компрессора и до перегрузов.",
+      "tip": "Стабильность трекинга зависит от уровня и динамики входного сигнала.",
+      "img": "",
+      "alt": "",
+      "form": "wide",
+      "offline": ""
+    },
+    {
+      "id": "keeley",
+      "name": "Compressor Plus",
+      "brand": "Keeley",
+      "cat": "Динамика",
+      "color": "#a3a392",
+      "controls": {
+        "Sustain": "9:00",
+        "Level": "unity",
+        "Blend": "11:00",
+        "Tone": "11:00"
+      },
+      "rec": "Для фанка ставь перед драйвами и попробуй невысокий Sustain. Если без компрессора атака нравится больше, оставь в резерве.",
+      "tip": "По последнему сравнению без Keeley звук понравился больше.",
+      "img": "",
+      "alt": "",
+      "form": "std",
+      "offline": ""
+    },
+    {
+      "id": "ep",
+      "name": "EP Booster",
+      "brand": "Xotic",
+      "cat": "Буст",
+      "color": "#d9dedc",
+      "controls": {
+        "Gain": "минимум",
+        "DIP": "unity"
+      },
+      "rec": "Перед TS808 уплотнит и поднимет входной уровень; после TS808 больше поднимет общий сигнал. Не обязательна, если без неё звук свободнее.",
+      "tip": "По последнему сравнению эта педаль в резерве.",
+      "img": "",
+      "alt": "",
+      "form": "std",
+      "offline": ""
+    },
+    {
+      "id": "ts808",
+      "name": "TS808 Tube Screamer",
+      "brand": "Ibanez",
+      "cat": "Драйв",
+      "color": "#0a8f53",
+      "controls": {
+        "Overdrive": "8:30",
+        "Tone": "12:00",
+        "Level": "12:00"
+      },
+      "rec": "Сейчас перед Fairfax это разумный стек: TS808 фокусирует середину, Fairfax добавляет лампоподобную реакцию. Сначала держи Overdrive низко; Level подбирай по фактической громкости.",
+      "tip": "Начальные значения основаны на показанной настройке, не являются цифровым измерением.",
+      "img": "https://www.sweelee.com.vn/cdn/shop/products/I01-TS808_1530607477072.jpg?v=1530610349&width=2048",
+      "alt": "",
+      "form": "std",
+      "offline": "data:image/jpeg;base64,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"
+    },
+    {
+      "id": "fairfax",
+      "name": "Fairfax",
+      "brand": "Strymon",
+      "cat": "Драйв",
+      "color": "#3b444c",
+      "controls": {
+        "Drive": "9:00",
+        "Level": "10:00",
+        "Sag": "9:00",
+        "Bright": "Off"
+      },
+      "rec": "После TS808 — насыщеннее и плотнее; перед TS808 — TS будет формировать перегруз Fairfax. Sag от минимума даёт более открытый отклик; высокий Sag может сделать звук «плюющимся».",
+      "tip": "Для Fairfax производитель рекомендует 9 V DC с центральным минусом, не менее 500 мА.",
+      "img": "https://cdn11.bigcommerce.com/s-4hc0jwsnnq/images/stencil/original/products/48813/256984/Fairfax_Press_Top_HQ__24568.1765201419.jpg?c=1",
+      "alt": "",
+      "form": "std",
+      "offline": "data:image/jpeg;base64,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"
+    },
+    {
+      "id": "joyo",
+      "name": "JF-14 American Sound",
+      "brand": "JOYO",
+      "cat": "Амп-сим",
+      "color": "#dd8a21",
+      "controls": {
+        "Low": "12:00",
+        "Mid": "11:30",
+        "High": "10:30",
+        "Voice": "13:30",
+        "Drive": "9:00",
+        "Level": "11:00"
+      },
+      "rec": "Ставя JOYO последней перед INPUT, ты формируешь общий характер каскада. Это преамп/спикер-сим: через обычный динамик TV-10A возможна дополнительная окраска; сравни с байпасом, не накручивай резко High.",
+      "tip": "Voice и Drive взаимодействуют; сначала установи громкость Level, затем подбирай Voice на слух.",
+      "img": "https://tiendadelmusico.com/4747-home_default/joyo-jf-14-american-sound-pedal-simulador-fender-para-guitarra-electrica.jpg",
+      "alt": "",
+      "form": "std",
+      "offline": ""
+    },
+    {
+      "id": "horseman",
+      "name": "Horseman",
+      "brand": "NUX",
+      "cat": "Драйв",
+      "color": "#d4aa6b",
+      "controls": {
+        "Gain": "9:00",
+        "Treble": "11:00",
+        "Output": "unity"
+      },
+      "rec": "Прозрачный драйв/буст: попробуй до Fairfax, чтобы слегка разогревать его, без лишнего каскада компрессии.",
+      "tip": "Дублирует часть функций драйвов, поэтому необязательно держать подключённым.",
+      "img": "",
+      "alt": "",
+      "form": "std",
+      "offline": ""
+    },
+    {
+      "id": "blues",
+      "name": "Blues Mood",
+      "brand": "Mooer",
+      "cat": "Драйв",
+      "color": "#3978a7",
+      "controls": {
+        "Gain": "9:00",
+        "Tone": "11:00",
+        "Level": "unity"
+      },
+      "rec": "Тёплый низкогейновый овердрайв. При нескольких драйвах следи за суммарным уровнем и шумом.",
+      "tip": "В резерве как альтернативный характер перегруза.",
+      "img": "",
+      "alt": "",
+      "form": "mini",
+      "offline": ""
+    },
+    {
+      "id": "rat",
+      "name": "Black Secret",
+      "brand": "Mooer",
+      "cat": "Драйв",
+      "color": "#15191d",
+      "controls": {
+        "Distortion": "9:00",
+        "Filter": "12:00",
+        "Volume": "unity"
+      },
+      "rec": "Характернее и жёстче Fairfax. Для соло попробуй отдельно от многослойного стека и контролируй выходной уровень.",
+      "tip": "Положение Filter может работать обратным образом относительно обычного Tone.",
+      "img": "",
+      "alt": "",
+      "form": "mini",
+      "offline": ""
+    },
+    {
+      "id": "sf300",
+      "name": "SF300 Super Fuzz",
+      "brand": "Behringer",
+      "cat": "Фузз",
+      "color": "#e48028",
+      "controls": {
+        "Fuzz": "9:00",
+        "Tone": "12:00",
+        "Level": "unity"
+      },
+      "rec": "Обычно ближе к гитаре или до драйвов; экспериментируй с соседними бустами на малой громкости.",
+      "tip": "Фузз может сильно изменить низы, громкость и трекинг следующих эффектов.",
+      "img": "",
+      "alt": "",
+      "form": "std",
+      "offline": ""
+    },
+    {
+      "id": "octavio",
+      "name": "Octavio",
+      "brand": "MXR",
+      "cat": "Фузз",
+      "color": "#edd3af",
+      "controls": {
+        "Fuzz": "10:00",
+        "Volume": "unity"
+      },
+      "rec": "Проверь перед TS808: октавный фузз обычно лучше откликается на чистую атаку. Сравни на одиночных нотах выше 12-го лада.",
+      "tip": "Чувствителен к громкости гитары и порядку перед ним.",
+      "img": "",
+      "alt": "",
+      "form": "std",
+      "offline": ""
+    },
+    {
+      "id": "freqout",
+      "name": "FreqOut",
+      "brand": "DigiTech",
+      "cat": "Специальный",
+      "color": "#28252d",
+      "controls": {
+        "Type": "Natural",
+        "Gain": "12:00",
+        "Onset": "12:00"
+      },
+      "rec": "При эффекте искусственного фидбека тестируй перед перегрузом и после него: входной уровень и компрессия влияют на срабатывание.",
+      "tip": "Ранее снята с основного рига.",
+      "img": "",
+      "alt": "",
+      "form": "wide",
+      "offline": ""
+    },
+    {
+      "id": "ge7",
+      "name": "GE-7 Equalizer",
+      "brand": "BOSS",
+      "cat": "EQ",
+      "color": "#c2c0b7",
+      "controls": {
+        "100": "0 dB",
+        "200": "0 dB",
+        "400": "+1 dB",
+        "800": "+1 dB",
+        "1.6k": "0 dB",
+        "3.2k": "−1 dB",
+        "6.4k": "−1 dB",
+        "Level": "0 dB"
+      },
+      "rec": "В FX Loop коррекция действует после предусилителя TV-10A: удобно убрать резкость 3,2–6,4 кГц или немного добавить тела 400–800 Гц. Двигай полосы маленькими шагами.",
+      "tip": "На входе усилителя EQ меняет ещё и реакцию предусилителя на атаку.",
+      "img": "https://m.media-amazon.com/images/I/61YnYDYbPyL.jpg",
+      "alt": "",
+      "form": "std",
+      "offline": ""
+    },
+    {
+      "id": "phase",
+      "name": "Phase 95",
+      "brand": "MXR",
+      "cat": "Модуляция",
+      "color": "#e68f1e",
+      "controls": {
+        "Speed": "9:30",
+        "Script": "по вкусу"
+      },
+      "rec": "До драйва phaser более слитный и винтажный; после — заметнее. У тебя он сейчас в резерве.",
+      "tip": "Попробуй на чистом звуке с небольшой скоростью.",
+      "img": "",
+      "alt": "",
+      "form": "mini",
+      "offline": ""
+    },
+    {
+      "id": "univibe",
+      "name": "Uni-Vibe Mini JHMS3",
+      "brand": "Dunlop",
+      "cat": "Модуляция",
+      "color": "#b18850",
+      "controls": {
+        "Speed": "9:30",
+        "Depth": "11:00"
+      },
+      "rec": "До овердрайва даст более винтажную пульсацию, в петле — более чёткую. Это сравнительная рекомендация, а не обязательное место.",
+      "tip": "Снята из основной цепи и находится в резерве.",
+      "img": "",
+      "alt": "",
+      "form": "mini",
+      "offline": ""
+    },
+    {
+      "id": "chorus",
+      "name": "Ensemble King Chorus",
+      "brand": "Mooer",
+      "cat": "Модуляция",
+      "color": "#3bb6d1",
+      "controls": {
+        "Level": "10:00",
+        "Depth": "12:00",
+        "Rate": "9:00"
+      },
+      "rec": "В петле после предусилителя хорус будет читаться мягче и яснее; перед драйвом модуляция может превратиться в более плотную текстуру. Начни с медленного Rate.",
+      "tip": "Сейчас на испытании в FX Loop, по последнему сообщению.",
+      "img": "https://ww2.musicworldbrilon.de/media/catalog/product/cache/74c1057f7991b4edb2bc7bdaa94de933/W/A/WARWICK_976009_3_Mooer_MCH1%28Emsemble%20King%29_1.jpg",
+      "alt": "",
+      "form": "mini",
+      "offline": ""
+    },
+    {
+      "id": "trem",
+      "name": "Choka Tremolo",
+      "brand": "TC Electronic",
+      "cat": "Модуляция",
+      "color": "#5e6a55",
+      "controls": {
+        "Speed": "9:30",
+        "Depth": "10:00"
+      },
+      "rec": "Для мягкого пульса лучше после драйвов. Но педаль снята из основного рига, оставь её для отдельных задач.",
+      "tip": "В резерве.",
+      "img": "",
+      "alt": "",
+      "form": "std",
+      "offline": ""
+    },
+    {
+      "id": "vd400",
+      "name": "VD400 Vintage Delay",
+      "brand": "Behringer",
+      "cat": "Дилей",
+      "color": "#9e9e9e",
+      "controls": {
+        "Repeat Rate": "10:30",
+        "Intensity": "9:30",
+        "Echo": "9:30"
+      },
+      "rec": "Аналоговый короткий дилей: хорош для slapback 80–150 мс или для тёплой короткой подложки. У VD400 максимум около 300 мс — 380 мс на ней не поставить.",
+      "tip": "Если используешь вместе с Elemental Pro, попробуй VD400 первым, Elemental вторым; убери лишние повторы.",
+      "img": "https://www.sweelee.com.vn/cdn/shop/products/products_2FB03-000-50800_2FB03-000-50800_1621843693620.jpg?v=1627278951&width=2048",
+      "alt": "",
+      "form": "std",
+      "offline": ""
+    },
+    {
+      "id": "elemental",
+      "name": "Elemental Pro Delay",
+      "brand": "M-VAVE",
+      "cat": "Дилей",
+      "color": "#844baa",
+      "controls": {
+        "Mode": "Analog",
+        "Time": "380 ms",
+        "Feedback": "9:30",
+        "Mix": "9:15",
+        "Param": "min",
+        "Mod": "min"
+      },
+      "rec": "Для блюзового соло 330–400 мс — разумный старт. Повторов немного, Mix умеренно. В петле задержанные ноты не проходят повторно через перегруз предусилителя.",
+      "tip": "Положение ручки Time нельзя надёжно приравнивать к 380 мс без замера/тапа.",
+      "img": "https://cdn.awsli.com.br/2500x2500/1795/1795431/produto/379924123/pedal-m-vave-elemental-delay-1-3p04v1obaf.jpg",
+      "alt": "",
+      "form": "std",
+      "offline": ""
+    },
+    {
+      "id": "jtc",
+      "name": "JTC Drum & Loop Pro",
+      "brand": "NUX",
+      "cat": "Лупер",
+      "color": "#175bab",
+      "controls": {
+        "Loop level": "unity",
+        "Rhythm level": "низко",
+        "Tempo": "по композиции"
+      },
+      "rec": "Лучше после остальных эффектов в петле, если хочешь записывать уже обработанный звук. Барабаны через гитарный динамик TV-10A могут звучать узко и неестественно.",
+      "tip": "Не перегружай FX Return суммой лупа и ударных.",
+      "img": "https://media.guitarcenter.com/is/image/MMGS7/L72470000000000-00-2000x2000.jpg",
+      "alt": "",
+      "form": "wide",
+      "offline": ""
+    },
+    {
+      "id": "ebow",
+      "name": "EBow Plus",
+      "brand": "Heet Sound",
+      "cat": "Аксессуар",
+      "color": "#292d32",
+      "controls": {
+        "Mode": "standard / harmonic"
+      },
+      "rec": "EBow не включается в кабельную цепь: это ручной электронный смычок, воздействующий на струны. Используй с подходящим положением на гитаре; задержка и реверберация после инструмента дадут длинные атмосферные ноты.",
+      "tip": "Не является педалью и не требует подключения к INPUT/FX Loop.",
+      "img": "",
+      "form": "wide"
+    }
+  ],
+  "input": [
+    "ts808",
+    "fairfax",
+    "joyo"
+  ],
+  "loop": [
+    "ge7",
+    "chorus",
+    "elemental",
+    "jtc"
+  ],
+  "off": [],
+  "selected": "vd400",
+  "guitar": "Fender Stratocaster Plus",
+  "history": [
+    "VD400 Vintage Delay: FX LOOP → резерв. "
+  ],
+  "photos": {},
+  "exportedAt": "2026-10-15T19:25:52.323Z"
+}
