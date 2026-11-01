@@ -1,0 +1,759 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Схема Главной сцены</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&family=Unbounded:wght@500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout: notes column beside a phone that runs the prototype; on narrow screens the phone comes first and the notes follow. The phone screen stays light on purpose: it imitates the ticket widget. */
+:root{
+  --bg:#ecebe6; --fg:#1d1c1a; --muted:#5f5c55; --line:#d6d2c8; --card:#f7f6f2; --frame:#141416;
+  --a-bg:#ffffff; --a-ink:#1c1c1e; --a-muted:#66656c; --a-muted-2:#9a978f; --a-line:#e5e1d9; --a-panel:#f2f0eb;
+  --a-floor:#f5f3ee; --a-amph:#f2eef6; --a-sold:#d9d5cc; --a-stage:#27272b; --a-on-seat:#ffffff;
+  --a-top-line:#bdb5a7; --a-sofa:#e8e1d5; --a-sofa-back:#cfc4b2; --a-zone:#d3ccbf; --a-zone-on:#8e8676;
+  --a-bar:#f6ead6; --a-bar-line:#e3c899; --a-bar-ink:#8a5a17;
+  --a-cta:#d2412f; --a-cta-ink:#ffffff; --a-scrim:rgba(28,28,30,.28); --a-shadow:rgba(28,28,30,.14); --a-pill:rgba(255,255,255,.95); --a-focus:#2a62c9;
+  --c1:#7a3fc8; --c2:#2a62c9; --c3:#0f8a80; --c4:#5b931f; --c5:#d1801a; --c6:#cc4a85;
+  --f-ui:'Golos Text', 'PT Sans', Arial, sans-serif;
+  --f-display:'Unbounded', 'Golos Text', Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --bg:#161618; --fg:#ecebe6; --muted:#a3a097; --line:#35343a; --card:#202024; --frame:#000000; color-scheme:dark }
+}
+:root[data-theme="dark"]{ --bg:#161618; --fg:#ecebe6; --muted:#a3a097; --line:#35343a; --card:#202024; --frame:#000000; color-scheme:dark }
+
+body{background:var(--bg);color:var(--fg);font-family:var(--f-ui);padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px))}
+.wrap{max-width:1040px;margin:0 auto;padding-block:28px 40px;display:flex;gap:56px;align-items:flex-start;justify-content:center}
+.notes{order:1;flex:1 1 360px;max-width:450px;min-width:0}
+.device{order:2;flex:none;box-sizing:content-box;width:390px;height:844px;border:10px solid var(--frame);border-radius:50px;overflow:hidden;background:var(--a-bg);box-shadow:0 30px 60px -30px rgba(0,0,0,.45)}
+@media (max-width:880px){
+  .wrap{flex-direction:column;align-items:center;gap:28px}
+  .device{order:0}
+  .notes{order:1;max-width:560px;flex:none;width:100%}
+}
+@media (max-width:520px){
+  .wrap{padding-block:12px 32px}
+  .device{width:100%;height:calc(100svh - 24px);min-height:560px;max-height:880px;border:0;border-radius:20px;box-shadow:0 0 0 1px var(--line)}
+}
+
+/* notes */
+.eyebrow{margin:0 0 10px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.notes h1{margin:0;font-family:var(--f-display);font-weight:600;font-size:28px;line-height:1.18;letter-spacing:-.01em;text-wrap:balance}
+.lead{margin:14px 0 0;font-size:16px;line-height:1.55;color:var(--muted)}
+.notes h2{margin:30px 0 10px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.notes ul,.notes ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:9px;font-size:15px;line-height:1.5}
+.notes li b{font-weight:600}
+.meta{margin:26px 0 0;padding-top:16px;border-top:1px solid var(--line);font-size:14px;line-height:1.5;color:var(--muted)}
+.seg{display:inline-flex;gap:2px;padding:3px;border:1px solid var(--line);border-radius:12px;background:var(--card)}
+.seg button{height:40px;padding:0 14px;border:0;border-radius:9px;background:transparent;font:inherit;font-size:14px;color:var(--fg);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--fg);color:var(--bg);font-weight:600}
+.seg button:focus-visible{outline:3px solid var(--a-focus);outline-offset:2px}
+
+/* app */
+.app{position:relative;display:flex;flex-direction:column;height:100%;background:var(--a-bg);color:var(--a-ink);font-family:var(--f-ui);touch-action:manipulation;-webkit-tap-highlight-color:transparent;overflow:hidden;color-scheme:light}
+.app button{font-family:inherit}
+.app button:focus-visible{outline:3px solid var(--a-focus);outline-offset:2px}
+.a-head{flex:none;display:flex;align-items:center;gap:4px;min-height:64px;padding:8px 10px 4px 16px;box-sizing:border-box}
+.a-head.zone{padding-left:4px}
+.ic{width:44px;height:44px;flex:none;border:0;border-radius:12px;background:transparent;color:var(--a-ink);display:grid;place-items:center;cursor:pointer}
+.ttl{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.ttl b{font-size:17px;font-weight:700;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ttl span{font-size:13px;color:var(--a-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.mini{flex:none;width:46px;height:54px;padding:3px;border:1px solid var(--a-line);border-radius:10px;background:var(--a-panel);cursor:pointer;display:block}
+.mini svg{display:block;width:100%;height:100%}
+.tabs{flex:none;display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;padding:0 10px;border-bottom:1px solid var(--a-line)}
+.tabs::-webkit-scrollbar,.prices::-webkit-scrollbar{display:none}
+.tabs button{flex:none;height:44px;padding:0 10px;border:0;border-bottom:3px solid transparent;background:transparent;font-size:14px;color:var(--a-muted);cursor:pointer}
+.tabs button[aria-current="true"]{color:var(--a-ink);font-weight:600;border-bottom-color:var(--a-ink)}
+.prices{flex:none;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:8px 12px}
+.chip{flex:none;height:36px;display:inline-flex;align-items:center;gap:7px;padding:0 12px;border:1px solid var(--a-line);border-radius:18px;background:var(--a-bg);font-size:14px;color:var(--a-ink);cursor:pointer;font-variant-numeric:tabular-nums;white-space:nowrap}
+.chip i{display:block;width:10px;height:10px;border-radius:5px}
+.chip[aria-pressed="true"]{background:var(--a-ink);border-color:var(--a-ink);color:var(--a-bg);font-weight:600}
+.map{position:relative;flex:1;min-height:0;background:var(--a-bg)}
+#map{position:absolute;inset:0;width:100%;height:100%;display:block}
+#map text{font-family:var(--f-ui);pointer-events:none}
+#map.ov .snum,#map.ov .tnum,#map.ov .slbl{display:none}
+#map .zhit{fill:transparent;pointer-events:none}
+#map.ov .zhit{pointer-events:all;cursor:pointer}
+#map .hit{fill:none;stroke:none;pointer-events:none}
+#map.zm circle.hit,#map.am circle.hit{pointer-events:all;cursor:pointer}
+#map.zm polyline.hit,#map.am polyline.hit{pointer-events:stroke;cursor:pointer}
+#map .top{pointer-events:none}
+#map.zm .top{pointer-events:all;cursor:pointer}
+#pills{position:absolute;inset:0;pointer-events:none}
+#pills.moving{visibility:hidden}
+.pill{position:absolute;transform:translate(-50%,-50%);pointer-events:auto;min-height:44px;box-sizing:border-box;padding:6px 10px;border:1px solid var(--a-line);border-radius:12px;background:var(--a-pill);box-shadow:0 4px 14px var(--a-shadow);text-align:left;color:var(--a-ink);cursor:pointer;display:flex;flex-direction:column;gap:2px;white-space:nowrap}
+.pill b{font-size:13px;font-weight:700}
+.pill span{font-size:12px;color:var(--a-muted);font-variant-numeric:tabular-nums}
+.pill .dots{display:flex;gap:3px;margin-top:1px}
+.pill .dots i{display:block;width:8px;height:8px;border-radius:4px}
+.pill.dim{opacity:.6}
+.toast{position:absolute;left:50%;top:10px;transform:translateX(-50%);max-width:calc(100% - 32px);box-sizing:border-box;padding:9px 13px;border-radius:10px;background:var(--a-ink);color:var(--a-bg);font-size:13px;line-height:1.3;text-align:center;pointer-events:none}
+.a-bar{flex:none;display:flex;align-items:center;gap:12px;min-height:84px;box-sizing:border-box;padding:12px 16px 16px;border-top:1px solid var(--a-line);background:var(--a-bg)}
+.sum{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.sum b{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums}
+.sum span{font-size:13px;color:var(--a-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cta{flex:none;height:52px;padding:0 22px;border:0;border-radius:14px;background:var(--a-cta);color:var(--a-cta-ink);font-size:16px;font-weight:700;cursor:pointer}
+.cta:disabled{background:var(--a-panel);color:var(--a-muted-2);cursor:default}
+.scrim{position:absolute;inset:0;background:var(--a-scrim)}
+.sheet{position:absolute;left:0;right:0;bottom:0;max-height:82%;overflow:auto;box-sizing:border-box;padding:8px 16px 18px;border-radius:20px 20px 0 0;background:var(--a-bg);box-shadow:0 -10px 30px var(--a-shadow);display:flex;flex-direction:column;gap:12px}
+.grab{align-self:center;width:36px;height:4px;border-radius:2px;background:var(--a-line)}
+.sh-head{display:flex;align-items:flex-start;gap:8px}
+.sh-head div{flex:1;min-width:0}
+.sh-head h2{margin:2px 0 0;font-size:20px;font-weight:700}
+.sh-head p{margin:4px 0 0;font-size:14px;color:var(--a-muted);font-variant-numeric:tabular-nums}
+.sh-head .ic{margin:-6px -10px 0 0}
+.tray{align-self:center;display:flex;gap:10px;padding:12px 14px;border-radius:46px;background:var(--a-sofa)}
+.seatbtn{width:66px;height:66px;border:0;border-radius:18px;color:var(--a-on-seat);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer}
+.seatbtn .n{font-size:19px;font-weight:700;line-height:1}
+.seatbtn .p{font-size:11px;font-variant-numeric:tabular-nums}
+.seatbtn.sold{background:var(--a-sold);color:var(--a-muted);cursor:default}
+.seatbtn.sel{background:var(--a-ink)}
+.sh-row{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:14px;color:var(--a-muted)}
+.link{height:44px;padding:0 4px;border:0;background:transparent;font-size:14px;font-weight:600;color:var(--a-ink);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.stepper{display:flex;align-items:center;justify-content:center;gap:22px;padding:4px 0}
+.stepper button{width:52px;height:52px;border:1px solid var(--a-line);border-radius:26px;background:var(--a-bg);font-size:24px;line-height:1;color:var(--a-ink);cursor:pointer}
+.stepper button:disabled{color:var(--a-muted-2);cursor:default}
+.stepper output{min-width:44px;text-align:center;font-size:28px;font-weight:700;font-variant-numeric:tabular-nums}
+.cart{list-style:none;margin:0;padding:0}
+.cart li{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid var(--a-line);font-size:15px;font-variant-numeric:tabular-nums}
+.total{display:flex;justify-content:space-between;align-items:baseline;gap:12px;font-size:18px;font-weight:700;font-variant-numeric:tabular-nums}
+.total small{display:block;font-size:12px;font-weight:400;color:var(--a-muted)}
+.note{margin:0;font-size:13px;line-height:1.45;color:var(--a-muted)}
+@media (prefers-reduced-motion: reduce){ *{transition:none!important} }
+</style>
+
+<div class="wrap">
+  <aside class="notes">
+    <p class="eyebrow">Клуб Алексея Козлова · Главная сцена</p>
+    <h1>Выбор мест с телефона</h1>
+    <p class="lead">Прототип для обсуждения с Ticketscloud. Геометрия взята из нынешней схемы зала: 45 столов и диванов, 167 мест. Цены и занятые места в примерах условные.</p>
+
+    <h2>Пример концерта</h2>
+    <div class="seg" role="group" aria-label="Пример концерта">
+      <button type="button" id="evA" data-ev="a" aria-pressed="true">6 цен</button>
+      <button type="button" id="evB" data-ev="b" aria-pressed="false">4 цены и бар</button>
+    </div>
+
+    <h2>Что показываем</h2>
+    <ul>
+      <li><b>Два уровня.</b> Сначала весь зал по зонам с ценой «от» и числом свободных мест. Нажатие на зону приближает её.</li>
+      <li><b>Крупное место.</b> В приближенной зоне стул 26–38 px, область нажатия около 44 px. Сейчас при показе всего зала на ширину телефона место около 6 px.</li>
+      <li><b>Стол читается как стол.</b> Столешница с номером, стулья вокруг. Нажатие на столешницу выбирает весь стол.</li>
+      <li><b>Цены по категориям.</b> До 6 категорий на концерт, в одной зоне бывает несколько цен, в том числе в амфитеатре. Цвет стула означает категорию, фильтр цен гасит неподходящие зоны и места.</li>
+      <li><b>Амфитеатр.</b> Сначала диван, потом места в нижней панели: на дуге места стоят слишком плотно для пальца.</li>
+      <li><b>Входной у бара.</b> Без места, выбирается количество.</li>
+    </ul>
+
+    <h2>Вопросы к Ticketscloud</h2>
+    <ol>
+      <li>Можно ли сделать уровень зон: подсхемы или приближение к рамке зоны по нажатию?</li>
+      <li>Можно ли показывать на зоне цену «от» и число свободных мест из текущих продаж?</li>
+      <li>Можно ли перерисовать схему: стол как столешница со стульями, место крупнее, без декора?</li>
+      <li>Можно ли сделать область нажатия места около 44 px, не меняя рисунок?</li>
+      <li>Можно ли выбирать места дивана в нижней панели?</li>
+    </ol>
+    <p class="meta">Пока только Главная сцена. В клубе четыре сцены, принцип для всех общий: зоны с ценой «от», крупное место, а где места стоят плотно, сначала группа, потом место.</p>
+  </aside>
+
+  <div class="device">
+    <div class="app" id="app">
+      <header class="a-head" id="head">
+        <button type="button" class="ic" id="hBack" aria-label="Весь зал" hidden>
+          <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4L7 11l7 7"></path></svg>
+        </button>
+        <div class="ttl"><b id="hTitle"></b><span id="hSub"></span></div>
+        <button type="button" class="mini" id="hMini" aria-label="Показать весь зал" hidden></button>
+      </header>
+      <nav class="tabs" id="tabs" aria-label="Зоны зала"></nav>
+      <div class="prices" id="prices" role="group" aria-label="Фильтр по цене"></div>
+      <div class="map" id="mapBox">
+        <svg id="map" class="ov" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Схема Главной сцены"><g id="bg"></g><g id="dyn"></g></svg>
+        <div id="pills"></div>
+        <div class="toast" id="toast" role="status" hidden></div>
+      </div>
+      <footer class="a-bar">
+        <div class="sum"><b id="bTotal"></b><span id="bSub"></span></div>
+        <button type="button" class="cta" id="bNext">Далее</button>
+      </footer>
+      <div class="scrim" id="scrim" hidden></div>
+      <section class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Выбор" hidden></section>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  // Столы и диваны нынешней схемы Ticketscloud, повернутой сценой вверх: номер, центр, смещения мест.
+  var TABLES = [{"n":"55","x":10984,"y":19156,"s":[[-480,-692],[477,-694],[1074,0],[479,695],[-478,695],[-1074,2]]},{"n":"56","x":13197,"y":18475,"s":[[-440,-431],[431,-439],[439,432],[-431,440]]},{"n":"57","x":9253,"y":16771,"s":[[-440,-432],[430,-438],[439,432],[-432,440]]},{"n":"58","x":11134,"y":16771,"s":[[-440,-432],[430,-438],[438,432],[-432,440]]},{"n":"59","x":13013,"y":16771,"s":[[-441,-432],[432,-438],[440,432],[-430,440]]},{"n":"60","x":8166,"y":15058,"s":[[-442,-431],[431,-439],[439,431],[-433,441]]},{"n":"61","x":9858,"y":15058,"s":[[-440,-431],[430,-439],[439,431],[-432,441]]},{"n":"62","x":11574,"y":15058,"s":[[-440,-431],[430,-439],[439,431],[-432,441]]},{"n":"63","x":13288,"y":15058,"s":[[-440,-431],[430,-439],[439,431],[-432,441]]},{"n":"64","x":8166,"y":13349,"s":[[-442,-430],[431,-438],[439,432],[-433,440]]},{"n":"65","x":9858,"y":13349,"s":[[-440,-430],[430,-438],[439,432],[-432,440]]},{"n":"66","x":11574,"y":13349,"s":[[-440,-430],[430,-438],[439,432],[-432,440]]},{"n":"67","x":13288,"y":13349,"s":[[-440,-430],[430,-438],[439,432],[-432,440]]},{"n":"68","x":8166,"y":11813,"s":[[-442,-431],[431,-439],[439,431],[-433,441]]},{"n":"69","x":9858,"y":11813,"s":[[-440,-431],[430,-439],[439,431],[-432,441]]},{"n":"70","x":11574,"y":11813,"s":[[-440,-431],[430,-439],[439,431],[-432,441]]},{"n":"71","x":13288,"y":11813,"s":[[-440,-431],[430,-439],[439,431],[-432,441]]},{"n":"72","x":8165,"y":10541,"s":[[436,-5],[-436,5]]},{"n":"73","x":9858,"y":10105,"s":[[-440,-431],[430,-439],[439,431],[-432,441]]},{"n":"74","x":11574,"y":10105,"s":[[-440,-431],[430,-439],[439,431],[-432,441]]},{"n":"75","x":13288,"y":10105,"s":[[-440,-431],[430,-439],[439,431],[-432,441]]},{"n":"76","x":9858,"y":8385,"s":[[-440,-429],[430,-439],[439,431],[-432,441]]},{"n":"77","x":11574,"y":8385,"s":[[-440,-429],[430,-439],[439,431],[-432,441]]},{"n":"78","x":13288,"y":8385,"s":[[-440,-429],[430,-439],[439,431],[-432,441]]},{"n":"80","x":9858,"y":6677,"s":[[-440,-431],[430,-439],[439,431],[-432,442]]},{"n":"81","x":11574,"y":6677,"s":[[-440,-431],[430,-439],[439,431],[-432,442]]},{"n":"82","x":13288,"y":6677,"s":[[-440,-431],[430,-439],[439,431],[-432,442]]},{"n":"83","x":9858,"y":4958,"s":[[-440,-430],[430,-438],[439,432],[-432,440]]},{"n":"84","x":11574,"y":4958,"s":[[-440,-430],[430,-438],[439,432],[-432,440]]},{"n":"85","x":13288,"y":4958,"s":[[-440,-430],[430,-438],[439,432],[-432,440]]},{"n":"86","x":9858,"y":3271,"s":[[-440,-430],[430,-438],[439,432],[-432,440]]},{"n":"87","x":11574,"y":3271,"s":[[-440,-430],[430,-438],[439,432],[-432,440]]},{"n":"88","x":13288,"y":3271,"s":[[-440,-430],[430,-438],[439,432],[-432,440]]},{"n":"902C","x":7127,"y":6548,"s":[[449,159],[-12,29],[-450,-158]]},{"n":"912C","x":5418,"y":5296,"s":[[296,374],[-25,18],[-296,-373]]},{"n":"922C","x":4686,"y":3352,"s":[[32,476],[-29,3],[-34,-476]]},{"n":"932C","x":6506,"y":8033,"s":[[369,166],[-6,13],[-368,-166]]},{"n":"942C","x":5145,"y":7179,"s":[[310,258],[-11,12],[-311,-258]]},{"n":"952C","x":4064,"y":5989,"s":[[228,333],[-10,6],[-230,-333]]},{"n":"962C","x":3344,"y":4550,"s":[[129,383],[-15,7],[-130,-382]]},{"n":"972C","x":3040,"y":2971,"s":[[22,403],[-13,3],[-23,-404]]},{"n":"982C","x":4738,"y":8808,"s":[[349,251],[-1,2],[-349,-251]]},{"n":"992C","x":3420,"y":7680,"s":[[292,323],[-10,8],[-292,-323]]},{"n":"1002C","x":2351,"y":6180,"s":[[108,181],[-108,-181]]},{"n":"1012C","x":1790,"y":4050,"s":[[391,622],[-391,161],[72,-621]]}];
+
+  var css = getComputedStyle(document.documentElement);
+  function tok(n) { return css.getPropertyValue(n).trim(); }
+  var C = {
+    ink: tok('--a-ink'), muted: tok('--a-muted'), sold: tok('--a-sold'), top: tok('--a-bg'), topLine: tok('--a-top-line'),
+    sofa: tok('--a-sofa'), sofaBack: tok('--a-sofa-back'), floor: tok('--a-floor'), amph: tok('--a-amph'), stage: tok('--a-stage'),
+    on: tok('--a-on-seat'), zone: tok('--a-zone'), zoneOn: tok('--a-zone-on'), bar: tok('--a-bar'), barLine: tok('--a-bar-line'), barInk: tok('--a-bar-ink'),
+    panel: tok('--a-panel'), focus: tok('--a-focus')
+  };
+  var COLORS = ['--c1', '--c2', '--c3', '--c4', '--c5', '--c6'].map(tok);
+
+  var AC = [8600, 1900]; // центр дуг амфитеатра
+  var FLOOR = '9150,2450 14200,2450 14200,20250 7350,20250 7350,9700 9150,9700';
+  var STAGE = { x: 6900, y: 450, w: 7300, h: 1500 };
+  var BAR = { x: 4741, y: 20156, w: 3255, h: 798 };
+  var HALL = { x: -250, y: 150, w: 14700, h: 21100 };
+  var R_SEAT = 250, R_ASEAT = 205;
+
+  var ZONES = [
+    { id: 'near', name: 'У сцены', tab: 'У сцены' },
+    { id: 'center', name: 'Центр зала', tab: 'Центр' },
+    { id: 'far', name: 'Дальше от сцены', tab: 'Дальше' },
+    { id: 'amph', name: 'Амфитеатр', tab: 'Амфитеатр' },
+    { id: 'bar', name: 'У бара, стоя', tab: 'У бара' }
+  ];
+  var ZN = {};
+  ZONES.forEach(function (z) { ZN[z.id] = z; });
+  function zoneOf(n) {
+    if (/C$/.test(n)) { return 'amph'; }
+    var k = +n;
+    return k >= 80 ? 'near' : (k >= 68 ? 'center' : 'far');
+  }
+
+  // Примеры концертов. Цены и проданные места условные.
+  var EVENTS = {
+    a: {
+      title: 'Квартет Антона Давидянца', date: '9 ноября, 20:00',
+      cats: [10900, 9900, 9500, 8900, 6900, 4900],
+      cat: function (n) {
+        if (n === '1012C' || n === '72') { return -1; }
+        if (/C$/.test(n)) { return n === '932C' ? 0 : (['902C', '912C', '942C', '952C'].indexOf(n) >= 0 ? 1 : 2); }
+        var k = +n;
+        if (k >= 86) { return 1; }
+        if (k >= 83) { return 2; }
+        if (k >= 76) { return 3; }
+        if (k >= 64) { return 4; }
+        return 5;
+      },
+      p: { near: 0.3, center: 0.4, far: 0.3, amph: 0.2 },
+      soldTables: ['56', '57', '58', '59'],
+      bar: null
+    },
+    b: {
+      title: 'Большой джем-сешн', date: '14 ноября, 20:00',
+      cats: [7900, 5900, 3900, 2500],
+      cat: function (n) {
+        if (/C$/.test(n)) { return ['902C', '912C', '922C'].indexOf(n) >= 0 ? 0 : 1; }
+        var z = zoneOf(n);
+        return z === 'near' ? 0 : (z === 'center' ? 1 : 2);
+      },
+      p: { near: 0.55, center: 0.3, far: 0.12, amph: 0.3 },
+      soldTables: [],
+      bar: { cat: 3, left: 40 }
+    }
+  };
+
+  // ---------- геометрия
+  var SEATS = [], BYKEY = {}, TBL = {}, TORDER = [];
+  TABLES.forEach(function (t) {
+    var zone = zoneOf(t.n);
+    var kind = zone === 'amph' ? 'sofa' : (t.s.length === 6 ? 'rect' : (t.s.length === 2 ? 'duo' : 'round'));
+    var tb = { n: t.n, x: t.x, y: t.y, zone: zone, kind: kind, seats: [] };
+    TBL[t.n] = tb;
+    TORDER.push(tb);
+    t.s.forEach(function (d, i) {
+      var ux, uy, L;
+      if (kind === 'sofa') {
+        var vx = t.x + d[0] - AC[0], vy = t.y + d[1] - AC[1];
+        L = Math.hypot(vx, vy); ux = vx / L; uy = vy / L;
+      } else if (kind === 'rect') {
+        if (Math.abs(d[0]) > 750) { ux = Math.sign(d[0]); uy = 0; } else { ux = 0; uy = Math.sign(d[1]); }
+      } else {
+        L = Math.hypot(d[0], d[1]); ux = d[0] / L; uy = d[1] / L;
+      }
+      var s = { key: t.n + '-' + (i + 1), n: t.n, i: i + 1, x: t.x + d[0], y: t.y + d[1], ux: ux, uy: uy, zone: zone, tb: tb };
+      tb.seats.push(s); SEATS.push(s); BYKEY[s.key] = s;
+    });
+  });
+
+  var BOX = {};
+  ['near', 'center', 'far', 'amph'].forEach(function (z) {
+    var ss = SEATS.filter(function (s) { return s.zone === z; });
+    var m = z === 'amph' ? 480 : 440;
+    var xs = ss.map(function (s) { return s.x; }), ys = ss.map(function (s) { return s.y; });
+    var x0 = Math.min.apply(null, xs) - m, x1 = Math.max.apply(null, xs) + m;
+    var y0 = Math.min.apply(null, ys) - m, y1 = Math.max.apply(null, ys) + m;
+    BOX[z] = { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
+  });
+  BOX.bar = BAR;
+
+  function annulus(r1, r2, a1, a2) {
+    var p = [], i, a, n = 40;
+    for (i = 0; i <= n; i++) { a = (a1 + (a2 - a1) * i / n) * Math.PI / 180; p.push([AC[0] + r2 * Math.cos(a), AC[1] + r2 * Math.sin(a)]); }
+    for (i = n; i >= 0; i--) { a = (a1 + (a2 - a1) * i / n) * Math.PI / 180; p.push([AC[0] + r1 * Math.cos(a), AC[1] + r1 * Math.sin(a)]); }
+    return p.map(function (q) { return Math.round(q[0]) + ',' + Math.round(q[1]); }).join(' ');
+  }
+  var AMPH_POLY = annulus(3350, 8650, 93, 171);
+
+  var PILL_AT = {
+    near: [BOX.near.x + BOX.near.w / 2, BOX.near.y + BOX.near.h / 2],
+    center: [BOX.center.x + BOX.center.w / 2, BOX.center.y + BOX.center.h / 2],
+    far: [BOX.far.x + BOX.far.w / 2, BOX.far.y + BOX.far.h / 2],
+    amph: [4300, 6250],
+    bar: [BAR.x + BAR.w / 2, BAR.y + BAR.h / 2]
+  };
+
+  // ---------- состояние
+  var S = { ev: 'a', mode: 'ov', zone: null, filter: [], sel: {}, ga: 0, sheet: null };
+  var EV = EVENTS.a;
+  var INFO = {};
+
+  function rnd(str) {
+    var h = 2166136261, i;
+    for (i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+    h ^= h >>> 13; h = Math.imul(h, 0x5bd1e995); h ^= h >>> 15;
+    return (h >>> 0) / 4294967296;
+  }
+  function computeInfo() {
+    INFO = {};
+    SEATS.forEach(function (s) {
+      var c = EV.cat(s.n);
+      if (c < 0) { INFO[s.key] = { off: true, c: -1, sold: false }; return; }
+      var sold = EV.soldTables.indexOf(s.n) >= 0 || rnd(S.ev + s.key) < EV.p[s.zone];
+      INFO[s.key] = { off: false, c: c, sold: sold };
+    });
+  }
+  function isFree(s) { var f = INFO[s.key]; return !f.off && !f.sold; }
+  function match(c) { return S.filter.length === 0 || S.filter.indexOf(c) >= 0; }
+  function price(s) { return EV.cats[INFO[s.key].c]; }
+  function selKeys() { return Object.keys(S.sel); }
+
+  function fmt(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' '); }
+  function pl(n, a, b, c) {
+    var x = n % 10, y = n % 100;
+    if (x === 1 && y !== 11) { return a; }
+    if (x >= 2 && x <= 4 && (y < 12 || y > 14)) { return b; }
+    return c;
+  }
+  function seatsWord(n) { return pl(n, 'место', 'места', 'мест'); }
+  function rub(n) { return fmt(n) + ' ₽'; }
+
+  function stats(z) {
+    if (z === 'bar') {
+      if (!EV.bar) { return { off: true }; }
+      var bp = EV.cats[EV.bar.cat];
+      var ok = match(EV.bar.cat);
+      return { off: false, count: ok ? EV.bar.left : 0, all: EV.bar.left, min: bp, max: bp, cats: [EV.bar.cat], ga: true };
+    }
+    var r = { off: true, count: 0, all: 0, min: null, max: null, cats: [] };
+    SEATS.forEach(function (s) {
+      if (s.zone !== z) { return; }
+      var f = INFO[s.key];
+      if (f.off) { return; }
+      r.off = false;
+      if (f.sold) { return; }
+      r.all += 1;
+      if (r.cats.indexOf(f.c) < 0) { r.cats.push(f.c); }
+      if (!match(f.c)) { return; }
+      var p = EV.cats[f.c];
+      r.count += 1;
+      if (r.min === null || p < r.min) { r.min = p; }
+      if (r.max === null || p > r.max) { r.max = p; }
+    });
+    r.cats.sort(function (a, b) { return a - b; });
+    return r;
+  }
+  function rangeText(st) {
+    if (st.min === null) { return ''; }
+    return st.min === st.max ? rub(st.min) : fmt(st.min) + '–' + rub(st.max);
+  }
+
+  // ---------- элементы
+  var $ = function (id) { return document.getElementById(id); };
+  var svg = $('map'), dyn = $('dyn'), bgG = $('bg'), mapBox = $('mapBox'), pills = $('pills');
+  var head = $('head'), hBack = $('hBack'), hTitle = $('hTitle'), hSub = $('hSub'), hMini = $('hMini');
+  var tabs = $('tabs'), prices = $('prices'), bTotal = $('bTotal'), bSub = $('bSub'), bNext = $('bNext');
+  var sheet = $('sheet'), scrim = $('scrim'), toastEl = $('toast');
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ---------- рисование
+  function arc(cx, cy, ux, uy, R) {
+    var th = Math.atan2(uy, ux), a = 1.0;
+    var x1 = cx + R * Math.cos(th - a), y1 = cy + R * Math.sin(th - a);
+    var x2 = cx + R * Math.cos(th + a), y2 = cy + R * Math.sin(th + a);
+    return 'M' + Math.round(x1) + ' ' + Math.round(y1) + 'A' + R + ' ' + R + ' 0 0 1 ' + Math.round(x2) + ' ' + Math.round(y2);
+  }
+  function pts(list) { return list.map(function (s) { return Math.round(s.x) + ',' + Math.round(s.y); }).join(' '); }
+  function txt(cls, x, y, size, fill, text, weight) {
+    return '<text class="' + cls + '" x="' + Math.round(x) + '" y="' + Math.round(y) + '" font-size="' + size + '" font-weight="' + (weight || 700) + '" fill="' + fill + '" text-anchor="middle" dominant-baseline="central">' + text + '</text>';
+  }
+  function cross(x, y, r) {
+    var k = Math.round(r * 0.34);
+    return '<path class="snum" d="M' + (x - k) + ' ' + (y - k) + 'L' + (x + k) + ' ' + (y + k) + 'M' + (x + k) + ' ' + (y - k) + 'L' + (x - k) + ' ' + (y + k) + '" stroke="' + C.on + '" stroke-width="' + Math.round(r * 0.17) + '" stroke-linecap="round"/>';
+  }
+  function check(x, y, r) {
+    return '<path class="snum" d="M' + Math.round(x - r * 0.42) + ' ' + Math.round(y + r * 0.02) + 'L' + Math.round(x - r * 0.12) + ' ' + Math.round(y + r * 0.32) + 'L' + Math.round(x + r * 0.42) + ' ' + Math.round(y - r * 0.3) + '" fill="none" stroke="' + C.on + '" stroke-width="' + Math.round(r * 0.2) + '" stroke-linecap="round" stroke-linejoin="round"/>';
+  }
+  function seatSVG(s, chair) {
+    var f = INFO[s.key], sel = !!S.sel[s.key], r = chair ? R_SEAT : R_ASEAT;
+    var fill, op = 1, inner;
+    if (f.off || f.sold) { fill = C.sold; inner = cross(s.x, s.y, r); }
+    else if (sel) { fill = C.ink; inner = check(s.x, s.y, r); }
+    else {
+      fill = COLORS[f.c];
+      if (!match(f.c)) { op = 0.2; }
+      inner = txt('snum', s.x, s.y, chair ? 210 : 180, C.on, s.i);
+    }
+    var back = chair ? '<path d="' + arc(s.x, s.y, s.ux, s.uy, 335) + '" fill="none" stroke="' + fill + '" stroke-opacity="' + (sel ? 1 : 0.5) + '" stroke-width="95" stroke-linecap="round"/>' : '';
+    return '<g' + (op < 1 ? ' opacity="' + op + '"' : '') + '>' + back + '<circle cx="' + s.x + '" cy="' + s.y + '" r="' + r + '" fill="' + fill + '"/>' + inner + '</g>';
+  }
+  function tableSVG(tb) {
+    var other = S.mode !== 'ov' && tb.zone !== S.zone;
+    var g = ['<g' + (other ? ' opacity="0.42"' : '') + '>'];
+    tb.seats.forEach(function (s) { g.push(seatSVG(s, true)); });
+    if (tb.kind === 'rect') {
+      g.push('<rect class="top" data-table="' + tb.n + '" x="' + (tb.x - 750) + '" y="' + (tb.y - 410) + '" width="1500" height="820" rx="200" fill="' + C.top + '" stroke="' + C.topLine + '" stroke-width="40"/>');
+    } else {
+      g.push('<circle class="top" data-table="' + tb.n + '" cx="' + tb.x + '" cy="' + tb.y + '" r="' + (tb.kind === 'duo' ? 150 : 320) + '" fill="' + C.top + '" stroke="' + C.topLine + '" stroke-width="40"/>');
+    }
+    g.push(txt('tnum', tb.x, tb.y, tb.kind === 'duo' ? 160 : 250, C.ink, tb.n));
+    g.push('</g>');
+    return g.join('');
+  }
+  function sofaSVG(tb) {
+    var other = S.mode !== 'ov' && S.zone !== 'amph';
+    var active = S.sheet && S.sheet.type === 'sofa' && S.sheet.id === tb.n;
+    var P = pts(tb.seats);
+    var Q = tb.seats.map(function (s) { return Math.round(s.x + s.ux * 300) + ',' + Math.round(s.y + s.uy * 300); }).join(' ');
+    var vx = tb.x - AC[0], vy = tb.y - AC[1], L = Math.hypot(vx, vy);
+    var lx = tb.x - vx / L * 600, ly = tb.y - vy / L * 600;
+    var g = ['<g' + (other ? ' opacity="0.42"' : '') + '>'];
+    if (active) { g.push('<polyline points="' + P + '" fill="none" stroke="' + C.ink + '" stroke-width="720" stroke-linecap="round" stroke-linejoin="round"/>'); }
+    g.push('<polyline points="' + Q + '" fill="none" stroke="' + C.sofaBack + '" stroke-width="170" stroke-linecap="round" stroke-linejoin="round"/>');
+    g.push('<polyline points="' + P + '" fill="none" stroke="' + C.sofa + '" stroke-width="580" stroke-linecap="round" stroke-linejoin="round"/>');
+    tb.seats.forEach(function (s) { g.push(seatSVG(s, false)); });
+    g.push(txt('slbl', lx, ly, 230, C.muted, tb.n));
+    g.push('</g>');
+    return g.join('');
+  }
+  function rectEl(cls, b, extra) {
+    return '<rect class="' + cls + '" x="' + Math.round(b.x) + '" y="' + Math.round(b.y) + '" width="' + Math.round(b.w) + '" height="' + Math.round(b.h) + '" ' + (extra || '') + '/>';
+  }
+  function drawBg() {
+    bgG.innerHTML =
+      '<polygon points="' + FLOOR + '" fill="' + C.floor + '"/>' +
+      '<polygon points="' + AMPH_POLY + '" fill="' + C.amph + '"/>' +
+      rectEl('', STAGE, 'rx="320" fill="' + C.stage + '"') +
+      '<text x="' + (STAGE.x + STAGE.w / 2) + '" y="' + (STAGE.y + STAGE.h / 2) + '" font-size="560" font-weight="700" letter-spacing="180" fill="' + C.on + '" text-anchor="middle" dominant-baseline="central">СЦЕНА</text>' +
+      rectEl('', BAR, 'rx="220" fill="' + C.bar + '" stroke="' + C.barLine + '" stroke-width="30"') +
+      txt('tnum', BAR.x + BAR.w / 2, BAR.y + BAR.h / 2, 300, C.barInk, 'У БАРА · СТОЯ', 600);
+  }
+  function drawMap() {
+    var out = [];
+    ['near', 'center', 'far'].forEach(function (z) {
+      var on = S.zone === z;
+      if (S.mode === 'ov' || on) { out.push(rectEl('', BOX[z], 'rx="380" fill="none" stroke="' + (on ? C.zoneOn : C.zone) + '" stroke-width="' + (on ? 46 : 36) + '"')); }
+    });
+    if (S.mode === 'ov' || S.zone === 'amph') {
+      out.push('<polygon points="' + AMPH_POLY + '" fill="none" stroke="' + (S.zone === 'amph' ? C.zoneOn : C.zone) + '" stroke-width="' + (S.zone === 'amph' ? 46 : 36) + '"/>');
+    }
+    TORDER.forEach(function (tb) { out.push(tb.kind === 'sofa' ? sofaSVG(tb) : tableSVG(tb)); });
+    SEATS.forEach(function (s) {
+      if (s.zone !== 'amph') { out.push('<circle class="hit" data-seat="' + s.key + '" cx="' + s.x + '" cy="' + s.y + '" r="390"/>'); }
+    });
+    TORDER.forEach(function (tb) {
+      if (tb.kind === 'sofa') { out.push('<polyline class="hit" data-sofa="' + tb.n + '" points="' + pts(tb.seats) + '" fill="none" stroke-width="950" stroke-linecap="round" stroke-linejoin="round"/>'); }
+    });
+    ['near', 'center', 'far'].forEach(function (z) { out.push(rectEl('zhit', BOX[z], 'data-zone="' + z + '"')); });
+    out.push('<polygon class="zhit" data-zone="amph" points="' + AMPH_POLY + '"/>');
+    out.push(rectEl('zhit', BAR, 'data-zone="bar"'));
+    dyn.innerHTML = out.join('');
+    svg.setAttribute('class', S.mode);
+  }
+
+  // ---------- масштаб
+  var VB = null, anim = 0, animating = false;
+  function setVB(v) { VB = v; svg.setAttribute('viewBox', v.map(function (n) { return n.toFixed(1); }).join(' ')); }
+  function fitBox(b) {
+    var W = mapBox.clientWidth || 390, H = mapBox.clientHeight || 600;
+    var s = Math.min(W / b.w, H / b.h), vw = W / s, vh = H / s;
+    return [b.x + b.w / 2 - vw / 2, b.y + b.h / 2 - vh / 2, vw, vh];
+  }
+  function currentBox() { return S.mode === 'ov' ? HALL : BOX[S.zone]; }
+  function animateTo(target) {
+    cancelAnimationFrame(anim);
+    var from = VB || target;
+    if (reduce) { setVB(target); placePills(); return; }
+    var t0 = performance.now(), D = 440;
+    animating = true;
+    pills.classList.add('moving');
+    function step(now) {
+      var k = Math.min(1, (now - t0) / D);
+      var e = k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+      setVB(from.map(function (f, i) { return f + (target[i] - f) * e; }));
+      if (k < 1) { anim = requestAnimationFrame(step); }
+      else { animating = false; pills.classList.remove('moving'); placePills(); }
+    }
+    anim = requestAnimationFrame(step);
+  }
+  function placePills() {
+    if (!VB) { return; }
+    var s = mapBox.clientWidth / VB[2];
+    Array.prototype.forEach.call(pills.children, function (b) {
+      var p = PILL_AT[b.getAttribute('data-zone')];
+      b.style.left = Math.round((p[0] - VB[0]) * s) + 'px';
+      b.style.top = Math.round((p[1] - VB[1]) * s) + 'px';
+    });
+  }
+
+  // ---------- интерфейс
+  function renderHeader() {
+    if (S.mode === 'ov') {
+      head.classList.remove('zone');
+      hBack.hidden = true; hMini.hidden = true;
+      hTitle.textContent = EV.title;
+      hSub.textContent = EV.date + ' · Главная сцена';
+      return;
+    }
+    head.classList.add('zone');
+    hBack.hidden = false; hMini.hidden = false;
+    hTitle.textContent = ZN[S.zone].name;
+    var st = stats(S.zone);
+    hSub.textContent = st.count ? rangeText(st) + ' · ' + st.count + ' ' + seatsWord(st.count) + ' свободно' : (S.filter.length ? 'нет мест по выбранной цене' : 'свободных мест нет');
+    var mz = hMini.querySelectorAll('[data-mz]');
+    Array.prototype.forEach.call(mz, function (el) { el.setAttribute('fill', el.getAttribute('data-mz') === S.zone ? C.focus : C.zone); });
+  }
+  function buildMini() {
+    hMini.innerHTML = '<svg viewBox="' + [HALL.x, HALL.y, HALL.w, HALL.h].join(' ') + '" aria-hidden="true">' +
+      rectEl('', STAGE, 'rx="400" fill="' + C.stage + '"') +
+      ['near', 'center', 'far'].map(function (z) { return rectEl('', BOX[z], 'rx="500" data-mz="' + z + '" fill="' + C.zone + '"'); }).join('') +
+      '<polygon data-mz="amph" points="' + AMPH_POLY + '" fill="' + C.zone + '"/>' +
+      rectEl('', BAR, 'rx="300" fill="' + C.zone + '"') + '</svg>';
+  }
+  function renderTabs() {
+    var cur = S.mode === 'ov' ? 'ov' : S.zone;
+    var items = [{ id: 'ov', tab: 'Весь зал' }].concat(ZONES);
+    tabs.innerHTML = items.map(function (z) {
+      return '<button type="button" data-tab="' + z.id + '" aria-current="' + (cur === z.id) + '">' + z.tab + '</button>';
+    }).join('');
+  }
+  function renderPrices() {
+    var h = ['<button type="button" class="chip" data-f="all" aria-pressed="' + (S.filter.length === 0) + '">Все цены</button>'];
+    EV.cats.forEach(function (p, i) {
+      h.push('<button type="button" class="chip" data-f="' + i + '" aria-pressed="' + (S.filter.indexOf(i) >= 0) + '"><i style="background:' + COLORS[i] + '"></i>' + rub(p) + '</button>');
+    });
+    prices.innerHTML = h.join('');
+  }
+  function renderPills() {
+    if (S.mode !== 'ov') { pills.innerHTML = ''; return; }
+    pills.innerHTML = ZONES.map(function (z) {
+      var st = stats(z.id), line, dim = false;
+      if (st.off) { line = 'не продаётся'; dim = true; }
+      else if (st.count === 0) { line = S.filter.length ? 'нет по этой цене' : 'всё продано'; dim = true; }
+      else { line = (st.min === st.max ? '' : 'от ') + rub(st.min) + ' · ' + st.count + (st.ga ? ' бил.' : ' ' + seatsWord(st.count)); }
+      var dots = st.off ? '' : '<span class="dots">' + st.cats.map(function (c) { return '<i style="background:' + COLORS[c] + ';opacity:' + (match(c) ? 1 : 0.25) + '"></i>'; }).join('') + '</span>';
+      return '<button type="button" class="pill' + (dim ? ' dim' : '') + '" data-zone="' + z.id + '" aria-label="' + z.name + ': ' + line + '"><b>' + z.name + '</b><span>' + line + '</span>' + dots + '</button>';
+    }).join('');
+    placePills();
+  }
+  var HINT = { ov: 'Нажмите на зону, чтобы приблизить', zm: 'Стул: одно место. Столешница: весь стол', am: 'Нажмите на диван, чтобы выбрать места' };
+  function selection() {
+    var keys = selKeys(), total = 0, groups = {}, order = [];
+    keys.forEach(function (k) {
+      var s = BYKEY[k];
+      total += price(s);
+      if (!groups[s.n]) { groups[s.n] = []; order.push(s.n); }
+      groups[s.n].push(s.i);
+    });
+    order.sort(function (a, b) { return parseInt(a, 10) - parseInt(b, 10); });
+    var parts = order.map(function (n) { return (/C$/.test(n) ? 'диван ' : 'стол ') + n + ': ' + groups[n].sort().join(', '); });
+    if (S.ga) { total += S.ga * EV.cats[EV.bar.cat]; parts.push('у бара: ' + S.ga); }
+    return { count: keys.length + S.ga, total: total, parts: parts, keys: keys };
+  }
+  function renderBar() {
+    var sel = selection();
+    if (sel.count) {
+      bTotal.textContent = rub(sel.total);
+      bSub.textContent = sel.count + ' ' + seatsWord(sel.count) + ' · ' + sel.parts.join(' · ');
+      bNext.disabled = false;
+    } else {
+      bTotal.textContent = 'Места не выбраны';
+      bSub.textContent = HINT[S.mode];
+      bNext.disabled = true;
+    }
+  }
+  var X_ICON = '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 4l12 12M16 4L4 16"></path></svg>';
+  function renderSheet() {
+    if (!S.sheet) { sheet.hidden = true; scrim.hidden = true; sheet.innerHTML = ''; return; }
+    sheet.hidden = false; scrim.hidden = false;
+    var h = ['<div class="grab"></div>'];
+    if (S.sheet.type === 'sofa') {
+      var tb = TBL[S.sheet.id];
+      var free = tb.seats.filter(isFree);
+      var ps = free.map(price);
+      var pr = ps.length ? (Math.min.apply(null, ps) === Math.max.apply(null, ps) ? rub(ps[0]) + ' за место' : fmt(Math.min.apply(null, ps)) + '–' + rub(Math.max.apply(null, ps)) + ' за место') : 'свободных мест нет';
+      sheet.setAttribute('aria-label', 'Диван ' + tb.n);
+      h.push('<div class="sh-head"><div><h2>Диван ' + tb.n + '</h2><p>Амфитеатр · ' + pr + '</p></div><button type="button" class="ic" data-act="close" aria-label="Закрыть">' + X_ICON + '</button></div>');
+      h.push('<div class="tray">' + tb.seats.map(function (s) {
+        var f = INFO[s.key];
+        if (f.off || f.sold) { return '<button type="button" class="seatbtn sold" disabled aria-label="Место ' + s.i + ', занято"><span class="n">' + s.i + '</span><span class="p">занято</span></button>'; }
+        var sel = !!S.sel[s.key];
+        return '<button type="button" class="seatbtn' + (sel ? ' sel' : '') + '" data-act="seat" data-key="' + s.key + '" aria-pressed="' + sel + '" style="' + (sel ? '' : 'background:' + COLORS[f.c]) + '" aria-label="Место ' + s.i + ', ' + rub(price(s)) + '"><span class="n">' + (sel ? '✓' : s.i) + '</span><span class="p">' + rub(price(s)) + '</span></button>';
+      }).join('') + '</div>');
+      h.push('<div class="sh-row"><span>' + free.length + ' ' + seatsWord(free.length) + ' свободно · места слева направо, если смотреть на сцену</span>' + (free.length > 1 ? '<button type="button" class="link" data-act="sofa-all">Весь диван</button>' : '') + '</div>');
+      h.push('<button type="button" class="cta" data-act="close">Готово</button>');
+    } else if (S.sheet.type === 'ga') {
+      var bp = EV.cats[EV.bar.cat];
+      sheet.setAttribute('aria-label', 'У бара, стоя');
+      h.push('<div class="sh-head"><div><h2>У бара, стоя</h2><p>Входной билет без места · ' + rub(bp) + '</p></div><button type="button" class="ic" data-act="close" aria-label="Закрыть">' + X_ICON + '</button></div>');
+      h.push('<div class="stepper"><button type="button" data-act="ga-minus" aria-label="Меньше"' + (S.ga ? '' : ' disabled') + '>−</button><output aria-live="polite">' + S.ga + '</output><button type="button" data-act="ga-plus" aria-label="Больше"' + (S.ga < Math.min(10, EV.bar.left) ? '' : ' disabled') + '>+</button></div>');
+      h.push('<p class="note" style="text-align:center">Осталось ' + EV.bar.left + ' билетов</p>');
+      h.push('<button type="button" class="cta" data-act="close">Готово</button>');
+    } else if (S.sheet.type === 'cart') {
+      var sel = selection();
+      sheet.setAttribute('aria-label', 'Ваш выбор');
+      var rows = sel.keys.map(function (k) { return BYKEY[k]; }).sort(function (a, b) { return parseInt(a.n, 10) - parseInt(b.n, 10) || a.i - b.i; }).map(function (s) {
+        return '<li><span>' + (/C$/.test(s.n) ? 'Диван ' : 'Стол ') + s.n + ', место ' + s.i + '</span><span>' + rub(price(s)) + '</span></li>';
+      });
+      if (S.ga) { rows.push('<li><span>У бара, стоя × ' + S.ga + '</span><span>' + rub(S.ga * EV.cats[EV.bar.cat]) + '</span></li>'); }
+      h.push('<div class="sh-head"><div><h2>Ваш выбор</h2><p>' + EV.title + ', ' + EV.date + '</p></div><button type="button" class="ic" data-act="close" aria-label="Закрыть">' + X_ICON + '</button></div>');
+      h.push('<ul class="cart">' + rows.join('') + '</ul>');
+      h.push('<div class="total"><span>Итого<small>без сервисного сбора</small></span><span>' + rub(sel.total) + '</span></div>');
+      h.push('<p class="note">Здесь прототип заканчивается. Дальше обычное оформление заказа в Ticketscloud: контакты и оплата.</p>');
+      h.push('<button type="button" class="cta" data-act="close">Вернуться к схеме</button>');
+    }
+    sheet.innerHTML = h.join('');
+  }
+  function render() {
+    renderHeader(); renderTabs(); renderPrices(); drawMap(); renderPills(); renderBar(); renderSheet();
+  }
+
+  // ---------- действия
+  var tt = 0;
+  function toast(msg) {
+    toastEl.textContent = msg; toastEl.hidden = false;
+    clearTimeout(tt); tt = setTimeout(function () { toastEl.hidden = true; }, 1900);
+  }
+  function goZone(z) {
+    if (z === 'bar') {
+      if (EV.bar) { S.sheet = { type: 'ga' }; render(); } else { toast('У бара: на этот концерт не продаётся'); }
+      return;
+    }
+    S.mode = z === 'amph' ? 'am' : 'zm'; S.zone = z; S.sheet = null;
+    render();
+    animateTo(fitBox(BOX[z]));
+  }
+  function goOverview() {
+    S.mode = 'ov'; S.zone = null; S.sheet = null;
+    render();
+    animateTo(fitBox(HALL));
+  }
+  function toggleSeat(key) {
+    if (S.sel[key]) { delete S.sel[key]; } else { S.sel[key] = true; }
+  }
+  function onSeat(key) {
+    var s = BYKEY[key];
+    if (s.zone !== S.zone) { goZone(s.zone); return; }
+    if (!isFree(s)) { toast(INFO[key].off ? 'Стол ' + s.n + ' на этот концерт не продаётся' : 'Место занято'); return; }
+    toggleSeat(key);
+    render();
+  }
+  function onTable(n) {
+    var tb = TBL[n];
+    if (tb.zone !== S.zone) { goZone(tb.zone); return; }
+    var free = tb.seats.filter(isFree);
+    if (!free.length) { toast(INFO[tb.seats[0].key].off ? 'Стол ' + n + ' на этот концерт не продаётся' : 'Стол ' + n + ': свободных мест нет'); return; }
+    var all = free.every(function (s) { return S.sel[s.key]; });
+    free.forEach(function (s) { if (all) { delete S.sel[s.key]; } else { S.sel[s.key] = true; } });
+    toast(all ? 'Стол ' + n + ': выбор снят' : 'Стол ' + n + ' целиком: ' + free.length + ' ' + seatsWord(free.length));
+    render();
+  }
+  function onSofa(n) {
+    if (S.zone !== 'amph') { goZone('amph'); return; }
+    var tb = TBL[n];
+    if (!tb.seats.some(function (s) { return !INFO[s.key].off; })) { toast('Диван ' + n + ' на этот концерт не продаётся'); return; }
+    S.sheet = { type: 'sofa', id: n };
+    render();
+  }
+
+  svg.addEventListener('click', function (e) {
+    var el = e.target.closest('[data-seat],[data-table],[data-sofa],[data-zone]');
+    if (!el || animating) { return; }
+    if (el.hasAttribute('data-zone')) { goZone(el.getAttribute('data-zone')); }
+    else if (el.hasAttribute('data-seat')) { onSeat(el.getAttribute('data-seat')); }
+    else if (el.hasAttribute('data-table')) { onTable(el.getAttribute('data-table')); }
+    else if (el.hasAttribute('data-sofa')) { onSofa(el.getAttribute('data-sofa')); }
+  });
+  pills.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-zone]');
+    if (b) { goZone(b.getAttribute('data-zone')); }
+  });
+  tabs.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-tab]');
+    if (!b) { return; }
+    var id = b.getAttribute('data-tab');
+    if (id === 'ov') { if (S.mode !== 'ov') { goOverview(); } } else if (id !== S.zone || id === 'bar') { goZone(id); }
+  });
+  prices.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-f]');
+    if (!b) { return; }
+    var f = b.getAttribute('data-f');
+    if (f === 'all') { S.filter = []; }
+    else {
+      var i = +f, at = S.filter.indexOf(i);
+      if (at >= 0) { S.filter.splice(at, 1); } else { S.filter.push(i); }
+      if (S.filter.length === EV.cats.length) { S.filter = []; }
+    }
+    render();
+  });
+  hBack.addEventListener('click', goOverview);
+  hMini.addEventListener('click', goOverview);
+  bNext.addEventListener('click', function () { if (selection().count) { S.sheet = { type: 'cart' }; render(); } });
+  scrim.addEventListener('click', function () { S.sheet = null; render(); });
+  sheet.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-act]');
+    if (!b) { return; }
+    var act = b.getAttribute('data-act');
+    if (act === 'close') { S.sheet = null; }
+    else if (act === 'seat') { toggleSeat(b.getAttribute('data-key')); }
+    else if (act === 'sofa-all') {
+      var free = TBL[S.sheet.id].seats.filter(isFree);
+      var all = free.every(function (s) { return S.sel[s.key]; });
+      free.forEach(function (s) { if (all) { delete S.sel[s.key]; } else { S.sel[s.key] = true; } });
+    }
+    else if (act === 'ga-plus') { S.ga = Math.min(Math.min(10, EV.bar.left), S.ga + 1); }
+    else if (act === 'ga-minus') { S.ga = Math.max(0, S.ga - 1); }
+    render();
+  });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && S.sheet) { S.sheet = null; render(); } });
+
+  Array.prototype.forEach.call(document.querySelectorAll('[data-ev]'), function (b) {
+    b.addEventListener('click', function () {
+      var id = b.getAttribute('data-ev');
+      if (id === S.ev) { return; }
+      S.ev = id; EV = EVENTS[id];
+      S.sel = {}; S.ga = 0; S.filter = []; S.sheet = null;
+      computeInfo();
+      Array.prototype.forEach.call(document.querySelectorAll('[data-ev]'), function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+      render();
+    });
+  });
+
+  // ---------- запуск
+  computeInfo();
+  drawBg();
+  buildMini();
+  render();
+  setVB(fitBox(HALL));
+  placePills();
+  if (window.ResizeObserver) {
+    new ResizeObserver(function () {
+      if (animating) { return; }
+      setVB(fitBox(currentBox()));
+      placePills();
+    }).observe(mapBox);
+  }
+})();
+</script>
+
+</body></html>
