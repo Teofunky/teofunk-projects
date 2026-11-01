@@ -137,6 +137,7 @@ class KEP_Front {
 	 */
 	public static function filter_html( $html ) {
 		try {
+			KEP_Live::remember_token( $html ); // открытый ключ виджета для свежей цены «от»
 			$frag = KEP_Parser::find_fragment( $html );
 			if ( ! $frag ) {
 				return self::fail( $html, 'Не найден блок концерта в разметке темы.' );

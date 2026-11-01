@@ -1,4 +1,4 @@
-/* Kozlov Event Page: поведение новой страницы концерта. Без jQuery и глобальных переменных. 1.0.14 */
+/* Kozlov Event Page: поведение новой страницы концерта. Без jQuery и глобальных переменных. 1.0.15 */
 (function () {
 	'use strict';
 
@@ -278,4 +278,87 @@
 			say(url);
 		});
 	});
+
+	// Цена «от» по свободным билетам. Страница для гостей лежит в кэше до 12 часов, поэтому
+	// цену спрашиваем у сайта после загрузки. Число меняется, только если самый дешёвый
+	// свободный билет дороже цены на странице (дешёвые места раскуплены). Ошибка: цена как была.
+	// Ответ хранится в браузере 5 минут: повторный заход на ту же страницу сайт не спрашивает.
+	var tcBtn = root.querySelector('[tc-event]');
+	var postId = (document.body.className.match(/(?:^|\s)postid-(\d+)(?:\s|$)/) || [])[1];
+	function showPrice(min) {
+		if (!(min > 0)) {
+			return;
+		}
+		var els = Array.prototype.slice.call(root.querySelectorAll('.kep-price-v:not(.kep-price-v--ink)'))
+			.concat(Array.prototype.slice.call(document.querySelectorAll('.kep-fixed .kep-bar-p')));
+		els.forEach(function (el) {
+			var m = /^(\s*от\s*)(\d[\d\s\u00a0]*\d|\d)(\D[\s\S]*)?$/i.exec(el.textContent);
+			if (!m) {
+				return; // «вход 1 500 / стол 3 000» и другие записи цены не трогаем
+			}
+			var shown = parseInt(m[2].replace(/\D/g, ''), 10);
+			if (!(min > shown)) {
+				return;
+			}
+			var num = String(min);
+			if (min >= 1000) {
+				num = num.replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0');
+			}
+			el.textContent = m[1] + num + (m[3] || '');
+		});
+	}
+	if (tcBtn && postId && window.fetch) {
+		var priceKey = 'kep-price-' + postId;
+		var saved = null;
+		try {
+			saved = JSON.parse(window.sessionStorage.getItem(priceKey) || 'null');
+		} catch (err) {
+			saved = null;
+		}
+		if (saved && typeof saved.t === 'number' && Date.now() - saved.t < 300000) {
+			showPrice(saved.min);
+		} else {
+			var api = (document.querySelector('link[rel="https://api.w.org/"]') || {}).href || '/wp-json/';
+			var priceUrl = api.replace(/\/?$/, '/') + 'kozlov-event-page/v1/price/' + postId +
+				'?event=' + encodeURIComponent(tcBtn.getAttribute('tc-event') || '');
+			window.fetch(priceUrl, { credentials: 'same-origin' })
+				.then(function (r) { return r.ok ? r.json() : null; })
+				.then(function (res) {
+					var min = res && typeof res.min === 'number' ? res.min : 0;
+					try {
+						window.sessionStorage.setItem(priceKey, JSON.stringify({ min: min, t: Date.now() }));
+					} catch (err) {}
+					showPrice(min);
+				})
+				.catch(function () {});
+		}
+	}
+
+	// Окно покупки Ticketscloud на устройствах с сенсорным экраном открывается только касанием:
+	// скрипт виджета там слушает touchend и не слушает click. Клик мышью, тачпадом или пером
+	// на таком устройстве отдаём виджету как касание. Настоящие касания не трогаем.
+	if ('ontouchend' in window) {
+		var lastPointer = '';
+		document.addEventListener('pointerdown', function (e) {
+			lastPointer = e.pointerType || '';
+		}, true);
+		document.addEventListener('click', function (e) {
+			if ('mouse' !== lastPointer && 'pen' !== lastPointer) {
+				return;
+			}
+			lastPointer = '';
+			var btn = e.target && e.target.closest ? e.target.closest('[tc-event], [data-tc-event]') : null;
+			if (!btn || document.querySelector('.tc-widget-frame_popup')) {
+				return; // не кнопка покупки или окно уже открыто
+			}
+			var ev;
+			try {
+				ev = new Event('touchend', { bubbles: true, cancelable: true });
+			} catch (err) {
+				ev = document.createEvent('Event');
+				ev.initEvent('touchend', true, true);
+			}
+			btn.dispatchEvent(ev);
+		}, true);
+	}
 }());

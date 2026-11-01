@@ -497,6 +497,7 @@ class KEP_Admin {
 			$s         = KEP_Settings::get();
 			$s['mode'] = $u['prev'];
 			update_option( KEP_Settings::OPTION, $s, false );
+			KEP_Data::flush_all(); // гости сразу видят возвращённый режим, а не страницы из кэша
 		}
 		delete_transient( 'kep_updated' );
 		wp_safe_redirect( self::page_url() );
