@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Kozlov Import
  * Description: Перенос контента старого kozlovclub.ru (дамп базы от 22.10.2026) в Kozlov Core: пользователи, страницы, меню, концерты, фото.
- * Version: 1.3.1
+ * Version: 1.4.0
  * Requires PHP: 8.1
  */
 
@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 define( 'KI_DIR', plugin_dir_path( __FILE__ ) );
 define( 'KI_URL', plugin_dir_url( __FILE__ ) );
-define( 'KI_VER', '1.3.1' );
+define( 'KI_VER', '1.4.0' );
 
 require_once KI_DIR . 'includes/class-ki-importer.php';
 require_once KI_DIR . 'includes/class-ki-media.php';
@@ -61,6 +61,9 @@ function ki_page() {
 		<tr><td><strong>3. Меню</strong><br><span class="description">Главное меню сайта.</span></td><td><button class="button" data-step="menu">Запустить</button></td><td class="ki-status" data-for="menu"><?php echo esc_html( $st['menu'] ?? '' ); ?></td></tr>
 		<tr><td><strong>4. Концерты</strong><br><span class="description">Сначала будущие, затем архив. Фото регистрируются, файлы качаются на шаге 5.</span></td><td><button class="button button-primary" data-step="concerts">Запустить</button></td><td class="ki-status" data-for="concerts"><?php echo esc_html( $st['concerts'] ?? '' ); ?></td></tr>
 		<tr><td><strong>5. Фото</strong><br><span class="description">Файлы берутся со старого сайта, если он доступен, иначе из Wayback Machine. Ожидают: <b id="ki-pending"><?php echo $pending; ?></b>, скачано <?php echo $done; ?>, не найдено <?php echo $failed; ?>.</span></td><td><button class="button" data-step="media">Запустить</button> <button class="button" data-step="media_retry">Повторить ненайденные</button></td><td class="ki-status" data-for="media"><?php echo esc_html( $st['media'] ?? '' ); ?></td></tr>
+		<tr><td><strong>5а. Фото из кэша Chrome</strong><br><span class="description">Превью со старого сайта из кэша браузера. Берутся только для ненайденных файлов. Размер небольшой (300–768 px).</span></td><td><button class="button" data-step="media_cache">Запустить</button></td><td class="ki-status" data-for="media_cache"><?php echo esc_html( $st['media_cache'] ?? '' ); ?></td></tr>
+		<tr><td><strong>5б. Обложки Ticketscloud</strong><br><span class="description">Для концертов без хорошей картинки: обложка события с Ticketscloud (85 событий).</span></td><td><button class="button" data-step="media_tc">Запустить</button></td><td class="ki-status" data-for="media_tc"><?php echo esc_html( $st['media_tc'] ?? '' ); ?></td></tr>
+		<tr><td><strong>5в. Заглушка</strong><br><span class="description">Картинка с логотипом клуба для концертов, у которых так и нет фото.</span></td><td><button class="button" data-step="media_placeholder">Запустить</button></td><td class="ki-status" data-for="media_placeholder"><?php echo esc_html( $st['media_placeholder'] ?? '' ); ?></td></tr>
 		<tr><td><strong>6. Джазета</strong><br><span class="description">Выпуски и статьи. Сначала установите плагин Kozlov Jazzeta.</span></td><td><button class="button" data-step="jazzeta">Запустить</button></td><td class="ki-status" data-for="jazzeta"><?php echo esc_html( $st['jazzeta'] ?? '' ); ?></td></tr>
 		<tr><td><strong>6б. Джазета: подшивка 24.10–02.11</strong><br><span class="description">Выпуски из файлов, которые нашлись на компьютере (№ 004–006, 008–013), с кроссвордом «Скрытая партитура» в № 004. Импорт черновиком, номер по дате, публикация от имени издателя. Уже опубликованные даты пропускаются.</span></td><td><button class="button button-primary" data-step="jazzeta_restore">Восстановить</button></td><td class="ki-status" data-for="jazzeta_restore"><?php echo esc_html( $st['jazzeta_restore'] ?? '' ); ?></td></tr>
 		<tr><td><strong>6а. Джазета: счётчик номеров</strong><br><span class="description">Номер последнего опубликованного выпуска. Следующий публикуемый получит номер на единицу больше. Нужно при восстановлении подшивки по порядку.</span></td><td><input type="number" id="ki-jz-number" min="0" style="width:80px" value="<?php echo (int) ( $wpdb->get_var( "SELECT value FROM {$wpdb->prefix}es_state WHERE name='number'" ) ?? 0 ); ?>"> <button class="button" data-step="jazzeta_number">Установить</button></td><td class="ki-status" data-for="jazzeta_number"><?php echo esc_html( $st['jazzeta_number'] ?? '' ); ?></td></tr>
@@ -103,6 +106,12 @@ add_action( 'wp_ajax_ki_step', function () {
 				$r = KI_Media::run( 6, false ); break;
 			case 'media_retry':
 				$r = KI_Media::run( 6, true ); break;
+			case 'media_cache':
+				$r = KI_Media::from_cache( 25 ); break;
+			case 'media_tc':
+				$r = KI_Media::from_tickets( 4 ); break;
+			case 'media_placeholder':
+				$r = KI_Media::placeholder(); break;
 			default:
 				wp_send_json_error( 'неизвестный шаг' );
 		}
