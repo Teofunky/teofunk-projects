@@ -2,8 +2,7 @@
 /**
  * Выборка концертов для посадочных страниц.
  *
- * Только читает: таблицу All-in-One Event Calendar `{prefix}ai1ec_events`, записи
- * ai1ec_event и их поля Magic Fields. Ничего не записывает.
+ * Только читает: концерты Kozlov Core (тип записи concert, поля kc_*, таксономии kc_stage и kc_genre). Ничего не записывает.
  *
  * Время: календарь хранит unix-время, посчитанное из введённого времени в поясе события
  * (на сайте это «UTC»). Восстанавливаем введённое «настенное» время и считаем его
@@ -25,7 +24,7 @@ if ( class_exists( 'Kozlov_Afisha_Data' ) ) {
  */
 class Kozlov_Afisha_Data {
 
-	const POST_TYPE = 'ai1ec_event';
+	const POST_TYPE = 'concert';
 
 	const CLUB_TZ = 'Europe/Moscow';
 
@@ -40,11 +39,11 @@ class Kozlov_Afisha_Data {
 
 	const DAY = 86400;
 
-	/** Поле Magic Fields с жанрами. */
-	const GENRE_META = 'genre_categories';
+	/** Таксономия жанров Kozlov Core. */
+	const GENRE_TAX = 'kc_genre';
 
-	/** Поле с ID события Ticketscloud. */
-	const TICKETS_META = 'ticketscloud_link';
+	/** Поле Kozlov Core с кодом события Ticketscloud. */
+	const TICKETS_META = 'kc_tc_event';
 
 	/** Метки «бесплатно» в жанрах (после нормализации). */
 	const FREE_TAGS = array( 'вход-свободный', 'free' );
@@ -82,19 +81,19 @@ class Kozlov_Afisha_Data {
 	public static function stages() {
 		return array(
 			'main_scene'   => array(
-				'meta'  => 'location_main_scene',
+				'meta'  => 'main-scene',
 				'label' => 'Главная сцена',
 			),
 			'mansarda'     => array(
-				'meta'  => 'location_mansarda',
+				'meta'  => 'mansarda',
 				'label' => 'Мансарда',
 			),
 			'the_beat'     => array(
-				'meta'  => 'location_the_beat',
+				'meta'  => 'the-beat',
 				'label' => 'The Beat',
 			),
 			'myasnitskaya' => array(
-				'meta'  => 'location_myasnitskaya',
+				'meta'  => 'myasnitskaya',
 				'label' => 'Сцена на Мясницкой, 15',
 			),
 		);
@@ -434,26 +433,34 @@ class Kozlov_Afisha_Data {
 	 * @return array
 	 */
 	private static function rows( $from, $to ) {
-		global $wpdb;
-
 		$key = $from . ':' . $to;
 		if ( isset( self::$rows_cache[ $key ] ) ) {
 			self::$last_error = self::$rows_cache[ $key ]['error'];
 			return self::$rows_cache[ $key ]['rows'];
 		}
-
-		$table = $wpdb->prefix . 'ai1ec_events';
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- имя таблицы из $wpdb->prefix, значения через плейсхолдеры.
-		$sql      = $wpdb->prepare( "SELECT e.`post_id`, e.`start`, e.`end`, e.`timezone_name`, e.`allday`, e.`instant_event`, e.`recurrence_rules`, e.`cost` FROM `{$table}` e INNER JOIN `{$wpdb->posts}` p ON p.`ID` = e.`post_id` WHERE p.`post_type` = %s AND p.`post_status` = 'publish' AND p.`post_password` = '' AND e.`start` >= %d AND e.`start` <= %d ORDER BY e.`start` ASC, e.`post_id` ASC LIMIT %d", self::POST_TYPE, (int) $from, (int) $to, self::MAX_ROWS );
-		$suppress = $wpdb->suppress_errors( true );
-		$rows     = $wpdb->get_results( $sql, ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery
-		$error    = (string) $wpdb->last_error;
-		$wpdb->suppress_errors( $suppress );
-
-		if ( ! is_array( $rows ) && '' === $error ) {
-			$error = 'не удалось прочитать таблицу календаря';
+		$rows  = array();
+		$error = '';
+		if ( ! function_exists( 'kozlov_concerts' ) ) {
+			$error = 'плагин Kozlov Core не активен';
+		} else {
+			// Kozlov Core хранит время по часам клуба строкой; окно задаётся в тех же часах
+			$list = kozlov_concerts( array( 'from' => gmdate( 'Y-m-d H:i:s', (int) $from ), 'to' => gmdate( 'Y-m-d H:i:s', (int) $to ), 'past' => true, 'limit' => self::MAX_ROWS ) );
+			foreach ( ( is_array( $list ) ? $list : array() ) as $c ) {
+				$end = (string) $c['end'];
+				$rows[] = array(
+					'post_id'          => (int) $c['id'],
+					'start'            => (int) strtotime( $c['start'] . ' UTC' ), // как раньше в календаре: время клуба как «UTC-метка»
+					'end'              => preg_match( '/^\d{4}-\d\d-\d\d \d\d:\d\d/', $end ) ? (int) strtotime( $end . ' UTC' ) : 0,
+					'timezone_name'    => 'UTC',
+					'allday'           => 0,
+					'instant_event'    => 0,
+					'recurrence_rules' => '',
+					'cost'             => (string) $c['price']['text'],
+					'can_buy'          => ! empty( $c['can_buy'] ),
+					'tc'               => (string) $c['tc_event'],
+				);
+			}
 		}
-		$rows                     = is_array( $rows ) ? $rows : array();
 		self::$last_error         = $error;
 		self::$rows_cache[ $key ] = array(
 			'rows'  => $rows,
@@ -577,28 +584,15 @@ class Kozlov_Afisha_Data {
 	 * @return array
 	 */
 	public static function genres( $post_id ) {
-		$raw  = get_post_meta( $post_id, self::GENRE_META, false );
-		$flat = array();
-		$walk = function ( $value ) use ( &$walk, &$flat ) {
-			$value = maybe_unserialize( $value );
-			if ( is_array( $value ) ) {
-				foreach ( $value as $item ) {
-					$walk( $item );
-				}
-			} elseif ( is_scalar( $value ) ) {
-				$flat[] = (string) $value;
-			}
-		};
-		$walk( $raw );
-
-		$out = array();
-		foreach ( $flat as $value ) {
-			$parts = explode( '|', $value );
-			$label = self::plain_text( $parts[0] );
+		$terms = get_the_terms( $post_id, self::GENRE_TAX );
+		$out   = array();
+		foreach ( ( is_array( $terms ) ? $terms : array() ) as $t ) {
+			$label = self::plain_text( $t->name );
 			if ( '' === $label ) {
 				continue;
 			}
-			foreach ( $parts as $part ) {
+			// ключи: русское название и ярлык (как раньше «Джаз|jazz»)
+			foreach ( array( $t->name, $t->slug ) as $part ) {
 				$key = self::norm( $part );
 				if ( '' !== $key && ! isset( $out[ $key ] ) ) {
 					$out[ $key ] = $label;
@@ -676,9 +670,13 @@ class Kozlov_Afisha_Data {
 	 */
 	public static function stage_keys( $post_id ) {
 		$found = array();
+		$terms = get_the_terms( $post_id, 'kc_stage' );
+		$slugs = array();
+		foreach ( ( is_array( $terms ) ? $terms : array() ) as $t ) {
+			$slugs[] = $t->slug;
+		}
 		foreach ( self::stages() as $key => $stage ) {
-			$value = get_post_meta( $post_id, $stage['meta'], true );
-			if ( is_scalar( $value ) && '1' === trim( (string) $value ) ) {
+			if ( in_array( $stage['meta'], $slugs, true ) ) {
 				$found[] = $key;
 			}
 		}
@@ -692,6 +690,10 @@ class Kozlov_Afisha_Data {
 	 * @return string
 	 */
 	public static function tickets_id( $post_id ) {
+		$c     = function_exists( 'kozlov_concert' ) ? kozlov_concert( $post_id ) : null;
+		if ( is_array( $c ) && empty( $c['can_buy'] ) ) {
+			return '';
+		}
 		$value = get_post_meta( $post_id, self::TICKETS_META, true );
 		$value = is_scalar( $value ) ? trim( (string) $value ) : '';
 		if ( '' === $value ) {

@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Kozlov Afisha Pages
  * Description:       Шорткод [kozlov_afisha] для посадочных страниц: афиша по жанру, сцене, «сегодня», «на выходных», «бесплатно» в дизайне карточек сайта. Анонсы, тему и главную не меняет; пишет только временный кэш готовых списков. Справка: «Настройки → Страницы афиши».
- * Version:           1.0.1
+ * Version:           1.1.0
  * Requires at least: 5.3
  * Requires PHP:      7.2
  * Author:            Kozlov Club
@@ -20,7 +20,7 @@ if ( defined( 'KOZLOV_AFISHA_PAGES_VERSION' ) ) {
 	return;
 }
 
-define( 'KOZLOV_AFISHA_PAGES_VERSION', '1.0.1' );
+define( 'KOZLOV_AFISHA_PAGES_VERSION', '1.1.0' );
 define( 'KOZLOV_AFISHA_PAGES_DIR', plugin_dir_path( __FILE__ ) );
 define( 'KOZLOV_AFISHA_PAGES_FILE', __FILE__ );
 
