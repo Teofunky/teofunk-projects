@@ -17,7 +17,6 @@ if ( ! class_exists( 'KAF_Front' ) ) :
 		public static function init() {
 			add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue' ), 20 );
 			add_action( 'wp_footer', array( __CLASS__, 'config' ), 5 );
-			add_action( 'wp_head', array( __CLASS__, 'fallback_css' ), 99 );
 			add_filter( 'rest_post_dispatch', array( __CLASS__, 'mark_index' ), 20, 3 );
 		}
 
@@ -71,24 +70,6 @@ if ( ! class_exists( 'KAF_Front' ) ) :
 				}
 				// в WordPress 6.3+ скрипт получает defer; в более ранних просто грузится в подвале страницы
 				wp_enqueue_script( 'kozlov-afisha-filters', plugins_url( 'assets/kaf-app.js', KAF_FILE ), array(), KAF_VERSION, array( 'in_footer' => true, 'strategy' => 'defer' ) );
-			} catch ( \Throwable $e ) {
-				kaf_log( $e );
-			}
-		}
-
-		/**
-		 * Вид афиши, если панель не запустилась (скрипт заблокирован, индекс недоступен) или работает без компактного вида
-		 * (планшет). Метка «Концерт сегодня | сцена» в теме висит на 34 px над карточкой, а «Дополнительные стили» сайта
-		 * (MONTH-GAP-MB, 04.11.2026) сократили отступ под заголовком месяца до 20 px: метка наезжала на заголовок.
-		 * В компактной афише панели метка внутри карточки, там 20 px остаются. Стиль печатается сервером, поэтому работает
-		 * и тогда, когда скрипт панели не выполнился.
-		 */
-		public static function fallback_css() {
-			try {
-				if ( ! self::on() ) {
-					return;
-				}
-				echo "<style id=\"kaf-fallback-css\">@media screen and (max-width:1024px){.events_wrap.view_cell:not(.kaf-compact) .event_month{padding-bottom:50px}}</style>\n";
 			} catch ( \Throwable $e ) {
 				kaf_log( $e );
 			}

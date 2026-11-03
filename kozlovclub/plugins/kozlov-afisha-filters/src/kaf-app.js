@@ -4,20 +4,7 @@
    При выбранном фильтре прячет лишние карточки афиши темы (inline display:none), при сбросе возвращает как было.
    Глобальных переменных не создаёт, jQuery не использует.
    Если индекс не загрузился, панель выключена на сайте или в её коде случилась ошибка, панель убирает себя.
-   Если данные индекса и карточки на странице разошлись, фильтры отключаются и показывается вся афиша.
-   1.0.8: афиша может приходить частями (плагин Kozlov Afisha Week: ближайшая неделя видна, остальные карточки лежат
-   в <template class="kaw-later">). Перед любым фильтром или поиском панель просит раскрыть все карточки (событие
-   kaw:expand на document) и заново собирает список карточек; так же, если посетитель сам открыл следующие недели.
-   Когда фильтры сброшены, панель сообщает об этом (kaw:collapse), и афиша снова показывает только открытые недели.
-   1.0.9: отложенные карточки учитываются с первой загрузки: жанры, сцены, цены, календарь и счётчики строятся
-   по всей афише, а не только по видимой неделе.
-   1.0.10: если скрипт Kozlov Afisha Week не ответил на kaw:expand (не загрузился, загружен позже панели
-   оптимизатором), панель раскрывает отложенные карточки сама: результаты фильтра видны в любом порядке загрузки.
-   1.0.11: хостинг Beget при защите от ботов отвечает на запросы без своей cookie «beget» страницей проверки (HTML)
-   вместо данных, и панель пропадала (у посетителей с блокировщиками, во встроенных браузерах мессенджеров, с очищенными
-   cookie). Панель ставит эту cookie сама до первого запроса, как это делает страница проверки, а если всё же пришла
-   страница проверки, ставит её и повторяет запрос. Навигатор и поиск на этой странице грузят тот же индекс позже
-   и тоже получают данные. */
+   Если данные индекса и карточки на странице разошлись, фильтры отключаются и показывается вся афиша. */
 (function () {
   'use strict';
 
@@ -309,9 +296,7 @@
       return true;
     }
     /** Концерты, чьи карточки ещё на странице: по ним считаются числа на кнопках и в окнах. */
-    // карточка на странице или отложена Kozlov Afisha Week (в <template>, раскроется перед фильтром)
-    function present(cd) { return cd.el.isConnected || !!cd.deferred; }
-    function live() { return events.filter(function (e) { return present(e.card); }); }
+    function live() { return events.filter(function (e) { return e.card.el.isConnected; }); }
     function anyActive() { return !!(state.when || state.budget !== null || count(state.formats) || count(state.genres) || count(state.stages) || state.q); }
 
     function fmtDay(k) { var p = k.split('-'); return +p[2] + ' ' + MG[+p[1] - 1]; }
@@ -376,17 +361,9 @@
         if (!el.classList.contains('events')) continue;
         var grp = { cont: el, month: month, cards: [] };
         month = null;
-        var list = [];
         for (var j = 0; j < el.children.length; j++) {
-          var ch = el.children[j];
-          if (ch.classList.contains('event')) { list.push([ch, false]); continue; }
-          // отложенная карточка Kozlov Afisha Week: лежит в <template>, на странице появится при раскрытии
-          if (ch.tagName === 'TEMPLATE' && ch.classList.contains('kaw-later') && ch.content) {
-            for (var t = 0; t < ch.content.children.length; t++) if (ch.content.children[t].classList.contains('event')) list.push([ch.content.children[t], true]);
-          }
-        }
-        for (j = 0; j < list.length; j++) {
-          var card = list[j][0];
+          var card = el.children[j];
+          if (!card.classList.contains('event')) continue;
           var a = card.querySelector('a.title'), c = card.querySelector('.cell_1'), r = card.querySelector('.row_1');
           var slug = a ? slugOf(a.getAttribute('href') || '') : '';
           var day = c ? parseInt((c.textContent || '').replace(/\D/g, ''), 10) : 0;
@@ -395,7 +372,7 @@
           var tm = /^\d\d:\d\d$/.test(dta) ? dta.match(/(\d{1,2}):(\d\d)/) : rowTxt.match(/(\d{1,2}):(\d\d)/);
           var c2 = card.querySelector('.cell_2'); // в плитке день недели в той же строке, в списке строкой ниже
           var date = (day && tm) ? cardDate(day, monthOf(rowTxt), ((r && +r.getAttribute('data-wd')) || weekdayOf(c2 ? c2.textContent : rowTxt))) : '';
-          var item = { el: card, grp: grp, ev: null, key: '', start: 0, deferred: list[j][1] };
+          var item = { el: card, grp: grp, ev: null, key: '', start: 0 };
           if (slug && date) {
             var hh = ('0' + tm[1]).slice(-2);
             item.key = slug + '|' + date + '|' + hh + ':' + tm[2];
@@ -406,53 +383,6 @@
         }
         groups.push(grp);
       }
-    }
-
-    /* ---------- афиша частями (Kozlov Afisha Week) ---------- */
-    // карточки дальше ближайшей недели лежат в <template class="kaw-later">: их нет среди карточек, пока их не раскроют
-    function pageCardCount() {
-      var n = 0;
-      for (var i = 0; i < wrap.children.length; i++) {
-        var el = wrap.children[i];
-        if (!el.classList.contains('events')) continue;
-        for (var j = 0; j < el.children.length; j++) {
-          var ch = el.children[j];
-          if (ch.classList.contains('event')) n++;
-          else if (ch.tagName === 'TEMPLATE' && ch.classList.contains('kaw-later') && ch.content) {
-            for (var t = 0; t < ch.content.children.length; t++) if (ch.content.children[t].classList.contains('event')) n++;
-          }
-        }
-      }
-      return n;
-    }
-    function recollect() {
-      cards = []; groups = [];
-      collectCards();
-      try { splitTitles(); } catch (e) { /* названия остаются как в теме */ }
-      if (raw) {
-        events = buildEvents(raw);
-        var cov = coverage(raw);
-        setDegraded(cov.bad > 0);
-        freshCount = newConcerts(raw);
-      }
-    }
-    /** Фильтр или поиск ищут по всей афише: сначала раскрываются все отложенные карточки. */
-    var wasActive = false;
-    function expandAll() {
-      if (wrap.querySelector('template.kaw-later, .event.kaw-off')) {
-        try { doc.dispatchEvent(new CustomEvent('kaw:expand')); } catch (e) { /* раскроем сами ниже */ }
-        // Kozlov Afisha Week не ответил: раскрываем сами. Дата из шаблона остаётся на карточке,
-        // чтобы Week, если загрузится позже, мог снова свернуть афишу до недели после сброса фильтров.
-        Array.prototype.forEach.call(wrap.querySelectorAll('template.kaw-later'), function (t) {
-          if (!t.parentNode || !t.content) return;
-          var d = t.getAttribute('data-kaw-d') || '';
-          Array.prototype.forEach.call(t.content.children, function (n) { if (d && n.classList.contains('event')) n.setAttribute('data-kaw-d', d); });
-          t.parentNode.replaceChild(t.content, t);
-        });
-        Array.prototype.forEach.call(wrap.querySelectorAll('.event.kaw-off'), function (c) { c.classList.remove('kaw-off'); });
-        Array.prototype.forEach.call(wrap.querySelectorAll('.kaw-hide'), function (el) { el.classList.remove('kaw-hide'); });
-      }
-      if (pageCardCount() !== cards.length) recollect();
     }
 
     /* ---------- концерты из индекса, привязанные к карточкам ---------- */
@@ -495,12 +425,6 @@
     }
 
     /* ---------- загрузка индекса ---------- */
-    // cookie защиты хостинга: без неё Beget отдаёт страницу проверки вместо индекса
-    function hostCookie() {
-      try {
-        if (!/(?:^|;\s*)beget=begetok(?:;|$)/.test(doc.cookie)) doc.cookie = 'beget=begetok; path=/; max-age=' + (200 * 86400) + '; SameSite=Lax';
-      } catch (e) { /* cookie недоступны: остаётся обычный путь */ }
-    }
     function getIndex(fresh, cb) { getJSON(cfg.index, fresh, cb); }
     function getJSON(url, fresh, cb) {
       var headers = { 'Accept': 'application/json' };
@@ -512,14 +436,6 @@
       win.fetch(u, { credentials: 'same-origin', headers: headers, cache: fresh ? 'reload' : 'default', signal: ctrl ? ctrl.signal : undefined })
         .then(function (r) {
           if (!r.ok) { var er = new Error('http ' + r.status); er.status = r.status; throw er; }
-          var ct = (r.headers && r.headers.get('content-type')) || '';
-          if (ct.indexOf('json') < 0 && ct.indexOf('html') >= 0) {
-            // страница проверки хостинга вместо данных: ставим cookie, повтор в load() пойдёт уже с ней
-            return r.text().then(function (t) {
-              if (/beget=begetok|set_cookie\(/.test(t)) hostCookie();
-              throw new Error('host check page');
-            });
-          }
           return r.json();
         })
         .then(function (d) { clearTimeout(timer); cb(null, d); }, function (e) { clearTimeout(timer); cb(e || new Error('fetch')); });
@@ -573,7 +489,7 @@
     function coverage(d) {
       var builtMs = (typeof d.built === 'number' ? d.built : 0) * 1000, matched = 0, bad = 0;
       cards.forEach(function (cd) {
-        if (!present(cd)) return; // тема могла удалить карточку своим скриптом
+        if (!cd.el.isConnected) return; // тема могла удалить карточку своим скриптом
         if (cd.ev) { matched++; return; }
         if (cd.key && cd.start <= builtMs + 60000) return;
         bad++;
@@ -597,7 +513,7 @@
     function newConcerts(d) {
       if (!fullScope()) return 0;
       var nowMs = (typeof d.now === 'number' && d.now > 1.6e9) ? d.now * 1000 : Date.now(), last = '', keyed = 0;
-      cards.forEach(function (cd) { if (cd.key && present(cd)) { keyed++; var dt = cd.key.split('|')[1]; if (dt > last) last = dt; } });
+      cards.forEach(function (cd) { if (cd.key && cd.el.isConnected) { keyed++; var dt = cd.key.split('|')[1]; if (dt > last) last = dt; } });
       var n = orphans.filter(function (o) { return o.start > nowMs + 60000 && o.date <= last; }).length;
       return n <= Math.max(5, Math.round(keyed * 0.05)) ? n : 0;
     }
@@ -853,9 +769,6 @@
     function apply(fromInput) {
       if (!hroot) return;
       var c = ctx(), active = anyActive();
-      if (active) expandAll();
-      else if (wasActive) { try { doc.dispatchEvent(new CustomEvent('kaw:collapse')); } catch (e) { /* остаётся вся афиша */ } }
-      wasActive = active;
       var top = hroot.querySelector('.kaf-top'), wait = hroot.querySelector('.kaf-wait'), empty = hroot.querySelector('.kaf-empty'), note = hroot.querySelector('.kaf-note');
       // отступ под панелью вместо скрытых значков темы: метки «Концерт сегодня | сцена» над карточками не наезжают на панель
       var kafEl = hroot.querySelector('.kaf'), gap = function (v) { if (kafEl) kafEl.classList.toggle('kaf-gap', v); };
@@ -1126,7 +1039,6 @@
 
     /* ---------- запуск ---------- */
     try {
-      hostCookie(); // до первого запроса: индекс, навигатор и поиск получат данные, а не страницу проверки хостинга
       collectCards();
       try { splitTitles(); } catch (e) { /* названия остаются как в теме */ }
       if (!cards.length) { flag('off'); return; }
