@@ -143,4 +143,83 @@ class KI_Settings {
 		$wpdb->query( $wpdb->prepare( "REPLACE INTO `$table` (name, value) VALUES ('number', %d)", $n ) ); // phpcs:ignore
 		return array( 'done' => true, 'status' => "последний номер: $n", 'log' => "Джазета: счётчик номеров установлен на $n, следующий выпуск получит № " . ( $n + 1 ) . '.' );
 	}
+
+	/**
+	 * Восстановление подшивки Джазеты из файлов data/jazzeta/ГГГГ-ММ-ДД.json: по датам, с прежними номерами
+	 * (№ = дням с 21.10.2026 + 1), с кроссвордом из crossword-ГГГГ-ММ-ДД.json, с публикацией от имени владельца.
+	 */
+	public static function jazzeta_restore() {
+		global $wpdb;
+		if ( ! class_exists( '\Kozlov\Gazeta\Data\Issues' ) ) {
+			return array( 'done' => true, 'status' => 'плагин Джазеты не активен', 'log' => 'Джазета: активируйте Kozlov Jazzeta.' );
+		}
+		$dir   = KI_DIR . 'data/jazzeta/';
+		$files = glob( $dir . '2026-*.json' );
+		sort( $files );
+		$table = $wpdb->prefix . 'es_issues';
+		$state = $wpdb->prefix . 'es_state';
+		$log   = array();
+		$owner = class_exists( '\Kozlov\Gazeta\Runtime\Mode' ) && \Kozlov\Gazeta\Runtime\Mode::isOwner();
+		if ( ! $owner ) {
+			$log[] = 'Вы не издатель газеты (es_security.publisher_id): выпуски будут созданы черновиками без публикации.';
+		}
+		foreach ( $files as $file ) {
+			$date = basename( $file, '.json' );
+			$num  = (int) floor( ( strtotime( $date ) - strtotime( '2026-10-21' ) ) / DAY_IN_SECONDS ) + 1;
+			$row  = $wpdb->get_row( $wpdb->prepare( "SELECT id, state, number, version FROM `$table` WHERE edition_date = %s", $date ), ARRAY_A ); // phpcs:ignore
+			if ( $row && 'published' === $row['state'] ) {
+				$log[] = "$date: уже опубликован (№ {$row['number']}), пропуск."; continue;
+			}
+			$raw = (string) file_get_contents( $file );
+			$res = \Kozlov\Gazeta\Data\Issues::import( $raw, $row ? (int) $row['version'] : null );
+			if ( is_wp_error( $res ) ) {
+				$log[] = "$date: импорт отклонён: " . $res->get_error_message(); continue;
+			}
+			$id = (int) $res['id']; $ver = (int) $res['version'];
+			$log[] = "$date: черновик id $id, версия $ver" . ( ! empty( $res['unchanged'] ) ? ' (без изменений)' : '' ) . '.';
+			// кроссворд выпуска
+			$cw = $dir . 'crossword-' . $date . '.json';
+			if ( file_exists( $cw ) && class_exists( '\Kozlov\Gazeta\Domain\Crossword' ) ) {
+				$parsed = \Kozlov\Gazeta\Domain\Crossword::parse( (string) file_get_contents( $cw ) );
+				$built  = is_wp_error( $parsed ) ? $parsed : \Kozlov\Gazeta\Domain\Crossword::assemble( $parsed, (int) wp_rand( 1, 999999 ), '' );
+				$saved  = is_wp_error( $built ) ? $built : \Kozlov\Gazeta\Data\Issues::saveCrossword( $id, $ver, $built );
+				if ( is_wp_error( $saved ) ) {
+					$log[] = "  кроссворд не принят: " . $saved->get_error_message();
+				} else {
+					$ver++; $log[] = '  кроссворд «' . ( $parsed['title'] ?? '' ) . '» добавлен.';
+				}
+			}
+			if ( ! $owner ) { continue; }
+			// материалы были проверены и опубликованы на старом сайте: отметка проверки восстанавливается, иначе публикация заблокирована
+			$atable = $wpdb->prefix . 'es_articles';
+			foreach ( \Kozlov\Gazeta\Data\Issues::articleRows( $id ) as $arow ) {
+				$article = \Kozlov\Gazeta\Data\Db::decode( $arow['draft_json'] );
+				$wpdb->update( $atable, array( 'reviewed_hash' => \Kozlov\Gazeta\Data\Issues::articleHash( $article ), 'reviewed_by' => get_current_user_id(), 'reviewed_at' => \Kozlov\Gazeta\Data\Db::now(), 'review_note' => 'Восстановление номера, опубликованного на kozlovclub.ru до 02.11.2026.' ), array( 'id' => (int) $arow['id'] ) ); // phpcs:ignore
+			}
+			$blockers = \Kozlov\Gazeta\Data\Issues::blockers( \Kozlov\Gazeta\Data\Issues::find( $id ) );
+			if ( $blockers ) {
+				$log[] = '  не опубликован, остался черновиком: ' . implode( ' ', array_slice( $blockers, 0, 4 ) ); continue;
+			}
+			// номер: счётчик на единицу меньше ожидаемого
+			$wpdb->query( $wpdb->prepare( "REPLACE INTO `$state` (name, value) VALUES ('number', %d)", $num - 1 ) ); // phpcs:ignore
+			\Kozlov\Gazeta\Data\Permit::grant( 'publish', array( $id, $ver ) );
+			try {
+				$pub = \Kozlov\Gazeta\Data\Issues::publish( $id, $ver );
+			} finally {
+				\Kozlov\Gazeta\Data\Permit::revoke( 'publish' );
+			}
+			if ( is_wp_error( $pub ) ) {
+				$log[] = "  публикация не удалась: " . $pub->get_error_message();
+			} else {
+				$got = $wpdb->get_var( $wpdb->prepare( "SELECT number FROM `$table` WHERE id = %d", $id ) ); // phpcs:ignore
+				$log[] = "  опубликован как № " . str_pad( (string) $got, 3, '0', STR_PAD_LEFT ) . '.';
+				if ( class_exists( '\Kozlov\Gazeta\Runtime\Cache' ) ) { try { \Kozlov\Gazeta\Runtime\Cache::purgeIssue( $id ); } catch ( \Throwable $e ) { /* не критично */ } }
+			}
+		}
+		// счётчик на последний опубликованный номер
+		$max = (int) $wpdb->get_var( "SELECT MAX(number) FROM `$table` WHERE state = 'published'" ); // phpcs:ignore
+		$wpdb->query( $wpdb->prepare( "REPLACE INTO `$state` (name, value) VALUES ('number', %d)", $max ) ); // phpcs:ignore
+		if ( class_exists( '\Kozlov\Gazeta\Data\Search' ) ) { try { \Kozlov\Gazeta\Data\Search::ensureFresh( true ); } catch ( \Throwable $e ) { /* не критично */ } }
+		return array( 'done' => true, 'status' => "последний номер: $max", 'log' => "Джазета, подшивка:\n  " . implode( "\n  ", $log ) );
+	}
 }
