@@ -131,4 +131,16 @@ class KI_Settings {
 		}
 		return array( 'done' => true, 'status' => "добавлено строк: $n", 'log' => 'Джазета: ' . implode( '; ', $log ) . '.' );
 	}
+
+	/** Счётчик номеров Джазеты: номер последнего опубликованного выпуска. */
+	public static function jazzeta_number( $n ) {
+		global $wpdb;
+		$table = $wpdb->prefix . 'es_state';
+		if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) !== $table ) {
+			return array( 'done' => true, 'status' => 'таблицы Джазеты нет', 'log' => 'Джазета: плагин не установлен.' );
+		}
+		$n = max( 0, (int) $n );
+		$wpdb->query( $wpdb->prepare( "REPLACE INTO `$table` (name, value) VALUES ('number', %d)", $n ) ); // phpcs:ignore
+		return array( 'done' => true, 'status' => "последний номер: $n", 'log' => "Джазета: счётчик номеров установлен на $n, следующий выпуск получит № " . ( $n + 1 ) . '.' );
+	}
 }

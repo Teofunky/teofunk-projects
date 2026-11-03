@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Kozlov Import
  * Description: Перенос контента старого kozlovclub.ru (дамп базы от 22.10.2026) в Kozlov Core: пользователи, страницы, меню, концерты, фото.
- * Version: 1.2.0
+ * Version: 1.2.1
  * Requires PHP: 8.1
  */
 
@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 define( 'KI_DIR', plugin_dir_path( __FILE__ ) );
 define( 'KI_URL', plugin_dir_url( __FILE__ ) );
-define( 'KI_VER', '1.2.0' );
+define( 'KI_VER', '1.2.1' );
 
 require_once KI_DIR . 'includes/class-ki-importer.php';
 require_once KI_DIR . 'includes/class-ki-media.php';
@@ -40,6 +40,7 @@ function ki_meta() {
 }
 
 function ki_page() {
+	global $wpdb;
 	if ( ! function_exists( 'kozlov_concert' ) ) {
 		echo '<div class="wrap"><h1>Импорт Kozlov</h1><div class="notice notice-error"><p>Сначала установите и активируйте плагин Kozlov Core.</p></div></div>';
 		return;
@@ -61,6 +62,7 @@ function ki_page() {
 		<tr><td><strong>4. Концерты</strong><br><span class="description">Сначала будущие, затем архив. Фото регистрируются, файлы качаются на шаге 5.</span></td><td><button class="button button-primary" data-step="concerts">Запустить</button></td><td class="ki-status" data-for="concerts"><?php echo esc_html( $st['concerts'] ?? '' ); ?></td></tr>
 		<tr><td><strong>5. Фото</strong><br><span class="description">Файлы берутся со старого сайта, если он доступен, иначе из Wayback Machine. Ожидают: <b id="ki-pending"><?php echo $pending; ?></b>, скачано <?php echo $done; ?>, не найдено <?php echo $failed; ?>.</span></td><td><button class="button" data-step="media">Запустить</button> <button class="button" data-step="media_retry">Повторить ненайденные</button></td><td class="ki-status" data-for="media"><?php echo esc_html( $st['media'] ?? '' ); ?></td></tr>
 		<tr><td><strong>6. Джазета</strong><br><span class="description">Выпуски и статьи. Сначала установите плагин Kozlov Jazzeta.</span></td><td><button class="button" data-step="jazzeta">Запустить</button></td><td class="ki-status" data-for="jazzeta"><?php echo esc_html( $st['jazzeta'] ?? '' ); ?></td></tr>
+		<tr><td><strong>6а. Джазета: счётчик номеров</strong><br><span class="description">Номер последнего опубликованного выпуска. Следующий публикуемый получит номер на единицу больше. Нужно при восстановлении подшивки по порядку.</span></td><td><input type="number" id="ki-jz-number" min="0" style="width:80px" value="<?php echo (int) ( $wpdb->get_var( "SELECT value FROM {$wpdb->prefix}es_state WHERE name='number'" ) ?? 0 ); ?>"> <button class="button" data-step="jazzeta_number">Установить</button></td><td class="ki-status" data-for="jazzeta_number"><?php echo esc_html( $st['jazzeta_number'] ?? '' ); ?></td></tr>
 	</table>
 	<p><button class="button" id="ki-stop" disabled>Остановить</button></p>
 	<pre id="ki-log" class="ki-log"></pre>
@@ -83,6 +85,8 @@ add_action( 'wp_ajax_ki_step', function () {
 				$r = KI_Settings::site(); break;
 			case 'jazzeta':
 				$r = KI_Settings::jazzeta(); break;
+			case 'jazzeta_number':
+				$r = KI_Settings::jazzeta_number( (int) ( $_POST['value'] ?? 0 ) ); break;
 			case 'users':
 				$r = KI_Importer::users(); break;
 			case 'pages':

@@ -3,7 +3,7 @@
   function log(t) { var el = $('#ki-log'); el.text(el.text() + t + '\n'); el.scrollTop(el[0].scrollHeight); }
   function run(step, offset) {
     if (stop) { running = false; stop = false; $('.ki-steps button').prop('disabled', false); $('#ki-stop').prop('disabled', true); log('Остановлено.'); return; }
-    $.post(KI.ajax, { action: 'ki_step', nonce: KI.nonce, step: step, offset: offset || 0 }).done(function (r) {
+    $.post(KI.ajax, { action: 'ki_step', nonce: KI.nonce, step: step, offset: offset || 0, value: $('#ki-jz-number').val() || 0 }).done(function (r) {
       if (!r.success) { log('Ошибка: ' + (r.data || '?')); finish(step); return; }
       var d = r.data; log(d.log || ''); $('.ki-status[data-for="' + (step === 'media_retry' ? 'media' : step) + '"]').text(d.status || '');
       if (d.pending !== undefined) $('#ki-pending').text(d.pending);
