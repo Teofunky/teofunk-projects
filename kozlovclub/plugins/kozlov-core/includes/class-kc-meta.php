@@ -158,7 +158,7 @@ class KC_Meta {
 			<div class="kc-image-preview"><?php echo $hero ? wp_get_attachment_image( $hero, 'medium' ) : ''; ?></div>
 			<button type="button" class="button kc-pick">Выбрать</button> <button type="button" class="button-link kc-clear">Убрать</button>
 		</div>
-		<p><label><strong>Видео</strong> (YouTube, RuTube, VK; по одной ссылке в строке)<br><textarea name="kc_videos" rows="3" class="widefat"><?php echo esc_textarea( implode( "\n", array_filter( array_map( 'strval', $videos ) ) ) ); ?></textarea></label></p>
+		<p><label><strong>Видео</strong> (YouTube, RuTube, VK Видео: вставьте код для вставки <code>&lt;iframe …&gt;</code> или ссылку, каждое видео с новой строки)<br><textarea name="kc_videos" rows="4" class="widefat"><?php echo esc_textarea( implode( "\n", array_filter( array_map( 'strval', $videos ) ) ) ); ?></textarea></label></p>
 		<p><strong>Артисты с фото</strong></p>
 		<div class="kc-artists" id="kc_artists">
 			<?php foreach ( $artists as $i => $a ) : self::artist_row( $i, $a ); endforeach; ?>
@@ -252,13 +252,7 @@ class KC_Meta {
 		foreach ( array( 'kc_hero', 'kc_slider_img' ) as $k ) {
 			update_post_meta( $post_id, $k, absint( $p[ $k ] ?? 0 ) );
 		}
-		$videos = array();
-		foreach ( preg_split( '/[\r\n]+/', (string) ( $p['kc_videos'] ?? '' ) ) as $line ) {
-			$line = esc_url_raw( trim( $line ) );
-			if ( $line ) {
-				$videos[] = $line;
-			}
-		}
+		$videos = kozlov_parse_videos( wp_unslash( $p['kc_videos'] ?? '' ) );
 		update_post_meta( $post_id, 'kc_videos', $videos );
 		$artists = array();
 		foreach ( (array) ( $p['kc_artists'] ?? array() ) as $a ) {

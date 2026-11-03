@@ -164,3 +164,74 @@ function kozlov_concert( $post = null ) {
 function kozlov_concerts( $args = array() ) {
 	return KC_Query::concerts( $args );
 }
+
+
+/**
+ * Адрес видео для встраивания. Принимает ссылку (YouTube, RuTube, VK, VK Видео) или код для вставки
+ * (<iframe src="...">). Возвращает адрес для iframe или пустую строку.
+ */
+function kozlov_video_src( $in ) {
+	$in = trim( (string) $in );
+	if ( '' === $in ) {
+		return '';
+	}
+	if ( preg_match( '/<iframe[^>]+src\s*=\s*["\']([^"\']+)["\']/i', $in, $m ) ) {
+		$in = html_entity_decode( trim( $m[1] ), ENT_QUOTES );
+	}
+	if ( 0 === strpos( $in, '//' ) ) {
+		$in = 'https:' . $in;
+	}
+	if ( ! preg_match( '#^https?://#i', $in ) ) {
+		return '';
+	}
+	if ( preg_match( '#youtu\.be/([\w-]{11})|youtube(?:-nocookie)?\.com/(?:watch\?(?:[^\#]*&)?v=|embed/|shorts/|live/)([\w-]{11})#', $in, $m ) ) {
+		return 'https://www.youtube.com/embed/' . ( $m[1] ?: $m[2] );
+	}
+	if ( preg_match( '#rutube\.ru/(?:video|play/embed|embed)/(?:private/)?([A-Za-z0-9]+)#', $in, $m ) ) {
+		return 'https://rutube.ru/play/embed/' . $m[1];
+	}
+	// VK: код для вставки video_ext.php оставляем как есть (со всеми параметрами), только без autoplay
+	if ( preg_match( '#^https?://(?:www\.)?(vk\.com|vk\.ru|vkvideo\.ru)/video_ext\.php\?(.+)$#i', $in, $m ) ) {
+		parse_str( html_entity_decode( $m[2] ), $q );
+		$keep = array();
+		foreach ( array( 'oid', 'id', 'hash' ) as $k ) {
+			if ( isset( $q[ $k ] ) && '' !== $q[ $k ] ) {
+				$keep[ $k ] = $q[ $k ];
+			}
+		}
+		if ( isset( $keep['oid'], $keep['id'] ) ) {
+			return 'https://' . strtolower( $m[1] ) . '/video_ext.php?' . http_build_query( $keep );
+		}
+	}
+	// VK: ссылка вида vk.com/video-123_456, vkvideo.ru/video806799120_456239493, vk.com/video?z=video-1_2
+	if ( preg_match( '#(?:vk\.com|vk\.ru|vkvideo\.ru)/[^\s]*?video(-?\d+)_(\d+)(?:_([0-9a-f]{8,}))?#i', $in, $m ) ) {
+		$u = 'https://vk.ru/video_ext.php?oid=' . $m[1] . '&id=' . $m[2];
+		if ( ! empty( $m[3] ) ) {
+			$u .= '&hash=' . $m[3];
+		}
+		return $u;
+	}
+	return esc_url_raw( $in );
+}
+
+/** Список видео из текста поля: ссылки по одной в строке и/или коды <iframe>, в любом сочетании. */
+function kozlov_parse_videos( $text ) {
+	$text = (string) $text;
+	$out  = array();
+	if ( preg_match_all( '/<iframe\b.*?(?:<\/iframe>|\/>)/is', $text, $m ) ) {
+		foreach ( $m[0] as $code ) {
+			$u = kozlov_video_src( $code );
+			if ( $u ) {
+				$out[] = $u;
+			}
+		}
+		$text = preg_replace( '/<iframe\b.*?(?:<\/iframe>|\/>)/is', "\n", $text );
+	}
+	foreach ( preg_split( '/[\r\n]+/', $text ) as $line ) {
+		$u = kozlov_video_src( $line );
+		if ( $u ) {
+			$out[] = $u;
+		}
+	}
+	return array_values( array_unique( $out ) );
+}
