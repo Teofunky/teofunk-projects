@@ -83,7 +83,7 @@ function kz_event_card( $c, $view = 'cell' ) {
 					<div class="datetime">
 						<div class="cell cell_1"><?php echo esc_html( $c['day'] ); ?></div>
 						<div class="cell cell_2">
-							<div class="row row_1"><?php echo esc_html( $c['month_short'] . ' | ' . $c['time'] ); ?></div>
+							<div class="row row_1" data-time="<?php echo esc_attr( $c['time'] ); ?>" data-wd="<?php echo (int) date( 'N', strtotime( $c['date'] ) ); ?>"><?php echo esc_html( $c['month_short'] . ' | ' . $c['time'] ); ?></div>
 							<div class="row row_2"><?php echo esc_html( $c['weekday'] ); ?></div>
 						</div>
 					</div>
@@ -94,7 +94,7 @@ function kz_event_card( $c, $view = 'cell' ) {
 						<div class="wrap">
 							<div class="cell cell_1"><?php echo esc_html( $c['day'] ); ?></div>
 							<div class="cell cell_2">
-								<div class="row row_1"><?php echo esc_html( $c['month_short'] . ' | ' . $c['time'] . ' | ' . $c['weekday'] ); ?></div>
+								<div class="row row_1" data-time="<?php echo esc_attr( $c['time'] ); ?>" data-wd="<?php echo (int) date( 'N', strtotime( $c['date'] ) ); ?>"><?php echo esc_html( $c['month_short'] . ' | ' . $c['time'] . ' | ' . $c['weekday'] ); ?></div>
 								<div class="row row_2"><?php echo esc_html( $c['price']['text'] ); ?></div>
 							</div>
 						</div>
