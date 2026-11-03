@@ -28,6 +28,25 @@ class KEP_Data {
 	}
 
 	/**
+	 * Картинка для шапки новой страницы: заглавное фото, а если его нет, обложка записи
+	 * (в том числе заглушка). Так новая страница открывается у всех концертов.
+	 *
+	 * @param int $post_id ID записи.
+	 * @return int
+	 */
+	public static function display_hero_id( $post_id ) {
+		$id = self::hero_id( $post_id );
+		if ( $id ) {
+			return $id;
+		}
+		$th = (int) get_post_thumbnail_id( $post_id );
+		if ( $th && wp_attachment_is_image( $th ) ) {
+			return $th;
+		}
+		return 0;
+	}
+
+	/**
 	 * Название программы.
 	 *
 	 * @param int $post_id ID записи.
