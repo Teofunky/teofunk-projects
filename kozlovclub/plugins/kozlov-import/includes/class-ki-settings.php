@@ -160,6 +160,15 @@ class KI_Settings {
 		$state = $wpdb->prefix . 'es_state';
 		$log   = array();
 		$owner = class_exists( '\Kozlov\Gazeta\Runtime\Mode' ) && \Kozlov\Gazeta\Runtime\Mode::isOwner();
+		if ( ! $owner && current_user_can( 'manage_options' ) ) {
+			// на новом сайте издатель — тот, кто запускает восстановление (администратор)
+			$sec = get_option( 'es_security', array() );
+			$sec = is_array( $sec ) ? $sec : array();
+			$log[] = 'издатель был id ' . (int) ( $sec['publisher_id'] ?? 0 ) . ', назначен вы (id ' . get_current_user_id() . ')';
+			$sec['publisher_id'] = get_current_user_id();
+			update_option( 'es_security', $sec, false );
+			$owner = \Kozlov\Gazeta\Runtime\Mode::isOwner();
+		}
 		if ( ! $owner ) {
 			$log[] = 'Вы не издатель газеты (es_security.publisher_id): выпуски будут созданы черновиками без публикации.';
 		}

@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Kozlov Import
  * Description: Перенос контента старого kozlovclub.ru (дамп базы от 22.10.2026) в Kozlov Core: пользователи, страницы, меню, концерты, фото.
- * Version: 1.3.0
+ * Version: 1.3.1
  * Requires PHP: 8.1
  */
 
@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 define( 'KI_DIR', plugin_dir_path( __FILE__ ) );
 define( 'KI_URL', plugin_dir_url( __FILE__ ) );
-define( 'KI_VER', '1.3.0' );
+define( 'KI_VER', '1.3.1' );
 
 require_once KI_DIR . 'includes/class-ki-importer.php';
 require_once KI_DIR . 'includes/class-ki-media.php';
