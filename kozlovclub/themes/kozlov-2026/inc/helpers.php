@@ -154,18 +154,11 @@ function kz_genre_links( $c ) {
 
 /** Видео: ссылка или iframe → iframe. */
 function kz_video_embed( $src ) {
-	$src = trim( (string) $src );
+	$src = function_exists( 'kozlov_video_src' ) ? kozlov_video_src( $src ) : trim( (string) $src );
 	if ( '' === $src ) {
 		return '';
 	}
-	if ( preg_match( '#youtu\.be/([\w-]+)|youtube\.com/(?:watch\?v=|embed/|shorts/)([\w-]+)#', $src, $m ) ) {
-		$src = 'https://www.youtube.com/embed/' . ( $m[1] ?: $m[2] );
-	} elseif ( preg_match( '#rutube\.ru/video/([\w-]+)#', $src, $m ) ) {
-		$src = 'https://rutube.ru/play/embed/' . $m[1] . '/';
-	} elseif ( preg_match( '#vk\.com/video(-?\d+)_(\d+)#', $src, $m ) ) {
-		$src = 'https://vk.com/video_ext.php?oid=' . $m[1] . '&id=' . $m[2];
-	}
-	return '<iframe src="' . esc_url( $src ) . '" width="853" height="480" frameborder="0" allowfullscreen loading="lazy" title="Видео"></iframe>';
+	return '<iframe src="' . esc_url( $src ) . '" width="853" height="480" frameborder="0" allow="autoplay; encrypted-media; fullscreen; picture-in-picture; screen-wake-lock;" allowfullscreen loading="lazy" title="Видео"></iframe>';
 }
 
 /** Подпись периода: «5 ноября», «5–12 ноября», «28 ноября – 3 декабря». */

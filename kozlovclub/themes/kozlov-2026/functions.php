@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'KZ_THEME_VER', '1.0.3' );
+define( 'KZ_THEME_VER', '1.0.4' );
 define( 'KZ_PROD_HOST', 'kozlovclub.ru' ); // счётчики и пиксели включаются только на боевом домене
 
 require_once get_template_directory() . '/inc/helpers.php';
