@@ -254,4 +254,21 @@ class KI_Media {
 		}
 		return array( 'done' => true, 'status' => "заглушка у $n концертов", 'log' => "Заглушка: поставлена $n концертам без картинки (метка kc_placeholder)." );
 	}
+
+	/** Откат обложек Ticketscloud: открепить от концертов (файлы остаются в медиатеке, имена tc-*), поставить заглушку. */
+	public static function tc_undo() {
+		$ids = get_posts( array( 'post_type' => 'concert', 'post_status' => 'any', 'numberposts' => -1, 'fields' => 'ids', 'meta_query' => array( array( 'key' => 'kc_tc_cover', 'compare' => 'EXISTS' ) ) ) );
+		$atts = array_map( 'intval', array_values( (array) get_option( 'ki_tc_att', array() ) ) );
+		$n = 0;
+		foreach ( $ids as $cid ) {
+			$t = (int) get_post_thumbnail_id( $cid );
+			if ( $t && in_array( $t, $atts, true ) ) { delete_post_thumbnail( $cid ); $n++; }
+			$h = (int) get_post_meta( $cid, 'kc_hero', true );
+			if ( $h && in_array( $h, $atts, true ) ) { update_post_meta( $cid, 'kc_hero', 0 ); }
+			delete_post_meta( $cid, 'kc_tc_cover' );
+		}
+		foreach ( $atts as $a ) { update_post_meta( $a, 'kc_tc_removed', 1 ); }
+		$r = self::placeholder();
+		return array( 'done' => true, 'status' => "откат: снято у $n, " . $r['status'], 'log' => "Ticketscloud откат: обложки сняты у $n концертов (файлы остались в медиатеке, помечены kc_tc_removed). " . $r['log'] );
+	}
 }
