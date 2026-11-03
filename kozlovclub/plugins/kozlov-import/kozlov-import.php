@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Kozlov Import
  * Description: Перенос контента старого kozlovclub.ru (дамп базы от 22.10.2026) в Kozlov Core: пользователи, страницы, меню, концерты, фото.
- * Version: 1.0.0
+ * Version: 1.2.0
  * Requires PHP: 8.1
  */
 
@@ -12,10 +12,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 define( 'KI_DIR', plugin_dir_path( __FILE__ ) );
 define( 'KI_URL', plugin_dir_url( __FILE__ ) );
-define( 'KI_VER', '1.0.0' );
+define( 'KI_VER', '1.2.0' );
 
 require_once KI_DIR . 'includes/class-ki-importer.php';
 require_once KI_DIR . 'includes/class-ki-media.php';
+require_once KI_DIR . 'includes/class-ki-settings.php';
 
 add_action( 'admin_menu', function () {
 	add_management_page( 'Импорт Kozlov', 'Импорт Kozlov', 'manage_options', 'kozlov-import', 'ki_page' );
@@ -53,11 +54,13 @@ function ki_page() {
 	<p>Источник: <?php echo esc_html( $m['source'] ); ?>. В пакете: пользователей <?php echo count( $m['users'] ); ?>, страниц <?php echo count( $m['pages'] ); ?>, пунктов меню <?php echo count( $m['menu'] ); ?>, концертов <?php echo (int) $m['concert_total']; ?> (с <?php echo esc_html( $m['since'] ); ?>, из них будущих <?php echo (int) $m['concert_future']; ?>).</p>
 	<p>Каждый шаг можно запускать повторно: уже перенесённые записи обновляются, а не дублируются. Порядок: сверху вниз.</p>
 	<table class="widefat ki-steps">
+		<tr><td><strong>0. Настройки сайта и Yoast</strong><br><span class="description">Название, часовой пояс, ЧПУ, шаблоны Yoast, соцсети, настройки наших плагинов.</span></td><td><button class="button" data-step="settings">Запустить</button></td><td class="ki-status" data-for="settings"><?php echo esc_html( $st['settings'] ?? '' ); ?></td></tr>
 		<tr><td><strong>1. Пользователи</strong><br><span class="description">Редакторы с их паролями и ролями.</span></td><td><button class="button" data-step="users">Запустить</button></td><td class="ki-status" data-for="users"><?php echo esc_html( $st['users'] ?? '' ); ?></td></tr>
 		<tr><td><strong>2. Страницы</strong><br><span class="description">О клубе, Контакты, Правила, FAQ и другие.</span></td><td><button class="button" data-step="pages">Запустить</button></td><td class="ki-status" data-for="pages"><?php echo esc_html( $st['pages'] ?? '' ); ?></td></tr>
 		<tr><td><strong>3. Меню</strong><br><span class="description">Главное меню сайта.</span></td><td><button class="button" data-step="menu">Запустить</button></td><td class="ki-status" data-for="menu"><?php echo esc_html( $st['menu'] ?? '' ); ?></td></tr>
 		<tr><td><strong>4. Концерты</strong><br><span class="description">Сначала будущие, затем архив. Фото регистрируются, файлы качаются на шаге 5.</span></td><td><button class="button button-primary" data-step="concerts">Запустить</button></td><td class="ki-status" data-for="concerts"><?php echo esc_html( $st['concerts'] ?? '' ); ?></td></tr>
 		<tr><td><strong>5. Фото</strong><br><span class="description">Файлы берутся со старого сайта, если он доступен, иначе из Wayback Machine. Ожидают: <b id="ki-pending"><?php echo $pending; ?></b>, скачано <?php echo $done; ?>, не найдено <?php echo $failed; ?>.</span></td><td><button class="button" data-step="media">Запустить</button> <button class="button" data-step="media_retry">Повторить ненайденные</button></td><td class="ki-status" data-for="media"><?php echo esc_html( $st['media'] ?? '' ); ?></td></tr>
+		<tr><td><strong>6. Джазета</strong><br><span class="description">Выпуски и статьи. Сначала установите плагин Kozlov Jazzeta.</span></td><td><button class="button" data-step="jazzeta">Запустить</button></td><td class="ki-status" data-for="jazzeta"><?php echo esc_html( $st['jazzeta'] ?? '' ); ?></td></tr>
 	</table>
 	<p><button class="button" id="ki-stop" disabled>Остановить</button></p>
 	<pre id="ki-log" class="ki-log"></pre>
@@ -76,6 +79,10 @@ add_action( 'wp_ajax_ki_step', function () {
 	$offset = (int) ( $_POST['offset'] ?? 0 );
 	try {
 		switch ( $step ) {
+			case 'settings':
+				$r = KI_Settings::site(); break;
+			case 'jazzeta':
+				$r = KI_Settings::jazzeta(); break;
 			case 'users':
 				$r = KI_Importer::users(); break;
 			case 'pages':

@@ -51,9 +51,11 @@ class KI_Media {
 	public static function run( $limit, $retry ) {
 		global $wpdb;
 		$status = $retry ? 'failed' : 'pending';
+		$now = wp_date( 'Y-m-d 00:00:00' );
 		$ids = $wpdb->get_col( $wpdb->prepare(
 			"SELECT pm.post_id FROM {$wpdb->postmeta} pm LEFT JOIN {$wpdb->posts} a ON a.ID = pm.post_id LEFT JOIN {$wpdb->postmeta} s ON s.post_id = a.post_parent AND s.meta_key='kc_start'
-			 WHERE pm.meta_key='kc_import_status' AND pm.meta_value=%s ORDER BY (s.meta_value IS NULL), s.meta_value DESC LIMIT %d", $status, $limit ) );
+			 WHERE pm.meta_key='kc_import_status' AND pm.meta_value=%s
+			 ORDER BY (s.meta_value IS NULL), (s.meta_value < %s), CASE WHEN s.meta_value >= %s THEN s.meta_value END ASC, s.meta_value DESC LIMIT %d", $status, $now, $now, $limit ) );
 		if ( ! $ids ) {
 			return array( 'done' => true, 'status' => 'все фото обработаны', 'log' => 'Фото: очередь пуста.' );
 		}
