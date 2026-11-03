@@ -1,0 +1,11 @@
+.kc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0 16px}
+.kc-grid p{margin:6px 0}
+.kc-grid input[type=date],.kc-grid input[type=time],.kc-grid input[type=number],.kc-grid input[type=text],.kc-grid select{width:100%}
+.kc-help{color:#646970;font-style:italic;margin:4px 0 8px}
+.kc-flags label{display:inline-block;margin:4px 18px 4px 0}
+.kc-image{margin:6px 0 14px}
+.kc-image-preview img{max-width:220px;height:auto;display:block;margin:0 0 6px;border:1px solid #dcdcde}
+.kc-image-preview:empty{display:none}
+.kc-artist{display:grid;grid-template-columns:120px 1fr;gap:12px;border:1px solid #dcdcde;padding:10px;margin:0 0 10px;background:#fbfbfb}
+.kc-artist .kc-image-preview img{max-width:110px}
+.kc-artist-text input{margin-bottom:6px}
