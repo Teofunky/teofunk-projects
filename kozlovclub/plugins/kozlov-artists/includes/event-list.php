@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
  * Считаем именно видимые карточки, потому что фильтры афиши прячут остальные, но оставляют их в разметке.
  */
 add_action( 'wp_footer', function () {
-	if ( is_admin() || is_singular( 'kozlov_artist' ) || is_singular( 'ai1ec_event' ) ) { return; }
+	if ( is_admin() || is_singular( 'kozlov_artist' ) || is_singular( 'concert' ) ) { return; }
 	?>
 <style>
 @media (max-width:719px){.events_wrap.kaf-compact .events.view_cell .event.ka-solo{grid-column:1/-1}}

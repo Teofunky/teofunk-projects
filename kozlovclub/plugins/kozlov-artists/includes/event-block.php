@@ -2,12 +2,12 @@
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 /**
- * Блок «Об артисте» на странице концерта (ai1ec_event): ссылка на страницу артиста.
+ * Блок «Об артисте» на странице концерта (concert): ссылка на страницу артиста.
  * Артист подбирается автоматически: по тем же ключевым словам и исключениям, что и афиша артиста.
  */
 function ka_artists_for_event( $event_post ) {
 	$title = (string) $event_post->post_title;
-	$full  = $title . ' ' . wp_strip_all_tags( (string) $event_post->post_content );
+	$full  = $title . ' ' . ka_concert_text( $event_post->ID );
 	$ids   = get_posts( array( 'post_type' => 'kozlov_artist', 'post_status' => 'publish', 'numberposts' => 100, 'fields' => 'ids' ) );
 	$found = array();
 	foreach ( $ids as $aid ) {
@@ -135,7 +135,7 @@ function ka_event_block_html( $post ) {
 
 /** Способ 1: добавляем в текст записи, когда тема выводит его через the_content (только после <head>) */
 add_filter( 'the_content', function ( $content ) {
-	if ( ! is_singular( 'ai1ec_event' ) || ! is_main_query() || ! did_action( 'wp_head' ) ) { return $content; }
+	if ( ! is_singular( 'concert' ) || ! is_main_query() || ! did_action( 'wp_head' ) ) { return $content; }
 	if ( ! empty( $GLOBALS['ka_eb_done'] ) ) { return $content; }
 	$post = get_queried_object();
 	if ( ! $post || ! isset( $post->ID ) || get_the_ID() !== $post->ID ) { return $content; }
@@ -147,7 +147,7 @@ add_filter( 'the_content', function ( $content ) {
 
 /** Способ 2 (запасной): тема не вызывала the_content, переносим блок под описание концерта */
 add_action( 'wp_footer', function () {
-	if ( ! is_singular( 'ai1ec_event' ) || ! empty( $GLOBALS['ka_eb_done'] ) ) { return; }
+	if ( ! is_singular( 'concert' ) || ! empty( $GLOBALS['ka_eb_done'] ) ) { return; }
 	$html = ka_event_block_html( get_queried_object() );
 	if ( ! $html ) { return; }
 	echo '<template id="ka-eb-tpl">' . $html . '</template>';
