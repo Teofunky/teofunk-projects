@@ -3,11 +3,11 @@
  * Сборка данных schema.org Event из анонса концерта.
  *
  * Источники (проверены на живом сайте):
- * - дата и время, цена: таблица All-in-One Event Calendar `{prefix}ai1ec_events`;
- * - сцена: поля Magic Fields location_main_scene / location_mansarda / location_the_beat / location_myasnitskaya;
- * - описание: поле Magic Fields textblock_1_description;
- * - продажа билетов: поле ticketscloud_link;
- * - жанры: поле Magic Fields genre_categories (значения вида «Джаз|Jazz»);
+ * - дата и время, цена: поля Kozlov Core kc_start, kc_end, kc_price_*;
+ * - сцена: таксономия kc_stage;
+ * - описание: поле kc_text_1;
+ * - продажа билетов: поле kc_tc_event (при открытой продаже);
+ * - жанры: таксономия kc_genre;
  * - картинка: изображение записи;
  * - исполнители: строка состава «На сцену выйдут: Имя (инструмент), …» в текстовых блоках анонса
  *   или собственное поле плагина _kozlov_event_performers (если редактор вписал вручную);
@@ -32,7 +32,7 @@ if ( class_exists( 'Kozlov_Event_Schema_Builder' ) ) {
  */
 class Kozlov_Event_Schema_Builder {
 
-	const POST_TYPE = 'ai1ec_event';
+	const POST_TYPE = 'concert';
 
 	/** Часовой пояс клуба: время в анонсах введено по Москве. */
 	const CLUB_TZ = 'Europe/Moscow';
@@ -56,14 +56,14 @@ class Kozlov_Event_Schema_Builder {
 	/** Собственное поле плагина: прежняя дата перенесённого концерта («Y-m-d H:i» по Москве). */
 	const PREVIOUS_META = '_kozlov_event_previous_start';
 
-	/** Поле Magic Fields с жанрами. */
-	const GENRE_META = 'genre_categories';
+	/** Таксономия жанров (Kozlov Core). */
+	const GENRE_TAX = 'kc_genre';
 
 	/** Собственное поле плагина: исполнители, вписанные редактором вручную (по одному на строке; «-» значит не выводить). */
 	const PERFORMERS_META = '_kozlov_event_performers';
 
-	/** Поля Magic Fields с текстом анонса, в которых ищется состав («На сцену выйдут: Имя (инструмент), …»). */
-	const PERFORMER_FIELDS = array( 'textblock_2_description', 'textblock_1_description', 'additional_text_description', 'artist_description' );
+	/** Поля Kozlov Core с текстом анонса, в которых ищется состав («На сцену выйдут: Имя (инструмент), …»). */
+	const PERFORMER_FIELDS = array( 'kc_text_2', 'kc_text_1', 'kc_additional', 'kc_artists' );
 
 	/** Больше исполнителей в разметку не выводим. */
 	const MAX_PERFORMERS = 15;
@@ -97,28 +97,28 @@ class Kozlov_Event_Schema_Builder {
 	private static $rows = array();
 
 	/**
-	 * Сцены: поле Magic Fields => название и площадка.
+	 * Сцены: ярлык kc_stage => название и площадка.
 	 *
 	 * @return array
 	 */
 	public static function stages() {
 		return array(
-			'location_main_scene'   => array(
+			'main-scene'   => array(
 				'label' => 'Главная сцена',
 				'venue' => 'marosejka',
 				'id'    => 'stage-main',
 			),
-			'location_mansarda'     => array(
+			'mansarda'     => array(
 				'label' => 'Мансарда',
 				'venue' => 'marosejka',
 				'id'    => 'stage-mansarda',
 			),
-			'location_the_beat'     => array(
+			'the-beat'     => array(
 				'label' => 'The Beat',
 				'venue' => 'marosejka',
 				'id'    => 'stage-the-beat',
 			),
-			'location_myasnitskaya' => array(
+			'myasnitskaya' => array(
 				'label' => 'Сцена на Мясницкой, 15',
 				'venue' => 'myasnitskaya',
 				'id'    => 'stage-myasnitskaya',
@@ -208,24 +208,10 @@ class Kozlov_Event_Schema_Builder {
 	 * @return string[]
 	 */
 	public static function genres( $post_id ) {
-		$raw  = get_post_meta( $post_id, self::GENRE_META, false );
-		$flat = array();
-		$walk = function ( $value ) use ( &$walk, &$flat ) {
-			$value = maybe_unserialize( $value );
-			if ( is_array( $value ) ) {
-				foreach ( $value as $item ) {
-					$walk( $item );
-				}
-			} elseif ( is_scalar( $value ) ) {
-				$flat[] = (string) $value;
-			}
-		};
-		$walk( $raw );
-
-		$out = array();
-		foreach ( $flat as $value ) {
-			$parts = explode( '|', $value );
-			$name  = self::plain_text( $parts[0] );
+		$terms = get_the_terms( $post_id, self::GENRE_TAX );
+		$out   = array();
+		foreach ( ( is_array( $terms ) ? $terms : array() ) as $t ) {
+			$name = self::plain_text( $t->name );
 			if ( '' !== $name && ! in_array( $name, $out, true ) ) {
 				$out[] = $name;
 			}
@@ -498,8 +484,7 @@ class Kozlov_Event_Schema_Builder {
 	 * @return string
 	 */
 	public static function table() {
-		global $wpdb;
-		return $wpdb->prefix . 'ai1ec_events';
+		return 'kozlov_core'; // источник: поля kc_start, kc_end, цена Kozlov Core; таблицы календаря больше нет
 	}
 
 	/**
@@ -519,19 +504,30 @@ class Kozlov_Event_Schema_Builder {
 			self::$rows[ $id ] = null;
 		}
 
-		$table = self::table();
-		foreach ( array_chunk( $ids, 200 ) as $chunk ) {
-			$placeholders = implode( ',', array_fill( 0, count( $chunk ), '%d' ) );
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- имя таблицы из $wpdb->prefix, значения через %d.
-			$sql      = $wpdb->prepare( "SELECT `post_id`, `start`, `end`, `timezone_name`, `allday`, `instant_event`, `recurrence_rules`, `cost` FROM `{$table}` WHERE `post_id` IN ({$placeholders})", $chunk );
-			$suppress = $wpdb->suppress_errors( true );
-			$results  = $wpdb->get_results( $sql, ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery
-			$wpdb->suppress_errors( $suppress );
-			if ( is_array( $results ) ) {
-				foreach ( $results as $row ) {
-					self::$rows[ (int) $row['post_id'] ] = $row;
-				}
+		if ( ! function_exists( 'kozlov_concert' ) ) {
+			return;
+		}
+		update_meta_cache( 'post', $ids );
+		foreach ( $ids as $id ) {
+			$start = (string) get_post_meta( $id, 'kc_start', true );
+			if ( ! preg_match( '/^\d{4}-\d\d-\d\d \d\d:\d\d/', $start ) ) {
+				continue;
 			}
+			$end = (string) get_post_meta( $id, 'kc_end', true );
+			$c   = kozlov_concert( $id );
+			// Kozlov Core хранит время по часам клуба строкой; здесь, как и раньше в календаре, оно переводится в unix «как UTC»
+			self::$rows[ $id ] = array(
+				'post_id'          => $id,
+				'start'            => (int) strtotime( $start . ' UTC' ),
+				'end'              => preg_match( '/^\d{4}-\d\d-\d\d \d\d:\d\d/', $end ) ? (int) strtotime( $end . ' UTC' ) : 0,
+				'timezone_name'    => 'UTC',
+				'allday'           => 0,
+				'instant_event'    => 0,
+				'recurrence_rules' => '',
+				'cost'             => is_array( $c ) ? (string) $c['price']['text'] : '',
+				'can_buy'          => is_array( $c ) && ! empty( $c['can_buy'] ),
+				'tc'               => is_array( $c ) ? (string) $c['tc_event'] : '',
+			);
 		}
 	}
 
@@ -747,7 +743,7 @@ class Kozlov_Event_Schema_Builder {
 		}
 
 		// Описание.
-		$description = self::truncate( self::plain_text( get_post_meta( $post->ID, 'textblock_1_description', true ) ), self::DESCRIPTION_MAX );
+		$description = self::truncate( self::plain_text( get_post_meta( $post->ID, 'kc_text_1', true ) ), self::DESCRIPTION_MAX );
 		if ( '' === $description ) {
 			$description = self::truncate( self::plain_text( $post->post_excerpt ), self::DESCRIPTION_MAX );
 		}
@@ -774,7 +770,7 @@ class Kozlov_Event_Schema_Builder {
 		// Цена и билеты.
 		$cost          = self::parse_cost( isset( $row['cost'] ) ? $row['cost'] : '' );
 		$info['price'] = $cost['text'];
-		$tickets_link  = trim( (string) get_post_meta( $post->ID, 'ticketscloud_link', true ) );
+		$tickets_link  = ! empty( $row['can_buy'] ) ? trim( (string) $row['tc'] ) : ''; // Kozlov Core: код Ticketscloud при открытой продаже
 		$valid_from    = self::valid_from( $post, $times['start_utc'] );
 		// Цена выводится при любом статусе: по правилам Google при отмене, отсрочке и переносе
 		// меняется только eventStatus (и startDate с previousStartDate при переносе), остальные свойства не трогают.
@@ -837,17 +833,17 @@ class Kozlov_Event_Schema_Builder {
 	}
 
 	/**
-	 * Отмеченные сцены (поля Magic Fields со значением 1).
+	 * Сцены концерта (термины kc_stage).
 	 *
 	 * @param int $post_id ID записи.
 	 * @return string[]
 	 */
 	public static function stage_keys( $post_id ) {
 		$found = array();
-		foreach ( array_keys( self::stages() ) as $key ) {
-			$value = get_post_meta( $post_id, $key, true );
-			if ( is_scalar( $value ) && '1' === trim( (string) $value ) ) {
-				$found[] = $key;
+		$terms = get_the_terms( $post_id, 'kc_stage' );
+		foreach ( ( is_array( $terms ) ? $terms : array() ) as $t ) {
+			if ( isset( self::stages()[ $t->slug ] ) ) {
+				$found[] = $t->slug;
 			}
 		}
 		return $found;

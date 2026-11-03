@@ -177,20 +177,16 @@ class Kozlov_Event_Schema_Admin {
 
 		echo '<h2>Проверка ближайших концертов</h2>';
 
-		$table    = Kozlov_Event_Schema_Builder::table();
-		$suppress = $wpdb->suppress_errors( true );
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery -- имя таблицы из $wpdb->prefix.
-		$probe = $wpdb->get_var( "SELECT COUNT(*) FROM `{$table}`" );
-		$error = $wpdb->last_error;
-		$wpdb->suppress_errors( $suppress );
-		if ( null === $probe || '' !== $error ) {
-			echo '<div class="notice notice-error inline"><p>Не удалось прочитать таблицу календаря <code>' . esc_html( $table ) . '</code>. Разметка выводиться не будет, сайт работает как обычно.</p></div>';
+		$table = Kozlov_Event_Schema_Builder::table();
+		if ( ! function_exists( 'kozlov_concert' ) ) {
+			echo '<div class="notice notice-error inline"><p>Плагин Kozlov Core не активен. Разметка выводиться не будет, сайт работает как обычно.</p></div>';
 			return;
 		}
 
 		$since = time() - DAY_IN_SECONDS;
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery
-		$ids = $wpdb->get_col( $wpdb->prepare( "SELECT e.`post_id` FROM `{$table}` e INNER JOIN `{$wpdb->posts}` p ON p.ID = e.post_id WHERE p.post_type = %s AND p.post_status IN ('publish','future','draft','pending','private') AND e.`start` >= %d ORDER BY e.`start` ASC LIMIT %d", Kozlov_Event_Schema_Builder::POST_TYPE, $since, self::CHECK_LIMIT ) );
+		$since_s = gmdate( 'Y-m-d H:i:s', $since + 3 * HOUR_IN_SECONDS ); // kc_start хранится по часам клуба
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$ids = $wpdb->get_col( $wpdb->prepare( "SELECT e.`post_id` FROM `{$wpdb->postmeta}` e INNER JOIN `{$wpdb->posts}` p ON p.ID = e.post_id WHERE e.meta_key = 'kc_start' AND p.post_type = %s AND p.post_status IN ('publish','future','draft','pending','private') AND e.meta_value >= %s ORDER BY e.meta_value ASC LIMIT %d", Kozlov_Event_Schema_Builder::POST_TYPE, $since_s, self::CHECK_LIMIT ) );
 		$ids = array_map( 'intval', (array) $ids );
 
 		// Отложенные и отменённые показываем всегда, даже если исходная дата прошла: их разметка продолжает выводиться.
@@ -313,11 +309,12 @@ class Kozlov_Event_Schema_Admin {
 		global $wpdb;
 
 		$half = (int) ( self::PAST_LIMIT / 2 );
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery
-		$recent = $wpdb->get_col( $wpdb->prepare( "SELECT e.`post_id` FROM `{$table}` e INNER JOIN `{$wpdb->posts}` p ON p.ID = e.post_id WHERE p.post_type = %s AND p.post_status = 'publish' AND e.`start` < %d ORDER BY e.`start` DESC LIMIT %d", Kozlov_Event_Schema_Builder::POST_TYPE, $since, $half ) );
+		$since_s = gmdate( 'Y-m-d H:i:s', $since + 3 * HOUR_IN_SECONDS );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$recent = $wpdb->get_col( $wpdb->prepare( "SELECT e.`post_id` FROM `{$wpdb->postmeta}` e INNER JOIN `{$wpdb->posts}` p ON p.ID = e.post_id WHERE e.meta_key = 'kc_start' AND p.post_type = %s AND p.post_status = 'publish' AND e.meta_value < %s ORDER BY e.meta_value DESC LIMIT %d", Kozlov_Event_Schema_Builder::POST_TYPE, $since_s, $half ) );
 		// Случайные из архива: список ID (только числа) и выбор в PHP, без ORDER BY RAND() на большой таблице.
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery
-		$all_past = $wpdb->get_col( $wpdb->prepare( "SELECT e.`post_id` FROM `{$table}` e INNER JOIN `{$wpdb->posts}` p ON p.ID = e.post_id WHERE p.post_type = %s AND p.post_status = 'publish' AND e.`start` < %d", Kozlov_Event_Schema_Builder::POST_TYPE, $since ) );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$all_past = $wpdb->get_col( $wpdb->prepare( "SELECT e.`post_id` FROM `{$wpdb->postmeta}` e INNER JOIN `{$wpdb->posts}` p ON p.ID = e.post_id WHERE e.meta_key = 'kc_start' AND p.post_type = %s AND p.post_status = 'publish' AND e.meta_value < %s", Kozlov_Event_Schema_Builder::POST_TYPE, $since_s ) );
 		$all_past = array_values( array_diff( array_map( 'intval', (array) $all_past ), array_map( 'intval', (array) $recent ) ) );
 		$random   = array();
 		if ( count( $all_past ) > $half ) {

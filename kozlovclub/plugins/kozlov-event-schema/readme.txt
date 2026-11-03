@@ -3,7 +3,7 @@ Contributors: kozlovclub
 Requires at least: 5.3
 Tested up to: 6.7
 Requires PHP: 7.2
-Stable tag: 1.3.0
+Stable tag: 1.4.0
 License: GPLv2 or later
 
 Разметка schema.org MusicEvent (JSON-LD) и title/description для поисковиков на страницах концертов kozlovclub.ru.
@@ -13,13 +13,13 @@ License: GPLv2 or later
 Добавляет в <head> страниц будущих концертов один блок JSON-LD (MusicEvent, для лекций и мастер-классов EducationEvent): название, дата и время (по Москве), сцена (MusicVenue) и адрес, описание, картинка, жанры (keywords), исполнители (performer), цена, ссылка на покупку и начало продаж. Организатор связан с Organization из разметки Yoast (#organization).
 
 Данные только читаются из полей, которые уже заполняют редакторы:
-* дата и время, стоимость: календарь All-in-One Event Calendar;
-* сцена: флажки location_main_scene, location_mansarda, location_the_beat, location_myasnitskaya;
-* описание: «Текстовый блок №1» (textblock_1_description);
-* продажа билетов: ticketscloud_link;
-* жанры: genre_categories;
+* дата и время, стоимость: Kozlov Core (kc_start, kc_end, цена);
+* сцена: таксономия kc_stage;
+* описание: «Текстовый блок 1» (kc_text_1);
+* продажа билетов: kc_tc_event при открытой продаже;
+* жанры: таксономия kc_genre;
 * картинка: изображение записи;
-* исполнители: строка состава в текстовых блоках анонса (textblock_1_description, textblock_2_description, additional_text_description, artist_description), например «На сцену выйдут: Дмитрий Илугдин (фортепиано), Пётр Ившин (ударные).»;
+* исполнители: строка состава в текстовых блоках анонса (kc_text_1, kc_text_2, kc_additional, kc_artists), например «На сцену выйдут: Дмитрий Илугдин (фортепиано), Пётр Ившин (ударные).»;
 * начало продаж (validFrom): дата публикации анонса.
 
 Тема, афиша и данные анонсов не меняются. Плагин хранит свою настройку и, только если редактор сам заполнил их в блоке «Для поисковиков», скрытые поля у этого анонса: _kozlov_event_status и _kozlov_event_previous_start (статус «Отложен», «Перенесён на новую дату» или «Отменён») и _kozlov_event_performers (исполнители, вписанные вручную).
@@ -64,6 +64,9 @@ License: GPLv2 or later
 Выключение: снять флажок или деактивировать плагин. Удаление стирает только данные плагина (настройку, поля статуса и исполнителей).
 
 == Changelog ==
+
+= 1.4.0 =
+* Перенос на новый сайт: данные читаются из Kozlov Core (тип записи concert, поля kc_*, таксономии kc_stage и kc_genre) вместо All-in-One Event Calendar и Magic Fields. Логика разметки без изменений.
 
 = 1.3.0 =
 * Title и meta description страниц концертов собираются автоматически (отдельный флажок, по умолчанию выключен): название в обычном регистре, дата, время, сцена, адрес, цена, жанры. Подставляются через фильтры Yoast, в том числе для Open Graph и Twitter.
