@@ -76,7 +76,5 @@ $slides = $filtered ? array() : array_values( array_filter( $concerts, fn( $c ) 
 </div>
 <?php if ( $filtered ) : ?>
 	<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="go-to-home-mb"></a>
-<?php else : ?>
-	<div class="view-all-events-mb"><a href="#events">Смотреть всю афишу</a></div>
 <?php endif; ?>
 <?php get_footer(); ?>

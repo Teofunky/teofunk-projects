@@ -53,7 +53,6 @@ $(document).ready(function () {
 
 	$(window).on('scroll', function () {
 		var scrollTop = $(this).scrollTop();
-		$('.view-all-events-mb').toggleClass('inactive', scrollTop >= 670);
 		$('.header').toggleClass('scrolled', scrollTop >= 90);
 	});
 
