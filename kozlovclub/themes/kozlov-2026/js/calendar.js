@@ -69,15 +69,16 @@
 		if (a && b && b < a) { var t = a; a = b; b = t; }
 		for (var d = 1; d <= dim; d++) {
 			var s = y + '-' + pad(m + 1) + '-' + pad(d), n = data.days[s] || 0, cls = 'kz-cal__day';
+			var past = s < today;
+			if (past) { n = 0; cls += ' is-past'; } // прошедшие дни выбрать нельзя
 			if (n) { cls += ' has'; }
-			if (s < today) { cls += ' is-past'; }
 			if (s === today) { cls += ' is-today'; }
 			if (((d + dow - 1) % 7) >= 5) { cls += ' is-we'; }
 			if (a && b && s >= a && s <= b) { cls += ' in-range'; }
 			if (s === sel.a || s === sel.b) { cls += ' is-edge'; }
 			if (s === a) { cls += ' is-start'; }
 			if (s === b && b !== a) { cls += ' is-end'; }
-			h += '<button type="button" class="' + cls + '" data-day="' + s + '"' + (n ? ' title="' + n + ' ' + plural(n, 'концерт', 'концерта', 'концертов') + '"' : '') + '><span>' + d + '</span>' + (n ? '<i></i>' : '') + '</button>';
+			h += '<button type="button" class="' + cls + '" data-day="' + s + '"' + (past ? ' disabled aria-disabled="true"' : '') + (n ? ' title="' + n + ' ' + plural(n, 'концерт', 'концерта', 'концертов') + '"' : '') + '><span>' + d + '</span>' + (n ? '<i></i>' : '') + '</button>';
 		}
 		return h + '</div></div>';
 	}
@@ -87,6 +88,11 @@
 		var h = monthHtml(view.y, view.m);
 		if (two()) { var n = view.m + 1, y = view.y; if (n > 11) { n = 0; y++; } h += monthHtml(y, n); }
 		monthsEl.innerHTML = h;
+		var prev = root.querySelector('[data-cal="prev"]');
+		if (prev) {
+			var t0 = parse(today), atMin = view.y < t0.getFullYear() || (view.y === t0.getFullYear() && view.m <= t0.getMonth());
+			prev.disabled = atMin; prev.classList.toggle('is-disabled', atMin);
+		}
 		// подвал
 		var chips = root.querySelectorAll('.kz-cal__chip');
 		Array.prototype.forEach.call(chips, function (c) { c.classList.toggle('is-on', c.getAttribute('data-quick') === sel.q); });
@@ -113,9 +119,14 @@
 	}
 
 	function setView(s) { var d = parse(s); view.y = d.getFullYear(); view.m = d.getMonth(); }
-	function shift(n) { var d = new Date(view.y, view.m + n, 1); view.y = d.getFullYear(); view.m = d.getMonth(); render(); }
+	function shift(n) {
+		var t0 = parse(today), lim = new Date(t0.getFullYear(), t0.getMonth(), 1);
+		if (new Date(view.y, view.m + n, 1) < lim) { return; }
+		var d = new Date(view.y, view.m + n, 1); view.y = d.getFullYear(); view.m = d.getMonth(); render();
+	}
 
 	function pick(s) {
+		if (s < today) { return; }
 		sel.q = '';
 		if (!sel.a || sel.b) { sel.a = s; sel.b = ''; }
 		else if (s === sel.a) { sel.b = s; }
@@ -187,5 +198,5 @@
 	// текущий выбор из адреса страницы
 	var q = new URLSearchParams(window.location.search);
 	var d1 = q.get('date') || q.get('date1'), d2 = q.get('date2');
-	if (d1 && /^\d{4}-\d\d-\d\d$/.test(d1)) { sel.a = d1; sel.b = (d2 && /^\d{4}-\d\d-\d\d$/.test(d2) && d2 > d1) ? d2 : ''; if (!sel.b) { sel.b = d1; } }
+	if (d1 && /^\d{4}-\d\d-\d\d$/.test(d1) && d1 >= today) { sel.a = d1; sel.b = (d2 && /^\d{4}-\d\d-\d\d$/.test(d2) && d2 > d1) ? d2 : ''; if (!sel.b) { sel.b = d1; } }
 })();
