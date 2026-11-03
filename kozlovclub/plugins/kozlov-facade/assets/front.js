@@ -8,7 +8,7 @@
    - while the house is on screen the site header takes the facade's paper colour (class kzf-top)
    - a ticket button that Ticketscloud does not pick up falls back to the concert page
    1.4.8: the drawing is parsed and painted at rest before the animation starts; the picture has no masks
-   and lives on its own compositor layer; swifts are CSS (no SMIL), they and the clouds stand still while the house is drawn. */
+   and lives on its own compositor layer; swifts and clouds stand still while the house is drawn. */
 (function () {
   "use strict";
 
@@ -173,6 +173,8 @@
           var wash = svg.querySelector("image[data-kzf-src]");
           var base = CFG.assetsUrl || String(CFG.heroUrl).replace(/[^\/]*$/, "");
           if (wash) wash.setAttribute("href", base + wash.getAttribute("data-kzf-src") + "?ver=" + (root.getAttribute("data-kzf-ver") || ""));
+          // the swifts (SMIL) stand still until the music starts
+          try { svg.pauseAnimations(); svg._kzfHeld = true; } catch (e) { /* older engines */ }
         } catch (e) { giveUp(e); return; }
         var still = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
         (still ? function (f) { f(); } : whenCalm)(function () {
@@ -204,6 +206,7 @@
       });
     }
     function sing() {
+      if (svg._kzfHeld) { svg._kzfHeld = false; try { if (!root.classList.contains("kzf-paused")) svg.unpauseAnimations(); } catch (e) { /* older engines */ } }
       resetPeople();
       root.classList.remove("kzf-dim", "kzf-lit", "kzf-playing", "kzf-alive");
       void root.offsetWidth;
@@ -309,7 +312,7 @@
     function syncPause() {
       var stop = document.hidden || offscreen;
       root.classList.toggle("kzf-paused", stop);
-      try { if (stop) svg.pauseAnimations(); else svg.unpauseAnimations(); } catch (e) { /* older engines */ }
+      try { if (stop) svg.pauseAnimations(); else if (!svg._kzfHeld) svg.unpauseAnimations(); } catch (e) { /* older engines */ }
     }
     document.addEventListener("visibilitychange", syncPause);
     if ("IntersectionObserver" in window) {

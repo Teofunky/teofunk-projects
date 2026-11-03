@@ -302,6 +302,25 @@ function kzf_event_data( $url ) {
 		list( $out['image'], $out['image_src'] ) = kzf_mf_image( $id );
 	}
 
+	// Kozlov Core: концерт нового типа, данные из kozlov_concert().
+	if ( function_exists( 'kozlov_concert' ) && 'concert' === get_post_type( $id ) ) {
+		$c = kozlov_concert( $id );
+		if ( $c ) {
+			$out['tc_id']  = $c['can_buy'] ? $c['tc_event'] : '';
+			$out['tc_key'] = 'kc_tc_event';
+			$out['start']  = (int) $c['timestamp'];
+			$out['end']    = $c['end'] ? (int) ( new DateTimeImmutable( $c['end'], wp_timezone() ) )->getTimestamp() : 0;
+			$out['when']   = $out['start'] ? kzf_ru_date( $out['start'], new DateTimeZone( 'Europe/Moscow' ) ) : '';
+			$out['price']  = (string) $c['price']['text'];
+			$out['stage']  = $c['stage'] ? (string) $c['stage']['name'] : '';
+			if ( ! $out['image'] && ! empty( $c['image']['thumb'] ) ) {
+				$out['image']     = $c['image']['thumb'];
+				$out['image_src'] = 'изображение записи';
+			}
+			return $out;
+		}
+	}
+
 	$row = kzf_ai1ec_row( $id );
 	if ( $row && ! empty( $row['start'] ) ) {
 		$tzname       = isset( $row['timezone_name'] ) ? trim( (string) $row['timezone_name'] ) : '';
