@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Kozlov Core
  * Description: Модель данных сайта Клуба Алексея Козлова: тип записи «Концерт», сцены, жанры, поля, REST и функции для темы и плагинов.
- * Version: 1.0.0
+ * Version: 1.1.0
  * Author: Kozlov Club
  * Requires PHP: 8.1
  * Requires at least: 6.5
@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'KC_VERSION', '1.0.0' );
+define( 'KC_VERSION', '1.1.0' );
 define( 'KC_FILE', __FILE__ );
 define( 'KC_DIR', plugin_dir_path( __FILE__ ) );
 define( 'KC_URL', plugin_dir_url( __FILE__ ) );

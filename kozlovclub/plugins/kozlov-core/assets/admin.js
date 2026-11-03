@@ -17,6 +17,11 @@
     var i = Date.now();
     var html = $('#kc_artist_tpl').html().replace(/__i__/g, i);
     $('#kc_artists').append(html);
+    // визуальный редактор для нового артиста (вкладки «Визуально» и «Текст»)
+    if (window.wp && wp.editor && wp.editor.initialize) {
+      var set = window.KC_EDITOR || {};
+      wp.editor.initialize('kc_artist_text_' + i, { tinymce: $.extend({ wpautop: true }, set.tinymce || {}), quicktags: set.quicktags || true, mediaButtons: false });
+    }
   });
   function syncPrice() {
     var t = $('#kc_price_type').val();

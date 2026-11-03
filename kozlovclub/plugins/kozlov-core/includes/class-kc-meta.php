@@ -67,8 +67,10 @@ class KC_Meta {
 			return;
 		}
 		wp_enqueue_media();
+		wp_enqueue_editor();
 		wp_enqueue_style( 'kc-admin', KC_URL . 'assets/admin.css', array(), KC_VERSION );
-		wp_enqueue_script( 'kc-admin', KC_URL . 'assets/admin.js', array( 'jquery' ), KC_VERSION, true );
+		wp_enqueue_script( 'kc-admin', KC_URL . 'assets/admin.js', array( 'jquery', 'editor' ), KC_VERSION, true );
+		wp_localize_script( 'kc-admin', 'KC_EDITOR', array( 'tinymce' => self::editor_settings( 'x' )['tinymce'], 'quicktags' => self::editor_settings( 'x' )['quicktags'] ) );
 	}
 
 	public static function boxes() {
@@ -123,6 +125,27 @@ class KC_Meta {
 		<?php
 	}
 
+	/** Настройки визуального редактора для текстовых блоков: вкладки «Визуально» и «Текст», без кнопки «Добавить медиафайл». */
+	public static function editor_settings( $name, $rows = 6 ) {
+		return array(
+			'textarea_name' => $name,
+			'textarea_rows' => $rows,
+			'media_buttons' => false,
+			'teeny'         => false,
+			'quicktags'     => array( 'buttons' => 'strong,em,link,ul,ol,li,close' ),
+			'tinymce'       => array(
+				'toolbar1'  => 'formatselect,bold,italic,link,unlink,bullist,numlist,blockquote,removeformat,undo,redo',
+				'toolbar2'  => '',
+				'block_formats' => 'Абзац=p;Заголовок 3=h3;Заголовок 4=h4',
+				'wpautop'   => true,
+			),
+		);
+	}
+
+	private static function editor( $name, $value, $rows = 6, $id = '' ) {
+		wp_editor( (string) $value, $id ?: sanitize_key( $name ), self::editor_settings( $name, $rows ) );
+	}
+
 	public static function box_media( $post ) {
 		$id = $post->ID;
 		$hero = (int) self::v( $id, 'kc_hero' );
@@ -142,13 +165,15 @@ class KC_Meta {
 		</div>
 		<p><button type="button" class="button" id="kc_add_artist">Добавить артиста</button></p>
 		<template id="kc_artist_tpl"><?php self::artist_row( '__i__', array() ); ?></template>
-		<p><label><strong>Текстовый блок 1</strong><br><textarea name="kc_text_1" rows="4" class="widefat"><?php echo esc_textarea( self::v( $id, 'kc_text_1' ) ); ?></textarea></label></p>
-		<p><label><strong>Текстовый блок 2</strong><br><textarea name="kc_text_2" rows="4" class="widefat"><?php echo esc_textarea( self::v( $id, 'kc_text_2' ) ); ?></textarea></label></p>
-		<div class="kc-grid">
-			<p><label>Цитата<br><textarea name="kc_quote" rows="2" class="widefat"><?php echo esc_textarea( self::v( $id, 'kc_quote' ) ); ?></textarea></label></p>
-			<p><label>Автор цитаты<br><input type="text" name="kc_quote_author" class="widefat" value="<?php echo esc_attr( self::v( $id, 'kc_quote_author' ) ); ?>"></label></p>
-		</div>
-		<p><label><strong>Дополнительная информация</strong> (условия, возраст, депозит)<br><textarea name="kc_additional" rows="3" class="widefat"><?php echo esc_textarea( self::v( $id, 'kc_additional' ) ); ?></textarea></label></p>
+		<p class="kc-label"><strong>Текстовый блок 1</strong> <span class="kc-help-inline">вкладки «Визуально» и «Текст» (HTML)</span></p>
+		<?php self::editor( 'kc_text_1', self::v( $id, 'kc_text_1' ), 8 ); ?>
+		<p class="kc-label"><strong>Текстовый блок 2</strong></p>
+		<?php self::editor( 'kc_text_2', self::v( $id, 'kc_text_2' ), 8 ); ?>
+		<p class="kc-label"><strong>Цитата</strong></p>
+		<?php self::editor( 'kc_quote', self::v( $id, 'kc_quote' ), 3 ); ?>
+		<p><label>Автор цитаты<br><input type="text" name="kc_quote_author" class="widefat" value="<?php echo esc_attr( self::v( $id, 'kc_quote_author' ) ); ?>"></label></p>
+		<p class="kc-label"><strong>Дополнительная информация</strong> (условия, возраст, депозит)</p>
+		<?php self::editor( 'kc_additional', self::v( $id, 'kc_additional' ), 4 ); ?>
 		<?php
 	}
 
@@ -160,7 +185,11 @@ class KC_Meta {
 			<div class="kc-image-preview"><?php echo $img ? wp_get_attachment_image( $img, 'thumbnail' ) : ''; ?></div>
 			<div class="kc-artist-text">
 				<input type="text" name="kc_artists[<?php echo esc_attr( $i ); ?>][name]" class="widefat" placeholder="Имя" value="<?php echo esc_attr( $a['name'] ?? '' ); ?>">
-				<textarea name="kc_artists[<?php echo esc_attr( $i ); ?>][text]" rows="3" class="widefat" placeholder="Описание"><?php echo esc_textarea( $a['text'] ?? '' ); ?></textarea>
+				<?php if ( '__i__' === $i ) : ?>
+					<textarea name="kc_artists[__i__][text]" id="kc_artist_text___i__" rows="5" class="widefat kc-artist-editor" placeholder="Описание"></textarea>
+				<?php else : ?>
+					<?php self::editor( 'kc_artists[' . $i . '][text]', $a['text'] ?? '', 5, 'kc_artist_text_' . (int) $i ); ?>
+				<?php endif; ?>
 				<button type="button" class="button kc-pick">Фото</button> <button type="button" class="button-link kc-clear">Убрать фото</button> <button type="button" class="button-link kc-remove">Удалить артиста</button>
 			</div>
 		</div>
