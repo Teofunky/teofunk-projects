@@ -3,7 +3,7 @@ Theme Name: Kozlov Club 2026
 Theme URI: https://kozlovclub.ru
 Description: Тема сайта Клуба Алексея Козлова на Kozlov Core. Дизайн и вёрстка прежней темы KozlovCLub, данные из типа «Концерт».
 Author: Kozlov Club
-Version: 1.0.2
+Version: 1.0.3
 Requires PHP: 8.1
 Text Domain: kozlov
 */
@@ -2807,19 +2807,74 @@ h1.home_h1 {
 /* ===== 3. Новое: правки для Kozlov Core ===== */
 .content_home .viewtabs .tab_calendar { cursor: pointer; }
 .events .event .top_info a { color: inherit; text-decoration: none; }
-.afisha-heading { text-align: center; text-transform: uppercase; letter-spacing: .06em; font-size: 24px; font-weight: 400; margin: 30px 0 10px; }
-.afisha-heading small { display: block; text-transform: none; letter-spacing: 0; font-size: 14px; color: #8a8a8a; margin-top: 6px; }
+.afisha-heading { text-align: center; text-transform: uppercase; letter-spacing: .06em; font-size: 24px; font-weight: 400; margin: 30px 0 60px; }
+.afisha-heading small { display: block; text-transform: none; letter-spacing: 0; font-size: 14px; color: #8a8a8a; margin-top: 8px; }
+.afisha-heading small a { color: #1f1f1f; margin: 0 8px; border-bottom: 1px solid #ddd; }
+.afisha-heading small a:hover { color: #f24841; border-color: #f24841; }
+.kz-date-view .content_home .slider-wrapper { display: none; }
 .afisha-empty { text-align: center; color: #8a8a8a; padding: 60px 20px; }
 .afisha-empty a { color: #f24841; }
 .event .readmore .btn-widget-buy.btn-soldout, .event .readmore .btn-widget-buy.btn-cancelled { background: #9e9e9e; cursor: default; }
-.datepicker_calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-.datepicker_calendar-item { text-align: center; padding: 8px 0; color: #bbb; font-size: 14px; }
-.datepicker_calendar-item.has-event a { display: block; color: #1f1f1f; font-weight: 500; }
-.datepicker_calendar-item.has-event a:hover { color: #f24841; }
-.datepicker_calendar-item.is-today a { color: #f24841; }
-.datepicker_calendar-item.is-head { color: #8a8a8a; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; }
-.datepicker_nav { display: flex; justify-content: space-between; align-items: center; margin: 0 0 14px; font-size: 16px; font-weight: 500; }
-.datepicker_nav-item { cursor: pointer; padding: 6px 10px; color: #f24841; user-select: none; }
 .page_post_content .concert-archive-link { display: inline-block; margin: 20px 0; color: #f24841; }
 @media screen and (min-width: 1025px) { .header .nav .search-btn { opacity: 1; } }
 .kz-program { font-size: 14px; letter-spacing: .06em; text-transform: uppercase; color: #6b6f76; margin-top: 6px; }
+
+/* ---------- Календарь концертов ---------- */
+.kz-cal { position: fixed; inset: 0; z-index: 10050; font-family: 'Roboto', Arial, sans-serif; }
+.kz-cal[hidden] { display: none; }
+html.kz-cal-open { overflow: hidden; }
+.kz-cal__scrim { position: absolute; inset: 0; background: rgba(20, 18, 17, .55); backdrop-filter: blur(2px); }
+.kz-cal__panel { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 720px; max-width: calc(100% - 32px); max-height: calc(100% - 32px); overflow: auto; background: #fff; border-radius: 20px; box-shadow: 0 30px 80px rgba(0, 0, 0, .35); padding: 24px 28px 22px; box-sizing: border-box; color: #1f1f1f; }
+.kz-cal__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.kz-cal__title { font-size: 13px; font-weight: 500; letter-spacing: .18em; text-transform: uppercase; color: #1f1f1f; }
+.kz-cal__x { width: 36px; height: 36px; border: 0; border-radius: 50%; background: #f3f1ef; color: #1f1f1f; font-size: 24px; line-height: 36px; cursor: pointer; padding: 0; }
+.kz-cal__x:hover { background: #f24841; color: #fff; }
+.kz-cal__quick { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+.kz-cal__chip { border: 1.5px solid #e4e0dd; background: #fff; border-radius: 999px; padding: 7px 14px; font: 500 13px/1 'Roboto', Arial, sans-serif; color: #1f1f1f; cursor: pointer; transition: all .15s; }
+.kz-cal__chip:hover { border-color: #1f1f1f; }
+.kz-cal__chip.is-on { background: #1f1f1f; border-color: #1f1f1f; color: #fff; }
+.kz-cal__nav { display: flex; align-items: flex-start; gap: 8px; }
+.kz-cal__arrow { flex: none; width: 36px; height: 36px; margin-top: 2px; border: 1.5px solid #e4e0dd; border-radius: 50%; background: #fff; cursor: pointer; position: relative; padding: 0; }
+.kz-cal__arrow::before { content: ''; position: absolute; left: 14px; top: 12px; width: 8px; height: 8px; border-left: 2px solid #1f1f1f; border-bottom: 2px solid #1f1f1f; transform: rotate(45deg); }
+.kz-cal__arrow--next::before { left: 11px; transform: rotate(-135deg); }
+.kz-cal__arrow:hover { border-color: #1f1f1f; }
+.kz-cal__months { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 28px; min-width: 0; }
+.kz-cal__mname { text-align: center; font-size: 16px; font-weight: 500; letter-spacing: .02em; margin: 8px 0 12px; }
+.kz-cal__mname span { color: #9a9693; font-weight: 400; }
+.kz-cal__grid { display: grid; grid-template-columns: repeat(7, 1fr); row-gap: 2px; }
+.kz-cal__wd { text-align: center; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #9a9693; padding: 4px 0 8px; }
+.kz-cal__wd.is-we { color: #f24841; }
+.kz-cal__day { position: relative; height: 40px; border: 0; background: transparent; padding: 0; font: 400 15px/40px 'Roboto', Arial, sans-serif; color: #c9c4c0; cursor: default; border-radius: 0; }
+.kz-cal__day span { position: relative; z-index: 1; display: block; width: 40px; height: 40px; margin: 0 auto; border-radius: 50%; }
+.kz-cal__day i { position: absolute; left: 50%; bottom: 5px; width: 5px; height: 5px; margin-left: -2.5px; border-radius: 50%; background: #f24841; z-index: 2; }
+.kz-cal__day.has { color: #1f1f1f; font-weight: 500; cursor: pointer; }
+.kz-cal__day.has:hover span { background: #f3f1ef; }
+.kz-cal__day.is-past.has { color: #6f6b68; }
+.kz-cal__day.is-today span { box-shadow: inset 0 0 0 1.5px #1f1f1f; }
+.kz-cal__day.in-range { background: #fdeceb; }
+.kz-cal__day.in-range:not(.has) { color: #d9a7a3; }
+.kz-cal__day.is-start { background: linear-gradient(90deg, transparent 50%, #fdeceb 50%); }
+.kz-cal__day.is-end { background: linear-gradient(90deg, #fdeceb 50%, transparent 50%); }
+.kz-cal__day.is-start.is-end, .kz-cal__day.is-edge:not(.in-range) { background: transparent; }
+.kz-cal__day.is-edge span, .kz-cal__day.is-start span, .kz-cal__day.is-end span { background: #f24841 !important; color: #fff; box-shadow: none; }
+.kz-cal__day.is-edge i, .kz-cal__day.is-start i, .kz-cal__day.is-end i { background: #fff; }
+.kz-cal__day:focus-visible span { outline: 2px solid #1f1f1f; outline-offset: 1px; }
+.kz-cal__hint { margin: 14px 0 0; font-size: 12px; color: #9a9693; text-align: center; }
+.kz-cal__foot { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 16px; padding-top: 16px; border-top: 1px solid #ece9e6; }
+.kz-cal__sel { font-size: 14px; color: #1f1f1f; min-width: 0; }
+.kz-cal__sel-text { display: block; }
+.kz-cal__reset { border: 0; background: none; padding: 2px 0 0; font: 500 12px/1.4 'Roboto', Arial, sans-serif; letter-spacing: .06em; text-transform: uppercase; color: #f24841; cursor: pointer; }
+.kz-cal__go { flex: none; display: inline-block; background: #f24841; color: #fff !important; text-decoration: none !important; font: 500 13px/1 'Roboto', Arial, sans-serif; letter-spacing: .1em; text-transform: uppercase; padding: 15px 24px; border-radius: 999px; transition: background .15s; }
+.kz-cal__go:hover { background: #d93d36; }
+.kz-cal__go.is-disabled { background: #e4e0dd; color: #9a9693 !important; pointer-events: none; }
+@media (max-width: 767px) {
+	.kz-cal__panel { top: auto; left: 0; bottom: 0; transform: none; width: 100%; max-width: 100%; max-height: 92vh; border-radius: 20px 20px 0 0; padding: 18px 16px calc(16px + env(safe-area-inset-bottom, 0px)); }
+	.kz-cal__months { grid-template-columns: 1fr; }
+	.kz-cal__quick { gap: 6px; margin-bottom: 12px; }
+	.kz-cal__chip { padding: 8px 12px; }
+	.kz-cal__day { height: 44px; line-height: 44px; }
+	.kz-cal__day span { width: 44px; height: 44px; }
+	.kz-cal__hint { display: none; }
+	.kz-cal__foot { flex-direction: column; align-items: stretch; }
+	.kz-cal__go { text-align: center; }
+}

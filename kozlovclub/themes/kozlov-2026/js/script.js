@@ -62,22 +62,6 @@ $(document).ready(function () {
 	});
 	$('.view_cell .set_height').css({ 'height': '50px' });
 
-	/* календарь */
-	var calLoaded = false;
-	function loadCalendar(month, year) {
-		$.get(KZ.ajax, { action: 'kz_calendar', month: month, year: year }).done(function (data) {
-			$('.calendar-picker-content').html(data);
-			calLoaded = true;
-		});
-	}
-	$(document).on('click', '.calendar-toggler', function (e) {
-		e.preventDefault();
-		if (!calLoaded) { var d = new Date(); loadCalendar(d.getMonth() + 1, d.getFullYear()); }
-		$('.block-modal--datepicker').fadeIn();
-	});
-	$(document).on('click', '.datepicker_nav-item', function () {
-		loadCalendar($(this).data('set-month'), $(this).data('set-year'));
-	});
 	$(document).on('click', '.block-modal-close, .block-modal-overlay', function () {
 		$(this).parents('.block-modal').fadeOut();
 	});

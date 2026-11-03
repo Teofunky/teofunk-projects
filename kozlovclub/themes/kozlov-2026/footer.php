@@ -29,19 +29,7 @@
 			</footer>
 		</div> <!-- .page -->
 
-<div class="block-modal block-modal--datepicker">
-	<div class="block-modal-overlay"></div>
-	<div class="block-modal-inner">
-		<div class="block-modal-main">
-			<div class="block-modal-body">
-				<div class="calendar-picker">
-					<div class="block-modal-close calendar-picker-close"><span>&times;</span></div>
-					<div class="calendar-picker-content"></div>
-				</div>
-			</div>
-		</div>
-	</div>
-</div>
+<?php kz_calendar_modal(); ?>
 
 <?php wp_footer(); ?>
 

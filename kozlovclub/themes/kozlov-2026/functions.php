@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'KZ_THEME_VER', '1.0.0' );
+define( 'KZ_THEME_VER', '1.0.3' );
 define( 'KZ_PROD_HOST', 'kozlovclub.ru' ); // счётчики и пиксели включаются только на боевом домене
 
 require_once get_template_directory() . '/inc/helpers.php';
@@ -37,6 +37,7 @@ add_action( 'wp_enqueue_scripts', function () {
 	}
 	wp_enqueue_script( 'kz-owl', get_template_directory_uri() . '/js/libs/owl.carousel.min.js', array( 'jquery' ), '2.3.4', true );
 	wp_enqueue_script( 'kz-script', get_template_directory_uri() . '/js/script.js', array( 'jquery', 'kz-owl' ), KZ_THEME_VER, true );
+	wp_enqueue_script( 'kz-calendar', get_template_directory_uri() . '/js/calendar.js', array(), KZ_THEME_VER, array( 'in_footer' => true, 'strategy' => 'defer' ) );
 	wp_localize_script( 'kz-script', 'KZ', array(
 		'ajax'   => admin_url( 'admin-ajax.php' ),
 		'home'   => home_url( '/' ),
@@ -105,3 +106,43 @@ add_action( 'admin_init', function () {
 } );
 
 // Короткие теги <? не используются: тема работает при любом short_open_tag.
+
+/**
+ * Афиша по дате (/?date=…&date2=…): та же главная, но без слайдера, фасада, панели фильтров и навигатора.
+ * Плагины показываются только на is_front_page(), поэтому для таких адресов запрос перестаёт считаться главной,
+ * а шаблон front-page.php подключается явно.
+ */
+function kz_is_date_view() {
+	return isset( $_GET['date'] ) || isset( $_GET['date1'] );
+}
+add_action( 'wp', function () {
+	if ( is_admin() || ! kz_is_date_view() || ! is_front_page() ) {
+		return;
+	}
+	global $wp_query;
+	$GLOBALS['kz_date_view'] = true;
+	$wp_query->is_home = false;
+	$wp_query->is_page = false;
+	$wp_query->is_singular = false;
+}, 1 );
+add_filter( 'template_include', function ( $tpl ) {
+	return empty( $GLOBALS['kz_date_view'] ) ? $tpl : get_template_directory() . '/front-page.php';
+}, 99 );
+add_filter( 'body_class', function ( $classes ) {
+	if ( ! empty( $GLOBALS['kz_date_view'] ) ) {
+		$classes[] = 'home';
+		$classes[] = 'kz-date-view';
+	}
+	return $classes;
+} );
+function kz_date_view_title( $title ) {
+	if ( empty( $GLOBALS['kz_date_view'] ) ) {
+		return $title;
+	}
+	$a = preg_match( '/^\d{4}-\d{2}-\d{2}$/', $_GET['date'] ?? $_GET['date1'] ?? '' ) ? ( $_GET['date'] ?? $_GET['date1'] ) : '';
+	$b = preg_match( '/^\d{4}-\d{2}-\d{2}$/', $_GET['date2'] ?? '' ) ? $_GET['date2'] : '';
+	return $a ? 'Концерты ' . kz_range_label( $a, $b ) . ' | ' . get_bloginfo( 'name' ) : $title;
+}
+add_filter( 'pre_get_document_title', 'kz_date_view_title', 20 );
+add_filter( 'wpseo_title', 'kz_date_view_title', 20 );
+add_filter( 'wpseo_robots', fn( $r ) => empty( $GLOBALS['kz_date_view'] ) ? $r : 'noindex, follow' );

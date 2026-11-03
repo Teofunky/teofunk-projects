@@ -4,11 +4,12 @@ get_header();
 
 $view = kz_view();
 $date = isset( $_GET['date'] ) && preg_match( '/^\d{4}-\d{2}-\d{2}$/', $_GET['date'] ) ? $_GET['date'] : ( isset( $_GET['date1'] ) && preg_match( '/^\d{4}-\d{2}-\d{2}$/', $_GET['date1'] ) ? $_GET['date1'] : '' );
+$date2 = ( $date && isset( $_GET['date2'] ) && preg_match( '/^\d{4}-\d{2}-\d{2}$/', $_GET['date2'] ) && $_GET['date2'] > $date ) ? $_GET['date2'] : '';
 $filtered = (bool) $date;
 
 if ( $date ) {
-	// день: как раньше, 31 час от начала суток, чтобы ночные концерты (23:59 и позже) не терялись
-	$concerts = kozlov_concerts( array( 'from' => $date . ' 00:00:00', 'to' => wp_date( 'Y-m-d H:i:s', strtotime( $date . ' +31 hours' ) ), 'past' => true, 'limit' => 200 ) );
+	// день или период: до 31 часа от начала последних суток, чтобы ночные концерты (23:59 и позже) не терялись
+	$concerts = kozlov_concerts( array( 'from' => $date . ' 00:00:00', 'to' => wp_date( 'Y-m-d H:i:s', strtotime( ( $date2 ?: $date ) . ' +31 hours' ) ), 'past' => true, 'limit' => 600 ) );
 } else {
 	$concerts = kozlov_concerts( array( 'limit' => 600 ) );
 }
@@ -66,8 +67,14 @@ $slides = $filtered ? array() : array_values( array_filter( $concerts, fn( $c ) 
 			<h1 class="home_h1">Джаз-клуб Алексея Козлова: афиша концертов в Москве</h1>
 			<?php echo kz_viewtabs( $view ); // phpcs:ignore ?>
 			<?php if ( $date ) : ?>
-				<h2 class="afisha-heading">Концерты <?php echo esc_html( (int) substr( $date, 8, 2 ) . ' ' . kz_month_genitive( (int) substr( $date, 5, 2 ) ) ); ?><small><a href="<?php echo esc_url( home_url( '/' ) ); ?>">Вся афиша</a></small></h2>
-				<?php echo $concerts ? '<div class="events view_' . esc_attr( $view ) . '">' . implode( '', array_map( fn( $c ) => kz_event_card( $c, $view ), $concerts ) ) . '</div>' : '<div class="afisha-empty">В этот день концертов нет. <a href="' . esc_url( home_url( '/' ) ) . '">Вся афиша</a></div>'; // phpcs:ignore ?>
+				<h2 class="afisha-heading">Концерты <?php echo esc_html( kz_range_label( $date, $date2 ) ); ?><small><a href="#" class="calendar-toggler">Другие даты</a> <a href="<?php echo esc_url( home_url( '/' ) ); ?>">Вся афиша</a></small></h2>
+				<?php if ( ! $concerts ) : ?>
+					<div class="afisha-empty"><?php echo $date2 ? 'В эти дни концертов нет.' : 'В этот день концертов нет.'; ?> <a href="<?php echo esc_url( home_url( '/' ) ); ?>">Вся афиша</a></div>
+				<?php elseif ( $date2 && substr( $date, 0, 7 ) !== substr( $date2, 0, 7 ) ) : ?>
+					<?php echo kz_afisha( $concerts, $view ); // phpcs:ignore ?>
+				<?php else : ?>
+					<div class="events view_<?php echo esc_attr( $view ); ?>"><?php echo implode( '', array_map( fn( $c ) => kz_event_card( $c, $view ), $concerts ) ); // phpcs:ignore ?></div>
+				<?php endif; ?>
 			<?php else : ?>
 				<?php echo kz_afisha( $concerts, $view ); // phpcs:ignore ?>
 			<?php endif; ?>

@@ -167,3 +167,18 @@ function kz_video_embed( $src ) {
 	}
 	return '<iframe src="' . esc_url( $src ) . '" width="853" height="480" frameborder="0" allowfullscreen loading="lazy" title="Видео"></iframe>';
 }
+
+/** Подпись периода: «5 ноября», «5–12 ноября», «28 ноября – 3 декабря». */
+function kz_range_label( $a, $b = '' ) {
+	$da = (int) substr( $a, 8, 2 ); $ma = (int) substr( $a, 5, 2 ); $ya = (int) substr( $a, 0, 4 );
+	$cur = (int) wp_date( 'Y' );
+	$year = $cur !== $ya ? ' ' . $ya : '';
+	if ( ! $b || $b <= $a ) {
+		return $da . ' ' . kz_month_genitive( $ma ) . $year;
+	}
+	$db = (int) substr( $b, 8, 2 ); $mb = (int) substr( $b, 5, 2 ); $yb = (int) substr( $b, 0, 4 );
+	if ( $ma === $mb && $ya === $yb ) {
+		return $da . "\u{2009}\u{2013}\u{2009}" . $db . ' ' . kz_month_genitive( $mb ) . $year;
+	}
+	return $da . ' ' . kz_month_genitive( $ma ) . ( $ya !== $yb ? ' ' . $ya : '' ) . " \u{2013} " . $db . ' ' . kz_month_genitive( $mb ) . ( $yb !== $cur ? ' ' . $yb : '' );
+}
