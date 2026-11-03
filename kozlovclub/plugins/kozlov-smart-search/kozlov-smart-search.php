@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Kozlov Smart Search
  * Description:       Мгновенный поиск по будущим концертам и страницам сайта. Работает только на чтение: не меняет тему, афишу и данные сайта.
- * Version:           1.0.4
+ * Version:           1.1.0
  * Requires at least: 5.3
  * Requires PHP:      7.2
  * Author:            Клуб Алексея Козлова
@@ -10,7 +10,7 @@
  * Text Domain:       kozlov-smart-search
  *
  * Как устроен плагин:
- *  - читает будущие концерты из таблиц All-in-One Event Calendar и полей события, ничего в них не записывает;
+ *  - читает будущие концерты из Kozlov Core (тип записи concert), ничего в них не записывает;
  *  - собирает из них небольшой индекс и хранит его в кэше (transient);
  *  - отдаёт индекс через REST в пространстве имён /kozlov-search/v1/;
  *  - сам поиск идёт в браузере посетителя: ни одного запроса к базе на нажатие клавиши;
@@ -30,7 +30,7 @@ if ( defined( 'KSS_VERSION' ) ) {
 	return;
 }
 
-define( 'KSS_VERSION', '1.0.4' );
+define( 'KSS_VERSION', '1.1.0' );
 define( 'KSS_FILE', __FILE__ );
 define( 'KSS_DIR', dirname( __FILE__ ) . '/' );
 

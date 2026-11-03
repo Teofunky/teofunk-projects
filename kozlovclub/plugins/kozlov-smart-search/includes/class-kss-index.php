@@ -42,7 +42,7 @@ if ( ! class_exists( 'KSS_Index' ) ) :
 		/** Сохранение записи: индекс зависит только от концертов и страниц; черновики-ревизии и прочие типы записей его не трогают. */
 		public static function on_save( $post_id = 0, $post = null ) {
 			try {
-				if ( is_object( $post ) && isset( $post->post_type ) && ! in_array( $post->post_type, array( 'ai1ec_event', 'page' ), true ) ) {
+				if ( is_object( $post ) && isset( $post->post_type ) && ! in_array( $post->post_type, array( 'concert', 'page' ), true ) ) {
 					return;
 				}
 				self::plan_dirty();
@@ -84,19 +84,19 @@ if ( ! class_exists( 'KSS_Index' ) ) :
 			}
 		}
 
-		/** Поля сцен в том же виде, в каком их читает тема. */
+		/** Буквы сцен (как в индексе 1.0.x) по ярлыкам таксономии kc_stage плагина Kozlov Core. */
 		public static function stage_keys() {
 			return array(
-				'g' => 'location_main_scene',
-				'm' => 'location_mansarda',
-				'b' => 'location_the_beat',
-				'u' => 'location_myasnitskaya',
+				'g' => 'main-scene',
+				'm' => 'mansarda',
+				'b' => 'the-beat',
+				'u' => 'myasnitskaya',
 			);
 		}
 
 		/** Поля, из которых тема собирает текст анонса на странице события. */
 		public static function text_keys() {
-			return array( 'textblock_1_description', 'artist_description', 'textblock_2_description', 'additional_text_description', 'quote_text', 'quote_author' );
+			return array( 'kc_text_1', 'kc_text_2', 'kc_additional', 'kc_quote', 'kc_quote_author' );
 		}
 
 		/**
@@ -380,9 +380,9 @@ if ( ! class_exists( 'KSS_Index' ) ) :
 		 * @return array [ 'Y-m-d', 'H:i' ]
 		 */
 		public static function when( $start ) {
-			$start = (int) $start;
-			// phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
-			return array( date( 'Y-m-d', $start ), date( 'H:i', $start ) );
+			// Kozlov Core хранит kc_start строкой «ГГГГ-ММ-ДД ЧЧ:ММ:СС» по часам клуба
+			$start = (string) $start;
+			return array( substr( $start, 0, 10 ), substr( $start, 11, 5 ) );
 		}
 
 		/**
@@ -390,8 +390,8 @@ if ( ! class_exists( 'KSS_Index' ) ) :
 		 * а время печатает через date(). Сравнивая с этими часами, поиск убирает концерт в ту же минуту, что и афиша.
 		 */
 		public static function afisha_offset( $now ) {
-			// phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
-			return (int) date( 'Z', (int) $now );
+			// Kozlov Core показывает концерт ещё три часа после начала: по «часам афиши» это сдвиг 0 от времени клуба как UTC
+			return 0;
 		}
 
 		/**
@@ -409,17 +409,9 @@ if ( ! class_exists( 'KSS_Index' ) ) :
 			}
 		}
 
+		/** Источник концертов: плагин Kozlov Core (тип записи concert). */
 		public static function tables_ok() {
-			global $wpdb;
-			foreach ( array( 'ai1ec_event_instances', 'ai1ec_events' ) as $name ) {
-				$table = $wpdb->prefix . $name;
-				$found = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $wpdb->esc_like( $table ) ) );
-				self::db_check( 'tables' );
-				if ( $found !== $table ) {
-					return false;
-				}
-			}
-			return true;
+			return function_exists( 'kozlov_concerts' ) && post_type_exists( 'concert' );
 		}
 
 		/**
@@ -427,10 +419,7 @@ if ( ! class_exists( 'KSS_Index' ) ) :
 		 * Проверяется перед запросом: если колонки нет, индекс строится как раньше, без окончания.
 		 */
 		public static function has_end() {
-			global $wpdb;
-			$col = $wpdb->get_var( $wpdb->prepare( "SHOW COLUMNS FROM {$wpdb->prefix}ai1ec_event_instances LIKE %s", 'end' ) );
-			self::db_check( 'columns' ); // сбой базы не принимается за «колонки нет»
-			return 'end' === $col;
+			return true;
 		}
 
 		/**
@@ -439,8 +428,8 @@ if ( ! class_exists( 'KSS_Index' ) ) :
 		 * 0: окончание не указано или выглядит ошибкой (раньше начала или дольше трёх суток).
 		 */
 		public static function duration( $start, $end ) {
-			$start = (int) $start;
-			$end   = (int) $end;
+			$start = is_numeric( $start ) ? (int) $start : (int) strtotime( (string) $start . ' UTC' );
+			$end   = is_numeric( $end ) ? (int) $end : (int) strtotime( (string) $end . ' UTC' );
 			if ( $start <= 0 || $end <= $start ) {
 				return 0;
 			}
@@ -533,6 +522,9 @@ if ( ! class_exists( 'KSS_Index' ) ) :
 
 		/** Цена так же, как её показывает афиша: русская часть поля cost. */
 		public static function price( $raw ) {
+			if ( is_string( $raw ) && ! is_serialized( $raw ) ) {
+				return self::plain( $raw );
+			}
 			$v = self::unser( $raw );
 			if ( is_array( $v ) ) {
 				$v = isset( $v['cost'] ) ? $v['cost'] : '';
@@ -641,7 +633,7 @@ if ( ! class_exists( 'KSS_Index' ) ) :
 			$sizes = ( is_array( $data ) && ! empty( $data['sizes'] ) && is_array( $data['sizes'] ) ) ? $data['sizes'] : array();
 			$pick  = '';
 			// строке результата нужна картинка шириной 112 px, для чётких экранов берём около 300 px
-			foreach ( array( 'medium', 'category-thumb', 'category-thumb2' ) as $name ) {
+			foreach ( array( 'medium', 'kc-card-small', 'kc-card', 'category-thumb', 'category-thumb2' ) as $name ) {
 				if ( ! empty( $sizes[ $name ]['file'] ) && is_string( $sizes[ $name ]['file'] ) ) {
 					$pick = $sizes[ $name ]['file'];
 					break;
@@ -740,31 +732,32 @@ if ( ! class_exists( 'KSS_Index' ) ) :
 			$rows = array();
 			if ( self::tables_ok() ) {
 				$stats['tables'] = true;
-				// окончание концерта (1.0.3): читается только если колонка есть, иначе запрос прежний
-				$end_sql         = self::has_end() ? ', i.`end` AS end_ts' : '';
-				$rows            = $wpdb->get_results(
-					$wpdb->prepare(
-						"SELECT i.post_id AS post_id, i.start AS start{$end_sql}, p.post_title AS post_title, p.post_name AS post_name, e.cost AS cost
-						 FROM {$wpdb->prefix}ai1ec_event_instances AS i
-						 INNER JOIN {$wpdb->posts} AS p ON p.ID = i.post_id
-						 LEFT JOIN {$wpdb->prefix}ai1ec_events AS e ON e.post_id = i.post_id
-						 WHERE i.start > %d AND p.post_status = 'publish' AND p.post_password = ''
-						 ORDER BY i.start ASC, i.post_id ASC
-						 LIMIT %d",
-						$now,
-						self::MAX_EVENTS
-					)
-				);
-				// SQL-ошибка или не-массив: это сбой, а не пустая афиша. Прежний индекс остаётся в кэше.
-				self::db_check( 'events' );
-				if ( ! is_array( $rows ) ) {
-					throw new RuntimeException( 'events query returned no result set' );
+				// те же концерты и тот же порог, что в афише темы (Kozlov Core: три часа после начала)
+				$list = kozlov_concerts( array( 'limit' => self::MAX_EVENTS ) );
+				foreach ( ( is_array( $list ) ? $list : array() ) as $c ) {
+					$post = get_post( (int) $c['id'] );
+					if ( ! $post || 'publish' !== $post->post_status || '' !== (string) $post->post_password ) {
+						continue;
+					}
+					$rows[] = (object) array(
+						'post_id'    => (int) $c['id'],
+						'start'      => (string) $c['start'],
+						'end_ts'     => (string) $c['end'],
+						'post_title' => (string) $post->post_title,
+						'post_name'  => (string) $post->post_name,
+						'cost'       => (string) $c['price']['text'],
+						'concert'    => $c,
+					);
 				}
 			}
 
 			$ids = array();
+			$concerts_by_id = array();
 			foreach ( $rows as $row ) {
 				$ids[ (int) $row->post_id ] = true;
+				if ( isset( $row->concert ) && is_array( $row->concert ) ) {
+					$concerts_by_id[ (int) $row->post_id ] = $row->concert;
+				}
 			}
 			$ids = array_keys( $ids );
 			if ( $ids ) {
@@ -779,38 +772,32 @@ if ( ! class_exists( 'KSS_Index' ) ) :
 				$meta = get_post_meta( $id );
 				$meta = is_array( $meta ) ? $meta : array();
 
+				$concert = isset( $concerts_by_id[ $id ] ) ? $concerts_by_id[ $id ] : kozlov_concert( $id );
+
 				$stages = '';
-				foreach ( self::stage_keys() as $code => $key ) {
-					if ( ! empty( $meta[ $key ][0] ) ) {
+				$stage_slug = ( is_array( $concert ) && ! empty( $concert['stage']['slug'] ) ) ? (string) $concert['stage']['slug'] : '';
+				foreach ( self::stage_keys() as $code => $slug ) {
+					if ( $slug === $stage_slug ) {
 						$stages .= $code;
 					}
 				}
 
 				$genres = array();
-				$gc     = self::unser( self::meta_first( $meta, 'genre_categories' ) );
-				if ( is_array( $gc ) ) {
-					foreach ( $gc as $one ) {
-						if ( ! is_string( $one ) || '' === trim( $one ) ) {
-							continue;
-						}
-						$parts = explode( '|', $one );
-						$name  = self::plain( $parts[0] );
-						$code  = isset( $parts[1] ) ? $parts[1] : $parts[0];
-						$code  = trim( function_exists( 'mb_strtolower' ) ? mb_strtolower( self::plain( $code ), 'UTF-8' ) : strtolower( self::plain( $code ) ) );
-						// «бесплатно» определяется по цене, а не по жанру
-						if ( '' === $code || 'free' === $code || strlen( $code ) > 40 ) {
-							continue;
-						}
-						$genres[ $code ] = ( '' !== $name ) ? $name : $code;
+				foreach ( ( is_array( $concert ) && ! empty( $concert['genres'] ) ) ? $concert['genres'] : array() as $g ) {
+					$code = isset( $g['slug'] ) ? trim( mb_strtolower( self::plain( (string) $g['slug'] ), 'UTF-8' ) ) : '';
+					$name = isset( $g['name'] ) ? self::plain( (string) $g['name'] ) : '';
+					// «бесплатно» определяется по цене, а не по жанру
+					if ( '' === $code || 'free' === $code || strlen( $code ) > 40 ) {
+						continue;
 					}
+					$genres[ $code ] = ( '' !== $name ) ? $name : $code;
 				}
 
-				// кнопка «Купить билет» показывается по тому же условию, что и в теме
-				$tc    = self::meta_first( $meta, 'ticketscloud_link' );
-				$tc_id = self::meta_first( $meta, 'ticketcloudid' );
-				$btn   = 0;
-				if ( '' !== $tc && '' !== $tc_id && '0' !== $tc_id && preg_match( '/^[A-Za-z0-9_-]{6,80}$/', $tc ) ) {
-					$btn = ( '' !== self::meta_first( $meta, 'btn_text_register' ) && '0' !== self::meta_first( $meta, 'btn_text_register' ) ) ? 2 : 1;
+				// кнопка «Купить билет» показывается по тому же условию, что и в теме (Kozlov Core: can_buy)
+				$tc  = ( is_array( $concert ) && ! empty( $concert['can_buy'] ) ) ? (string) $concert['tc_event'] : '';
+				$btn = 0;
+				if ( '' !== $tc && preg_match( '/^[A-Za-z0-9_-]{6,80}$/', $tc ) ) {
+					$btn = get_post_meta( $id, 'kc_register_btn', true ) ? 2 : 1;
 				} else {
 					$tc = '';
 				}
@@ -828,13 +815,22 @@ if ( ! class_exists( 'KSS_Index' ) ) :
 							}
 						}
 					}
-					$artists = self::unser( self::meta_first( $meta, 'artist_list' ) );
+					$artists = self::unser( self::meta_first( $meta, 'kc_artists' ) );
 					if ( is_array( $artists ) ) {
 						foreach ( $artists as $artist ) {
-							if ( is_string( $artist ) && ! is_numeric( $artist ) && 'Не выбран' !== trim( $artist ) ) {
+							if ( is_array( $artist ) ) {
+								foreach ( array( 'name', 'text' ) as $k ) {
+									if ( ! empty( $artist[ $k ] ) && is_string( $artist[ $k ] ) ) {
+										$chunks[] = self::plain( self::ru( $artist[ $k ] ) );
+									}
+								}
+							} elseif ( is_string( $artist ) && ! is_numeric( $artist ) ) {
 								$chunks[] = self::plain( self::ru( $artist ) );
 							}
 						}
+					}
+					if ( is_array( $concert ) && ! empty( $concert['program'] ) ) {
+						$chunks[] = self::plain( (string) $concert['program'] );
 					}
 					$words = self::words( implode( ' ', $chunks ) );
 					if ( count( $words ) > self::MAX_DOC ) {
@@ -925,10 +921,10 @@ if ( ! class_exists( 'KSS_Index' ) ) :
 			$genre_names = array();
 			foreach ( $rows as $row ) {
 				$id    = (int) $row->post_id;
-				$start = (int) $row->start;
+				$start = (string) $row->start;
 				$p     = isset( $per_post[ $id ] ) ? $per_post[ $id ] : null;
 				$title = self::title( $row->post_title );
-				if ( null === $p || $start <= 0 || '' === $title ) {
+				if ( null === $p || ! preg_match( '/^\d{4}-\d\d-\d\d \d\d:\d\d/', $start ) || '' === $title ) {
 					continue;
 				}
 				$slug = (string) $row->post_name;

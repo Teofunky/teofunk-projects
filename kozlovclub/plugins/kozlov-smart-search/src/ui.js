@@ -23,7 +23,7 @@ function kssUI(K, CSS) {
   var MON = ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек'];
   var WD = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб'];
   // кнопки быстрого выбора: это строгие фильтры, а не текстовый запрос
-  var FILTERS = [['when', 'today', 'Сегодня'], ['when', 'tomorrow', 'Завтра'], ['when', 'weekend', 'Выходные'], ['stage', 'g', 'Главная сцена'], ['stage', 'm', 'Мансарда'], ['stage', 'b', 'The Beat'], ['stage', 'u', 'Unplugged'], ['free', true, 'Вход свободный']];
+  var FILTERS = [['when', 'today', 'Сегодня'], ['when', 'tomorrow', 'Завтра'], ['when', 'weekend', 'Выходные'], ['stage', 'g', 'Главная сцена'], ['stage', 'm', 'Мансарда'], ['stage', 'b', 'The Beat'], ['stage', 'u', 'Мясницкая, 15'], ['free', true, 'Вход свободный']];
   var LIMIT = 12, REFRESH_MS = 5 * 60 * 1000;
 
   var state = 'idle';            // idle: индекс ещё не запрашивали; loading; ready; failed

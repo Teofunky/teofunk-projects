@@ -135,7 +135,7 @@ function kssEngine() {
     g: { name: 'Главная сцена', words: ['главная', 'главной', 'сцена', 'main', 'stage', 'маросейка'] },
     m: { name: 'Мансарда', words: ['мансарда', 'мансарде', 'mansarda', 'mansard', 'сцена', 'маросейка'] },
     b: { name: 'The Beat', words: ['beat', 'бит', 'сцена', 'маросейка'] },
-    u: { name: 'Unplugged', words: ['unplugged', 'анплагд', 'мясницкая', 'мясницкой', 'сцена'] }
+    u: { name: 'Мясницкая, 15', words: ['unplugged', 'анплагд', 'мясницкая', 'мясницкой', 'сцена'] }
   };
   var GENRES = {
     'jazz': { name: 'Джаз', words: ['джаз', 'jazz'] },

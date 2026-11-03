@@ -175,7 +175,7 @@ if ( ! class_exists( 'KSS_Admin' ) ) :
 					<div class="notice notice-error inline"><p>Индекс собрать не удалось. Ошибка записана в журнал PHP. На сайте работает штатный поиск темы.</p></div>
 				<?php else : ?>
 					<?php if ( empty( $stats['tables'] ) ) : ?>
-						<div class="notice notice-warning inline"><p>Таблицы календаря (ai1ec_event_instances, ai1ec_events) не найдены: концертов в индексе нет.</p></div>
+						<div class="notice notice-warning inline"><p>Плагин Kozlov Core не активен: концертов в индексе нет.</p></div>
 					<?php endif; ?>
 					<table class="widefat striped" style="max-width:760px">
 						<tbody>
