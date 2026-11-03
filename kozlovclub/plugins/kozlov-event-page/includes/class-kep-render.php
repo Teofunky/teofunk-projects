@@ -571,6 +571,8 @@ class KEP_Render {
 		if ( preg_match( '/^[«"“]/u', $p ) ) {
 			return $p;
 		}
+		// кавычки внутри программы становятся внутренними: «Презентация альбома „Modern Nomad“»
+		$p = str_replace( array( '«', '»' ), array( '„', '“' ), $p );
 		return '«' . $p . '»';
 	}
 

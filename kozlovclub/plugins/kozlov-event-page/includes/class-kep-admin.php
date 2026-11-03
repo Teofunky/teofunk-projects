@@ -613,7 +613,7 @@ class KEP_Admin {
 			if ( 200 !== $code ) {
 				return new WP_Error( 'kep_http', 'сервер ответил кодом ' . $code . ' вместо страницы' );
 			}
-			if ( false === strpos( $body, 'single-ai1ec' ) ) {
+			if ( false === strpos( $body, 'single-concert' ) ) {
 				return new WP_Error( 'kep_not_event', 'ответ сервера не похож на страницу концерта' );
 			}
 			$clean++;
