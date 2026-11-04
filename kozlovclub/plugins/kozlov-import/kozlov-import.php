@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Kozlov Import
  * Description: Перенос контента старого kozlovclub.ru (дамп базы от 22.10.2026) в Kozlov Core: пользователи, страницы, меню, концерты, фото.
- * Version: 1.4.2
+ * Version: 1.5.0
  * Requires PHP: 8.1
  */
 
@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 define( 'KI_DIR', plugin_dir_path( __FILE__ ) );
 define( 'KI_URL', plugin_dir_url( __FILE__ ) );
-define( 'KI_VER', '1.4.2' );
+define( 'KI_VER', '1.5.0' );
 
 require_once KI_DIR . 'includes/class-ki-importer.php';
 require_once KI_DIR . 'includes/class-ki-media.php';
@@ -60,6 +60,7 @@ function ki_page() {
 		<tr><td><strong>2. Страницы</strong><br><span class="description">О клубе, Контакты, Правила, FAQ и другие.</span></td><td><button class="button" data-step="pages">Запустить</button></td><td class="ki-status" data-for="pages"><?php echo esc_html( $st['pages'] ?? '' ); ?></td></tr>
 		<tr><td><strong>3. Меню</strong><br><span class="description">Главное меню сайта.</span></td><td><button class="button" data-step="menu">Запустить</button></td><td class="ki-status" data-for="menu"><?php echo esc_html( $st['menu'] ?? '' ); ?></td></tr>
 		<tr><td><strong>4. Концерты</strong><br><span class="description">Сначала будущие, затем архив. Фото регистрируются, файлы качаются на шаге 5.</span></td><td><button class="button button-primary" data-step="concerts">Запустить</button></td><td class="ki-status" data-for="concerts"><?php echo esc_html( $st['concerts'] ?? '' ); ?></td></tr>
+		<tr><td><strong>4б. Концерты с kozlovclub.ru (04.11)</strong><br><span class="description">108 новых концертов (в основном декабрь) и изменения 142 концертов после дампа: заглавные фото, программы, названия, коды Ticketscloud, цены, даты, видео. Поле меняется, только если у нас его никто не правил. Потом шаг 5 «Фото».</span></td><td><button class="button" data-step="live">Запустить</button></td><td class="ki-status" data-for="live"><?php echo esc_html( $st['live'] ?? '' ); ?></td></tr>
 		<tr><td><strong>5. Фото</strong><br><span class="description">Файлы берутся со старого сайта, если он доступен, иначе из Wayback Machine. Ожидают: <b id="ki-pending"><?php echo $pending; ?></b>, скачано <?php echo $done; ?>, не найдено <?php echo $failed; ?>.</span></td><td><button class="button" data-step="media">Запустить</button> <button class="button" data-step="media_retry">Повторить ненайденные</button></td><td class="ki-status" data-for="media"><?php echo esc_html( $st['media'] ?? '' ); ?></td></tr>
 		<tr><td><strong>5а. Фото из кэша Chrome</strong><br><span class="description">Превью со старого сайта из кэша браузера. Берутся только для ненайденных файлов. Размер небольшой (300–768 px).</span></td><td><button class="button" data-step="media_cache">Запустить</button></td><td class="ki-status" data-for="media_cache"><?php echo esc_html( $st['media_cache'] ?? '' ); ?></td></tr>
 		<tr><td><strong>5б. Откат обложек Ticketscloud</strong><br><span class="description">Снимает обложки Ticketscloud с концертов и ставит вместо них заглушку.</span></td><td><button class="button" data-step="media_tc_undo">Запустить</button></td><td class="ki-status" data-for="media_tc_undo"><?php echo esc_html( $st['media_tc_undo'] ?? '' ); ?></td></tr>
@@ -104,6 +105,8 @@ add_action( 'wp_ajax_ki_step', function () {
 				$r = KI_Importer::menu(); break;
 			case 'concerts':
 				$r = KI_Importer::concerts( $offset ); break;
+			case 'live':
+				$r = KI_Importer::live_sync( $offset ); break;
 			case 'media':
 				$r = KI_Media::run( 6, false ); break;
 			case 'media_retry':

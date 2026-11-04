@@ -254,6 +254,83 @@ class KI_Importer {
 		self::map_set( 'concert', $c['id'], $id );
 	}
 
+	/* ---------- 4б. концерты с боевого сайта (страницы сохранены 04.11.2026) ---------- */
+
+	/**
+	 * Новые концерты создаются целиком. У существующих меняются только поля, которые изменились на боевом сайте
+	 * после дампа, и только если у нас это поле никто не правил (сейчас равно значению из дампа).
+	 */
+	public static function live_sync( $offset ) {
+		$ops   = self::load( 'live-2026-11-04' );
+		$total = count( $ops );
+		$batch = array_slice( $ops, (int) $offset, 20 );
+		$st    = get_option( 'ki_live_stats', array() );
+		if ( 0 === (int) $offset ) {
+			$st = array( 'new' => 0, 'new_skip' => 0, 'set' => 0, 'kept' => 0, 'missing' => 0 );
+		}
+		foreach ( $batch as $op ) {
+			if ( 'new' === $op['op'] ) {
+				if ( self::map_get( 'concert', $op['c']['id'] ) ) { $st['new_skip']++; continue; }
+				self::concert( $op['c'] ); $st['new']++;
+				continue;
+			}
+			$pid = self::map_get( 'concert', $op['id'] );
+			if ( ! $pid || ! get_post( $pid ) ) { $st['missing']++; continue; }
+			$r = self::patch( $pid, $op['set'], $op['was'] );
+			$st['set'] += $r[0]; $st['kept'] += $r[1];
+		}
+		update_option( 'ki_live_stats', $st, false );
+		$offset += count( $batch );
+		$done = $offset >= $total;
+		$msg = "новых {$st['new']}, обновлено полей {$st['set']}, оставлено наших правок {$st['kept']}";
+		return array( 'done' => $done, 'offset' => $offset, 'total' => $total, 'status' => ( $done ? 'готово: ' : "$offset из $total: " ) . $msg,
+			'log' => "Концерты с сайта: $offset из $total, $msg" . ( $st['new_skip'] ? ", уже были {$st['new_skip']}" : '' ) . ( $st['missing'] ? ", не найдено {$st['missing']}" : '' ) . ( $done ? '. Дальше шаг 5 «Фото».' : '' ) );
+	}
+
+	private static function same( $a, $b ) {
+		$n = function ( $v ) {
+			return trim( preg_replace( '/\s+/u', ' ', str_replace( "\xc2\xa0", ' ', html_entity_decode( (string) $v, ENT_QUOTES, 'UTF-8' ) ) ) );
+		};
+		return $n( $a ) === $n( $b );
+	}
+
+	/** @return array{0:int,1:int} обновлено, оставлено */
+	private static function patch( $pid, $set, $was ) {
+		$ok = 0; $kept = 0;
+		$map = get_option( 'ki_map_attachment', array() );
+		$ph  = (int) get_option( 'ki_placeholder', 0 );
+		if ( isset( $set['title'] ) ) {
+			if ( self::same( get_post_field( 'post_title', $pid ), $was['title'] ) ) { wp_update_post( array( 'ID' => $pid, 'post_title' => $set['title'] ) ); $ok++; } else { $kept++; }
+		}
+		foreach ( array( 'program' => 'kc_program', 'tc_event' => 'kc_tc_event', 'start' => 'kc_start', 'end' => 'kc_end' ) as $f => $key ) {
+			if ( ! array_key_exists( $f, $set ) ) { continue; }
+			if ( self::same( get_post_meta( $pid, $key, true ), $was[ $f ] ) ) { update_post_meta( $pid, $key, $set[ $f ] ); $ok++; } else { $kept++; }
+		}
+		if ( isset( $set['price_type'] ) ) {
+			if ( self::same( get_post_meta( $pid, 'kc_price_type', true ), $was['price_type'] ) && (int) get_post_meta( $pid, 'kc_price', true ) === (int) $was['price'] ) {
+				update_post_meta( $pid, 'kc_price_type', $set['price_type'] );
+				update_post_meta( $pid, 'kc_price', (int) $set['price'] );
+				update_post_meta( $pid, 'kc_price_text', self::custom_price_text( $set ) );
+				$ok++;
+			} else { $kept++; }
+		}
+		if ( isset( $set['videos'] ) ) {
+			$cur = array_values( (array) get_post_meta( $pid, 'kc_videos', true ) );
+			if ( $cur === array_values( array_unique( (array) $was['videos'] ) ) || ! $cur ) { update_post_meta( $pid, 'kc_videos', array_values( array_unique( $set['videos'] ) ) ); $ok++; } else { $kept++; }
+		}
+		if ( isset( $set['hero'] ) ) {
+			$cur   = (int) get_post_meta( $pid, 'kc_hero', true );
+			$was_id = $was['hero'] && isset( $map[ $was['hero'] ] ) ? (int) $map[ $was['hero'] ] : 0;
+			if ( ! $cur || $cur === $was_id || $cur === $ph ) { update_post_meta( $pid, 'kc_hero', KI_Media::register( $set['hero'], $pid ) ); $ok++; } else { $kept++; }
+		}
+		if ( isset( $set['thumb'] ) ) {
+			$cur    = (int) get_post_thumbnail_id( $pid );
+			$was_id = $was['thumb'] && isset( $map[ $was['thumb'] ] ) ? (int) $map[ $was['thumb'] ] : 0;
+			if ( ! $cur || $cur === $was_id || $cur === $ph ) { set_post_thumbnail( $pid, KI_Media::register( $set['thumb'], $pid, get_the_title( $pid ) ) ); delete_post_meta( $pid, 'kc_placeholder' ); $ok++; } else { $kept++; }
+		}
+		return array( $ok, $kept );
+	}
+
 	/** Текст цены сохраняем, только если он нестандартный; стандартный Core соберёт сам. */
 	private static function custom_price_text( $c ) {
 		$t = trim( $c['price_text'] );
