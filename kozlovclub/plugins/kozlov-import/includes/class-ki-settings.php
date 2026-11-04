@@ -300,9 +300,7 @@ class KI_Settings {
 				$rel = rawurldecode( $m[2] );
 				$aid = KI_Media::register( $rel, 0, '' );
 				if ( $aid ) {
-					KI_Media::fetch_now( $aid );
-					$url = wp_get_attachment_url( $aid );
-					if ( $url ) { $in['media_rights']['image_url'] = $url; }
+					KI_Media::fetch_now( $aid ); // файл ложится к нам по тому же пути; адрес остаётся адресом kozlovclub.ru (после переезда он наш)
 				}
 			}
 			try {
@@ -364,6 +362,11 @@ class KI_Settings {
 				$a = \Kozlov\Gazeta\Data\Db::decode( $arow['draft_json'] );
 				$wpdb->update( $wpdb->prefix . 'es_articles', array( 'reviewed_hash' => $I::articleHash( $a ), 'reviewed_by' => get_current_user_id(), 'reviewed_at' => \Kozlov\Gazeta\Data\Db::now(), 'review_note' => 'Выпуск перенесён с kozlovclub.ru, где был проверен и опубликован.' ), array( 'id' => (int) $arow['id'] ) ); // phpcs:ignore
 			}
+			// фото материалов записаны адресами kozlovclub.ru: на время проверки и публикации сайт считает этот домен своим
+			$host  = wp_parse_url( home_url(), PHP_URL_HOST );
+			$swap  = function ( $url ) use ( $host ) { return is_string( $url ) ? preg_replace( '#^https?://' . preg_quote( (string) $host, '#' ) . '#', 'https://kozlovclub.ru', $url ) : $url; };
+			$updir = function ( $d ) use ( $swap ) { $d['baseurl'] = $swap( $d['baseurl'] ); $d['url'] = $swap( $d['url'] ); return $d; };
+			if ( 'kozlovclub.ru' !== $host ) { add_filter( 'home_url', $swap, 99 ); add_filter( 'upload_dir', $updir, 99 ); }
 			$fresh = $I::find( $id );
 			$blk   = $I::blockers( $fresh );
 			if ( $blk ) {
@@ -381,6 +384,7 @@ class KI_Settings {
 					if ( class_exists( '\Kozlov\Gazeta\Runtime\Cache' ) ) { try { \Kozlov\Gazeta\Runtime\Cache::purgeIssue( $id ); } catch ( \Throwable $e ) { /* не критично */ } }
 				}
 			}
+			remove_filter( 'home_url', $swap, 99 ); remove_filter( 'upload_dir', $updir, 99 );
 		} else {
 			$log[] = 'оставлен черновиком, как на старом сайте';
 		}
