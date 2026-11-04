@@ -5,7 +5,7 @@
     if (stop) { running = false; stop = false; $('.ki-steps button').prop('disabled', false); $('#ki-stop').prop('disabled', true); log('Остановлено.'); return; }
     $.post(KI.ajax, { action: 'ki_step', nonce: KI.nonce, step: step, offset: offset || 0, value: $('#ki-jz-number').val() || 0 }).done(function (r) {
       if (!r.success) { log('Ошибка: ' + (r.data || '?')); finish(step); return; }
-      var d = r.data; log(d.log || ''); $('.ki-status[data-for="' + (step === 'media_retry' ? 'media' : step) + '"]').text(d.status || '');
+      var d = r.data; log(d.log || ''); $('.ki-status[data-for="' + (step === 'media_retry' ? 'media' : (step === 'media_origin_retry' ? 'media_origin' : step)) + '"]').text(d.status || '');
       if (d.pending !== undefined) $('#ki-pending').text(d.pending);
       if (d.done) { finish(step); } else { run(step, d.offset); }
     }).fail(function (x) { log('Сбой запроса (' + x.status + '). Нажмите «Запустить» ещё раз, импорт продолжится с места остановки.'); finish(step); });

@@ -176,6 +176,112 @@ class KI_Media {
 		return array( 'done' => 0 === $left, 'status' => "из кэша +$ok, нет в кэше +$miss, в очереди $left", 'log' => "Кэш Chrome: +$ok восстановлено, +$miss без совпадения, осталось проверить $left", 'pending' => self::count( 'pending' ) );
 	}
 
+	/** Условие очереди «с боевого сайта»: не найдено, ещё не скачано или только мелкое превью из кэша. */
+	private static function origin_sql( $tried_cond ) {
+		global $wpdb;
+		return "FROM {$wpdb->posts} a
+			INNER JOIN {$wpdb->postmeta} st ON st.post_id = a.ID AND st.meta_key = 'kc_import_status'
+			LEFT JOIN {$wpdb->postmeta} lr ON lr.post_id = a.ID AND lr.meta_key = 'kc_lowres'
+			LEFT JOIN {$wpdb->postmeta} tr ON tr.post_id = a.ID AND tr.meta_key = 'kc_origin_tried'
+			LEFT JOIN {$wpdb->postmeta} s ON s.post_id = a.post_parent AND s.meta_key = 'kc_start'
+			WHERE a.post_type = 'attachment' AND $tried_cond AND ( st.meta_value IN ('failed','pending') OR lr.meta_id IS NOT NULL )";
+	}
+
+	/**
+	 * Дозагрузка оригиналов с боевого kozlovclub.ru: для вложений, которые не нашлись или лежат мелким превью из кэша.
+	 * Файл заменяется только после успешной загрузки. Будущие концерты первыми.
+	 */
+	public static function from_origin( $limit = 6, $retry = false ) {
+		global $wpdb;
+		if ( $retry ) {
+			$wpdb->query( "DELETE FROM {$wpdb->postmeta} WHERE meta_key = 'kc_origin_tried' AND meta_value = 'fail'" );
+		}
+		$now = wp_date( 'Y-m-d 00:00:00' );
+		$ids = $wpdb->get_col( $wpdb->prepare(
+			'SELECT DISTINCT a.ID ' . self::origin_sql( 'tr.meta_id IS NULL' ) . ' ORDER BY (s.meta_value IS NULL), (s.meta_value < %s), CASE WHEN s.meta_value >= %s THEN s.meta_value END ASC, s.meta_value DESC LIMIT %d',
+			$now, $now, $limit ) );
+		if ( ! $ids ) {
+			return array( 'done' => true, 'status' => 'очередь пуста', 'log' => 'С боевого сайта: очередь пуста.' );
+		}
+		require_once ABSPATH . 'wp-admin/includes/image.php';
+		$up = wp_upload_dir(); $ok = 0; $fail = 0; $log = array();
+		foreach ( $ids as $aid ) {
+			$aid = (int) $aid;
+			$src = (string) get_post_meta( $aid, 'kc_import_src', true );
+			if ( '' === $src ) { update_post_meta( $aid, 'kc_origin_tried', 'fail' ); $fail++; continue; }
+			$is_mf = 0 === strpos( $src, KI_Importer::OLD_CONTENT . 'files_mf/' );
+			$local = $is_mf ? 'legacy/' . substr( $src, strlen( KI_Importer::OLD_CONTENT . 'files_mf/' ) ) : substr( $src, strlen( KI_Importer::OLD_UPLOADS ) );
+			$local = rawurldecode( $local );
+			$last = ''; $body = '';
+			for ( $try = 0; $try < 2; $try++ ) {
+				$r = wp_remote_get( $src, array( 'timeout' => 30, 'redirection' => 5, 'user-agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/124 Safari/537.36', 'headers' => array( 'Cookie' => 'beget=begetok' ) ) );
+				if ( is_wp_error( $r ) ) { $last = $r->get_error_message(); continue; }
+				$code = wp_remote_retrieve_response_code( $r );
+				$b    = wp_remote_retrieve_body( $r );
+				$type = (string) wp_remote_retrieve_header( $r, 'content-type' );
+				if ( 200 === $code && strlen( $b ) > 200 && false !== strpos( $type, 'image' ) ) { $body = $b; break; }
+				$last = "HTTP $code";
+				if ( 429 === $code ) { sleep( 8 ); }
+				if ( 404 === $code ) { break; }
+			}
+			if ( '' === $body ) {
+				update_post_meta( $aid, 'kc_origin_tried', 'fail' );
+				update_post_meta( $aid, 'kc_import_error', $last );
+				$fail++; $log[] = basename( $local ) . ': ' . $last;
+				continue;
+			}
+			$path = $up['basedir'] . '/' . $local;
+			wp_mkdir_p( dirname( $path ) );
+			if ( false === file_put_contents( $path, $body ) ) {
+				update_post_meta( $aid, 'kc_origin_tried', 'fail' ); $fail++; $log[] = basename( $local ) . ': не записался'; continue;
+			}
+			$ext  = strtolower( pathinfo( $local, PATHINFO_EXTENSION ) );
+			$rel0 = (string) get_post_meta( $aid, '_wp_attached_file', true );
+			if ( $rel0 !== $local ) {
+				update_post_meta( $aid, '_wp_attached_file', $local );
+				wp_update_post( array( 'ID' => $aid, 'post_mime_type' => array( 'jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'png' => 'image/png', 'gif' => 'image/gif', 'webp' => 'image/webp' )[ $ext ] ?? 'image/jpeg', 'guid' => $up['baseurl'] . '/' . $local ) );
+			}
+			delete_post_meta( $aid, 'kc_lowres' );
+			delete_post_meta( $aid, 'kc_import_error' );
+			self::finish( $aid, $path );
+			update_post_meta( $aid, 'kc_origin_tried', 'ok' );
+			$ok++;
+		}
+		global $wpdb;
+		$left = (int) $wpdb->get_var( 'SELECT COUNT(DISTINCT a.ID) ' . self::origin_sql( 'tr.meta_id IS NULL' ) );
+		return array( 'done' => 0 === $left, 'status' => "с сайта +$ok, не скачалось +$fail, в очереди $left", 'log' => "С боевого сайта: +$ok скачано, +$fail ошибок, осталось $left" . ( $log ? "\n  " . implode( "\n  ", array_slice( $log, 0, 6 ) ) : '' ), 'pending' => $left );
+	}
+
+	/** Вернуть настоящую обложку концертам, которым была поставлена заглушка, если файл теперь есть. Порциями по 150 концертов. */
+	public static function restore_thumbs( $offset ) {
+		$m = ki_meta();
+		$chunks = (int) $m['concert_chunks'];
+		$i = intdiv( (int) $offset, 150 );
+		if ( $i >= $chunks ) {
+			return array( 'done' => true, 'offset' => $offset, 'status' => 'обложки проверены', 'log' => 'Обложки: готово.' );
+		}
+		$list = KI_Importer::load( sprintf( 'concerts-%03d', $i ) );
+		$map  = get_option( 'ki_map_attachment', array() );
+		$ph   = (int) get_option( 'ki_placeholder', 0 );
+		$n = 0;
+		foreach ( $list as $c ) {
+			$cid = KI_Importer::map_get( 'concert', $c['id'] );
+			if ( ! $cid ) { continue; }
+			$rel = $c['thumb'] ?: ( $c['anons_mf'] ?? '' );
+			$rel = ltrim( (string) $rel, '/' );
+			if ( '' === $rel || empty( $map[ $rel ] ) ) { continue; }
+			$aid = (int) $map[ $rel ];
+			$cur = (int) get_post_thumbnail_id( $cid );
+			if ( $cur === $aid || ! self::thumb_ok( $aid ) ) { continue; }
+			if ( $cur && $cur !== $ph && self::thumb_ok( $cur ) ) { continue; } // у концерта уже другое рабочее фото
+			set_post_thumbnail( $cid, $aid );
+			delete_post_meta( $cid, 'kc_placeholder' );
+			$n++;
+		}
+		$next = ( $i + 1 ) * 150;
+		return array( 'done' => $i + 1 >= $chunks, 'offset' => $next, 'status' => "обложек возвращено +$n (порция " . ( $i + 1 ) . " из $chunks)", 'log' => "Обложки: порция " . ( $i + 1 ) . " из $chunks, возвращено $n." );
+	}
+
 	private static function thumb_ok( $aid ) {
 		if ( ! $aid ) { return false; }
 		$f = get_attached_file( $aid );

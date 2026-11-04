@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Kozlov Import
  * Description: Перенос контента старого kozlovclub.ru (дамп базы от 22.10.2026) в Kozlov Core: пользователи, страницы, меню, концерты, фото.
- * Version: 1.4.1
+ * Version: 1.4.2
  * Requires PHP: 8.1
  */
 
@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 define( 'KI_DIR', plugin_dir_path( __FILE__ ) );
 define( 'KI_URL', plugin_dir_url( __FILE__ ) );
-define( 'KI_VER', '1.4.1' );
+define( 'KI_VER', '1.4.2' );
 
 require_once KI_DIR . 'includes/class-ki-importer.php';
 require_once KI_DIR . 'includes/class-ki-media.php';
@@ -64,6 +64,8 @@ function ki_page() {
 		<tr><td><strong>5а. Фото из кэша Chrome</strong><br><span class="description">Превью со старого сайта из кэша браузера. Берутся только для ненайденных файлов. Размер небольшой (300–768 px).</span></td><td><button class="button" data-step="media_cache">Запустить</button></td><td class="ki-status" data-for="media_cache"><?php echo esc_html( $st['media_cache'] ?? '' ); ?></td></tr>
 		<tr><td><strong>5б. Откат обложек Ticketscloud</strong><br><span class="description">Снимает обложки Ticketscloud с концертов и ставит вместо них заглушку.</span></td><td><button class="button" data-step="media_tc_undo">Запустить</button></td><td class="ki-status" data-for="media_tc_undo"><?php echo esc_html( $st['media_tc_undo'] ?? '' ); ?></td></tr>
 		<tr><td><strong>5в. Заглушка</strong><br><span class="description">Картинка с логотипом клуба для концертов, у которых так и нет фото.</span></td><td><button class="button" data-step="media_placeholder">Запустить</button></td><td class="ki-status" data-for="media_placeholder"><?php echo esc_html( $st['media_placeholder'] ?? '' ); ?></td></tr>
+		<tr><td><strong>5г. Оригиналы с kozlovclub.ru</strong><br><span class="description">Скачивает с боевого сайта фото, которые не нашлись или лежат мелким превью из кэша. Файл заменяется только после удачной загрузки. Ближайшие концерты первыми.</span></td><td><button class="button" data-step="media_origin">Запустить</button> <button class="button" data-step="media_origin_retry">Повторить ошибки</button></td><td class="ki-status" data-for="media_origin"><?php echo esc_html( $st['media_origin'] ?? '' ); ?></td></tr>
+		<tr><td><strong>5д. Вернуть обложки вместо заглушек</strong><br><span class="description">Запускать после 5г. Концертам с заглушкой ставит настоящую обложку, если файл теперь есть.</span></td><td><button class="button" data-step="media_restore">Запустить</button></td><td class="ki-status" data-for="media_restore"><?php echo esc_html( $st['media_restore'] ?? '' ); ?></td></tr>
 		<tr><td><strong>6. Джазета</strong><br><span class="description">Выпуски и статьи. Сначала установите плагин Kozlov Jazzeta.</span></td><td><button class="button" data-step="jazzeta">Запустить</button></td><td class="ki-status" data-for="jazzeta"><?php echo esc_html( $st['jazzeta'] ?? '' ); ?></td></tr>
 		<tr><td><strong>6б. Джазета: подшивка 24.10–02.11</strong><br><span class="description">Выпуски из файлов, которые нашлись на компьютере (№ 004–006, 008–013), с кроссвордом «Скрытая партитура» в № 004. Импорт черновиком, номер по дате, публикация от имени издателя. Уже опубликованные даты пропускаются.</span></td><td><button class="button button-primary" data-step="jazzeta_restore">Восстановить</button></td><td class="ki-status" data-for="jazzeta_restore"><?php echo esc_html( $st['jazzeta_restore'] ?? '' ); ?></td></tr>
 		<tr><td><strong>6а. Джазета: счётчик номеров</strong><br><span class="description">Номер последнего опубликованного выпуска. Следующий публикуемый получит номер на единицу больше. Нужно при восстановлении подшивки по порядку.</span></td><td><input type="number" id="ki-jz-number" min="0" style="width:80px" value="<?php echo (int) ( $wpdb->get_var( "SELECT value FROM {$wpdb->prefix}es_state WHERE name='number'" ) ?? 0 ); ?>"> <button class="button" data-step="jazzeta_number">Установить</button></td><td class="ki-status" data-for="jazzeta_number"><?php echo esc_html( $st['jazzeta_number'] ?? '' ); ?></td></tr>
@@ -108,6 +110,12 @@ add_action( 'wp_ajax_ki_step', function () {
 				$r = KI_Media::run( 6, true ); break;
 			case 'media_cache':
 				$r = KI_Media::from_cache( 25 ); break;
+			case 'media_origin':
+				$r = KI_Media::from_origin( 6, false ); break;
+			case 'media_origin_retry':
+				$r = KI_Media::from_origin( 6, true ); break;
+			case 'media_restore':
+				$r = KI_Media::restore_thumbs( $offset ); break;
 			case 'media_tc_undo':
 				$r = KI_Media::tc_undo(); break;
 			case 'media_placeholder':
@@ -119,7 +127,7 @@ add_action( 'wp_ajax_ki_step', function () {
 		wp_send_json_error( $e->getMessage() . ' @ ' . basename( $e->getFile() ) . ':' . $e->getLine() );
 	}
 	$st = get_option( 'ki_state', array() );
-	$st[ 'media_retry' === $step ? 'media' : $step ] = $r['status'];
+	$st[ 'media_retry' === $step ? 'media' : ( 'media_origin_retry' === $step ? 'media_origin' : $step ) ] = $r['status'];
 	update_option( 'ki_state', $st, false );
 	wp_send_json_success( $r );
 } );
