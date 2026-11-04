@@ -35,7 +35,7 @@ class KZM_Admin {
 			echo '<div class="notice notice-success"><p>Сохранено.</p></div>';
 		}
 		$page = get_page_by_path( 'menu' );
-		echo '<div class="wrap"><h1>Меню ресторана: настройки</h1><form method="post">';
+		echo '<div class="wrap"><h1>Ресторан: настройки</h1><form method="post">';
 		wp_nonce_field( 'kzm_settings' );
 		echo '<p><label><strong>Текст над меню</strong><br><textarea name="kzm_notice" rows="3" class="large-text">' . esc_textarea( KZM_Data::notice() ) . '</textarea></label></p>';
 		echo '<p class="description">Меню выводится на странице «' . ( $page ? esc_html( get_the_title( $page ) ) : 'menu' ) . '» само. На любой другой странице можно вставить шорткод <code>[kozlov_menu]</code>.</p>';

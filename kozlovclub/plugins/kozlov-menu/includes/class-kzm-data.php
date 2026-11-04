@@ -26,9 +26,9 @@ class KZM_Data {
 			KZM_PT,
 			array(
 				'labels'          => array(
-					'name'          => 'Меню ресторана',
+					'name'          => 'Ресторан',
 					'singular_name' => 'Раздел меню',
-					'menu_name'     => 'Меню ресторана',
+					'menu_name'     => 'Ресторан',
 					'add_new'       => 'Добавить раздел',
 					'add_new_item'  => 'Новый раздел меню',
 					'edit_item'     => 'Раздел меню',

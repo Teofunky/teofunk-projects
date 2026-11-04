@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Kozlov Menu
  * Description:       Меню ресторана клуба: разделы (кухня, бранч, бар), блюда с фото, вариантами объёма и ценами. Редактор в админке, страница /menu/ с поиском и навигацией по разделам.
- * Version:           1.0.1
+ * Version:           1.0.2
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            Kozlov Club
@@ -13,7 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'KZM_VER', '1.0.1' );
+define( 'KZM_VER', '1.0.2' );
 define( 'KZM_FILE', __FILE__ );
 define( 'KZM_DIR', plugin_dir_path( __FILE__ ) );
 define( 'KZM_URL', plugin_dir_url( __FILE__ ) );
