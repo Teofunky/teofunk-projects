@@ -254,81 +254,141 @@ class KI_Importer {
 		self::map_set( 'concert', $c['id'], $id );
 	}
 
-	/* ---------- 4б. концерты с боевого сайта (страницы сохранены 04.11.2026) ---------- */
+	/* ---------- 4б. концерты с боевого сайта (исходные поля из админки kozlovclub.ru, 04.11.2026) ---------- */
 
 	/**
-	 * Новые концерты создаются целиком. У существующих меняются только поля, которые изменились на боевом сайте
-	 * после дампа, и только если у нас это поле никто не правил (сейчас равно значению из дампа).
+	 * Новые концерты создаются целиком. У существующих меняется поле, только если у нас его никто не правил
+	 * (сейчас равно значению из дампа или из прошлого запуска этого шага). Если поле уже новое, оно пропускается.
 	 */
 	public static function live_sync( $offset ) {
 		$ops   = self::load( 'live-2026-11-04' );
 		$total = count( $ops );
-		$batch = array_slice( $ops, (int) $offset, 20 );
+		$batch = array_slice( $ops, (int) $offset, 15 );
 		$st    = get_option( 'ki_live_stats', array() );
-		if ( 0 === (int) $offset ) {
-			$st = array( 'new' => 0, 'new_skip' => 0, 'set' => 0, 'kept' => 0, 'missing' => 0 );
+		if ( 0 === (int) $offset || ! $st ) {
+			$st = array( 'new' => 0, 'upd' => 0, 'set' => 0, 'kept' => 0, 'same' => 0, 'missing' => 0 );
 		}
 		foreach ( $batch as $op ) {
 			if ( 'new' === $op['op'] ) {
-				if ( self::map_get( 'concert', $op['c']['id'] ) ) { $st['new_skip']++; continue; }
-				self::concert( $op['c'] ); $st['new']++;
-				continue;
+				$pid = self::map_get( 'concert', $op['c']['id'] );
+				if ( ! $pid || ! get_post( $pid ) ) { self::concert( $op['c'] ); $st['new']++; continue; }
+				if ( empty( $op['was'] ) ) { continue; }
+				$set = array();
+				foreach ( $op['was'] as $f => $v ) { $set[ $f ] = $op['c'][ $f ]; }
+				$r = self::patch( $pid, $set, $op['was'] );
+				$st['upd']++;
+			} else {
+				$pid = self::map_get( 'concert', $op['id'] );
+				if ( ! $pid || ! get_post( $pid ) ) { $st['missing']++; continue; }
+				$r = self::patch( $pid, $op['set'], $op['was'], $op['was2'] ?? array() );
 			}
-			$pid = self::map_get( 'concert', $op['id'] );
-			if ( ! $pid || ! get_post( $pid ) ) { $st['missing']++; continue; }
-			$r = self::patch( $pid, $op['set'], $op['was'] );
-			$st['set'] += $r[0]; $st['kept'] += $r[1];
+			$st['set'] += $r[0]; $st['kept'] += $r[1]; $st['same'] += $r[2];
 		}
 		update_option( 'ki_live_stats', $st, false );
 		$offset += count( $batch );
 		$done = $offset >= $total;
-		$msg = "новых {$st['new']}, обновлено полей {$st['set']}, оставлено наших правок {$st['kept']}";
+		$msg = "новых {$st['new']}, обновлено полей {$st['set']}, уже совпадало {$st['same']}, оставлено наших правок {$st['kept']}";
 		return array( 'done' => $done, 'offset' => $offset, 'total' => $total, 'status' => ( $done ? 'готово: ' : "$offset из $total: " ) . $msg,
-			'log' => "Концерты с сайта: $offset из $total, $msg" . ( $st['new_skip'] ? ", уже были {$st['new_skip']}" : '' ) . ( $st['missing'] ? ", не найдено {$st['missing']}" : '' ) . ( $done ? '. Дальше шаг 5 «Фото».' : '' ) );
+			'log' => "Концерты с сайта: $offset из $total, $msg" . ( $st['missing'] ? ", не найдено {$st['missing']}" : '' ) . ( $done ? '. Дальше шаг 5 «Фото».' : '' ) );
 	}
 
-	private static function same( $a, $b ) {
-		$n = function ( $v ) {
-			return trim( preg_replace( '/\s+/u', ' ', str_replace( "\xc2\xa0", ' ', html_entity_decode( (string) $v, ENT_QUOTES, 'UTF-8' ) ) ) );
-		};
-		return $n( $a ) === $n( $b );
+	private static function norm( $v ) {
+		if ( is_bool( $v ) ) { return $v ? '1' : '0'; }
+		if ( is_array( $v ) ) { return wp_json_encode( array_map( array( __CLASS__, 'norm' ), $v ) ); }
+		$v = (string) $v;
+		if ( false !== strpos( $v, '<' ) ) {
+			$v = wp_kses_post( $v ); // так значение сохраняет Kozlov Core
+		}
+		return trim( preg_replace( '/\s+/u', ' ', str_replace( array( "\r", "\xc2\xa0" ), array( '', ' ' ), html_entity_decode( $v, ENT_QUOTES, 'UTF-8' ) ) ) );
 	}
 
-	/** @return array{0:int,1:int} обновлено, оставлено */
-	private static function patch( $pid, $set, $was ) {
-		$ok = 0; $kept = 0;
+	/** Сравнимое значение поля: что лежит у нас сейчас и во что превращается значение из пакета. */
+	private static function cur( $pid, $f ) {
+		$meta = array( 'program' => 'kc_program', 'start' => 'kc_start', 'end' => 'kc_end', 'tc_event' => 'kc_tc_event', 'text1' => 'kc_text_1', 'text2' => 'kc_text_2',
+			'quote' => 'kc_quote', 'quote_author' => 'kc_quote_author', 'additional' => 'kc_additional', 'lead' => 'kep_lead', 'notes' => 'kep_notes', 'yoast_desc' => '_yoast_wpseo_metadesc',
+			'booking' => 'kc_booking', 'register' => 'kc_register_btn' );
+		if ( 'title' === $f ) { return self::norm( get_post_field( 'post_title', $pid ) ); }
+		if ( 'booking' === $f || 'register' === $f ) { return get_post_meta( $pid, $meta[ $f ], true ) ? '1' : '0'; }
+		if ( isset( $meta[ $f ] ) ) { return self::norm( get_post_meta( $pid, $meta[ $f ], true ) ); }
+		if ( 'price' === $f ) { return (string) (int) get_post_meta( $pid, 'kc_price', true ); }
+		if ( 'price_type' === $f ) { return self::norm( get_post_meta( $pid, 'kc_price_type', true ) ); }
+		if ( 'price_text' === $f ) { return self::norm( get_post_meta( $pid, 'kc_price_text', true ) ); }
+		if ( 'videos' === $f ) { return self::norm( array_values( (array) get_post_meta( $pid, 'kc_videos', true ) ) ); }
+		if ( 'hero' === $f ) { return (string) (int) get_post_meta( $pid, 'kc_hero', true ); }
+		if ( 'thumb' === $f ) { return (string) (int) get_post_thumbnail_id( $pid ); }
+		if ( 'stage' === $f ) { $t = wp_get_post_terms( $pid, KC_TAX_STAGE, array( 'fields' => 'slugs' ) ); return is_array( $t ) && $t ? $t[0] : ''; }
+		if ( 'artists' === $f ) {
+			$out = array();
+			foreach ( (array) get_post_meta( $pid, 'kc_artists', true ) as $a ) { $out[] = array( (int) ( $a['image'] ?? 0 ), self::norm( $a['text'] ?? '' ) ); }
+			return wp_json_encode( $out );
+		}
+		return null;
+	}
+
+	private static function pack_val( $f, $v ) {
 		$map = get_option( 'ki_map_attachment', array() );
-		$ph  = (int) get_option( 'ki_placeholder', 0 );
-		if ( isset( $set['title'] ) ) {
-			if ( self::same( get_post_field( 'post_title', $pid ), $was['title'] ) ) { wp_update_post( array( 'ID' => $pid, 'post_title' => $set['title'] ) ); $ok++; } else { $kept++; }
+		if ( in_array( $f, array( 'hero', 'thumb' ), true ) ) { $v = ltrim( (string) $v, '/' ); return (string) ( $v && isset( $map[ $v ] ) ? (int) $map[ $v ] : 0 ); }
+		if ( 'price' === $f ) { return (string) (int) $v; }
+		if ( 'price_text' === $f ) { return null; }
+		if ( 'videos' === $f ) { return self::norm( array_values( array_unique( (array) $v ) ) ); }
+		if ( 'artists' === $f ) {
+			$out = array();
+			foreach ( (array) $v as $a ) { $img = ltrim( (string) ( $a['image'] ?? '' ), '/' ); $out[] = array( $img && isset( $map[ $img ] ) ? (int) $map[ $img ] : 0, self::norm( $a['text'] ?? '' ) ); }
+			return wp_json_encode( $out );
 		}
-		foreach ( array( 'program' => 'kc_program', 'tc_event' => 'kc_tc_event', 'start' => 'kc_start', 'end' => 'kc_end' ) as $f => $key ) {
-			if ( ! array_key_exists( $f, $set ) ) { continue; }
-			if ( self::same( get_post_meta( $pid, $key, true ), $was[ $f ] ) ) { update_post_meta( $pid, $key, $set[ $f ] ); $ok++; } else { $kept++; }
+		if ( 'booking' === $f || 'register' === $f ) { return $v ? '1' : '0'; }
+		return self::norm( $v );
+	}
+
+	private static function put( $pid, $f, $v, $set ) {
+		$meta = array( 'program' => 'kc_program', 'start' => 'kc_start', 'end' => 'kc_end', 'tc_event' => 'kc_tc_event', 'text1' => 'kc_text_1', 'text2' => 'kc_text_2',
+			'quote' => 'kc_quote', 'quote_author' => 'kc_quote_author', 'additional' => 'kc_additional', 'lead' => 'kep_lead', 'notes' => 'kep_notes', 'yoast_desc' => '_yoast_wpseo_metadesc' );
+		if ( 'title' === $f ) { wp_update_post( array( 'ID' => $pid, 'post_title' => $v ) ); return; }
+		if ( isset( $meta[ $f ] ) ) { update_post_meta( $pid, $meta[ $f ], $v ); return; }
+		if ( 'booking' === $f ) { update_post_meta( $pid, 'kc_booking', $v ? 1 : 0 ); return; }
+		if ( 'register' === $f ) { update_post_meta( $pid, 'kc_register_btn', $v ? 1 : 0 ); return; }
+		if ( 'price_type' === $f ) {
+			update_post_meta( $pid, 'kc_price_type', $set['price_type'] );
+			update_post_meta( $pid, 'kc_price', (int) $set['price'] );
+			update_post_meta( $pid, 'kc_price_text', self::custom_price_text( $set ) );
+			return;
 		}
-		if ( isset( $set['price_type'] ) ) {
-			if ( self::same( get_post_meta( $pid, 'kc_price_type', true ), $was['price_type'] ) && (int) get_post_meta( $pid, 'kc_price', true ) === (int) $was['price'] ) {
-				update_post_meta( $pid, 'kc_price_type', $set['price_type'] );
-				update_post_meta( $pid, 'kc_price', (int) $set['price'] );
-				update_post_meta( $pid, 'kc_price_text', self::custom_price_text( $set ) );
-				$ok++;
-			} else { $kept++; }
+		if ( 'videos' === $f ) { update_post_meta( $pid, 'kc_videos', array_values( array_unique( (array) $v ) ) ); return; }
+		if ( 'hero' === $f ) { update_post_meta( $pid, 'kc_hero', $v ? KI_Media::register( $v, $pid ) : 0 ); return; }
+		if ( 'thumb' === $f ) { if ( $v ) { set_post_thumbnail( $pid, KI_Media::register( $v, $pid, get_the_title( $pid ) ) ); delete_post_meta( $pid, 'kc_placeholder' ); } return; }
+		if ( 'stage' === $f ) { $t = $v ? get_term_by( 'slug', $v, KC_TAX_STAGE ) : null; wp_set_post_terms( $pid, $t ? array( (int) $t->term_id ) : array(), KC_TAX_STAGE, false ); return; }
+		if ( 'artists' === $f ) {
+			$out = array();
+			foreach ( (array) $v as $a ) { $out[] = array( 'image' => $a['image'] ? KI_Media::register( $a['image'], $pid, $a['alt'] ?? '' ) : 0, 'name' => '', 'text' => $a['text'] ); }
+			update_post_meta( $pid, 'kc_artists', $out );
 		}
-		if ( isset( $set['videos'] ) ) {
-			$cur = array_values( (array) get_post_meta( $pid, 'kc_videos', true ) );
-			if ( $cur === array_values( array_unique( (array) $was['videos'] ) ) || ! $cur ) { update_post_meta( $pid, 'kc_videos', array_values( array_unique( $set['videos'] ) ) ); $ok++; } else { $kept++; }
+	}
+
+	/** @return array{0:int,1:int,2:int} обновлено, оставлено наших правок, уже совпадало */
+	private static function patch( $pid, $set, $was, $was2 = array() ) {
+		$ok = 0; $kept = 0; $same = 0;
+		$ph = (string) (int) get_option( 'ki_placeholder', 0 );
+		foreach ( $set as $f => $v ) {
+			if ( in_array( $f, array( 'price', 'price_text' ), true ) ) { continue; } // меняются вместе с price_type
+			if ( 'price_type' === $f ) {
+				$now  = self::cur( $pid, 'price_type' ) . '|' . self::cur( $pid, 'price' );
+				$new  = self::pack_val( 'price_type', $set['price_type'] ) . '|' . self::pack_val( 'price', $set['price'] ?? 0 );
+				$old  = self::pack_val( 'price_type', $was['price_type'] ?? '' ) . '|' . self::pack_val( 'price', $was['price'] ?? 0 );
+				$text = self::cur( $pid, 'price_text' ) === self::norm( self::custom_price_text( $set ) );
+				if ( $now === $new && $text ) { $same++; continue; }
+				if ( $now === $old || $now === $new ) { self::put( $pid, 'price_type', null, $set + array( 'price' => 0, 'price_text' => '' ) ); $ok++; } else { $kept++; }
+				continue;
+			}
+			$now = self::cur( $pid, $f );
+			if ( null === $now ) { continue; }
+			$new = self::pack_val( $f, $v );
+			$old = self::pack_val( $f, $was[ $f ] ?? '' );
+			if ( $now === $new && ( '0' !== $new || ! in_array( $f, array( 'hero', 'thumb' ), true ) ) ) { $same++; continue; }
+			$old2 = array_key_exists( $f, $was2 ) ? self::pack_val( $f, $was2[ $f ] ) : null;
+			$free = ( $now === $old ) || ( null !== $old2 && $now === $old2 ) || ( in_array( $f, array( 'hero', 'thumb' ), true ) && ( '0' === $now || $now === $ph ) ) || ( '' === $now && '' !== $new );
+			if ( $free ) { self::put( $pid, $f, $v, $set ); $ok++; } else { $kept++; }
 		}
-		if ( isset( $set['hero'] ) ) {
-			$cur   = (int) get_post_meta( $pid, 'kc_hero', true );
-			$was_id = $was['hero'] && isset( $map[ $was['hero'] ] ) ? (int) $map[ $was['hero'] ] : 0;
-			if ( ! $cur || $cur === $was_id || $cur === $ph ) { update_post_meta( $pid, 'kc_hero', KI_Media::register( $set['hero'], $pid ) ); $ok++; } else { $kept++; }
-		}
-		if ( isset( $set['thumb'] ) ) {
-			$cur    = (int) get_post_thumbnail_id( $pid );
-			$was_id = $was['thumb'] && isset( $map[ $was['thumb'] ] ) ? (int) $map[ $was['thumb'] ] : 0;
-			if ( ! $cur || $cur === $was_id || $cur === $ph ) { set_post_thumbnail( $pid, KI_Media::register( $set['thumb'], $pid, get_the_title( $pid ) ) ); delete_post_meta( $pid, 'kc_placeholder' ); $ok++; } else { $kept++; }
-		}
-		return array( $ok, $kept );
+		return array( $ok, $kept, $same );
 	}
 
 	/** Текст цены сохраняем, только если он нестандартный; стандартный Core соберёт сам. */
