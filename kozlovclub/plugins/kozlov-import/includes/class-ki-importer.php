@@ -122,6 +122,91 @@ class KI_Importer {
 		}
 	}
 
+	/* ---------- 2в. меню ресторана (плагин Kozlov Menu) ---------- */
+	public static function restaurant_menu() {
+		if ( ! post_type_exists( 'kz_menu' ) ) {
+			return array( 'done' => true, 'status' => 'нужен плагин Kozlov Menu', 'log' => 'Меню: установите и активируйте Kozlov Menu.' );
+		}
+		$d = self::load( 'menu' );
+		$n = 0; $items = 0;
+		foreach ( $d['sections'] as $sec ) {
+			$id   = self::map_get( 'menu', $sec['id'] );
+			$args = array( 'ID' => $id ?: 0, 'post_type' => 'kz_menu', 'post_status' => 'publish', 'post_title' => $sec['title'], 'post_name' => $sec['slug'], 'menu_order' => (int) $sec['order'] );
+			$id   = $id && get_post( $id ) ? wp_update_post( $args, true ) : wp_insert_post( array_merge( $args, array( 'ID' => 0 ) ), true );
+			if ( is_wp_error( $id ) ) {
+				continue;
+			}
+			$list = array();
+			foreach ( $sec['items'] as $it ) {
+				$list[] = array( 'title' => $it['title'], 'desc' => $it['desc'], 'image' => $it['image'] ? KI_Media::register( $it['image'], $id, $it['title'] ) : 0, 'variants' => $it['variants'], 'kcal' => $it['kcal'], 'hidden' => (bool) $it['hidden'] );
+				$items++;
+			}
+			update_post_meta( $id, 'kzm_items', wp_slash( wp_json_encode( $list, JSON_UNESCAPED_UNICODE ) ) );
+			update_post_meta( $id, 'kzm_group', $sec['group'] );
+			update_post_meta( $id, 'kzm_note', $sec['note'] );
+			self::map_set( 'menu', $sec['id'], $id );
+			$n++;
+		}
+		if ( ! empty( $d['notice'] ) && false === get_option( 'kzm_notice', false ) ) {
+			update_option( 'kzm_notice', $d['notice'] );
+		}
+		$page = get_page_by_path( 'menu' );
+		if ( $page ) {
+			update_post_meta( $page->ID, '_wp_page_template', 'page-menu.php' );
+		}
+		return array( 'done' => true, 'status' => "разделов $n, позиций $items", 'log' => "Меню ресторана: разделов $n, позиций $items. Фото скачает шаг 5." );
+	}
+
+	/* ---------- 2г. слайд «Новый год» на главной и картинки новогодней страницы ---------- */
+	public static function slides() {
+		if ( ! post_type_exists( 'kc_slide' ) ) {
+			return array( 'done' => true, 'status' => 'нужен Kozlov Core 1.2.0', 'log' => 'Слайды: обновите Kozlov Core до 1.2.0.' );
+		}
+		$log = array();
+		if ( ! get_posts( array( 'post_type' => 'kc_slide', 'post_status' => 'any', 'numberposts' => 1, 'fields' => 'ids' ) ) ) {
+			$id = wp_insert_post( array( 'post_type' => 'kc_slide', 'post_status' => 'publish', 'post_title' => 'НОВЫЙ ГОД 2026-2027', 'menu_order' => 0 ), true );
+			if ( ! is_wp_error( $id ) ) {
+				update_post_meta( $id, 'kc_slide_sub', 'Праздничная программа 31 декабря' );
+				update_post_meta( $id, 'kc_slide_link', '/novyj-god/' );
+				update_post_meta( $id, 'kc_slide_until', '2027-01-01' );
+				set_post_thumbnail( $id, KI_Media::register( '2026/10/ABF1D939-FFE3-4CDA-9D8B-4D5B48682EBD.png', $id, 'Новый год в Клубе Алексея Козлова' ) );
+				$log[] = 'слайд «Новый год 2026-2027» добавлен (до 1 января)';
+			}
+		} else {
+			$log[] = 'слайды уже есть, новый не добавлен';
+		}
+		// картинки, на которые ссылается новогодняя страница: после переезда домена они должны быть у нас
+		foreach ( array( '2026/10/Unknown-17-1.png', '2026/10/Unknown-14.png' ) as $rel ) {
+			KI_Media::register( $rel, 0, '' );
+		}
+		$log[] = 'картинки новогодней страницы поставлены в очередь шага 5';
+		// «Схемы залов»: галерея ссылалась на номера вложений старого сайта
+		$page = get_page_by_path( 'sxemy-zalov' );
+		if ( $page && false !== strpos( $page->post_content, '42290' ) ) {
+			$ids = array();
+			foreach ( array( '2022/04/TheBeat-1.png', '2022/04/Главная-сцена.png', '2022/04/Снимок-экрана-2021-06-03-в-00.47.31.png', '2022/04/Сцена-на-Мясницкой.png' ) as $rel ) {
+				$ids[] = KI_Media::register( $rel, $page->ID, 'Схема зала' );
+			}
+			wp_update_post( array( 'ID' => $page->ID, 'post_content' => '[gallery columns="1" link="file" size="large" ids="' . implode( ',', array_filter( $ids ) ) . '"]' ) );
+			$log[] = 'схемы залов: галерея перенесена';
+		}
+		// PDF технического и светового райдера
+		$up = wp_upload_dir();
+		foreach ( array( '2025/12/Kozlov-Club-Technical-Rider-2025.pdf', '2018/09/Kozlov-Club-patch.pdf' ) as $rel ) {
+			$path = $up['basedir'] . '/' . $rel;
+			if ( file_exists( $path ) && filesize( $path ) > 1000 ) { continue; }
+			$r = wp_remote_get( KI_Importer::OLD_UPLOADS . $rel, array( 'timeout' => 40, 'user-agent' => 'Mozilla/5.0 KozlovImport', 'headers' => array( 'Cookie' => 'beget=begetok' ) ) );
+			if ( ! is_wp_error( $r ) && 200 === wp_remote_retrieve_response_code( $r ) && strlen( wp_remote_retrieve_body( $r ) ) > 1000 ) {
+				wp_mkdir_p( dirname( $path ) );
+				file_put_contents( $path, wp_remote_retrieve_body( $r ) );
+				$log[] = basename( $rel ) . ' скачан';
+			} else {
+				$log[] = basename( $rel ) . ': не скачался';
+			}
+		}
+		return array( 'done' => true, 'status' => implode( '; ', $log ), 'log' => 'Слайды: ' . implode( '; ', $log ) . '. Фото скачает шаг 5.' );
+	}
+
 	/* ---------- 3. меню ---------- */
 	public static function menu() {
 		$m = ki_meta();

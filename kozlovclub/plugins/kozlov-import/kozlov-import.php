@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Kozlov Import
  * Description: Перенос контента старого kozlovclub.ru (дамп базы от 22.10.2026) в Kozlov Core: пользователи, страницы, меню, концерты, фото.
- * Version: 1.5.1
+ * Version: 1.6.0
  * Requires PHP: 8.1
  */
 
@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 define( 'KI_DIR', plugin_dir_path( __FILE__ ) );
 define( 'KI_URL', plugin_dir_url( __FILE__ ) );
-define( 'KI_VER', '1.5.1' );
+define( 'KI_VER', '1.6.0' );
 
 require_once KI_DIR . 'includes/class-ki-importer.php';
 require_once KI_DIR . 'includes/class-ki-media.php';
@@ -60,6 +60,8 @@ function ki_page() {
 		<tr><td><strong>2. Страницы</strong><br><span class="description">О клубе, Контакты, Правила, FAQ и другие.</span></td><td><button class="button" data-step="pages">Запустить</button></td><td class="ki-status" data-for="pages"><?php echo esc_html( $st['pages'] ?? '' ); ?></td></tr>
 		<tr><td><strong>3. Меню</strong><br><span class="description">Главное меню сайта.</span></td><td><button class="button" data-step="menu">Запустить</button></td><td class="ki-status" data-for="menu"><?php echo esc_html( $st['menu'] ?? '' ); ?></td></tr>
 		<tr><td><strong>4. Концерты</strong><br><span class="description">Сначала будущие, затем архив. Фото регистрируются, файлы качаются на шаге 5.</span></td><td><button class="button button-primary" data-step="concerts">Запустить</button></td><td class="ki-status" data-for="concerts"><?php echo esc_html( $st['concerts'] ?? '' ); ?></td></tr>
+		<tr><td><strong>2в. Меню ресторана</strong><br><span class="description">46 разделов и 370 позиций (кухня, бранч, бар) из старого сайта в плагин Kozlov Menu. Фото скачает шаг 5. Можно запускать повторно: разделы обновятся.</span></td><td><button class="button" data-step="restaurant_menu">Запустить</button></td><td class="ki-status" data-for="restaurant_menu"><?php echo esc_html( $st['restaurant_menu'] ?? '' ); ?></td></tr>
+		<tr><td><strong>2г. Слайд «Новый год» и правки страниц</strong><br><span class="description">Слайд на главной, как на kozlovclub.ru (нужен Kozlov Core 1.2.0), картинки новогодней страницы, галерея «Схем залов», PDF райдеров.</span></td><td><button class="button" data-step="slides">Запустить</button></td><td class="ki-status" data-for="slides"><?php echo esc_html( $st['slides'] ?? '' ); ?></td></tr>
 		<tr><td><strong>4б. Концерты с kozlovclub.ru (04.11)</strong><br><span class="description">108 новых концертов (в основном декабрь) и правки 160 концертов после дампа: тексты, состав, заглавные фото, программы, названия, коды Ticketscloud, цены, даты, видео. Можно запускать повторно. Поле меняется, только если у нас его никто не правил. Потом шаг 5 «Фото».</span></td><td><button class="button" data-step="live">Запустить</button></td><td class="ki-status" data-for="live"><?php echo esc_html( $st['live'] ?? '' ); ?></td></tr>
 		<tr><td><strong>5. Фото</strong><br><span class="description">Файлы берутся со старого сайта, если он доступен, иначе из Wayback Machine. Ожидают: <b id="ki-pending"><?php echo $pending; ?></b>, скачано <?php echo $done; ?>, не найдено <?php echo $failed; ?>.</span></td><td><button class="button" data-step="media">Запустить</button> <button class="button" data-step="media_retry">Повторить ненайденные</button></td><td class="ki-status" data-for="media"><?php echo esc_html( $st['media'] ?? '' ); ?></td></tr>
 		<tr><td><strong>5а. Фото из кэша Chrome</strong><br><span class="description">Превью со старого сайта из кэша браузера. Берутся только для ненайденных файлов. Размер небольшой (300–768 px).</span></td><td><button class="button" data-step="media_cache">Запустить</button></td><td class="ki-status" data-for="media_cache"><?php echo esc_html( $st['media_cache'] ?? '' ); ?></td></tr>
@@ -105,6 +107,10 @@ add_action( 'wp_ajax_ki_step', function () {
 				$r = KI_Importer::menu(); break;
 			case 'concerts':
 				$r = KI_Importer::concerts( $offset ); break;
+			case 'slides':
+				$r = KI_Importer::slides(); break;
+			case 'restaurant_menu':
+				$r = KI_Importer::restaurant_menu(); break;
 			case 'live':
 				$r = KI_Importer::live_sync( $offset ); break;
 			case 'media':
