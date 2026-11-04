@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'KZ_THEME_VER', '1.0.9' );
+define( 'KZ_THEME_VER', '1.0.10' );
 define( 'KZ_PROD_HOST', 'kozlovclub.ru' ); // счётчики и пиксели включаются только на боевом домене
 
 require_once get_template_directory() . '/inc/helpers.php';
@@ -38,6 +38,7 @@ add_action( 'wp_enqueue_scripts', function () {
 	}
 	wp_enqueue_script( 'kz-owl', get_template_directory_uri() . '/js/libs/owl.carousel.min.js', array( 'jquery' ), '2.3.4', true );
 	wp_enqueue_script( 'kz-script', get_template_directory_uri() . '/js/script.js', array( 'jquery', 'kz-owl' ), KZ_THEME_VER, true );
+	wp_enqueue_script( 'kz-logo-keys', get_template_directory_uri() . '/js/logo-keys.js', array(), KZ_THEME_VER, array( 'in_footer' => true, 'strategy' => 'defer' ) );
 	wp_enqueue_script( 'kz-calendar', get_template_directory_uri() . '/js/calendar.js', array(), KZ_THEME_VER, array( 'in_footer' => true, 'strategy' => 'defer' ) );
 	wp_localize_script( 'kz-script', 'KZ', array(
 		'ajax'   => admin_url( 'admin-ajax.php' ),

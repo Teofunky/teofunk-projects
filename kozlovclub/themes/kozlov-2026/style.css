@@ -3,7 +3,7 @@ Theme Name: Kozlov Club 2026
 Theme URI: https://kozlovclub.ru
 Description: Тема сайта Клуба Алексея Козлова на Kozlov Core. Дизайн и вёрстка прежней темы KozlovCLub, данные из типа «Концерт».
 Author: Kozlov Club
-Version: 1.0.9
+Version: 1.0.10
 Requires PHP: 8.1
 Text Domain: kozlov
 */
@@ -2894,11 +2894,13 @@ html.kz-cal-open { overflow: hidden; }
 /* Логотип: фирменный чёрный, вектор (assets/images/logo-kozlovclub.svg из KOZLOV_CLUB_LOGO.eps) */
 .header .logo { width: 200px }
 .header .logo a { display: block; line-height: 0 }
-.header .logo img { width: 200px; height: auto }
-.header.scrolled .logo img { width: 130px }
+.header .logo img, .header .logo svg { display: block; width: 200px; height: auto; transition: width 200ms linear }
+.header.scrolled .logo img, .header.scrolled .logo svg { width: 130px }
+.header .logo .kzk { will-change: transform }
+.header .logo a:focus-visible { outline: 2px solid #bf1818; outline-offset: 4px }
 @media screen and (max-width: 1024px) {
 	.header .logo { width: 96px }
-	.header .logo img, .header.scrolled .logo img { width: 96px }
+	.header .logo img, .header.scrolled .logo img, .header .logo svg, .header.scrolled .logo svg { width: 96px }
 }
 
 /* Слайдер: заголовок фирменным чёрным, как логотип; подпись тёмно-серая, чтобы держалась иерархия */
