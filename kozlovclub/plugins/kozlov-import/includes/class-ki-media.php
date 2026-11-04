@@ -74,6 +74,14 @@ class KI_Media {
 		return array( 'done' => 0 === $left, 'status' => "скачано +$ok, не найдено +$fail, в очереди $left", 'log' => "Фото: +$ok скачано, +$fail не найдено, осталось $left" . ( $log ? "\n  " . implode( "\n  ", array_slice( $log, 0, 6 ) ) : '' ), 'pending' => $left );
 	}
 
+	/** Скачать одно вложение сразу (для Джазеты). */
+	public static function fetch_now( $aid ) {
+		if ( 'done' === get_post_meta( $aid, 'kc_import_status', true ) ) { return array( 'ok' => true ); }
+		require_once ABSPATH . 'wp-admin/includes/image.php';
+		require_once ABSPATH . 'wp-admin/includes/file.php';
+		return self::fetch( (int) $aid );
+	}
+
 	private static function fetch( $aid ) {
 		$src   = get_post_meta( $aid, 'kc_import_src', true );
 		$rel   = get_post_meta( $aid, '_wp_attached_file', true );

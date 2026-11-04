@@ -231,4 +231,170 @@ class KI_Settings {
 		if ( class_exists( '\Kozlov\Gazeta\Data\Search' ) ) { try { \Kozlov\Gazeta\Data\Search::ensureFresh( true ); } catch ( \Throwable $e ) { /* не критично */ } }
 		return array( 'done' => true, 'status' => "последний номер: $max", 'log' => "Джазета, подшивка:\n  " . implode( "\n  ", $log ) );
 	}
+
+	/**
+	 * 6в. Все выпуски Джазеты с kozlovclub.ru (поля из админки старого сайта, 04.11.2026): 21.10–01.11 опубликованы, 02.11 черновик.
+	 * Выпуск, который уже есть, переписывается тем, что было на старом сайте (опубликованный сначала снимается, потом публикуется снова с тем же номером).
+	 * Один выпуск за запуск шага: offset = номер в списке.
+	 */
+	public static function jazzeta_live( $offset ) {
+		global $wpdb;
+		if ( ! class_exists( '\Kozlov\Gazeta\Data\Issues' ) || ! class_exists( '\Kozlov\Gazeta\Admin\ArticleForm' ) ) {
+			return array( 'done' => true, 'status' => 'плагин Джазеты не активен', 'log' => 'Джазета: активируйте Kozlov Jazzeta.' );
+		}
+		$list = json_decode( (string) file_get_contents( KI_DIR . 'data/jazzeta-live.json' ), true );
+		$i    = (int) $offset;
+		if ( ! is_array( $list ) || $i >= count( $list ) ) {
+			$max = (int) $wpdb->get_var( "SELECT MAX(number) FROM `{$wpdb->prefix}es_issues` WHERE state = 'published'" ); // phpcs:ignore
+			$wpdb->query( $wpdb->prepare( "REPLACE INTO `{$wpdb->prefix}es_state` (name, value) VALUES ('number', %d)", $max ) ); // phpcs:ignore
+			if ( class_exists( '\Kozlov\Gazeta\Data\Search' ) ) { try { \Kozlov\Gazeta\Data\Search::ensureFresh( true ); } catch ( \Throwable $e ) { /* не критично */ } }
+			return array( 'done' => true, 'offset' => $i, 'status' => "готово, последний номер № $max", 'log' => "Джазета: готово, последний опубликованный № $max." );
+		}
+		$I   = '\Kozlov\Gazeta\Data\Issues';
+		$sec = get_option( 'es_security', array() );
+		$sec = is_array( $sec ) ? $sec : array();
+		if ( (int) ( $sec['publisher_id'] ?? 0 ) !== get_current_user_id() && current_user_can( 'manage_options' ) ) {
+			$sec['publisher_id'] = get_current_user_id();
+			update_option( 'es_security', $sec, false );
+		}
+		$it   = $list[ $i ];
+		$date = $it['date'];
+		$log  = array();
+		$fail = function ( $msg ) use ( $i, $list, $date ) {
+			return array( 'done' => $i + 1 >= count( $list ), 'offset' => $i + 1, 'status' => "$date: $msg", 'log' => "Джазета $date: $msg" );
+		};
+		$row = $I::findByDate( $date );
+		if ( ! $row ) {
+			$id = $I::create( $date );
+			if ( is_wp_error( $id ) ) { return $fail( 'не создан: ' . $id->get_error_message() ); }
+			$row = $I::find( (int) $id );
+			$log[] = 'создан';
+		}
+		$id  = (int) $row['id'];
+		$ver = (int) $row['version'];
+		if ( 'published' === $row['state'] ) {
+			$r = $I::withdraw( $id, $ver );
+			if ( is_wp_error( $r ) ) { return $fail( 'не снят для обновления: ' . $r->get_error_message() ); }
+			$ver++;
+			$log[] = 'снят для обновления';
+		}
+		// материалы, которых не было на старом сайте, убираются
+		$want = array();
+		foreach ( $it['articles'] as $pairs ) {
+			foreach ( $pairs as $p ) { if ( 'article[id]' === $p[0] ) { $want[] = $p[1]; } }
+		}
+		$doc = $I::document( $I::find( $id ) );
+		foreach ( $doc['articles'] as $a ) {
+			if ( ! in_array( $a['id'], $want, true ) ) {
+				$r = $I::saveArticle( $id, $ver, array( 'id' => $a['id'] ), false, '', '', null, true );
+				if ( ! is_wp_error( $r ) ) { $ver++; $log[] = 'убран ' . $a['id']; }
+			}
+		}
+		$up = wp_upload_dir();
+		foreach ( $it['articles'] as $pairs ) {
+			$post = self::form( $pairs );
+			$in   = isset( $post['article'] ) && is_array( $post['article'] ) ? $post['article'] : array();
+			// фото материала: файл старого сайта переносится к нам
+			$img = (string) ( $in['media_rights']['image_url'] ?? '' );
+			if ( $img && preg_match( '#^https?://(www\.)?kozlovclub\.ru/wp-content/uploads/(.+)$#', $img, $m ) ) {
+				$rel = rawurldecode( $m[2] );
+				$aid = KI_Media::register( $rel, 0, '' );
+				if ( $aid ) {
+					KI_Media::fetch_now( $aid );
+					$url = wp_get_attachment_url( $aid );
+					if ( $url ) { $in['media_rights']['image_url'] = $url; }
+				}
+			}
+			try {
+				$article = \Kozlov\Gazeta\Admin\ArticleForm::fromPost( $in, (string) ( $post['body'] ?? '' ), (string) ( $post['editorial_notes'] ?? '' ), (string) ( $post['previous_article_ids'] ?? '' ), (string) ( $post['new_fact'] ?? '' ) );
+			} catch ( \Throwable $e ) {
+				$log[] = 'материал не разобран: ' . $e->getMessage(); continue;
+			}
+			$social = null;
+			if ( '1' === (string) ( $post['social_enabled'] ?? '' ) ) {
+				$social = array( 'article_id' => $article['id'], 'telegram_sentence' => (string) ( $post['telegram_sentence'] ?? '' ), 'instagram_sentence' => (string) ( $post['instagram_sentence'] ?? '' ), 'visual_format' => '1080x1350' );
+			}
+			$meta = array( 'brief' => array_intersect_key( (array) ( $post['brief'] ?? array() ), array_flip( array( 'why', 'context', 'next' ) ) ), 'facts_visible' => '1' === (string) ( $post['facts_visible'] ?? '' ) );
+			if ( isset( $post['focus'] ) && is_array( $post['focus'] ) ) {
+				$meta['focus'] = array( 'x' => (int) ( $post['focus']['x'] ?? 50 ), 'y' => (int) ( $post['focus']['y'] ?? 50 ) );
+			}
+			if ( '1' === (string) ( $post['tags_form'] ?? '' ) ) {
+				$meta['tags'] = '1' === (string) ( $post['tags_manual'] ?? '' ) ? array_values( array_map( 'strval', (array) ( $post['tags'] ?? array() ) ) ) : null;
+			}
+			$r = $I::saveArticle( $id, $ver, $article, false, (string) ( $post['review_note'] ?? '' ), (string) ( $post['new_fact'] ?? '' ), $social, false, $meta );
+			if ( is_wp_error( $r ) ) { $log[] = $article['id'] . ': ' . $r->get_error_message(); continue; }
+			$ver++;
+		}
+		// выпуск: порядок, обложка, служебные поля
+		$f   = self::form( $it['issue'] );
+		$cur = $I::document( $I::find( $id ) );
+		$ed  = $cur['editorial'];
+		$ed['ready_for_human_review'] = '1' === (string) ( $f['ready'] ?? '' );
+		$lines = function ( $v ) { return array_values( array_filter( array_map( 'trim', preg_split( '/\R/u', (string) $v ) ?: array() ), 'strlen' ) ); };
+		$ed['blocking_issues']  = $lines( $f['blocking_issues'] ?? '' );
+		$ed['generation_notes'] = $lines( $f['generation_notes'] ?? '' );
+		foreach ( array( 'scan_start' => 'source_scan_window_start', 'scan_end' => 'source_scan_window_end' ) as $k => $key ) {
+			$v = trim( (string) ( $f[ $k ] ?? '' ) );
+			if ( preg_match( '/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2})?$/', $v ) ) {
+				$ed[ $key ] = ( new \DateTimeImmutable( $v, new \DateTimeZone( 'Europe/Moscow' ) ) )->format( 'c' );
+			}
+		}
+		$order = array_values( array_filter( array_map( 'trim', explode( ',', (string) ( $f['order'] ?? '' ) ) ) ) );
+		$kind  = (string) ( $f['cover_kind'] ?? '' );
+		$cover = null;
+		if ( 'plate' === $kind ) { $cover = array( 'kind' => 'plate', 'plate' => (string) ( $f['cover_plate'] ?? '' ) ); }
+		elseif ( in_array( $kind, array( 'lead', 'none' ), true ) ) { $cover = array( 'kind' => $kind ); }
+		elseif ( 'photo' === $kind ) { $cover = array( 'kind' => 'lead' ); $log[] = 'обложка-фото заменена на главный материал'; }
+		$r = $I::saveIssue( $id, $ver, $ed, $order, $cover );
+		if ( is_wp_error( $r ) ) { $log[] = 'выпуск: ' . $r->get_error_message(); } else { $ver++; }
+		// кроссворд: как на старом сайте (есть только у 23.10 и 30.10)
+		$cwf = KI_DIR . 'data/jazzeta-cw/' . $date . '.json';
+		$has = \Kozlov\Gazeta\Data\Meta::forIssue( $id, 'draft' );
+		if ( file_exists( $cwf ) && class_exists( '\Kozlov\Gazeta\Domain\Crossword' ) ) {
+			$parsed = \Kozlov\Gazeta\Domain\Crossword::parse( (string) file_get_contents( $cwf ) );
+			$built  = is_wp_error( $parsed ) ? $parsed : \Kozlov\Gazeta\Domain\Crossword::assemble( $parsed, (int) wp_rand( 1, 999999 ), '' );
+			$r      = is_wp_error( $built ) ? $built : $I::saveCrossword( $id, $ver, $built );
+			if ( is_wp_error( $r ) ) { $log[] = 'кроссворд: ' . $r->get_error_message(); } else { $ver++; $log[] = 'кроссворд «' . ( $parsed['title'] ?? '' ) . '»'; }
+		} elseif ( ! empty( $has['issue'][ $id ]['crossword'] ) || ! empty( $has['crossword'] ) ) {
+			$r = $I::saveCrossword( $id, $ver, null );
+			if ( ! is_wp_error( $r ) ) { $ver++; $log[] = 'лишний кроссворд убран'; }
+		}
+		if ( 'published' === $it['state'] ) {
+			foreach ( $I::articleRows( $id ) as $arow ) {
+				$a = \Kozlov\Gazeta\Data\Db::decode( $arow['draft_json'] );
+				$wpdb->update( $wpdb->prefix . 'es_articles', array( 'reviewed_hash' => $I::articleHash( $a ), 'reviewed_by' => get_current_user_id(), 'reviewed_at' => \Kozlov\Gazeta\Data\Db::now(), 'review_note' => 'Выпуск перенесён с kozlovclub.ru, где был проверен и опубликован.' ), array( 'id' => (int) $arow['id'] ) ); // phpcs:ignore
+			}
+			$fresh = $I::find( $id );
+			$blk   = $I::blockers( $fresh );
+			if ( $blk ) {
+				$log[] = 'не опубликован: ' . implode( ' ', array_slice( $blk, 0, 3 ) );
+			} else {
+				if ( ! (int) $fresh['number'] ) {
+					$wpdb->query( $wpdb->prepare( "REPLACE INTO `{$wpdb->prefix}es_state` (name, value) VALUES ('number', %d)", (int) $it['number'] - 1 ) ); // phpcs:ignore
+				}
+				\Kozlov\Gazeta\Data\Permit::grant( 'publish', array( $id, (int) $fresh['version'] ) );
+				try { $pub = $I::publish( $id, (int) $fresh['version'] ); } finally { \Kozlov\Gazeta\Data\Permit::revoke( 'publish' ); }
+				if ( is_wp_error( $pub ) ) { $log[] = 'публикация: ' . $pub->get_error_message(); }
+				else {
+					$n = (int) $wpdb->get_var( $wpdb->prepare( "SELECT number FROM `{$wpdb->prefix}es_issues` WHERE id = %d", $id ) ); // phpcs:ignore
+					$log[] = 'опубликован № ' . str_pad( (string) $n, 3, '0', STR_PAD_LEFT );
+					if ( class_exists( '\Kozlov\Gazeta\Runtime\Cache' ) ) { try { \Kozlov\Gazeta\Runtime\Cache::purgeIssue( $id ); } catch ( \Throwable $e ) { /* не критично */ } }
+				}
+			}
+		} else {
+			$log[] = 'оставлен черновиком, как на старом сайте';
+		}
+		return array( 'done' => false, 'offset' => $i + 1, 'status' => "$date: " . implode( ', ', $log ), 'log' => "Джазета $date: " . implode( '; ', $log ) );
+	}
+
+	/** Пары [имя, значение] из формы в массив, как $_POST. */
+	private static function form( $pairs ) {
+		$q = array();
+		foreach ( $pairs as $p ) {
+			$q[] = rawurlencode( $p[0] ) . '=' . rawurlencode( (string) $p[1] );
+		}
+		$out = array();
+		parse_str( implode( '&', $q ), $out );
+		return $out;
+	}
 }
