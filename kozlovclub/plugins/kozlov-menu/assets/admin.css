@@ -1,0 +1,15 @@
+.kzm-a{display:flex;flex-direction:column;gap:10px;margin:6px 0 12px}
+.kzm-r{display:grid;grid-template-columns:96px 1fr auto;gap:12px;padding:12px;border:1px solid #dcdcde;border-radius:6px;background:#fff}
+.kzm-r.is-hidden{opacity:.55;background:#f6f7f7}
+.kzm-r-ph{width:96px;height:72px;border:1px dashed #c3c4c7;border-radius:4px;background:#f6f7f7 center/cover no-repeat;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#787c82;font-size:12px;text-align:center}
+.kzm-r-ph.has{border-style:solid;color:transparent}
+.kzm-r-main{display:flex;flex-direction:column;gap:6px;min-width:0}
+.kzm-r-main input[type=text],.kzm-r-main textarea{width:100%}
+.kzm-r-title{font-weight:600}
+.kzm-vars{display:flex;flex-direction:column;gap:4px}
+.kzm-var{display:flex;gap:6px;align-items:center}
+.kzm-var input{width:160px}
+.kzm-var input.kzm-price{width:100px}
+.kzm-r-side{display:flex;flex-direction:column;gap:4px;align-items:flex-end}
+.kzm-r-side .button{min-width:34px;padding:0 6px}
+.kzm-r-sm{font-size:12px;color:#646970}

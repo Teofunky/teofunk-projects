@@ -1,0 +1,67 @@
+/* Kozlov Menu: страница меню ресторана. Шрифт и цвета темы клуба. */
+.kzm{--kzm-red:#f24841;--kzm-ink:#2b2b2b;--kzm-mute:#6f6b68;--kzm-line:#e6e3e0;--kzm-bg:#fff;--kzm-soft:#f6f4f2;color:var(--kzm-ink);font-family:Roboto,Arial,sans-serif;max-width:1180px;margin:0 auto 60px}
+.kzm *{box-sizing:border-box}
+.kzm a{text-decoration:none!important}
+.kzm-notice{display:flex;align-items:center;gap:12px;margin:0 0 22px;padding:14px 18px;border-radius:14px;background:var(--kzm-soft);font-size:15px;line-height:1.45;color:var(--kzm-ink)}
+.kzm-notice svg{flex:none;color:#424242}
+.kzm-bar{position:sticky;top:0;z-index:30;background:var(--kzm-bg);padding:10px 0 8px;margin:0 0 10px;border-bottom:1px solid var(--kzm-line)}
+.admin-bar .kzm-bar{top:32px}
+@media (max-width:782px){.admin-bar .kzm-bar{top:0}}
+.kzm-search{display:flex;align-items:center;gap:8px;height:44px;padding:0 14px;border:1px solid var(--kzm-line);border-radius:22px;background:#fff;color:var(--kzm-mute);max-width:420px}
+.kzm-search input{flex:1;min-width:0;border:0;outline:0;background:transparent;font:400 15px/1.2 Roboto,Arial,sans-serif;color:var(--kzm-ink);height:42px}
+.kzm-search:focus-within{border-color:#424242}
+.kzm-groups{display:flex;gap:6px;margin:10px 0 8px}
+.kzm-group{padding:7px 16px;border-radius:18px;font:500 13px/1 Roboto,Arial,sans-serif;letter-spacing:.06em;text-transform:uppercase;text-decoration:none;color:var(--kzm-ink);background:var(--kzm-soft)}
+.kzm-group.is-on{background:var(--kzm-ink);color:#fff}
+.kzm-chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;padding-bottom:2px;scroll-behavior:smooth}
+.kzm-chips::-webkit-scrollbar{display:none}
+.kzm-chip{flex:none;padding:7px 13px;border:1px solid var(--kzm-line);border-radius:16px;font:400 13px/1 Roboto,Arial,sans-serif;color:var(--kzm-ink);text-decoration:none;white-space:nowrap;background:#fff}
+.kzm-chip:hover{border-color:#424242}
+.kzm-chip.is-on{border-color:var(--kzm-red);color:var(--kzm-red)}
+.kzm-chip[hidden]{display:none}
+.kzm-gt{margin:34px 0 4px;font:500 28px/1.15 Roboto,Arial,sans-serif;letter-spacing:.02em;text-transform:uppercase;color:#424242}
+.kzm-s{scroll-margin-top:150px;padding:18px 0 6px;border-top:1px solid var(--kzm-line)}
+.kzm-g>.kzm-s:first-of-type{border-top:0}
+.kzm-st{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;margin:0 0 14px;font:500 19px/1.25 Roboto,Arial,sans-serif;letter-spacing:.04em;text-transform:uppercase;color:var(--kzm-ink)}
+.kzm-note{font:400 13px/1.3 Roboto,Arial,sans-serif;letter-spacing:0;text-transform:none;color:var(--kzm-red)}
+.kzm-items{list-style:none;margin:0;padding:0}
+/* карточки с фото */
+.kzm-s--cards .kzm-items{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:18px}
+.kzm-s--cards .kzm-i{display:flex;flex-direction:column;min-width:0;border-radius:14px;background:#fff;border:1px solid var(--kzm-line);overflow:hidden}
+.kzm-ph{display:block;width:100%;aspect-ratio:4/3;padding:0;border:0;background:var(--kzm-soft);cursor:zoom-in;overflow:hidden}
+.kzm-ph img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .35s}
+.kzm-ph:hover img{transform:scale(1.03)}
+.kzm-ph--none{cursor:default;background:linear-gradient(135deg,#f6f4f2,#ece8e4)}
+.kzm-s--cards .kzm-b{flex:1;display:flex;flex-direction:column;gap:6px;padding:12px 14px 6px}
+.kzm-s--cards .kzm-p{display:flex;flex-direction:column;gap:3px;padding:6px 14px 14px}
+.kzm-n{font:500 16px/1.3 Roboto,Arial,sans-serif;color:var(--kzm-ink)}
+.kzm-d{font:400 13.5px/1.45 Roboto,Arial,sans-serif;color:var(--kzm-mute)}
+.kzm-k{font:400 12px/1.3 Roboto,Arial,sans-serif;color:var(--kzm-mute)}
+.kzm-v{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font:400 14px/1.35 Roboto,Arial,sans-serif;color:var(--kzm-mute)}
+.kzm-v b{margin-left:auto;font-weight:500;color:var(--kzm-ink);white-space:nowrap}
+/* строки без фото (бар) */
+.kzm-s--list .kzm-items{columns:2 420px;column-gap:48px}
+.kzm-s--list .kzm-i{break-inside:avoid;display:flex;gap:16px;justify-content:space-between;padding:10px 0;border-bottom:1px dashed var(--kzm-line)}
+.kzm-s--list .kzm-b{display:flex;flex-direction:column;gap:3px;min-width:0}
+.kzm-s--list .kzm-p{flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:2px;text-align:right}
+.kzm-s--list .kzm-v{gap:8px;justify-content:flex-end}
+.kzm-s--list .kzm-ph{display:none}
+.kzm-i[hidden],.kzm-s[hidden],.kzm-g[hidden]{display:none!important}
+.kzm-empty{margin:30px 0;font-size:16px;color:var(--kzm-mute)}
+.kzm mark{background:#fdeceb;color:inherit;border-radius:2px}
+.kzm-dlg{max-width:min(92vw,960px);padding:0;border:0;border-radius:14px;background:#111;color:#fff;overflow:hidden}
+.kzm-dlg::backdrop{background:rgba(0,0,0,.75)}
+.kzm-dlg img{display:block;max-width:100%;max-height:80vh;margin:0 auto}
+.kzm-dlg p{margin:0;padding:12px 16px;font:400 15px/1.4 Roboto,Arial,sans-serif}
+.kzm-x{position:absolute;top:8px;right:8px;width:40px;height:40px;border:0;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;font-size:26px;line-height:40px;cursor:pointer}
+@media (max-width:600px){
+	.kzm-gt{font-size:22px;margin-top:26px}
+	.kzm-s{scroll-margin-top:140px}
+	.kzm-s--cards .kzm-items{grid-template-columns:1fr 1fr;gap:10px}
+	.kzm-s--cards .kzm-b{padding:10px 10px 4px}
+	.kzm-s--cards .kzm-p{padding:4px 10px 10px}
+	.kzm-n{font-size:14.5px}
+	.kzm-d{font-size:12.5px}
+	.kzm-v{font-size:13px;flex-wrap:wrap;gap:0 6px}
+	.kzm-s--list .kzm-items{columns:1}
+}
