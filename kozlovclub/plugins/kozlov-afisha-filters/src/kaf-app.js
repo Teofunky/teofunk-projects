@@ -636,6 +636,9 @@
         var txt = a.textContent || '';
         var m = txt.match(/^(\s*)([^:]{2,}?):(\s+)(\S[\s\S]*?)(\s*)$/);
         if (!m) return;
+        // Делим только если после двоеточия стоит программа, записанная в поле концерта (метка data-kep-prog от Event Page).
+        // Иначе после двоеточия может быть артист («FRIDAY NIGHT: КСЕНИЯ КОЛАМБАЦКАЯ»), и делить его нельзя.
+        if (!normProg(m[4]) || normProg(a.getAttribute('data-kep-prog')) !== normProg(m[4])) return;
         var name = doc.createElement('span'), colon = doc.createElement('span'), prog = doc.createElement('span');
         name.className = 'kaf-name'; colon.className = 'kaf-colon'; prog.className = 'kaf-prog';
         name.textContent = m[2]; colon.textContent = ':'; prog.textContent = m[4];
