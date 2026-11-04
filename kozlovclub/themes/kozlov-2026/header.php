@@ -65,7 +65,7 @@ if (w.opera == "[object Opera]") { d.addEventListener("DOMContentLoaded", f, fal
 				<div class="inner">
 					<div class="wrap">
 						<div class="logo">
-							<a href="<?php echo esc_url( home_url( '/' ) ); ?>"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/logo-kozlovclub.svg" alt="Клуб Алексея Козлова" width="200" height="84" /></a>
+							<a href="<?php echo esc_url( home_url( '/' ) ); ?>"><img src="<?php echo esc_url( get_template_directory_uri() ); ?>/assets/images/logo-kozlovclub.svg" alt="Клуб Алексея Козлова" width="200" height="95" /></a>
 						</div>
 						<div class="nav">
 							<div class="contacts">
