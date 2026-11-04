@@ -213,8 +213,12 @@ class KI_Media {
 		}
 		require_once ABSPATH . 'wp-admin/includes/image.php';
 		$up = wp_upload_dir(); $ok = 0; $fail = 0; $log = array();
+		wp_raise_memory_limit( 'image' );
 		foreach ( $ids as $aid ) {
 			$aid = (int) $aid;
+			// отметка до работы: если файл уронит PHP (огромная картинка, нехватка памяти), он не застопорит очередь
+			update_post_meta( $aid, 'kc_origin_tried', 'fail' );
+			update_post_meta( $aid, 'kc_import_error', 'сбой обработки (слишком большой файл?)' );
 			$src = (string) get_post_meta( $aid, 'kc_import_src', true );
 			if ( '' === $src ) { update_post_meta( $aid, 'kc_origin_tried', 'fail' ); $fail++; continue; }
 			$is_mf = 0 === strpos( $src, KI_Importer::OLD_CONTENT . 'files_mf/' );

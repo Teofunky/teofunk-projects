@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Kozlov Import
  * Description: Перенос контента старого kozlovclub.ru (дамп базы от 22.10.2026) в Kozlov Core: пользователи, страницы, меню, концерты, фото.
- * Version: 1.6.2
+ * Version: 1.6.3
  * Requires PHP: 8.1
  */
 
@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 define( 'KI_DIR', plugin_dir_path( __FILE__ ) );
 define( 'KI_URL', plugin_dir_url( __FILE__ ) );
-define( 'KI_VER', '1.6.2' );
+define( 'KI_VER', '1.6.3' );
 
 require_once KI_DIR . 'includes/class-ki-importer.php';
 require_once KI_DIR . 'includes/class-ki-media.php';
@@ -123,9 +123,9 @@ add_action( 'wp_ajax_ki_step', function () {
 			case 'media_cache':
 				$r = KI_Media::from_cache( 25 ); break;
 			case 'media_origin':
-				$r = KI_Media::from_origin( 6, false ); break;
+				$r = KI_Media::from_origin( 3, false ); break;
 			case 'media_origin_retry':
-				$r = KI_Media::from_origin( 6, true ); break;
+				$r = KI_Media::from_origin( 3, true ); break;
 			case 'media_restore':
 				$r = KI_Media::restore_thumbs( $offset ); break;
 			case 'media_tc_undo':
