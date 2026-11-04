@@ -123,6 +123,12 @@ class KEP_Cards {
 			function ( $m ) use ( &$done ) {
 				$prog = self::program_for( $m[1], $m[2] );
 				if ( '' === $prog ) {
+					// Программа уже написана в названии: ставим метку, по ней афиша делит название на две строки.
+					$own = self::own_program( $m[1] );
+					if ( '' !== $own && false === strpos( $m[1], 'data-kep-prog' ) ) {
+						$done++;
+						return '<a' . $m[1] . ' data-kep-prog="' . esc_attr( $own ) . '">' . $m[2] . '</a>';
+					}
 					return $m[0];
 				}
 				$done++;
@@ -177,6 +183,21 @@ class KEP_Cards {
 			return ''; // программа уже есть в названии концерта
 		}
 		return $prog;
+	}
+
+	/**
+	 * Программа из поля концерта для ссылки (без проверки, есть ли она в названии).
+	 *
+	 * @param string $attrs Атрибуты ссылки.
+	 * @return string
+	 */
+	private static function own_program( $attrs ) {
+		if ( ! preg_match( '#\bhref="[^"]*/event/([^/?\#"]+)/?(?:[?\#][^"]*)?"#', $attrs, $mm ) ) {
+			return '';
+		}
+		$map = self::programs();
+		$key = self::slug_key( $mm[1] );
+		return empty( $map[ $key ] ) ? '' : (string) $map[ $key ];
 	}
 
 	private static function norm( $s ) {
