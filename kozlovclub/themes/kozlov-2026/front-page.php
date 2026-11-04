@@ -14,6 +14,11 @@ if ( $date ) {
 	$concerts = kozlov_concerts( array( 'limit' => 600 ) );
 }
 $slides = $filtered ? array() : array_values( array_filter( $concerts, fn( $c ) => $c['slider']['show'] ) );
+// Слайды-баннеры (Kozlov Core: «Концерты → Слайды на главной») идут перед концертами.
+$banners = ( ! $filtered && class_exists( 'KC_Slides' ) ) ? KC_Slides::active() : array();
+foreach ( array_reverse( $banners ) as $b ) {
+	array_unshift( $slides, array( 'banner' => true, 'id' => $b['id'], 'title' => $b['title'], 'url' => $b['url'] ?: home_url( '/' ), 'program' => $b['sub'], 'image' => array( 'id' => $b['image'] ), 'slider' => array( 'title' => '', 'image' => '' ) ) );
+}
 ?>
 <div class="content content_home">
 	<div class="inner content_inner events_wrap view_<?php echo esc_attr( $view ); ?>">
@@ -26,7 +31,7 @@ $slides = $filtered ? array() : array_values( array_filter( $concerts, fn( $c ) 
 							<div class="slides">
 								<?php foreach ( $slides as $s ) :
 									$title = $s['slider']['title'] ?: $s['title'];
-									$img   = $s['slider']['image'] ? (int) get_post_meta( $s['id'], 'kc_slider_img', true ) : $s['image']['id'];
+									$img   = ( empty( $s['banner'] ) && $s['slider']['image'] ) ? (int) get_post_meta( $s['id'], 'kc_slider_img', true ) : $s['image']['id'];
 									?>
 									<div class="slide">
 										<div class="slide_inner">
@@ -35,6 +40,9 @@ $slides = $filtered ? array() : array_values( array_filter( $concerts, fn( $c ) 
 													<a href="<?php echo esc_url( $s['url'] ); ?>"><?php echo $img ? wp_get_attachment_image( $img, 'slider-thumb', false, array( 'fetchpriority' => 'high' ) ) : ''; ?></a>
 												</div>
 												<div class="info">
+													<?php if ( ! empty( $s['banner'] ) ) : ?>
+													<div class="title"><a href="<?php echo esc_url( $s['url'] ); ?>"><?php echo esc_html( $title ); ?><?php if ( $s['program'] ) : ?><span class="kz-sub"><?php echo esc_html( $s['program'] ); ?></span><?php endif; ?></a></div>
+													<?php else : ?>
 													<div class="top">
 														<div class="datetime"><?php echo esc_html( $s['day'] . ' ' . $s['month_short'] . ' | ' . $s['time'] ); ?><?php if ( $s['stage'] ) : ?> | <span class="mansarda"><?php echo esc_html( $s['stage']['name'] ); ?></span><?php endif; ?></div>
 														<div class="price"><?php echo esc_html( $s['price']['text'] ); ?></div>
@@ -43,6 +51,7 @@ $slides = $filtered ? array() : array_values( array_filter( $concerts, fn( $c ) 
 														<a href="<?php echo esc_url( $s['url'] ); ?>"><?php echo esc_html( $title ); ?><?php if ( $s['program'] ) : ?><span class="kz-sub"><?php echo esc_html( $s['program'] ); ?></span><?php endif; ?></a>
 													</div>
 													<div class="readmore"><?php echo kz_buy_button( $s ); // phpcs:ignore ?></div>
+													<?php endif; ?>
 												</div> <!-- info -->
 											</div>
 										</div>
