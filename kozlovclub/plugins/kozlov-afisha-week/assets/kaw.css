@@ -1,7 +1,7 @@
 /* Kozlov Afisha Week: кнопка «Показать концерты …» под афишей главной. Все правила только внутри .events_wrap.kaw-on. */
 .events_wrap.kaw-on .kaw-hide,.events_wrap.kaw-on .event.kaw-off{display:none!important}
 .events_wrap.kaw-on .kaw-more{box-sizing:border-box;clear:both;width:100%;margin:0;padding:8px 0 48px;text-align:center}
-.events_wrap.kaw-on .kaw-btn{box-sizing:border-box;display:block;width:100%;max-width:440px;min-height:52px;margin:0 auto;padding:14px 20px;border:1.5px solid #2b2522;border-radius:0;background:transparent;color:#2b2522;font:inherit;font-size:13px;font-weight:600;line-height:1.35;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;-webkit-appearance:none;appearance:none;-webkit-tap-highlight-color:transparent;transition:background-color .15s ease,color .15s ease}
+.events_wrap.kaw-on .kaw-btn,.events_wrap.kaw-on a.kaw-btn:visited{box-sizing:border-box;display:block;text-decoration:none;text-align:center;width:100%;max-width:440px;min-height:52px;margin:0 auto;padding:14px 20px;border:1.5px solid #2b2522;border-radius:0;background:transparent;color:#2b2522;font:inherit;font-size:13px;font-weight:600;line-height:1.35;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;-webkit-appearance:none;appearance:none;-webkit-tap-highlight-color:transparent;transition:background-color .15s ease,color .15s ease}
 .events_wrap.kaw-on .kaw-btn:hover{background:#2b2522;color:#fff}
 .events_wrap.kaw-on .kaw-btn:active{background:#2b2522;color:#fff}
 .events_wrap.kaw-on .kaw-btn:focus-visible,.events_wrap.kaw-on .kaw-cal:focus-visible{outline:2px solid #cb3a2a;outline-offset:3px}

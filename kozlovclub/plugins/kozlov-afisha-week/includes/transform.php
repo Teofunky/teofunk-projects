@@ -22,14 +22,34 @@ if ( ! defined( 'DAY_IN_SECONDS_KAW' ) ) {
 	define( 'DAY_IN_SECONDS_KAW', 86400 );
 }
 
-/** Короткие названия месяцев темы (функция _month в functions.php темы). */
-function kaw_month_map() {
-	return array(
-		'янв' => 1, 'фев' => 2, 'мар' => 3, 'апр' => 4, 'май' => 5, 'июн' => 6,
-		'июл' => 7, 'авг' => 8, 'сен' => 9, 'окт' => 10, 'ноя' => 11, 'дек' => 12,
-		'jan' => 1, 'feb' => 2, 'mar' => 3, 'apr' => 4, 'may' => 5, 'jun' => 6,
-		'jul' => 7, 'aug' => 8, 'sep' => 9, 'oct' => 10, 'nov' => 11, 'dec' => 12,
+/**
+ * Месяц по слову из карточки. Тема пишет короткие названия (функция _month: «Янв» … «Дек», «Jan» … «Dec»);
+ * на всякий случай понимаются и родительный падеж («мая», «ноября»), и английские полные названия.
+ * Сравнение регулярными выражениями в режиме UTF-8 без учёта регистра: расширение mbstring не нужно.
+ */
+function kaw_month_of( $word ) {
+	static $pats = array(
+		1  => 'янв|jan', 2 => 'фев|feb', 3 => 'мар|mar', 4 => 'апр|apr', 5 => 'май|мая|may', 6 => 'июн|jun',
+		7  => 'июл|jul', 8 => 'авг|aug', 9 => 'сен|sep', 10 => 'окт|oct', 11 => 'ноя|nov', 12 => 'дек|dec',
 	);
+	foreach ( $pats as $n => $p ) {
+		if ( preg_match( '#^(?:' . $p . ')#iu', $word ) ) {
+			return $n;
+		}
+	}
+	return 0;
+}
+
+/** Родительный падеж для подписи «до 31 декабря». */
+function kaw_month_gen( $n ) {
+	$g = array( 1 => 'января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря' );
+	return isset( $g[ $n ] ) ? $g[ $n ] : '';
+}
+
+function kaw_plural( $n, $one, $few, $many ) {
+	$a = $n % 10;
+	$b = $n % 100;
+	return ( 1 === $a && 11 !== $b ) ? $one : ( ( $a >= 2 && $a <= 4 && ( $b < 12 || $b > 14 ) ) ? $few : $many );
 }
 
 /**
@@ -41,14 +61,11 @@ function kaw_card_date( $card, $today_ts ) {
 	if ( ! preg_match( '#<div class="cell cell_1">\s*(\d{1,2})\s*</div>.*?<div class="row row_1"[^>]*>\s*([^\s|<]+)#su', $card, $m ) ) {
 		return '';
 	}
-	$day = (int) $m[1];
-	$key = function_exists( 'mb_strtolower' ) ? mb_strtolower( $m[2], 'UTF-8' ) : strtolower( $m[2] );
-	$key = function_exists( 'mb_substr' ) ? mb_substr( $key, 0, 3, 'UTF-8' ) : substr( $key, 0, 3 );
-	$map = kaw_month_map();
-	if ( $day < 1 || $day > 31 || ! isset( $map[ $key ] ) ) {
+	$day   = (int) $m[1];
+	$month = kaw_month_of( $m[2] );
+	if ( $day < 1 || $day > 31 || ! $month ) {
 		return '';
 	}
-	$month = $map[ $key ];
 	$year  = (int) gmdate( 'Y', $today_ts );
 	foreach ( array( $year, $year + 1 ) as $y ) {
 		if ( ! checkdate( $month, $day, $y ) ) {
@@ -86,9 +103,10 @@ function kaw_prepare_card( $card ) {
  * @param string $today     сегодняшняя дата по Москве, ГГГГ-ММ-ДД
  * @param int    $first     сколько дней видно сразу (сегодня и ещё first-1)
  * @param int    $step      сколько дней открывает кнопка
+ * @param string $all_url   адрес всей афиши без плагина (ссылка для посетителей без JavaScript)
  * @return array { html: string, total: int, kept: int, later: int, reason: string }
  */
-function kaw_transform( $html, $today, $first = 7, $step = 7 ) {
+function kaw_transform( $html, $today, $first = 7, $step = 7, $all_url = '/?kaw=off' ) {
 	$res = array( 'html' => $html, 'total' => 0, 'kept' => 0, 'later' => 0, 'reason' => '' );
 	if ( ! is_string( $html ) || false === strpos( $html, '<div class="event today_' ) || ! preg_match( '#^\d{4}-\d\d-\d\d$#', $today ) ) {
 		$res['reason'] = 'no afisha';
@@ -101,15 +119,19 @@ function kaw_transform( $html, $today, $first = 7, $step = 7 ) {
 
 	$total = 0;
 	$later = 0;
+	$last  = '';
 	$out   = preg_replace_callback(
 		'#<div class="event today_[^"]*">.*?</div> <!-- event -->#su',
-		function ( $m ) use ( $today_ts, $limit, &$total, &$later ) {
+		function ( $m ) use ( $today_ts, $limit, &$total, &$later, &$last ) {
 			$total++;
 			$date = kaw_card_date( $m[0], $today_ts );
 			if ( '' === $date || $date <= $limit ) {
 				return $m[0];
 			}
 			$later++;
+			if ( $date > $last ) {
+				$last = $date;
+			}
 			return '<template class="kaw-later" data-kaw-d="' . $date . '">' . kaw_prepare_card( $m[0] ) . '</template>';
 		},
 		$html
@@ -145,6 +167,18 @@ function kaw_transform( $html, $today, $first = 7, $step = 7 ) {
 		}
 		$out = implode( '', $parts );
 	}
+
+	// Ссылка на всю афишу сразу под афишей. Она в самом HTML: если скрипт не загрузился или JavaScript выключен,
+	// посетитель всё равно откроет все концерты (адрес с ?kaw=off плагин не трогает). Скрипт заменяет её кнопкой.
+	$end = '</div> <!-- events -->';
+	if ( 1 !== substr_count( $out, $end ) ) {
+		$res['reason'] = 'no events end';
+		return $res; // без места для ссылки не прячем ничего
+	}
+	$sub  = 'Ещё ' . $later . ' ' . kaw_plural( $later, 'концерт', 'концерта', 'концертов' );
+	$sub .= $last ? ' до ' . (int) substr( $last, 8, 2 ) . ' ' . kaw_month_gen( (int) substr( $last, 5, 2 ) ) : '';
+	$link = '<div class="kaw-more kaw-nojs"><a class="kaw-btn" rel="nofollow" href="' . htmlspecialchars( $all_url, ENT_QUOTES, 'UTF-8' ) . '">Показать всю афишу</a><p class="kaw-sub">' . $sub . '</p></div>';
+	$out  = str_replace( $end, $end . $link, $out );
 
 	// Метка на блоке афиши: по ней включаются стили и скрипт плагина.
 	$attrs = ' data-kaw-first="' . $first . '" data-kaw-step="' . $step . '" data-kaw-today="' . $today . '"';

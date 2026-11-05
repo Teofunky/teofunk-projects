@@ -7,7 +7,8 @@
      по kaw:collapse (фильтры сброшены) снова прячет дни дальше открытых и возвращает кнопку;
    - при возврате кнопкой «Назад» или обновлении страницы открывает столько же дней, сколько было открыто;
    - для раскрытых карточек повторяет то, что встроенный скрипт темы сделал для остальных (высота названий);
-   - кнопка «Купить билет» раскрытой карточки, которую не подхватил виджет Ticketscloud, ведёт на страницу концерта.
+   - убирает запасную ссылку «Показать всю афишу» (она в HTML для посетителей без JavaScript) и ставит свою кнопку.
+   Кнопки «Купить билет» в раскрытых карточках работают сами: виджет Ticketscloud ловит клики на всём документе.
    Глобальных переменных нет, jQuery не нужен. Любая ошибка раскрывает все карточки: афиша остаётся полной. */
 (function () {
   'use strict';
@@ -83,47 +84,6 @@
     cell.forEach(function (c) { var s = c.querySelector('.set_height'); if (s) s.style.height = '50px'; });
   }
 
-  /* ---------- билеты в раскрытых карточках ---------- */
-  // Виджет Ticketscloud мог привязаться к кнопкам до раскрытия. Если после нажатия его окно не появилось,
-  // посетитель попадает на страницу концерта, где кнопка покупки работает как обычно.
-  function tcScript() { return !!doc.querySelector('script[src*="ticketscloud"], #tcwidget-js'); }
-  function looksLikeTicketWindow(el) {
-    if (!el || el.nodeType !== 1 || !doc.documentElement.contains(el)) return false;
-    if (el.tagName === 'IFRAME') return true;
-    var name = (el.id || '') + ' ' + (typeof el.className === 'string' ? el.className : '') + ' ' + (el.getAttribute('src') || '');
-    if (/ticketscloud|(^|[\s_-])tc[\s_-]/i.test(' ' + name + ' ')) return true;
-    var r = el.getBoundingClientRect(), cs = win.getComputedStyle(el);
-    return (cs.position === 'fixed' || cs.position === 'absolute') && r.width * r.height > win.innerWidth * win.innerHeight * 0.5;
-  }
-  function isWindow(n) {
-    if (looksLikeTicketWindow(n)) return true;
-    return n && n.querySelectorAll ? Array.prototype.some.call(n.querySelectorAll('iframe'), looksLikeTicketWindow) : false;
-  }
-  function watchTickets(cards) {
-    cards.forEach(function (card) {
-      var a = card.querySelector('a.title');
-      var href = a ? a.getAttribute('href') : '';
-      if (!href) return;
-      Array.prototype.forEach.call(card.querySelectorAll('[tc-event]'), function (b) {
-        b.addEventListener('click', function () {
-          if (!tcScript()) { win.location.href = href; return; }
-          var added = [], opened = false;
-          var mo = win.MutationObserver ? new MutationObserver(function (list) {
-            list.forEach(function (m) {
-              Array.prototype.forEach.call(m.addedNodes, function (n) { added.push(n); if (!opened && isWindow(n)) opened = true; });
-            });
-          }) : null;
-          if (mo) mo.observe(doc.body, { childList: true, subtree: true });
-          setTimeout(function () {
-            if (mo) mo.disconnect();
-            if (!opened) opened = added.some(isWindow);
-            if (!opened) win.location.href = href;
-          }, 2500);
-        });
-      });
-    });
-  }
-
   /* ---------- раскрытие ---------- */
   function unpack(list) {
     if (!list.length) return 0;
@@ -140,7 +100,6 @@
     });
     refreshMonths();
     try { fixCards(cards); } catch (e) { /* названия остаются без подгонки высоты */ }
-    try { watchTickets(cards); } catch (e) { /* кнопки работают как есть */ }
     return cards.length + shown;
   }
   // фильтры сброшены: дни дальше открытых снова прячутся (карточки остаются на странице)
@@ -230,7 +189,12 @@
     render();
   }
 
+  function dropFallback() {
+    Array.prototype.forEach.call(box.querySelectorAll('.kaw-nojs'), function (el) { el.parentNode.removeChild(el); });
+  }
+
   try {
+    dropFallback();
     doc.addEventListener('kaw:expand', function () { try { expandAll(); } catch (e) { giveUp(e); } });
     doc.addEventListener('kaw:collapse', function () { try { collapse(); render(); } catch (e) { giveUp(e); } });
     upTo(until); // наступившие дни из страницы, сохранённой в кэше раньше
@@ -245,6 +209,7 @@
       Array.prototype.forEach.call(box.querySelectorAll('template.kaw-later'), function (t) { if (t.parentNode) t.parentNode.replaceChild(t.content, t); });
       Array.prototype.forEach.call(box.querySelectorAll('.kaw-hide, .kaw-off'), function (el) { el.classList.remove('kaw-hide', 'kaw-off'); });
       if (more && more.parentNode) more.parentNode.removeChild(more);
+      dropFallback();
       outer.classList.remove('kaw-on');
     } catch (x) { /* больше нечего вернуть */ }
     if (e && win.console) win.console.warn('[kaw]', e);
