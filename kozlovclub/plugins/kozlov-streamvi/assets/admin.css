@@ -1,0 +1,41 @@
+.kzsv-wrap { max-width: 1180px; }
+.kzsv-title { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.kzsv-lead { font-size: 14px; color: #3c434a; max-width: 860px; margin: 4px 0 16px; }
+.kzsv-pill { font-size: 12px; font-weight: 600; line-height: 1; padding: 6px 10px; border-radius: 999px; background: #dcdcde; color: #1d2327; }
+.kzsv-pill-on { background: #d1f2dc; color: #0a5c2b; }
+.kzsv-pill-off { background: #e6e6e6; color: #50575e; }
+.kzsv-pill-test { background: #e5eefc; color: #1d4f9c; }
+.kzsv-pill-warn { background: #fde7c6; color: #8a4b00; }
+.kzsv-grid { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 16px; align-items: start; }
+.kzsv-card { background: #fff; border: 1px solid #dcdcde; border-radius: 8px; padding: 16px 20px; margin-bottom: 16px; }
+.kzsv-card h2 { margin: 0 0 12px; font-size: 16px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.kzsv-dl { display: grid; grid-template-columns: 140px minmax(0, 1fr); gap: 8px 12px; margin: 0 0 12px; }
+.kzsv-dl dt { color: #646970; }
+.kzsv-dl dd { margin: 0; }
+.kzsv-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.kzsv-inline { display: inline; margin: 0; }
+.kzsv-muted { color: #646970; }
+.kzsv-good { color: #0a7a35; font-weight: 600; }
+.kzsv-warn { color: #9a5b00; font-weight: 600; }
+.kzsv-bad { color: #b32d2e; font-weight: 600; }
+.kzsv-live { color: #fff; background: #d63638; border-radius: 4px; padding: 1px 6px; font-weight: 600; }
+.kzsv-danger { color: #b32d2e !important; }
+.kzsv-tag { font-size: 11px; background: #f0f0f1; border-radius: 4px; padding: 1px 5px; color: #50575e; }
+.kzsv-table td, .kzsv-table th { vertical-align: top; }
+.kzsv-row-cur td { background: #f3f9f4 !important; }
+.kzsv-nowrap { white-space: nowrap; }
+.kzsv-steps { margin: 0 0 12px 18px; }
+.kzsv-steps li { margin-bottom: 4px; }
+.kzsv-copy { display: inline-flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.kzsv-copy code { word-break: break-all; }
+.kzsv-details summary { cursor: pointer; color: #2271b1; margin: 8px 0; }
+.kzsv-log td { font-size: 12px; }
+.kzsv-log-error td { color: #b32d2e; }
+.kzsv-log-warn td { color: #9a5b00; }
+.kzsv-log-ok td:last-child { color: #0a5c2b; }
+.kzsv-log-test td:last-child { color: #1d4f9c; }
+@media (max-width: 960px) {
+	.kzsv-grid { grid-template-columns: 1fr; }
+	.kzsv-dl { grid-template-columns: 1fr; gap: 2px; }
+	.kzsv-dl dd { margin-bottom: 8px; }
+}
