@@ -8,7 +8,10 @@
    - while the house is on screen the site header takes the facade's paper colour (class kzf-top)
    - a ticket button that Ticketscloud does not pick up falls back to the concert page
    1.4.8: the drawing is parsed and painted at rest before the animation starts; the picture has no masks
-   and lives on its own compositor layer; swifts and clouds stand still while the house is drawn. */
+   and lives on its own compositor layer; the clouds stand still while the house is drawn.
+   1.4.9: the swifts fly by SMIL animateMotion again (iOS Safari ignores offset-path on groups inside an inline SVG:
+   the birds stood in a heap under the logo); the house waits at most 1 s for a calm phone and is drawn in 2.2 s
+   instead of 3.7 s, so the first screen settles about 4 s sooner. */
 (function () {
   "use strict";
 
@@ -45,11 +48,11 @@
   // The house is drawn only once the page has loaded and the phone is free: on the home page the
   // site's own scripts and the long afisha keep the phone busy for the first seconds, and a drawing
   // started in that time stutters (measured on a copy of the live page: pauses of 0.2-1 s).
-  // Free = the page has loaded and 8 frames in a row came on time. Never waits more than 5 s.
+  // Free = the page has loaded and 4 frames in a row came on time. Never waits more than 1 s (1.4.9; was 5 s).
   function whenCalm(done) {
     var fired = false, t0 = Date.now();
     function go() { if (!fired) { fired = true; done(); } }
-    setTimeout(go, 5000);
+    setTimeout(go, 1000);
     function quiet() {
       if (!window.requestAnimationFrame) { go(); return; }
       var good = 0, last = 0;
@@ -57,7 +60,7 @@
         if (fired) return;
         good = (last && t - last < 40) ? good + 1 : 0;
         last = t;
-        if (good >= 8) { go(); return; }
+        if (good >= 4) { go(); return; }
         window.requestAnimationFrame(tick);
       });
     }
@@ -173,8 +176,6 @@
           var wash = svg.querySelector("image[data-kzf-src]");
           var base = CFG.assetsUrl || String(CFG.heroUrl).replace(/[^\/]*$/, "");
           if (wash) wash.setAttribute("href", base + wash.getAttribute("data-kzf-src") + "?ver=" + (root.getAttribute("data-kzf-ver") || ""));
-          // the swifts (SMIL) stand still until the music starts
-          try { svg.pauseAnimations(); svg._kzfHeld = true; } catch (e) { /* older engines */ }
         } catch (e) { giveUp(e); return; }
         var still = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
         (still ? function (f) { f(); } : whenCalm)(function () {
@@ -187,7 +188,7 @@
   function start(svg) {
     var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    // The show. Load: the house draws itself (3.7 s), the saxophonist plays: a wave of light runs
+    // The show. Load: the house draws itself (2.2 s), the saxophonist plays: a wave of light runs
     // through the windows, the people wake and the walls take a pale watercolour. From then on the
     // band plays without stopping and the guests drink and clink now and then (up to 4 windows),
     // like the swifts and clouds that never stop.
@@ -195,6 +196,20 @@
     // On the hour and half hour (Moscow): only the wave, the house is not redrawn.
     var T = { end: null, dim: null, play: null, out: null, token: null };
     var guests = Array.prototype.slice.call(svg.querySelectorAll(".kzf-who.kzf-guest"));
+    // swifts: each bird carries an <animateMotion begin="indefinite">; started once, with the music, each
+    // from its own point along the path (data-kzf-fb, seconds, negative = already on its way), and never
+    // stopped: a redraw of the house does not touch them, a hidden tab pauses the whole svg below
+    var swiftsOn = false;
+    function startSwifts() {
+      if (swiftsOn || reduced) return;
+      swiftsOn = true;
+      Array.prototype.forEach.call(svg.querySelectorAll(".kzf-swift"), function (g) {
+        var m = g.querySelector("animateMotion");
+        if (!m) return;
+        var fb = parseFloat(g.getAttribute("data-kzf-fb") || "0") || 0;
+        try { if (m.beginElementAt) m.beginElementAt(fb); else m.beginElement(); } catch (e) { try { m.beginElement(); } catch (x) { /* no SMIL: the birds stay hidden */ } }
+      });
+    }
     function clearAll() {
       T.token = null;
       root.classList.remove("kzf-hold");   // never left holding if something else takes over
@@ -206,11 +221,11 @@
       });
     }
     function sing() {
-      if (svg._kzfHeld) { svg._kzfHeld = false; try { if (!root.classList.contains("kzf-paused")) svg.unpauseAnimations(); } catch (e) { /* older engines */ } }
       resetPeople();
       root.classList.remove("kzf-dim", "kzf-lit", "kzf-playing", "kzf-alive");
       void root.offsetWidth;
       if (reduced) { root.classList.add("kzf-lit"); return; }
+      startSwifts();
       root.classList.add("kzf-playing", "kzf-alive");
       T.end = setTimeout(function () {
         root.classList.add("kzf-lit");
@@ -236,15 +251,15 @@
       resetPeople();
       root.classList.remove("kzf-run", "kzf-playing", "kzf-lit", "kzf-dim", "kzf-alive", "kzf-out");
       root.classList.toggle("kzf-keep", !!fast);
-      root.style.setProperty("--k", fast ? "0.42" : "1");
-      root.style.setProperty("--kd", fast ? "0.6" : "1");
+      root.style.setProperty("--k", fast ? "0.42" : "0.6");
+      root.style.setProperty("--kd", fast ? "0.6" : "0.8");
       void root.offsetWidth;
       root.classList.add("kzf-hold", "kzf-run");
       var token = T.token = {};
       afterFrames(2, function () {
         if (T.token !== token) return;
         root.classList.remove("kzf-hold");
-        T.play = setTimeout(sing, reduced ? 0 : (fast ? 1300 : 3700));
+        T.play = setTimeout(sing, reduced ? 0 : (fast ? 1300 : 2200));
       });
     }
     function replay() {
@@ -312,7 +327,7 @@
     function syncPause() {
       var stop = document.hidden || offscreen;
       root.classList.toggle("kzf-paused", stop);
-      try { if (stop) svg.pauseAnimations(); else if (!svg._kzfHeld) svg.unpauseAnimations(); } catch (e) { /* older engines */ }
+      try { if (stop) svg.pauseAnimations(); else svg.unpauseAnimations(); } catch (e) { /* older engines */ }
     }
     document.addEventListener("visibilitychange", syncPause);
     if ("IntersectionObserver" in window) {

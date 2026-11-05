@@ -1,4 +1,5 @@
-/* Kozlov Living Facade: house drawing and its motion (generated; 1.4.8: no masks, resting state, own layer) */
+/* Kozlov Living Facade: house drawing and its motion (generated; 1.4.8: no masks, resting state, own layer;
+   1.4.9: swifts fly by SMIL animateMotion (iOS Safari ignores offset-path on groups inside an inline SVG), shorter drawing) */
 
 
 .kzf-glow { fill: #f3cf8e; opacity: 0; }
@@ -29,16 +30,22 @@
   .kzf-root:not(.kzf-run) .kzf-sign, .kzf-root:not(.kzf-run) .kzf-nb,
   .kzf-root:not(.kzf-run):not(.kzf-keep) .kzf-swifts, .kzf-root:not(.kzf-run):not(.kzf-keep) .kzf-cloud { opacity: 0; }
   .kzf-root:not(.kzf-run) .kzf-awn { transform: scaleY(0); }
-  /* clouds stand still while the house is being drawn (they are invisible until 2 s anyway); the swifts
-     are held the same way from the script (SMIL). Both start together with the music. */
-  .kzf-root.kzf-run:not(.kzf-playing):not(.kzf-lit):not(.kzf-keep) .kzf-drift { animation-play-state: paused; }
+  /* clouds stand still while the house is being drawn (they are invisible until the fade anyway); the wing
+     beat is held the same way. Both start together with the music. */
+  .kzf-root.kzf-run:not(.kzf-playing):not(.kzf-lit):not(.kzf-keep) .kzf-drift,
+  .kzf-root.kzf-run:not(.kzf-playing):not(.kzf-lit):not(.kzf-keep) .kzf-wing { animation-play-state: paused; }
+  /* swifts: the flight along the path is an <animateMotion> inside each bird (SMIL), started once from the
+     script when the music starts and never stopped, so the birds survive the quick redraw (kzf-keep) and
+     never jump back to the start. Only the wing beat (two beats, then a glide) is CSS. */
+  .kzf-swifts { display: block; }
+  .kzf-root.kzf-run .kzf-wing, .kzf-root.kzf-keep .kzf-wing { animation: kzf-flap 1.15s ease-in-out var(--fb, 0s) infinite; }
   .kzf-root.kzf-run .kzf-ln, .kzf-root.kzf-run .kzf-rl { stroke-dasharray: 1 1; stroke-dashoffset: 1; animation: kzf-draw calc(0.6s * var(--kd, 1)) cubic-bezier(0.45, 0, 0.2, 1) calc(var(--d) * var(--k, 1)) forwards; }
   .kzf-root.kzf-run .kzf-fl, .kzf-root.kzf-run .kzf-sol { opacity: 0; animation: kzf-fade calc(0.4s * var(--kd, 1)) ease calc(var(--d) * var(--k, 1)) forwards; }
   .kzf-root.kzf-run .kzf-awn { transform: scaleY(0); animation: kzf-unroll calc(0.5s * var(--kd, 1)) cubic-bezier(0.3, 1.5, 0.55, 1) calc(var(--d) * var(--k, 1)) forwards; }
   .kzf-root.kzf-run .kzf-fig { opacity: 0; animation: kzf-rise calc(0.8s * var(--kd, 1)) cubic-bezier(0.2, 0.7, 0.2, 1) calc(var(--d) * var(--k, 1)) forwards; }
   .kzf-root.kzf-run .kzf-sign { opacity: 0; animation: kzf-fade calc(0.6s * var(--kd, 1)) ease calc(1s * var(--k, 1)) forwards; }
-  .kzf-root.kzf-run .kzf-swifts { opacity: 0; animation: kzf-fade 0.6s ease calc(3.6s * var(--k, 1)) forwards; }
-  .kzf-root.kzf-run .kzf-cloud { opacity: 0; animation: kzf-fade 1.4s ease 2s forwards; }
+  .kzf-root.kzf-run .kzf-swifts { opacity: 0; animation: kzf-fade 0.8s ease calc(4.2s * var(--k, 1)) forwards; }
+  .kzf-root.kzf-run .kzf-cloud { opacity: 0; animation: kzf-fade 1.4s ease calc(2s * var(--k, 1)) forwards; }
   .kzf-drift { animation-timing-function: linear; animation-iteration-count: infinite; }
   .kzf-keep .kzf-swifts, .kzf-keep .kzf-cloud { animation: none; opacity: 1; }
   
@@ -130,6 +137,7 @@
   .kzf-who.kzf-solo .kzf-spark { animation: kzf-spark 0.7s ease-out 0.9s both; }
 }
 @keyframes kzf-draw { to { stroke-dashoffset: 0; } }
+@keyframes kzf-flap { 0%, 25%, 50%, 100% { scale: 1 1; } 12%, 37% { scale: 1 0.62; } }
 @keyframes kzf-fade { to { opacity: 1; } }
 @keyframes kzf-rise { from { opacity: 0; translate: 0 5px; } to { opacity: 1; translate: 0 0; } }
 @keyframes kzf-unroll { to { transform: scaleY(1); } }
