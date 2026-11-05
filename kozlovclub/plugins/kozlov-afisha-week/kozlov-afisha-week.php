@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name:       Kozlov Afisha Week
- * Description:       Афиша главной по неделям: сразу видны ближайшие 7 дней, остальное открывает кнопка «Показать концерты …». Карточки дальше недели остаются на странице в отложенном виде, поэтому фильтры и поиск (Kozlov Afisha Filters 1.0.9+) ищут по всей афише. Тему, базу и события не меняет.
- * Version:           1.0.1
+ * Description:       Афиша главной по неделям: сразу видны ближайшие 7 дней, остальное открывает кнопка «Показать концерты …». Карточки дальше недели остаются на странице в отложенном виде, поэтому фильтры и поиск (Kozlov Afisha Filters 1.0.10+) ищут по всей афише. Тему, базу и события не меняет.
+ * Version:           1.0.2
  * Requires at least: 5.3
  * Requires PHP:      7.2
  * Author:            Клуб Алексея Козлова
@@ -31,7 +31,7 @@ if ( defined( 'KAW_VERSION' ) ) {
 	return;
 }
 
-define( 'KAW_VERSION', '1.0.1' );
+define( 'KAW_VERSION', '1.0.2' );
 define( 'KAW_FILE', __FILE__ );
 define( 'KAW_URL', plugin_dir_url( __FILE__ ) );
 
@@ -141,14 +141,57 @@ function kaw_log( $e ) {
 	}
 }
 
+/**
+ * Сброс кэша главной во всех найденных системах кэша. Возвращает названия тех, что были сброшены.
+ * На kozlovclub.ru стоит W3 Total Cache; остальные ветки срабатывают, только если такой плагин есть.
+ * Внешний кэш (CDN, прокси хостинга) сбрасывается через хук kaw_purge_home, если его кто-то обрабатывает.
+ */
 function kaw_purge_home() {
+	$url  = home_url( '/' );
+	$done = array();
 	try {
 		if ( function_exists( 'w3tc_flush_url' ) ) {
-			w3tc_flush_url( home_url( '/' ) );
+			w3tc_flush_url( $url );
+			$done[] = 'W3 Total Cache';
+		} elseif ( function_exists( 'w3tc_pgcache_flush' ) ) {
+			w3tc_pgcache_flush();
+			$done[] = 'W3 Total Cache';
 		}
+		if ( function_exists( 'wpsc_delete_url_cache' ) ) {
+			wpsc_delete_url_cache( $url );
+			$done[] = 'WP Super Cache';
+		}
+		if ( function_exists( 'rocket_clean_home' ) ) {
+			rocket_clean_home();
+			$done[] = 'WP Rocket';
+		}
+		if ( defined( 'LSCWP_V' ) ) {
+			do_action( 'litespeed_purge_url', $url );
+			$done[] = 'LiteSpeed Cache';
+		}
+		do_action( 'kaw_purge_home', $url );
 	} catch ( Throwable $e ) {
 		kaw_log( $e );
 	}
+	return $done;
+}
+
+/** Какие системы кэша страниц найдены: для подсказки в настройках. */
+function kaw_cache_systems() {
+	$f = array();
+	if ( function_exists( 'w3tc_flush_url' ) || function_exists( 'w3tc_pgcache_flush' ) ) {
+		$f[] = 'W3 Total Cache';
+	}
+	if ( function_exists( 'wpsc_delete_url_cache' ) ) {
+		$f[] = 'WP Super Cache';
+	}
+	if ( function_exists( 'rocket_clean_home' ) ) {
+		$f[] = 'WP Rocket';
+	}
+	if ( defined( 'LSCWP_V' ) ) {
+		$f[] = 'LiteSpeed Cache';
+	}
+	return $f;
 }
 
 /* ---------- админка: Настройки → Афиша по неделям ---------- */
@@ -208,7 +251,7 @@ function kaw_page() {
 	?>
 	<div class="wrap">
 		<h1>Афиша по неделям <span style="font-size:13px;color:#646970;font-weight:400">версия <?php echo esc_html( KAW_VERSION ); ?></span></h1>
-		<p style="max-width:720px">На главной сразу видны ближайшие дни, остальные концерты открывает кнопка под афишей. Карточки дальше этих дней остаются на странице, но браузер их не раскладывает и не грузит их картинки, поэтому главная открывается быстрее, особенно на телефоне. Фильтры и поиск над афишей ищут по всем концертам (нужен Kozlov Afisha Filters 1.0.9 или новее).</p>
+		<p style="max-width:720px">На главной сразу видны ближайшие дни, остальные концерты открывает кнопка под афишей. Карточки дальше этих дней остаются на странице, но браузер их не раскладывает и не грузит их картинки, поэтому главная открывается быстрее, особенно на телефоне. Фильтры и поиск над афишей ищут по всем концертам (нужен Kozlov Afisha Filters 1.0.10 или новее).</p>
 		<form method="post" action="options.php">
 			<?php settings_fields( 'kaw' ); ?>
 			<table class="form-table" role="presentation">
@@ -231,7 +274,16 @@ function kaw_page() {
 			</table>
 			<?php submit_button( 'Сохранить' ); ?>
 		</form>
-		<p class="description">После сохранения кэш главной в W3 Total Cache сбрасывается сам. Выключить на один заход: <code><?php echo esc_html( home_url( '/?kaw=off' ) ); ?></code></p>
+		<?php $kaw_caches = kaw_cache_systems(); ?>
+		<p class="description">
+			<?php if ( $kaw_caches ) : ?>
+				Кэш главной сбрасывается сам при сохранении и при выключении плагина: <?php echo esc_html( implode( ', ', $kaw_caches ) ); ?>.
+			<?php else : ?>
+				Плагин кэша страниц не найден: после сохранения или выключения при необходимости сбросьте кэш вручную.
+			<?php endif; ?>
+			Браузеры посетителей могут держать старую главную до часа (заголовок Cache-Control сервера); в обе стороны это безопасно.
+			Выключить на один заход: <code><?php echo esc_html( home_url( '/?kaw=off' ) ); ?></code>
+		</p>
 	</div>
 	<?php
 }

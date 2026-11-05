@@ -170,15 +170,18 @@ function kaw_transform( $html, $today, $first = 7, $step = 7, $all_url = '/?kaw=
 
 	// Ссылка на всю афишу сразу под афишей. Она в самом HTML: если скрипт не загрузился или JavaScript выключен,
 	// посетитель всё равно откроет все концерты (адрес с ?kaw=off плагин не трогает). Скрипт заменяет её кнопкой.
+	// Тема закрывает блоки месяцев простым </div>, а метку </div> <!-- events --> ставит один раз после афиши.
+	// Если меток окажется несколько, ссылка встаёт после последней, то есть после всей афиши.
 	$end = '</div> <!-- events -->';
-	if ( 1 !== substr_count( $out, $end ) ) {
+	$pos = strrpos( $out, $end );
+	if ( false === $pos ) {
 		$res['reason'] = 'no events end';
 		return $res; // без места для ссылки не прячем ничего
 	}
 	$sub  = 'Ещё ' . $later . ' ' . kaw_plural( $later, 'концерт', 'концерта', 'концертов' );
 	$sub .= $last ? ' до ' . (int) substr( $last, 8, 2 ) . ' ' . kaw_month_gen( (int) substr( $last, 5, 2 ) ) : '';
 	$link = '<div class="kaw-more kaw-nojs"><a class="kaw-btn" rel="nofollow" href="' . htmlspecialchars( $all_url, ENT_QUOTES, 'UTF-8' ) . '">Показать всю афишу</a><p class="kaw-sub">' . $sub . '</p></div>';
-	$out  = str_replace( $end, $end . $link, $out );
+	$out  = substr( $out, 0, $pos + strlen( $end ) ) . $link . substr( $out, $pos + strlen( $end ) );
 
 	// Метка на блоке афиши: по ней включаются стили и скрипт плагина.
 	$attrs = ' data-kaw-first="' . $first . '" data-kaw-step="' . $step . '" data-kaw-today="' . $today . '"';
