@@ -84,6 +84,21 @@
     cell.forEach(function (c) { var s = c.querySelector('.set_height'); if (s) s.style.height = '50px'; });
   }
 
+  /* ---------- картинки других ленивых загрузчиков ---------- */
+  // Сервер уже возвращает обычные src. Если разметка пришла иначе (кэш старой версии, другой плагин),
+  // заглушка a3 Lazy Load и похожих заменяется настоящим адресом здесь.
+  var LAZY = ['lazy', 'lazy-hidden', 'lazy-loaded', 'lazyload', 'lazyloaded', 'lazyloading'];
+  function unlazy(cards) {
+    cards.forEach(function (c) {
+      Array.prototype.forEach.call(c.querySelectorAll('img'), function (img) {
+        var real = img.getAttribute('data-src') || img.getAttribute('data-lazy-src') || img.getAttribute('data-original');
+        if (real) { img.setAttribute('loading', 'lazy'); img.setAttribute('src', real); }
+        ['data-src', 'data-lazy-src', 'data-original', 'data-srcset', 'data-sizes', 'data-lazy-type'].forEach(function (a) { img.removeAttribute(a); });
+        LAZY.forEach(function (k) { img.classList.remove(k); });
+      });
+    });
+  }
+
   /* ---------- раскрытие ---------- */
   function unpack(list) {
     if (!list.length) return 0;
@@ -99,6 +114,7 @@
       t.parentNode.replaceChild(frag, t);
     });
     refreshMonths();
+    try { unlazy(cards); } catch (e) { /* картинки как есть */ }
     try { fixCards(cards); } catch (e) { /* названия остаются без подгонки высоты */ }
     return cards.length + shown;
   }

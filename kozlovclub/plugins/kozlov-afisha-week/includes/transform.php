@@ -79,16 +79,52 @@ function kaw_card_date( $card, $today_ts ) {
 	return '';
 }
 
-/** Отложенная карточка: картинки ленивые, без srcset (иначе на retina берётся оригинал вместо превью). */
+/**
+ * Ленивая разметка других плагинов (a3 Lazy Load и похожие): заглушка в src, настоящий адрес в data-src.
+ * Их скрипт находит такие картинки один раз при загрузке страницы и о раскрытых позже ничего не знает:
+ * без этой правки вместо фото крутилась бы заглушка. Возвращаем обычные src/srcset, классы lazy убираем.
+ */
+function kaw_unlazy_img( $tag ) {
+	foreach ( array( 'data-src', 'data-lazy-src', 'data-original' ) as $attr ) {
+		if ( preg_match( '#\s' . $attr . '\s*=\s*(["\'])(.*?)\1#is', $tag, $m ) && '' !== trim( $m[2] ) ) {
+			$tag = preg_replace( '#\ssrc\s*=\s*(["\'])[^"\']*\1#i', '', $tag, 1 );
+			$tag = preg_replace( '#\s' . $attr . '\s*=#i', ' src=', $tag, 1 );
+			break;
+		}
+	}
+	$tag = preg_replace( '#\sdata-(?:lazy-)?(?:srcset|sizes)\s*=\s*(["\'])[^"\']*\1#i', '', $tag );
+	$tag = preg_replace( '#\sdata-lazy-type\s*=\s*(["\'])[^"\']*\1#i', '', $tag );
+	$tag = preg_replace_callback(
+		'#\sclass\s*=\s*(["\'])(.*?)\1#is',
+		function ( $c ) {
+			$keep = array();
+			foreach ( preg_split( '#\s+#', trim( $c[2] ) ) as $x ) {
+				if ( '' !== $x && ! in_array( $x, array( 'lazy', 'lazy-hidden', 'lazy-loaded', 'lazyload', 'lazyloaded', 'lazyloading' ), true ) ) {
+					$keep[] = $x;
+				}
+			}
+			return $keep ? ' class=' . $c[1] . implode( ' ', $keep ) . $c[1] : '';
+		},
+		$tag,
+		1
+	);
+	return $tag;
+}
+
+/** Отложенная карточка: картинки обычные и ленивые средствами браузера, без srcset (на retina иначе берётся оригинал). */
 function kaw_prepare_card( $card ) {
-	$out = preg_replace_callback(
+	// запасная копия картинки для браузеров без JavaScript (a3 Lazy Load): в отложенной карточке не нужна
+	$clean = preg_replace( '#<noscript\b[^>]*>.*?</noscript>#is', '', $card );
+	$card  = is_string( $clean ) ? $clean : $card;
+	$out   = preg_replace_callback(
 		'#<img\b[^>]*>#i',
 		function ( $m ) {
-			$tag = preg_replace( '#\s(?:srcset|sizes)="[^"]*"#i', '', $m[0] );
-			if ( ! preg_match( '#\sloading=#i', $tag ) ) {
+			$tag = kaw_unlazy_img( $m[0] );
+			$tag = preg_replace( '#\s(?:srcset|sizes)\s*=\s*(["\'])[^"\']*\1#i', '', $tag );
+			if ( ! preg_match( '#\sloading\s*=#i', $tag ) ) {
 				$tag = preg_replace( '#^<img\b#i', '<img loading="lazy"', $tag );
 			}
-			if ( ! preg_match( '#\sdecoding=#i', $tag ) ) {
+			if ( ! preg_match( '#\sdecoding\s*=#i', $tag ) ) {
 				$tag = preg_replace( '#^<img\b#i', '<img decoding="async"', $tag );
 			}
 			return $tag;

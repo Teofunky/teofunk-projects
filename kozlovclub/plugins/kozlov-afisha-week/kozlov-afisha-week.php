@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Kozlov Afisha Week
  * Description:       Афиша главной по неделям: сразу видны ближайшие 7 дней, остальное открывает кнопка «Показать концерты …». Карточки дальше недели остаются на странице в отложенном виде, поэтому фильтры и поиск (Kozlov Afisha Filters 1.0.10+) ищут по всей афише. Тему, базу и события не меняет.
- * Version:           1.0.2
+ * Version:           1.0.3
  * Requires at least: 5.3
  * Requires PHP:      7.2
  * Author:            Клуб Алексея Козлова
@@ -22,6 +22,7 @@
  *     define( 'KAW_DISABLE', true );
  * или удалите папку плагина, затем сбросьте кэш страниц (Performance → Purge All Caches).
  * Отключить на один заход: добавьте к адресу ?kaw=off
+ * Проверить без входа в админку (телефон, другой браузер): ?kaw=test, работает в режимах «Только редакторы» и «Все»
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -31,7 +32,7 @@ if ( defined( 'KAW_VERSION' ) ) {
 	return;
 }
 
-define( 'KAW_VERSION', '1.0.2' );
+define( 'KAW_VERSION', '1.0.3' );
 define( 'KAW_FILE', __FILE__ );
 define( 'KAW_URL', plugin_dir_url( __FILE__ ) );
 
@@ -76,13 +77,21 @@ function kaw_wanted() {
 	if ( ! ( is_front_page() || is_home() ) || is_paged() ) {
 		return false;
 	}
-	foreach ( array_keys( $_GET ) as $k ) { // phpcs:ignore WordPress.Security.NonceVerification
+	$test = false;
+	foreach ( $_GET as $k => $v ) { // phpcs:ignore WordPress.Security.NonceVerification
 		$k = (string) $k;
+		if ( 'kaw' === $k && 'test' === $v ) {
+			$test = true; // проверка на любом устройстве без входа в админку: адрес с ?kaw=test
+			continue;
+		}
 		if ( in_array( $k, array( 'date1', 'genre', 'sort', 'kaw', 's' ), true ) || 0 === strpos( $k, 'kaf_' ) ) {
 			return false; // афиша уже сокращена темой, выбраны фильтры или плагин выключен на этот заход
 		}
 	}
 	$s = kaw_settings();
+	if ( $test && 'off' !== $s['mode'] ) {
+		return true;
+	}
 	if ( 'all' === $s['mode'] ) {
 		return true;
 	}
@@ -282,7 +291,8 @@ function kaw_page() {
 				Плагин кэша страниц не найден: после сохранения или выключения при необходимости сбросьте кэш вручную.
 			<?php endif; ?>
 			Браузеры посетителей могут держать старую главную до часа (заголовок Cache-Control сервера); в обе стороны это безопасно.
-			Выключить на один заход: <code><?php echo esc_html( home_url( '/?kaw=off' ) ); ?></code>
+			Выключить на один заход: <code><?php echo esc_html( home_url( '/?kaw=off' ) ); ?></code>.
+			Проверить на телефоне без входа: <code><?php echo esc_html( home_url( '/?kaw=test' ) ); ?></code>
 		</p>
 	</div>
 	<?php
