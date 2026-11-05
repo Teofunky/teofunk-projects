@@ -4,7 +4,11 @@
    При выбранном фильтре прячет лишние карточки афиши темы (inline display:none), при сбросе возвращает как было.
    Глобальных переменных не создаёт, jQuery не использует.
    Если индекс не загрузился, панель выключена на сайте или в её коде случилась ошибка, панель убирает себя.
-   Если данные индекса и карточки на странице разошлись, фильтры отключаются и показывается вся афиша. */
+   Если данные индекса и карточки на странице разошлись, фильтры отключаются и показывается вся афиша.
+   1.0.8: афиша может приходить частями (плагин Kozlov Afisha Week: ближайшая неделя видна, остальные карточки лежат
+   в <template class="kaw-later">). Перед любым фильтром или поиском панель просит раскрыть все карточки (событие
+   kaw:expand на document) и заново собирает список карточек; так же, если посетитель сам открыл следующие недели.
+   Когда фильтры сброшены, панель сообщает об этом (kaw:collapse), и афиша снова показывает только открытые недели. */
 (function () {
   'use strict';
 
@@ -383,6 +387,37 @@
         }
         groups.push(grp);
       }
+    }
+
+    /* ---------- афиша частями (Kozlov Afisha Week) ---------- */
+    // карточки дальше ближайшей недели лежат в <template class="kaw-later">: их нет среди карточек, пока их не раскроют
+    function pageCardCount() {
+      var n = 0;
+      for (var i = 0; i < wrap.children.length; i++) {
+        var el = wrap.children[i];
+        if (!el.classList.contains('events')) continue;
+        for (var j = 0; j < el.children.length; j++) if (el.children[j].classList.contains('event')) n++;
+      }
+      return n;
+    }
+    function recollect() {
+      cards = []; groups = [];
+      collectCards();
+      try { splitTitles(); } catch (e) { /* названия остаются как в теме */ }
+      if (raw) {
+        events = buildEvents(raw);
+        var cov = coverage(raw);
+        setDegraded(cov.bad > 0);
+        freshCount = newConcerts(raw);
+      }
+    }
+    /** Фильтр или поиск ищут по всей афише: сначала раскрываются все отложенные карточки. */
+    var wasActive = false;
+    function expandAll() {
+      if (wrap.querySelector('template.kaw-later, .event.kaw-off')) {
+        try { doc.dispatchEvent(new CustomEvent('kaw:expand')); } catch (e) { /* старый браузер: остаются видимые карточки */ }
+      }
+      if (pageCardCount() !== cards.length) recollect();
     }
 
     /* ---------- концерты из индекса, привязанные к карточкам ---------- */
@@ -769,6 +804,9 @@
     function apply(fromInput) {
       if (!hroot) return;
       var c = ctx(), active = anyActive();
+      if (active) expandAll();
+      else if (wasActive) { try { doc.dispatchEvent(new CustomEvent('kaw:collapse')); } catch (e) { /* остаётся вся афиша */ } }
+      wasActive = active;
       var top = hroot.querySelector('.kaf-top'), wait = hroot.querySelector('.kaf-wait'), empty = hroot.querySelector('.kaf-empty'), note = hroot.querySelector('.kaf-note');
       // отступ под панелью вместо скрытых значков темы: метки «Концерт сегодня | сцена» над карточками не наезжают на панель
       var kafEl = hroot.querySelector('.kaf'), gap = function (v) { if (kafEl) kafEl.classList.toggle('kaf-gap', v); };
