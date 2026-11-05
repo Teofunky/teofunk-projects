@@ -8,7 +8,9 @@
    1.0.8: афиша может приходить частями (плагин Kozlov Afisha Week: ближайшая неделя видна, остальные карточки лежат
    в <template class="kaw-later">). Перед любым фильтром или поиском панель просит раскрыть все карточки (событие
    kaw:expand на document) и заново собирает список карточек; так же, если посетитель сам открыл следующие недели.
-   Когда фильтры сброшены, панель сообщает об этом (kaw:collapse), и афиша снова показывает только открытые недели. */
+   Когда фильтры сброшены, панель сообщает об этом (kaw:collapse), и афиша снова показывает только открытые недели.
+   1.0.9: отложенные карточки учитываются с первой загрузки: жанры, сцены, цены, календарь и счётчики строятся
+   по всей афише, а не только по видимой неделе. */
 (function () {
   'use strict';
 
@@ -300,7 +302,9 @@
       return true;
     }
     /** Концерты, чьи карточки ещё на странице: по ним считаются числа на кнопках и в окнах. */
-    function live() { return events.filter(function (e) { return e.card.el.isConnected; }); }
+    // карточка на странице или отложена Kozlov Afisha Week (в <template>, раскроется перед фильтром)
+    function present(cd) { return cd.el.isConnected || !!cd.deferred; }
+    function live() { return events.filter(function (e) { return present(e.card); }); }
     function anyActive() { return !!(state.when || state.budget !== null || count(state.formats) || count(state.genres) || count(state.stages) || state.q); }
 
     function fmtDay(k) { var p = k.split('-'); return +p[2] + ' ' + MG[+p[1] - 1]; }
@@ -365,9 +369,17 @@
         if (!el.classList.contains('events')) continue;
         var grp = { cont: el, month: month, cards: [] };
         month = null;
+        var list = [];
         for (var j = 0; j < el.children.length; j++) {
-          var card = el.children[j];
-          if (!card.classList.contains('event')) continue;
+          var ch = el.children[j];
+          if (ch.classList.contains('event')) { list.push([ch, false]); continue; }
+          // отложенная карточка Kozlov Afisha Week: лежит в <template>, на странице появится при раскрытии
+          if (ch.tagName === 'TEMPLATE' && ch.classList.contains('kaw-later') && ch.content) {
+            for (var t = 0; t < ch.content.children.length; t++) if (ch.content.children[t].classList.contains('event')) list.push([ch.content.children[t], true]);
+          }
+        }
+        for (j = 0; j < list.length; j++) {
+          var card = list[j][0];
           var a = card.querySelector('a.title'), c = card.querySelector('.cell_1'), r = card.querySelector('.row_1');
           var slug = a ? slugOf(a.getAttribute('href') || '') : '';
           var day = c ? parseInt((c.textContent || '').replace(/\D/g, ''), 10) : 0;
@@ -376,7 +388,7 @@
           var tm = /^\d\d:\d\d$/.test(dta) ? dta.match(/(\d{1,2}):(\d\d)/) : rowTxt.match(/(\d{1,2}):(\d\d)/);
           var c2 = card.querySelector('.cell_2'); // в плитке день недели в той же строке, в списке строкой ниже
           var date = (day && tm) ? cardDate(day, monthOf(rowTxt), ((r && +r.getAttribute('data-wd')) || weekdayOf(c2 ? c2.textContent : rowTxt))) : '';
-          var item = { el: card, grp: grp, ev: null, key: '', start: 0 };
+          var item = { el: card, grp: grp, ev: null, key: '', start: 0, deferred: list[j][1] };
           if (slug && date) {
             var hh = ('0' + tm[1]).slice(-2);
             item.key = slug + '|' + date + '|' + hh + ':' + tm[2];
@@ -396,7 +408,13 @@
       for (var i = 0; i < wrap.children.length; i++) {
         var el = wrap.children[i];
         if (!el.classList.contains('events')) continue;
-        for (var j = 0; j < el.children.length; j++) if (el.children[j].classList.contains('event')) n++;
+        for (var j = 0; j < el.children.length; j++) {
+          var ch = el.children[j];
+          if (ch.classList.contains('event')) n++;
+          else if (ch.tagName === 'TEMPLATE' && ch.classList.contains('kaw-later') && ch.content) {
+            for (var t = 0; t < ch.content.children.length; t++) if (ch.content.children[t].classList.contains('event')) n++;
+          }
+        }
       }
       return n;
     }
@@ -524,7 +542,7 @@
     function coverage(d) {
       var builtMs = (typeof d.built === 'number' ? d.built : 0) * 1000, matched = 0, bad = 0;
       cards.forEach(function (cd) {
-        if (!cd.el.isConnected) return; // тема могла удалить карточку своим скриптом
+        if (!present(cd)) return; // тема могла удалить карточку своим скриптом
         if (cd.ev) { matched++; return; }
         if (cd.key && cd.start <= builtMs + 60000) return;
         bad++;
@@ -548,7 +566,7 @@
     function newConcerts(d) {
       if (!fullScope()) return 0;
       var nowMs = (typeof d.now === 'number' && d.now > 1.6e9) ? d.now * 1000 : Date.now(), last = '', keyed = 0;
-      cards.forEach(function (cd) { if (cd.key && cd.el.isConnected) { keyed++; var dt = cd.key.split('|')[1]; if (dt > last) last = dt; } });
+      cards.forEach(function (cd) { if (cd.key && present(cd)) { keyed++; var dt = cd.key.split('|')[1]; if (dt > last) last = dt; } });
       var n = orphans.filter(function (o) { return o.start > nowMs + 60000 && o.date <= last; }).length;
       return n <= Math.max(5, Math.round(keyed * 0.05)) ? n : 0;
     }
