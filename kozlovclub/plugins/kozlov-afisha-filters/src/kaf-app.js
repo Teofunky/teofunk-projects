@@ -12,7 +12,12 @@
    1.0.9: отложенные карточки учитываются с первой загрузки: жанры, сцены, цены, календарь и счётчики строятся
    по всей афише, а не только по видимой неделе.
    1.0.10: если скрипт Kozlov Afisha Week не ответил на kaw:expand (не загрузился, загружен позже панели
-   оптимизатором), панель раскрывает отложенные карточки сама: результаты фильтра видны в любом порядке загрузки. */
+   оптимизатором), панель раскрывает отложенные карточки сама: результаты фильтра видны в любом порядке загрузки.
+   1.0.11: хостинг Beget при защите от ботов отвечает на запросы без своей cookie «beget» страницей проверки (HTML)
+   вместо данных, и панель пропадала (у посетителей с блокировщиками, во встроенных браузерах мессенджеров, с очищенными
+   cookie). Панель ставит эту cookie сама до первого запроса, как это делает страница проверки, а если всё же пришла
+   страница проверки, ставит её и повторяет запрос. Навигатор и поиск на этой странице грузят тот же индекс позже
+   и тоже получают данные. */
 (function () {
   'use strict';
 
@@ -490,6 +495,12 @@
     }
 
     /* ---------- загрузка индекса ---------- */
+    // cookie защиты хостинга: без неё Beget отдаёт страницу проверки вместо индекса
+    function hostCookie() {
+      try {
+        if (!/(?:^|;\s*)beget=begetok(?:;|$)/.test(doc.cookie)) doc.cookie = 'beget=begetok; path=/; max-age=' + (200 * 86400) + '; SameSite=Lax';
+      } catch (e) { /* cookie недоступны: остаётся обычный путь */ }
+    }
     function getIndex(fresh, cb) { getJSON(cfg.index, fresh, cb); }
     function getJSON(url, fresh, cb) {
       var headers = { 'Accept': 'application/json' };
@@ -501,6 +512,14 @@
       win.fetch(u, { credentials: 'same-origin', headers: headers, cache: fresh ? 'reload' : 'default', signal: ctrl ? ctrl.signal : undefined })
         .then(function (r) {
           if (!r.ok) { var er = new Error('http ' + r.status); er.status = r.status; throw er; }
+          var ct = (r.headers && r.headers.get('content-type')) || '';
+          if (ct.indexOf('json') < 0 && ct.indexOf('html') >= 0) {
+            // страница проверки хостинга вместо данных: ставим cookie, повтор в load() пойдёт уже с ней
+            return r.text().then(function (t) {
+              if (/beget=begetok|set_cookie\(/.test(t)) hostCookie();
+              throw new Error('host check page');
+            });
+          }
           return r.json();
         })
         .then(function (d) { clearTimeout(timer); cb(null, d); }, function (e) { clearTimeout(timer); cb(e || new Error('fetch')); });
@@ -1107,6 +1126,7 @@
 
     /* ---------- запуск ---------- */
     try {
+      hostCookie(); // до первого запроса: индекс, навигатор и поиск получат данные, а не страницу проверки хостинга
       collectCards();
       try { splitTitles(); } catch (e) { /* названия остаются как в теме */ }
       if (!cards.length) { flag('off'); return; }
