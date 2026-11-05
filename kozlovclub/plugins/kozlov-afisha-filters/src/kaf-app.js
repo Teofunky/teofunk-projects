@@ -10,7 +10,9 @@
    kaw:expand на document) и заново собирает список карточек; так же, если посетитель сам открыл следующие недели.
    Когда фильтры сброшены, панель сообщает об этом (kaw:collapse), и афиша снова показывает только открытые недели.
    1.0.9: отложенные карточки учитываются с первой загрузки: жанры, сцены, цены, календарь и счётчики строятся
-   по всей афише, а не только по видимой неделе. */
+   по всей афише, а не только по видимой неделе.
+   1.0.10: если скрипт Kozlov Afisha Week не ответил на kaw:expand (не загрузился, загружен позже панели
+   оптимизатором), панель раскрывает отложенные карточки сама: результаты фильтра видны в любом порядке загрузки. */
 (function () {
   'use strict';
 
@@ -433,7 +435,17 @@
     var wasActive = false;
     function expandAll() {
       if (wrap.querySelector('template.kaw-later, .event.kaw-off')) {
-        try { doc.dispatchEvent(new CustomEvent('kaw:expand')); } catch (e) { /* старый браузер: остаются видимые карточки */ }
+        try { doc.dispatchEvent(new CustomEvent('kaw:expand')); } catch (e) { /* раскроем сами ниже */ }
+        // Kozlov Afisha Week не ответил: раскрываем сами. Дата из шаблона остаётся на карточке,
+        // чтобы Week, если загрузится позже, мог снова свернуть афишу до недели после сброса фильтров.
+        Array.prototype.forEach.call(wrap.querySelectorAll('template.kaw-later'), function (t) {
+          if (!t.parentNode || !t.content) return;
+          var d = t.getAttribute('data-kaw-d') || '';
+          Array.prototype.forEach.call(t.content.children, function (n) { if (d && n.classList.contains('event')) n.setAttribute('data-kaw-d', d); });
+          t.parentNode.replaceChild(t.content, t);
+        });
+        Array.prototype.forEach.call(wrap.querySelectorAll('.event.kaw-off'), function (c) { c.classList.remove('kaw-off'); });
+        Array.prototype.forEach.call(wrap.querySelectorAll('.kaw-hide'), function (el) { el.classList.remove('kaw-hide'); });
       }
       if (pageCardCount() !== cards.length) recollect();
     }
