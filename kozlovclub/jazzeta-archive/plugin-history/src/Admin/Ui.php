@@ -18,6 +18,7 @@ final class Ui
         'es-newsroom' => ['Пульт', 'es_edit'],
         'es-import' => ['Импорт', 'es_import'],
         'es-sources' => ['Источники', 'es_edit'],
+        'es-calendar' => ['Календарь', 'es_publish'],
         'es-runtime' => ['Режим', 'es_edit'],
         'es-appearance' => ['Оформление', 'manage_options'],
         'es-access' => ['Доступ', 'manage_options'],
@@ -44,6 +45,8 @@ final class Ui
         'mode_closed' => 'Газета в закрытом режиме: её видит только редакция.',
         'mode_public' => 'Газета открыта читателям.',
         'mode_paused' => 'Газета остановлена.',
+        'calendar_uploaded' => 'Календарь загружен: строки «Этот день в джазе» уже под номерами своих дат.',
+        'calendar_removed' => 'Календарь убран: блока и карточки под номерами больше нет. Номера не менялись.',
     ];
 
     public static function open(string $title, string $current, array $opts = []): void

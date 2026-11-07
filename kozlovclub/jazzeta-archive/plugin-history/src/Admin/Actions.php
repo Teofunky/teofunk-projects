@@ -4,6 +4,7 @@ namespace Kozlov\Gazeta\Admin;
 
 use Kozlov\Gazeta\Domain\Crossword;
 use Kozlov\Gazeta\Domain\Topics;
+use Kozlov\Gazeta\Data\Calendar;
 use Kozlov\Gazeta\Data\Installer;
 use Kozlov\Gazeta\Data\Issues;
 use Kozlov\Gazeta\Data\Meta;
@@ -37,6 +38,7 @@ final class Actions
         'publish' => 'es_publish',
         'withdraw' => 'es_publish',
         'migrate' => 'manage_options',
+        'calendar' => 'es_publish',
     ];
 
     public static function nonceAction(string $operation, int $issue = 0, int $version = 0): string
@@ -171,6 +173,10 @@ final class Actions
                 });
                 return;
 
+            case 'calendar':
+                self::calendar();
+                return;
+
             case 'migrate':
                 $result = Legacy020::copy(absint(self::value('legacy_id')));
                 self::done($result, $back, static function ($newId) {
@@ -179,6 +185,50 @@ final class Actions
                 return;
         }
         wp_die('Неизвестное действие.', '', ['response' => 400]);
+    }
+
+    /**
+     * 0.5.11: upload or remove «Этот день в джазе». Readers see it at once, so only the selected
+     * owner in a browser session, with the confirmation tick. A file with any error changes nothing.
+     */
+    private static function calendar(): void
+    {
+        $back = admin_url('admin.php?page=es-calendar');
+        if (!Mode::isOwner() || !Request::isInteractiveSession()) {
+            wp_die('Календарь загружает только выбранный владелец газеты в авторизованном браузере.', '', ['response' => 403]);
+        }
+        if (self::value('confirm') !== '1') {
+            self::fail('Поставьте отметку подтверждения.', $back);
+        }
+        if (self::value('calendar_op') === 'remove') {
+            Calendar::remove();
+            self::purge(static function () {
+                Cache::purgeRecent(200);
+            });
+            wp_safe_redirect(add_query_arg('es_notice', 'calendar_removed', $back));
+            exit;
+        }
+        $file = $_FILES['calendar_file'] ?? null;
+        if (!is_array($file) || (int) ($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK || !is_uploaded_file((string) ($file['tmp_name'] ?? ''))) {
+            self::fail('Файл не получен. Выберите calendar.json и загрузите ещё раз.', $back);
+        }
+        if ((int) ($file['size'] ?? 0) > Calendar::MAX_BYTES) {
+            self::fail('Файл больше 2 МБ.', $back);
+        }
+        $result = Calendar::validate((string) file_get_contents((string) $file['tmp_name']));
+        if (!$result['ok']) {
+            $errors = $result['errors'];
+            $more = count($errors) > 5 ? ' …и ещё ' . (count($errors) - 5) . '.' : '';
+            self::fail('Календарь не загружен: ' . implode(' ', array_slice($errors, 0, 5)) . $more, $back);
+        }
+        if (!Calendar::save($result['value'], get_current_user_id())) {
+            self::fail('Календарь не сохранён: база данных не приняла запись. Прежний календарь остался на месте.', $back, 500);
+        }
+        self::purge(static function () {
+            Cache::purgeRecent(200);
+        });
+        wp_safe_redirect(add_query_arg('es_notice', 'calendar_uploaded', $back));
+        exit;
     }
 
     private static function manualImport(int $id, int $version, string $back): void

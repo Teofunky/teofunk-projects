@@ -2,7 +2,8 @@
 /**
  * "Номер в двух словах": one sentence per story with a link to the material. Since 0.5.7 the whole
  * block is a closed «Поделиться номером» drawer; the 4:5 cards for social networks sit in a second
- * closed <details> inside it; copy and PNG buttons appear only with JS.
+ * closed <details> inside it; copy and PNG buttons appear only with JS. (0.5.11) The calendar
+ * «Этот день в джазе» adds its own card at the end, with its own text for a messenger.
  * Nothing is posted anywhere automatically.
  * @var array $v
  */
@@ -24,7 +25,16 @@ $payload = [
     'issue_url' => $v['private'] ? '' : $issue['url'],
     'palette' => ['paper' => $s['paper'], 'ink' => $s['ink'], 'accent' => $s['accent']],
     'items' => $issue['digest'],
+    // 0.5.11: «Этот день в джазе» — its own card and its own text for a messenger.
+    'calendar' => $issue['calendar'] ? [
+        'title' => $issue['calendar']['title'],
+        'date_label' => $issue['calendar']['date_label'],
+        'items' => array_map(static function ($item) {
+            return ['year' => $item['year'], 'label' => $item['label'], 'name' => $item['name'], 'occupation' => $item['occupation'], 'round' => $item['round'], 'line' => $item['line']];
+        }, $issue['calendar']['items']),
+    ] : null,
 ];
+$calendar = $issue['calendar'];
 ?>
 <?php // 0.5.7: a closed drawer under the issue. Open, the same five sentences repeated the issue a second time. ?>
 <details class="es-digest" id="es-digest">
@@ -64,6 +74,22 @@ $payload = [
                     <p class="es-social__actions"><button type="button" data-es-png="<?php echo esc_attr($item['id']); ?>" hidden>Скачать PNG</button></p>
                 </li>
             <?php endforeach; ?>
+            <?php if ($calendar) : // 0.5.11: the calendar card follows the stories' cards. ?>
+                <li class="es-social">
+                    <div class="es-social__card es-social__card--calendar" aria-hidden="true">
+                        <span class="es-social__mast"><?php echo esc_html($over); ?><br><?php echo esc_html($main); ?></span>
+                        <span class="es-social__rubric"><?php echo esc_html($calendar['title'] . ' · ' . $calendar['date_label']); ?></span>
+                        <span class="es-social__dates">
+                            <?php foreach ($calendar['items'] as $item) : ?>
+                                <span class="es-social__date"><span class="es-social__year"><?php echo (int) $item['year']; ?></span><span><span class="es-social__label<?php echo $item['round'] ? ' es-social__label--round' : ''; ?>"><?php echo esc_html($item['label']); ?></span><span class="es-social__name"><?php echo esc_html($item['name']); ?></span></span></span>
+                            <?php endforeach; ?>
+                        </span>
+                        <span class="es-social__foot"><span><?php echo esc_html($issue['human_date']); ?></span><span><?php echo esc_html($v['private'] ? 'Черновик' : $issue['number_label']); ?></span></span>
+                    </div>
+                    <p class="es-social__sentence"><?php echo esc_html($calendar['title'] . ' · ' . $calendar['date_label']); ?></p>
+                    <p class="es-social__actions"><button type="button" data-es-png="calendar" hidden>Скачать PNG</button><button type="button" data-es-copy-calendar hidden>Текст для мессенджера</button></p>
+                </li>
+            <?php endif; ?>
         </ol>
     </details>
     <p class="es-digest__status" role="status" data-es-digest-status><?php echo $v['private'] ? 'Закрытый просмотр: карточки помечены как черновик, ссылок на неопубликованные материалы нет.' : ''; ?></p>

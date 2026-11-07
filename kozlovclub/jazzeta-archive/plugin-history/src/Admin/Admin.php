@@ -5,6 +5,7 @@ namespace Kozlov\Gazeta\Admin;
 use Kozlov\Gazeta\Admin\Screens\AccessScreen;
 use Kozlov\Gazeta\Admin\Screens\AppearanceScreen;
 use Kozlov\Gazeta\Admin\Screens\ArticleScreen;
+use Kozlov\Gazeta\Admin\Screens\CalendarScreen;
 use Kozlov\Gazeta\Admin\Screens\DeskScreen;
 use Kozlov\Gazeta\Admin\Screens\ImportScreen;
 use Kozlov\Gazeta\Admin\Screens\IntegrityScreen;
@@ -25,7 +26,7 @@ if (!defined('ABSPATH')) {
 /** wp-admin integration: menu, assets, settings registration and POST endpoints. */
 final class Admin
 {
-    public const PAGES = ['es-newsroom', 'es-import', 'es-sources', 'es-runtime', 'es-appearance', 'es-access', 'es-integrity', 'es-migrate'];
+    public const PAGES = ['es-newsroom', 'es-import', 'es-sources', 'es-calendar', 'es-runtime', 'es-appearance', 'es-access', 'es-integrity', 'es-migrate'];
 
     public static function init(): void
     {
@@ -74,6 +75,7 @@ final class Admin
             add_action('load-' . $importHook, Guard::wrap([ImportScreen::class, 'load']));
         }
         add_submenu_page('es-newsroom', 'Источники газеты', 'Источники', 'es_edit', 'es-sources', [SourcesScreen::class, 'render']);
+        add_submenu_page('es-newsroom', 'Календарь «Этот день в джазе»', 'Календарь', 'es_publish', 'es-calendar', [CalendarScreen::class, 'render']);
         add_submenu_page('es-newsroom', 'Режим газеты', 'Режим', 'es_edit', 'es-runtime', [ModeScreen::class, 'render']);
         add_submenu_page('es-newsroom', 'Оформление газеты', 'Оформление', 'manage_options', 'es-appearance', [AppearanceScreen::class, 'render']);
         add_submenu_page('es-newsroom', 'Доступ к газете', 'Доступ', 'manage_options', 'es-access', [AccessScreen::class, 'render']);

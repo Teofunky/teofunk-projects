@@ -1,0 +1,54 @@
+{
+ "format": "es-calendar-1",
+ "generated_at": "2026-11-07T12:00:00Z",
+ "from": "2026-11-10",
+ "to": "2026-11-10",
+ "days": {
+  "2026-11-10": [
+   {
+    "kind": "birth",
+    "year": 1916,
+    "age": 110,
+    "name": "Билли Мэй",
+    "occupation": "трубач и композитор",
+    "round": true,
+    "russian": false,
+    "club": false,
+    "source": "https://www.wikidata.org/wiki/Q713273"
+   },
+   {
+    "kind": "birth",
+    "year": 1932,
+    "age": 94,
+    "name": "Пол Блей",
+    "occupation": "пианист",
+    "round": false,
+    "russian": false,
+    "club": false,
+    "source": "https://www.wikidata.org/wiki/Q709810"
+   },
+   {
+    "kind": "death",
+    "year": 1994,
+    "age": 32,
+    "name": "Кармен Макрей",
+    "occupation": "певица и пианистка",
+    "round": false,
+    "russian": false,
+    "club": false,
+    "source": "https://www.wikidata.org/wiki/Q240371"
+   },
+   {
+    "kind": "death",
+    "year": 2021,
+    "age": 5,
+    "name": "Вячеслав Горский",
+    "occupation": "пианист и композитор",
+    "round": false,
+    "russian": true,
+    "club": false,
+    "source": "https://www.wikidata.org/wiki/Q16638772"
+   }
+  ]
+ }
+}

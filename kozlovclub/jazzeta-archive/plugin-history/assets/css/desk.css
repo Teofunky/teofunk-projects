@@ -706,3 +706,8 @@ details.es-card.es-details { margin-top: 0; }
 .es-frame--desktop { width: 400px; height: 260px; }
 .es-frame--desktop iframe { width: 1280px; height: 832px; transform: scale(.3125); }
 @media (max-width: 782px) { .es-design-pick { grid-template-columns: 1fr; } }
+
+/* 0.5.11: calendar screen — the next seven days as they will print. */
+.es-calendar-preview { margin: 8px 0 0; }
+.es-calendar-preview dt { margin-top: 12px; font-weight: 700; }
+.es-calendar-preview dd { margin: 3px 0 0; font-size: 13px; }

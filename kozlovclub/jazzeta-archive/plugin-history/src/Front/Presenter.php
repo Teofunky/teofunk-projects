@@ -2,6 +2,7 @@
 
 namespace Kozlov\Gazeta\Front;
 
+use Kozlov\Gazeta\Data\Calendar;
 use Kozlov\Gazeta\Data\Search;
 use Kozlov\Gazeta\Domain\Credit;
 use Kozlov\Gazeta\Domain\Crossword;
@@ -142,6 +143,8 @@ final class Presenter
             'rubrics' => array_values($rubrics),
             'topics' => array_merge(array_values($rubrics), array_values($tagChips)),
             'digest' => $digest,
+            // 0.5.11: «Этот день в джазе», entries of the issue's own date (Data\Calendar).
+            'calendar' => self::calendar((array) ($opts['calendar'] ?? []), (string) $doc['edition_date']),
             'cover' => self::cover($opts['cover'] ?? null, $stories[0] ?? null),
             // 0.5.2: the crossword of the week, when this issue carries one.
             // 0.5.9: the teaser links to the crossword's own date, which may be an earlier issue of the week.
@@ -326,6 +329,43 @@ final class Presenter
      * Issue cover: the editor's explicit choice, else the lead story's photo, else nothing.
      * A previous issue's picture or an illustration appears only when chosen.
      */
+    /**
+     * 0.5.11: the calendar block, or null when the date has no entries. Club dates first, then by year.
+     * Entries arrive already checked by Data\Calendar::validate(); here only the labels are built.
+     */
+    public static function calendar(array $items, string $date): ?array
+    {
+        $out = [];
+        foreach ($items as $item) {
+            if (!is_array($item) || !isset($item['kind'], $item['year'], $item['age'], $item['name'])) {
+                continue;
+            }
+            $entry = [
+                'kind' => (string) $item['kind'],
+                'year' => (int) $item['year'],
+                'age' => (int) $item['age'],
+                'name' => (string) $item['name'],
+                'occupation' => (string) ($item['occupation'] ?? ''),
+                'round' => Calendar::isRound((int) $item['age']),
+                'club' => !empty($item['club']),
+            ];
+            $entry['label'] = Calendar::label($entry['kind'], $entry['age']);
+            $entry['line'] = Calendar::line($entry);
+            $out[] = $entry;
+        }
+        if (!$out) {
+            return null;
+        }
+        usort($out, static function ($a, $b) {
+            return [!$a['club'], $a['year']] <=> [!$b['club'], $b['year']];
+        });
+        return [
+            'title' => 'Этот день в джазе',
+            'date_label' => Labels::date($date, false),
+            'items' => array_slice($out, 0, Calendar::MAX_ITEMS),
+        ];
+    }
+
     private static function cover(?array $chosen, ?array $lead): ?array
     {
         if (is_array($chosen)) {

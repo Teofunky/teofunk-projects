@@ -73,6 +73,10 @@ $stories = $issue['stories'];
         <?php endforeach; ?>
     </div>
 
+    <?php if (!empty($issue['calendar'])) : // 0.5.11 ?>
+        <?php View::render('front/parts/calendar', ['calendar' => $issue['calendar']]); ?>
+    <?php endif; ?>
+
     <?php if (!empty($issue['crossword'])) : ?>
         <?php View::render('front/parts/crossword-teaser', ['teaser' => $issue['crossword']]); ?>
     <?php endif; ?>

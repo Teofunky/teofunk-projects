@@ -350,6 +350,20 @@
     copyDigest.addEventListener('click', function () { copyText(digestText(), status, 'Дайджест скопирован — можно вставлять в мессенджер.'); });
   }
 
+  /* 0.5.11: «Этот день в джазе» — its own text and its own card. */
+  function calendarText() {
+    var cal = data.calendar;
+    var head = cal.title.toUpperCase() + ' · ' + cal.date_label;
+    var body = cal.items.map(function (item) { return item.line; }).join('\n');
+    var foot = data.brand + ' · ' + (data.draft ? 'ЧЕРНОВИК' : data.number) + (data.issue_url ? '\n' + data.issue_url : '');
+    return head + '\n\n' + body + '\n\n' + foot;
+  }
+  var copyCalendar = $('[data-es-copy-calendar]');
+  if (copyCalendar && data.calendar) {
+    copyCalendar.hidden = false;
+    copyCalendar.addEventListener('click', function () { copyText(calendarText(), status, 'Календарь скопирован — можно вставлять в мессенджер.'); });
+  }
+
   function wrap(ctx, text, maxWidth) {
     var words = String(text).split(/\s+/), lines = [], line = '';
     words.forEach(function (word) {
@@ -391,7 +405,7 @@
     var over = fitText(x, String(data.over || '').toUpperCase(), serif, '600', 40, 22, W - 2 * M, 50, 1);
     if (over) { x.fillText(over.lines.join(' '), M, 196); }
     if ('letterSpacing' in x) { x.letterSpacing = '0px'; }
-    var mast = fitText(x, String(data.main || data.brand).toUpperCase() + '.', serif, '700', 160, 60, W - 2 * M, 170, 0.9);
+    var mast = fitText(x, String(data.main || data.brand).toUpperCase(), serif, '700', 160, 60, W - 2 * M, 170, 0.9);
     if (mast) { x.fillText(mast.lines[0], M - 6, 340); }
     x.fillRect(M, 372, W - 2 * M, 6);
     x.fillRect(M, 384, W - 2 * M, 2);
@@ -442,6 +456,83 @@
     return c;
   }
 
+  function drawCalendarCard(cal) {
+    var W = 1080, H = 1350, M = 88;
+    var serif = '"ES Serif", Georgia, serif';
+    var sans = 'Roboto, "Helvetica Neue", Arial, sans-serif';
+    var c = document.createElement('canvas');
+    c.width = W; c.height = H;
+    var x = c.getContext('2d');
+    var paper = data.palette.paper, ink = data.palette.ink, accent = data.palette.accent;
+    var spacing = function (px) { if ('letterSpacing' in x) { x.letterSpacing = px + 'px'; } };
+    var clip = function (text, width) {
+      text = String(text);
+      if (x.measureText(text).width <= width) { return text; }
+      while (text.length > 1 && x.measureText(text + '…').width > width) { text = text.slice(0, -1); }
+      return text.replace(/[\s,.;:–—-]+$/, '') + '…';
+    };
+
+    x.fillStyle = paper; x.fillRect(0, 0, W, H);
+    x.strokeStyle = ink; x.lineWidth = 3; x.strokeRect(40, 40, W - 80, H - 80);
+    x.lineWidth = 1; x.globalAlpha = 0.45; x.strokeRect(52, 52, W - 104, H - 104); x.globalAlpha = 1;
+
+    x.fillStyle = accent; x.font = '700 24px ' + sans; spacing(5);
+    x.fillText('МУЗЫКА · ЛЮДИ · СОБЫТИЯ', M, 122);
+    x.fillStyle = ink; spacing(14);
+    var over = fitText(x, String(data.over || '').toUpperCase(), serif, '600', 40, 22, W - 2 * M, 50, 1);
+    if (over) { x.fillText(over.lines.join(' '), M, 196); }
+    spacing(0);
+    var mast = fitText(x, String(data.main || data.brand).toUpperCase(), serif, '700', 160, 60, W - 2 * M, 170, 0.9);
+    if (mast) { x.fillText(mast.lines[0], M - 6, 340); }
+    x.fillRect(M, 372, W - 2 * M, 6);
+    x.fillRect(M, 384, W - 2 * M, 2);
+
+    x.fillStyle = accent; x.font = '700 28px ' + sans; spacing(4);
+    x.fillText(String(cal.title).toUpperCase(), M, 452);
+    spacing(0);
+    x.textAlign = 'right'; x.font = 'italic 400 40px ' + serif;
+    x.fillText(cal.date_label, W - M, 454);
+    x.textAlign = 'left';
+
+    var items = cal.items.slice(0, 6); // = Data\Calendar::MAX_ITEMS: no entry of the block is left off the card
+    var top = 488, bottom = 1166, colX = M + 196, colW = W - M - colX;
+    var row = Math.min(190, (bottom - top) / Math.max(1, items.length));
+    var nameMax = row >= 170 ? 56 : 48;
+    items.forEach(function (item, i) {
+      var y = top + i * row;
+      if (i > 0) { x.fillStyle = ink; x.globalAlpha = 0.25; x.fillRect(M, y, W - 2 * M, 1); x.globalAlpha = 1; }
+      x.fillStyle = ink; x.font = '700 64px ' + serif;
+      x.fillText(String(item.year), M, y + 78);
+      x.fillStyle = item.round ? accent : ink; x.globalAlpha = item.round ? 1 : 0.62;
+      x.font = '700 23px ' + sans; spacing(2);
+      x.fillText(clip(String(item.label).toUpperCase(), colW), colX, y + 44);
+      spacing(0); x.globalAlpha = 1;
+      x.fillStyle = ink;
+      var name = fitText(x, item.name, serif, '700', nameMax, 34, colW, nameMax * 1.1, 1.05);
+      x.font = '700 ' + (name ? name.size : 34) + 'px ' + serif;
+      x.fillText(name ? name.lines[0] : clip(item.name, colW), colX, y + 44 + (name ? name.size : 34) + 10);
+      if (item.occupation && row >= 140) {
+        x.globalAlpha = 0.75; x.font = 'italic 400 31px ' + serif;
+        x.fillText(clip(item.occupation, colW), colX, y + 44 + (name ? name.size : 34) + 54);
+        x.globalAlpha = 1;
+      }
+    });
+
+    x.fillStyle = ink; x.fillRect(M, 1186, W - 2 * M, 2);
+    x.font = '700 24px ' + sans; spacing(3);
+    x.fillText((data.human_date + ' · ' + (data.draft ? 'ЧЕРНОВИК' : data.number)).toUpperCase(), M, 1244);
+    x.textAlign = 'right';
+    x.fillText((window.location.host + '/gazeta').toUpperCase(), W - M, 1244);
+    x.textAlign = 'left'; spacing(0);
+
+    if (data.draft) {
+      x.save(); x.translate(W / 2, H / 2); x.rotate(-0.36);
+      x.globalAlpha = 0.16; x.fillStyle = accent; x.font = '700 150px ' + sans; x.textAlign = 'center';
+      x.fillText('ЧЕРНОВИК', 0, 0); x.restore();
+    }
+    return c;
+  }
+
   function deliver(canvas, name) {
     canvas.toBlob(function (blob) {
       if (!blob) { return; }
@@ -462,15 +553,17 @@
   $$('[data-es-png]').forEach(function (button) {
     button.hidden = false;
     button.addEventListener('click', function () {
+      var id = button.getAttribute('data-es-png');
       var item = null;
-      data.items.forEach(function (it) { if (it.id === button.getAttribute('data-es-png')) { item = it; } });
+      data.items.forEach(function (it) { if (it.id === id) { item = it; } });
+      if (id === 'calendar' && data.calendar) { item = data.calendar; }
       if (!item) { return; }
       var ready = document.fonts && document.fonts.load
         ? Promise.all([document.fonts.load('700 80px "ES Serif"'), document.fonts.load('italic 600 80px "ES Serif"')])
         : Promise.resolve();
       ready.catch(function () {}).then(function () {
-        var canvas = drawCard(item);
-        if (canvas) { deliver(canvas, 'standart-' + data.date + '-' + item.id + '-1080x1350.png'); }
+        var canvas = id === 'calendar' ? drawCalendarCard(item) : drawCard(item);
+        if (canvas) { deliver(canvas, 'standart-' + data.date + '-' + id + '-1080x1350.png'); }
       });
     });
   });

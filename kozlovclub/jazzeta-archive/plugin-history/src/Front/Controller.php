@@ -6,6 +6,7 @@ use Kozlov\Gazeta\Data\Db;
 use Kozlov\Gazeta\Data\Meta;
 use Kozlov\Gazeta\Data\Issues;
 use Kozlov\Gazeta\Data\Search;
+use Kozlov\Gazeta\Data\Calendar;
 use Kozlov\Gazeta\Data\Crosswords;
 use Kozlov\Gazeta\Domain\Crossword;
 use Kozlov\Gazeta\Domain\Labels;
@@ -183,6 +184,7 @@ final class Controller
             'crossword_date' => $active['edition_date'] ?? null,
             'crossword_number' => $active['number'] ?? null,
             'tags' => $meta['tags'] ?? [],
+            'calendar' => Calendar::forDate((string) $issue['edition_date']),
         ]);
         $model['issue']['published_at'] = $issue['published_at'];
         $model['issue']['updated_at'] = $issue['public_updated_at'];
@@ -259,6 +261,7 @@ final class Controller
             'focus' => $meta['focus'] ?? [],
             'crossword' => $meta['crossword'] ?? null,
             'tags' => $meta['tags'] ?? [],
+            'calendar' => Calendar::forDate((string) $draft['edition_date']),
         ]);
         $model['issue']['is_latest'] = true;
         $model['issue']['version'] = (int) $issue['version'];
