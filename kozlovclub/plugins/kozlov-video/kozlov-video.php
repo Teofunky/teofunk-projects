@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Kozlov Video
  * Description:       Kozlov TV: одна страница /tv/ для эфира и записей концертов главной сцены через плеер VK Видео. Программа эфиров, записи из истории StreamVi с привязкой к афише, поиск и жанры, мини-плеер. Тему и афишу не меняет; выключение возвращает страницы «Live» и «Видеоархив» как были.
- * Version:           1.1.0
+ * Version:           1.1.1
  * Requires at least: 5.6
  * Requires PHP:      7.4
  * Author:            Kozlov Club
@@ -11,7 +11,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'KZV_VERSION', '1.1.0' );
+define( 'KZV_VERSION', '1.1.1' );
 define( 'KZV_FILE', __FILE__ );
 define( 'KZV_DIR', plugin_dir_path( __FILE__ ) );
 define( 'KZV_URL', plugin_dir_url( __FILE__ ) );

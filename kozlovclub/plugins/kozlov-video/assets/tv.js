@@ -22,7 +22,11 @@
 				u.searchParams.set(k, params[k]);
 			}
 		});
-		var opts = { credentials: 'same-origin', headers: {} };
+		// версия в адресе: после обновления плагина браузер не возьмёт старый ответ из своего кэша
+		if (cfg.ver) {
+			u.searchParams.set('ver', cfg.ver);
+		}
+		var opts = { credentials: 'same-origin', headers: {}, cache: path === 'live' ? 'no-store' : 'default' };
 		if (cfg.nonce) {
 			opts.headers['X-WP-Nonce'] = cfg.nonce;
 		}

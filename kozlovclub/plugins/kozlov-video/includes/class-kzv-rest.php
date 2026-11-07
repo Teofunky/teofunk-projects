@@ -69,6 +69,8 @@ final class KZV_Rest {
 			$res = new WP_REST_Response( array( 'live' => null ), 200 ); // скрипт страницы ничего не меняет
 		}
 		$res->header( 'Cache-Control', 'no-store, max-age=0' );
+		// срок задаём явно: иначе правило сервера для JSON (mod_expires на Beget) допишет год хранения
+		$res->header( 'Expires', 'Thu, 01 Jan 1970 00:00:01 GMT' );
 		return $res;
 	}
 
@@ -95,6 +97,7 @@ final class KZV_Rest {
 			);
 			// короткий кэш: скрытая в админке запись пропадает из ответов не позже чем через минуту
 			$res->header( 'Cache-Control', 'public, max-age=60' );
+			$res->header( 'Expires', gmdate( 'D, d M Y H:i:s', time() + 60 ) . ' GMT' );
 			return $res;
 		} catch ( \Throwable $e ) {
 			kzv_log_exception( $e );

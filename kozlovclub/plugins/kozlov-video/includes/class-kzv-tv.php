@@ -129,6 +129,7 @@ final class KZV_TV {
 		}
 		$cfg = array(
 			'rest'  => esc_url_raw( rest_url( 'kozlov-video/v1/' ) ),
+			'ver'   => KZV_VERSION,
 			'live'  => (bool) $live['live'],
 			'per'   => $per,
 			'total' => (int) $res['total'],
