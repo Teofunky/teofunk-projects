@@ -32,6 +32,7 @@ final class KZV_Live {
 			'next'    => null,
 			'checked' => $now,
 			'known'   => false,
+			'signal'  => '',
 		);
 
 		$around = KZV_Concerts::around( $now );
@@ -49,6 +50,7 @@ final class KZV_Live {
 				$state['known'] = true;
 				if ( $st['live'] ) {
 					$state['live']    = true;
+					$state['signal']  = (string) ( $st['signal'] ?? '' );
 					$state['started'] = (int) $st['started'];
 					$links            = $st['links'];
 					if ( ! self::has_vk( $links ) && $st['broadcast_id'] ) {

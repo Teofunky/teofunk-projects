@@ -136,6 +136,33 @@ final class KZV_Util {
 		return trim( (string) $t );
 	}
 
+	const MONTHS_NOM = array( 1 => 'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь' );
+	const WEEKDAYS   = array( 1 => 'пн', 'вт', 'ср', 'чт', 'пт', 'сб', 'вс' );
+
+	/** «Ноябрь 2026» для заголовков месяцев в архиве. */
+	public static function month_label( $ts, DateTimeZone $tz ) {
+		$d = ( new DateTimeImmutable( '@' . (int) $ts ) )->setTimezone( $tz );
+		return self::MONTHS_NOM[ (int) $d->format( 'n' ) ] . ' ' . $d->format( 'Y' );
+	}
+
+	/** День для программы эфиров: «Сегодня», «Завтра», «Пн, 9 ноября». */
+	public static function day_label( $ts, $now, DateTimeZone $tz ) {
+		$d     = ( new DateTimeImmutable( '@' . (int) $ts ) )->setTimezone( $tz );
+		$today = ( new DateTimeImmutable( '@' . (int) $now ) )->setTimezone( $tz )->setTime( 0, 0 );
+		$diff  = (int) round( ( $d->setTime( 0, 0 )->getTimestamp() - $today->getTimestamp() ) / DAY_IN_SECONDS );
+		if ( 0 === $diff ) {
+			return 'Сегодня';
+		}
+		if ( 1 === $diff ) {
+			return 'Завтра';
+		}
+		return self::ucfirst( self::WEEKDAYS[ (int) $d->format( 'N' ) ] ) . ', ' . (int) $d->format( 'j' ) . ' ' . self::MONTHS[ (int) $d->format( 'n' ) ];
+	}
+
+	public static function time_label( $ts, DateTimeZone $tz ) {
+		return ( new DateTimeImmutable( '@' . (int) $ts ) )->setTimezone( $tz )->format( 'H:i' );
+	}
+
 	/** Заглавная первая буква (для русских строк). */
 	public static function ucfirst( $s ) {
 		$s = (string) $s;

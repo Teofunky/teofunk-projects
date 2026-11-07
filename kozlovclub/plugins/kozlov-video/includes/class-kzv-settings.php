@@ -16,6 +16,7 @@ final class KZV_Settings {
 	public static function defaults() {
 		return array(
 			'mode'         => 'off',   // off | admins | all
+			'tv_page'      => 0,       // ID страницы «Kozlov TV» (/tv/)
 			'live_page'    => 0,       // ID страницы «Live»
 			'archive_page' => 0,       // ID страницы «Видеоархив»
 			'vk_owner'     => self::DEFAULT_VK_OWNER,
@@ -34,6 +35,9 @@ final class KZV_Settings {
 	public static function get( $key = null ) {
 		$saved = get_option( self::OPTION, array() );
 		$s     = array_merge( self::defaults(), is_array( $saved ) ? $saved : array() );
+		if ( ! $s['tv_page'] ) {
+			$s['tv_page'] = self::page_id_by_path( 'tv' );
+		}
 		if ( ! $s['live_page'] ) {
 			$s['live_page'] = self::page_id_by_path( 'live' );
 		}
@@ -43,11 +47,19 @@ final class KZV_Settings {
 		return null === $key ? $s : ( isset( $s[ $key ] ) ? $s[ $key ] : null );
 	}
 
-	private static function page_id_by_path( $path ) {
+	public static function forget_pages() {
+		self::page_id_by_path( '', true );
+	}
+
+	private static function page_id_by_path( $path, $reset = false ) {
 		static $cache = array();
+		if ( $reset ) {
+			$cache = array();
+			return 0;
+		}
 		if ( ! isset( $cache[ $path ] ) ) {
 			$p              = get_page_by_path( $path, OBJECT, 'page' );
-			$cache[ $path ] = $p ? (int) $p->ID : 0;
+			$cache[ $path ] = ( $p && 'trash' !== $p->post_status ) ? (int) $p->ID : 0;
 		}
 		return $cache[ $path ];
 	}
@@ -57,6 +69,7 @@ final class KZV_Settings {
 		$out = array();
 
 		$out['mode']         = in_array( $in['mode'] ?? '', array( 'off', 'admins', 'all' ), true ) ? $in['mode'] : $d['mode'];
+		$out['tv_page']      = max( 0, (int) ( $in['tv_page'] ?? 0 ) );
 		$out['live_page']    = max( 0, (int) ( $in['live_page'] ?? 0 ) );
 		$out['archive_page'] = max( 0, (int) ( $in['archive_page'] ?? 0 ) );
 
@@ -116,6 +129,8 @@ final class KZV_Settings {
 				'total'         => 0,  // трансляций в StreamVi
 				'backfill'      => 0,  // сколько старых уже перебрали (по возрастанию)
 				'backfill_done' => false,
+				'backfill_at'   => 0,  // когда история перебрана целиком в последний раз
+				'gap'           => 0,  // где остановился разбор свежих после долгого простоя
 				'last_run'      => 0,
 				'last_ok'       => 0,
 				'errors'        => array(),

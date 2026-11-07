@@ -1,6 +1,8 @@
 <?php
 /**
- * REST только для чтения: /kozlov-video/v1/live (состояние эфира) и /kozlov-video/v1/videos (карточки архива).
+ * REST только для чтения:
+ *   /kozlov-video/v1/live    состояние эфира для Kozlov TV (шапка, программа, плеер эфира);
+ *   /kozlov-video/v1/videos  карточки записей (поиск, жанр, «Показать ещё»).
  * Ответы содержат готовый HTML тех же блоков, что и сервер при первой загрузке.
  */
 
@@ -22,13 +24,6 @@ final class KZV_Rest {
 				'methods'             => 'GET',
 				'permission_callback' => array( __CLASS__, 'allowed' ),
 				'callback'            => array( __CLASS__, 'live' ),
-				'args'                => array(
-					'view' => array(
-						'type'    => 'string',
-						'enum'    => array( 'live', 'bar' ),
-						'default' => 'live',
-					),
-				),
 			)
 		);
 		register_rest_route(
@@ -50,29 +45,28 @@ final class KZV_Rest {
 						'default'   => '',
 						'maxLength' => 60,
 					),
+					'genre'  => array(
+						'type'    => 'string',
+						'default' => '',
+						'enum'    => array_merge( array( '' ), array_keys( KZV_TV::GENRES ) ),
+					),
 				),
 			)
 		);
 	}
 
-	/** Пока плагин выключен, данные отдаются только редакторам. */
+	/** Пока Kozlov TV не включён для всех, данные отдаются только редакторам. */
 	public static function allowed() {
 		return 'all' === KZV_Settings::get( 'mode' ) || current_user_can( 'edit_pages' );
 	}
 
 	public static function live( WP_REST_Request $r ) {
 		try {
-			$s    = KZV_Live::state();
-			$view = 'bar' === $r->get_param( 'view' ) ? 'bar' : 'live';
-			$res  = new WP_REST_Response(
-				array(
-					'live' => (bool) $s['live'],
-					'html' => KZV_Render::live( $s, $view ),
-				)
-			);
+			$res = new WP_REST_Response( KZV_TV::live_payload() );
+			KZV_Sync::maybe_run_later();
 		} catch ( \Throwable $e ) {
 			kzv_log_exception( $e );
-			$res = new WP_REST_Response( array( 'live' => false, 'html' => null ), 200 );
+			$res = new WP_REST_Response( array( 'live' => null ), 200 ); // скрипт страницы ничего не меняет
 		}
 		$res->header( 'Cache-Control', 'no-store, max-age=0' );
 		return $res;
@@ -83,25 +77,28 @@ final class KZV_Rest {
 			$per    = (int) KZV_Settings::get( 'per_page' );
 			$offset = max( 0, (int) $r->get_param( 'offset' ) );
 			$q      = mb_substr( sanitize_text_field( (string) $r->get_param( 'q' ) ), 0, 60 );
-			$data   = KZV_Store::query( $offset, $per, $q );
+			$genre  = sanitize_key( (string) $r->get_param( 'genre' ) );
+			$data   = KZV_Store::query( $offset, $per, $q, KZV_TV::genre_codes( $genre ) );
+			$now    = time();
 			$items  = array();
 			foreach ( $data['items'] as $row ) {
-				$items[] = KZV_Render::present( $row );
+				$items[] = KZV_TV::item( $row, $now );
 			}
 			$res = new WP_REST_Response(
 				array(
-					'html'  => KZV_Render::cards( $items ),
+					'html'  => KZV_TV::cards( $items ),
 					'count' => count( $items ),
 					'total' => (int) $data['total'],
 					'label' => KZV_Render::count_label( (int) $data['total'] ),
 					'next'  => $offset + count( $items ),
 				)
 			);
-			$res->header( 'Cache-Control', 'public, max-age=300' );
+			// короткий кэш: скрытая в админке запись пропадает из ответов не позже чем через минуту
+			$res->header( 'Cache-Control', 'public, max-age=60' );
 			return $res;
 		} catch ( \Throwable $e ) {
 			kzv_log_exception( $e );
-			return new WP_REST_Response( array( 'html' => '', 'count' => 0, 'total' => 0, 'label' => '', 'next' => 0 ), 200 );
+			return new WP_REST_Response( array( 'message' => 'error' ), 500 ); // скрипт покажет «Повторить»
 		}
 	}
 }

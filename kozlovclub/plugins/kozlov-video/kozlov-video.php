@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name:       Kozlov Video
- * Description:       Трансляции и видеоархив на сайте через плеер VK Видео: блок «Сейчас в эфире», записи концертов главной сцены из истории StreamVi с привязкой к афише, поиск. Работает поверх страниц «Live» и «Видеоархив», тему и афишу не меняет; выключение возвращает страницы как были.
- * Version:           1.0.0
+ * Description:       Kozlov TV: одна страница /tv/ для эфира и записей концертов главной сцены через плеер VK Видео. Программа эфиров, записи из истории StreamVi с привязкой к афише, поиск и жанры, мини-плеер. Тему и афишу не меняет; выключение возвращает страницы «Live» и «Видеоархив» как были.
+ * Version:           1.1.0
  * Requires at least: 5.6
  * Requires PHP:      7.4
  * Author:            Kozlov Club
@@ -11,7 +11,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'KZV_VERSION', '1.0.0' );
+define( 'KZV_VERSION', '1.1.0' );
 define( 'KZV_FILE', __FILE__ );
 define( 'KZV_DIR', plugin_dir_path( __FILE__ ) );
 define( 'KZV_URL', plugin_dir_url( __FILE__ ) );
@@ -35,7 +35,7 @@ function kzv_log_exception( $e ) {
 
 $kzv_loaded = true;
 try {
-	foreach ( array( 'settings', 'util', 'store', 'streamvi', 'concerts', 'sync', 'live', 'render', 'front', 'rest', 'admin' ) as $kzv_part ) {
+	foreach ( array( 'settings', 'util', 'store', 'streamvi', 'concerts', 'sync', 'live', 'render', 'tv', 'front', 'rest', 'admin' ) as $kzv_part ) {
 		require_once KZV_DIR . 'includes/class-kzv-' . $kzv_part . '.php';
 	}
 } catch ( \Throwable $e ) {

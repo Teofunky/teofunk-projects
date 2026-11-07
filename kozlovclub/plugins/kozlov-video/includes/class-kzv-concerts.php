@@ -53,7 +53,8 @@ final class KZV_Concerts {
 	}
 
 	/**
-	 * Концерт для трансляции: ближайший по началу в окне, без отметки «не транслируется» в приоритете.
+	 * Концерт для трансляции: ближайший по началу в окне. Концерты с отметкой «не транслируется»
+	 * (правило или галочка в Kozlov StreamVi) не рассматриваются: их эфира не бывает.
 	 *
 	 * @param int     $started Начало эфира (Unix).
 	 * @param array[] $events  Концерты, уже выбранные на нужный период.
@@ -63,17 +64,49 @@ final class KZV_Concerts {
 		$best  = null;
 		$score = PHP_INT_MAX;
 		foreach ( $events as $e ) {
+			if ( $e['skip'] ) {
+				continue;
+			}
 			$d = (int) $started - (int) $e['start']; // >0: эфир позже начала по афише
 			if ( $d < -self::BEFORE || $d > self::AFTER ) {
 				continue;
 			}
-			$s = abs( $d ) + ( $e['skip'] ? 3 * HOUR_IN_SECONDS : 0 );
+			$s = abs( $d );
 			if ( $s < $score ) {
 				$score = $s;
 				$best  = $e;
 			}
 		}
 		return $best;
+	}
+
+	/**
+	 * Жанры концерта из афиши (поле genre_categories, как в фильтрах афиши и поиске): коды через запятую.
+	 * Пусто, если жанров нет; «-», чтобы не перечитывать концерт без жанров.
+	 */
+	public static function genres( $post_id ) {
+		$post_id = (int) $post_id;
+		if ( $post_id <= 0 ) {
+			return '';
+		}
+		$raw = get_post_meta( $post_id, 'genre_categories', true );
+		if ( is_string( $raw ) ) {
+			$raw = maybe_unserialize( $raw );
+		}
+		$codes = array();
+		foreach ( (array) $raw as $one ) {
+			if ( ! is_string( $one ) || '' === trim( $one ) ) {
+				continue;
+			}
+			$parts = explode( '|', $one );
+			$code  = strtolower( trim( wp_strip_all_tags( isset( $parts[1] ) ? $parts[1] : $parts[0] ) ) );
+			if ( '' === $code || 'free' === $code || strlen( $code ) > 40 || false !== strpos( $code, ',' ) ) {
+				continue;
+			}
+			$codes[ $code ] = true;
+		}
+		$out = implode( ',', array_keys( $codes ) );
+		return '' !== $out ? mb_substr( $out, 0, 255 ) : '-';
 	}
 
 	/**

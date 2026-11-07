@@ -107,9 +107,17 @@ final class KZV_StreamVi {
 				'url'  => (string) ( $r['video'] ?? ( $r['url'] ?? '' ) ),
 			);
 		}
+		$name = '';
+		foreach ( array( 'name', 'title' ) as $k ) {
+			if ( isset( $d[ $k ] ) && is_string( $d[ $k ] ) && '' !== trim( $d[ $k ] ) ) {
+				$name = trim( $d[ $k ] );
+				break;
+			}
+		}
 		return array(
 			'started_at'  => KZV_Util::ts( $d['created_at'] ?? '' ),
 			'finished_at' => KZV_Util::ts( $d['finish_at'] ?? '' ),
+			'name'        => $name, // название трансляции (Kozlov StreamVi ставит название концерта)
 			'links'       => $links,
 		);
 	}
@@ -130,6 +138,7 @@ final class KZV_StreamVi {
 		$live = ( 'live' === $kind && in_array( $st, array( 'active', 'pause', 'lost' ), true ) );
 		$out  = array(
 			'live'         => $live,
+			'signal'       => $live ? $st : '', // active | pause | lost
 			'broadcast_id' => $live ? (int) ( $d['broadcast_id'] ?? 0 ) : 0,
 			'started'      => $live ? KZV_Util::ts( $d['date_start'] ?? '' ) : 0,
 			'links'        => array(),

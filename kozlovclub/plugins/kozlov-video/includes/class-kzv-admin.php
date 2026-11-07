@@ -1,6 +1,6 @@
 <?php
 /**
- * Админка: «Трансляции → Видео на сайте» (или отдельный пункт, если Kozlov StreamVi не установлен).
+ * Админка: «Трансляции → Kozlov TV» (или отдельный пункт, если Kozlov StreamVi не установлен).
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -15,6 +15,7 @@ final class KZV_Admin {
 		add_action( 'admin_post_kzv_save', array( __CLASS__, 'save' ) );
 		add_action( 'admin_post_kzv_row', array( __CLASS__, 'row' ) );
 		add_action( 'admin_post_kzv_rematch', array( __CLASS__, 'rematch' ) );
+		add_action( 'admin_post_kzv_create_tv', array( __CLASS__, 'create_tv' ) );
 		add_action( 'wp_ajax_kzv_batch', array( __CLASS__, 'batch' ) );
 		add_action( 'admin_notices', array( __CLASS__, 'notice' ) );
 	}
@@ -22,9 +23,9 @@ final class KZV_Admin {
 	public static function menu() {
 		global $admin_page_hooks;
 		if ( isset( $admin_page_hooks['kozlov-streamvi'] ) ) {
-			add_submenu_page( 'kozlov-streamvi', 'Видео на сайте', 'Видео на сайте', self::CAP, self::SLUG, array( __CLASS__, 'page' ) );
+			add_submenu_page( 'kozlov-streamvi', 'Kozlov TV', 'Kozlov TV', self::CAP, self::SLUG, array( __CLASS__, 'page' ) );
 		} else {
-			add_menu_page( 'Видео на сайте', 'Видео на сайте', self::CAP, self::SLUG, array( __CLASS__, 'page' ), 'dashicons-video-alt3', 58 );
+			add_menu_page( 'Kozlov TV', 'Kozlov TV', self::CAP, self::SLUG, array( __CLASS__, 'page' ), 'dashicons-video-alt3', 58 );
 		}
 	}
 
@@ -42,6 +43,8 @@ final class KZV_Admin {
 			'saved'   => 'Настройки сохранены.',
 			'row'     => 'Запись обновлена.',
 			'rematch' => 'Привязка к афише обновлена.',
+			'tv'      => 'Страница Kozlov TV создана.',
+			'nopost'  => 'Концерт не найден: вставьте ссылку на страницу концерта или его ID.',
 		);
 		if ( isset( $map[ $msg ] ) ) {
 			echo '<div class="notice notice-success is-dismissible"><p>' . esc_html( $map[ $msg ] ) . '</p></div>';
@@ -66,8 +69,30 @@ final class KZV_Admin {
 		};
 		?>
 		<div class="wrap kzv-admin">
-			<h1>Видео на сайте</h1>
-			<p>Страницы «Live» и «Видеоархив» показывают трансляции через плеер VK Видео. Записи и ссылки берутся из истории StreamVi, названия и страницы концертов из афиши главной сцены.</p>
+			<h1>Kozlov TV</h1>
+			<p>Одна страница для эфира и записей концертов главной сцены через плеер VK Видео. Записи и ссылки берутся из истории StreamVi, названия, фото и жанры из афиши. Концерты с отметкой «не транслируется» в Kozlov StreamVi в программу эфиров не попадают.</p>
+			<?php $tv = (int) $s['tv_page']; ?>
+			<table class="widefat striped" style="max-width:760px;margin-bottom:16px">
+				<tbody>
+					<tr><td style="width:220px">Страница Kozlov TV</td><td>
+						<?php if ( $tv ) : ?>
+							<a href="<?php echo esc_url( get_permalink( $tv ) ); ?>" target="_blank"><?php echo esc_html( (string) get_permalink( $tv ) ); ?></a>
+							(<?php echo esc_html( 'publish' === get_post_status( $tv ) ? 'опубликована' : 'видна только редакторам' ); ?>)
+						<?php else : ?>
+							<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="display:inline">
+								<?php wp_nonce_field( 'kzv_create_tv' ); ?>
+								<input type="hidden" name="action" value="kzv_create_tv">
+								<button class="button button-primary">Создать страницу /tv/</button>
+							</form>
+							<span class="description">Пока её нет, Kozlov TV показывается на страницах «Live» и «Видеоархив».</span>
+						<?php endif; ?>
+					</td></tr>
+					<tr><td>Старые адреса</td><td><?php echo esc_html( KZV_Front::tv_public() ? '/live/ и /videoarxiv/ перенаправляются на /tv/ (301)' : 'перенаправление включится вместе с режимом «Всем посетителям»' ); ?></td></tr>
+					<?php if ( defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON ) : ?>
+						<tr><td>Расписание</td><td>WP-Cron на сайте отключён. Архив догружается сам, пока страницу Kozlov TV кто-то открывает (не чаще раза в 10 минут), и по кнопке ниже. Для ночных часов можно добавить в cron хостинга вызов <code><?php echo esc_html( site_url( 'wp-cron.php' ) ); ?></code> раз в 10 минут.</td></tr>
+					<?php endif; ?>
+				</tbody>
+			</table>
 
 			<h2>Состояние</h2>
 			<table class="widefat striped" style="max-width:760px">
@@ -76,7 +101,7 @@ final class KZV_Admin {
 					<tr><td>Афиша главной сцены</td><td><?php echo $afi ? 'доступна' : '<strong>нет</strong> (нужен Kozlov StreamVi): записи будут без названий концертов'; // phpcs:ignore WordPress.Security.EscapeOutput ?></td></tr>
 					<tr><td>Трансляций в StreamVi</td><td><?php echo esc_html( (string) (int) $st['total'] ); ?></td></tr>
 					<tr><td>Загружено в архив</td><td><?php echo esc_html( $stats['total'] . ' (ждут ссылок: ' . $pend . ', не удалось: ' . $stats['failed'] . ')' ); ?></td></tr>
-					<tr><td>С видео в VK</td><td><?php echo esc_html( (string) $stats['with_vk'] ); ?></td></tr>
+					<tr><td>С видео в VK</td><td><?php echo esc_html( $stats['with_vk'] . ' (без VK после трёх дней проверок: ' . (int) ( $stats['no_vk'] ?? 0 ) . ')' ); ?></td></tr>
 					<tr><td>Привязано к концертам</td><td><?php echo esc_html( (string) $stats['matched'] ); ?></td></tr>
 					<tr><td>Показывается на сайте</td><td><?php echo esc_html( $stats['public'] . ' (скрыто вручную: ' . $stats['hidden'] . ', короче ' . (int) $s['min_minutes'] . ' мин: ' . $stats['short_ones'] . ')' ); ?></td></tr>
 					<tr><td>Самая ранняя запись</td><td><?php echo esc_html( $fmt( $stats['first_ts'] ) ); ?></td></tr>
@@ -97,7 +122,7 @@ final class KZV_Admin {
 				<button type="button" class="button button-primary" id="kzv-run" <?php disabled( ! $ready ); ?>>Загрузить архив сейчас</button>
 				<span id="kzv-run-status" style="margin-left:8px"></span>
 			</p>
-			<p class="description">Без кнопки архив догружается сам: каждые 10 минут по 25 трансляций. Кнопка делает то же пачками, пока не дойдёт до конца (около 10 минут на всю историю).</p>
+			<p class="description">Без кнопки архив догружается сам: каждые 10 минут по 25 трансляций. Кнопка делает то же пачками, пока не дойдёт до конца (около 10 минут на всю историю). Если VK-ссылка появляется не сразу, запись проверяется каждый час три дня после эфира.</p>
 			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="margin-top:8px">
 				<?php wp_nonce_field( 'kzv_rematch' ); ?>
 				<input type="hidden" name="action" value="kzv_rematch">
@@ -114,13 +139,14 @@ final class KZV_Admin {
 						$modes = array(
 							'off'    => 'Выключено: страницы как раньше',
 							'admins' => 'Только редакторам (проверка), посетители видят старые страницы',
-							'all'    => 'Всем посетителям',
+							'all'    => 'Всем посетителям: страница /tv/ публикуется, /live/ и /videoarxiv/ ведут на неё',
 						);
 						foreach ( $modes as $k => $label ) {
 							echo '<label style="display:block;margin:4px 0"><input type="radio" name="mode" value="' . esc_attr( $k ) . '" ' . checked( $s['mode'], $k, false ) . '> ' . esc_html( $label ) . '</label>';
 						}
 						?>
 					</td></tr>
+					<tr><th scope="row">Страница Kozlov TV</th><td><?php wp_dropdown_pages( array( 'name' => 'tv_page', 'selected' => (int) $s['tv_page'], 'show_option_none' => 'не выбрана', 'option_none_value' => 0, 'post_status' => array( 'publish', 'private' ) ) ); ?></td></tr>
 					<tr><th scope="row">Страница эфира</th><td><?php wp_dropdown_pages( array( 'name' => 'live_page', 'selected' => (int) $s['live_page'], 'show_option_none' => 'не выбрана', 'option_none_value' => 0 ) ); ?> <a href="<?php echo esc_url( KZV_Render::live_url() ); ?>" target="_blank">открыть</a></td></tr>
 					<tr><th scope="row">Страница архива</th><td><?php wp_dropdown_pages( array( 'name' => 'archive_page', 'selected' => (int) $s['archive_page'], 'show_option_none' => 'не выбрана', 'option_none_value' => 0 ) ); ?> <a href="<?php echo esc_url( KZV_Render::archive_url() ); ?>" target="_blank">открыть</a></td></tr>
 					<tr><th scope="row"><label for="kzv-owner">Группа VK</label></th><td><input id="kzv-owner" name="vk_owner" type="number" value="<?php echo esc_attr( (string) $s['vk_owner'] ); ?>" class="regular-text"><p class="description">ID группы со знаком минус. Клуб: -77211165. Если в трансляции своей группы нет, берётся видео из другой группы VK.</p></td></tr>
@@ -146,7 +172,7 @@ final class KZV_Admin {
 					$v     = KZV_Render::present( $r );
 					$short = (int) $r['duration'] < (int) $s['min_minutes'] * 60;
 					if ( ! (int) $r['detailed'] ) {
-						$state = 'ждёт ссылок';
+						$state = (int) $r['tries'] >= 5 ? 'сбои StreamVi, проверка ' . $fmt( $r['next_try'] ?? 0 ) : 'ждёт ссылок';
 					} elseif ( (int) $r['hidden'] ) {
 						$state = 'скрыта';
 					} elseif ( ! (int) $r['vk_id'] ) {
@@ -168,9 +194,17 @@ final class KZV_Admin {
 								<input type="text" name="title" value="<?php echo esc_attr( (string) $r['title_custom'] ); ?>" placeholder="<?php echo esc_attr( $v['title'] ); ?>" style="width:100%;min-width:220px">
 								<button class="button">ОК</button>
 							</form>
-							<?php if ( '' !== $v['concert'] ) : ?>
-								<a href="<?php echo esc_url( $v['concert'] ); ?>" target="_blank">концерт</a>
-							<?php endif; ?>
+							<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="display:flex;gap:6px;margin-top:4px;align-items:center">
+								<?php wp_nonce_field( 'kzv_row_' . $bid ); ?>
+								<input type="hidden" name="action" value="kzv_row">
+								<input type="hidden" name="bid" value="<?php echo esc_attr( (string) $bid ); ?>">
+								<input type="hidden" name="op" value="concert">
+								<?php if ( '' !== $v['concert'] ) : ?>
+									<a href="<?php echo esc_url( $v['concert'] ); ?>" target="_blank">концерт</a>
+								<?php endif; ?>
+								<input type="text" name="concert" value="" placeholder="<?php echo esc_attr( '' !== $v['concert'] ? 'другой концерт: ссылка или ID' : 'привязать концерт: ссылка или ID' ); ?>" style="width:100%;min-width:180px">
+								<button class="button">ОК</button>
+							</form>
 						</td>
 						<td><?php echo esc_html( KZV_Util::duration_label( (int) $r['duration'] ) ); ?></td>
 						<td>
@@ -190,6 +224,15 @@ final class KZV_Admin {
 								<input type="hidden" name="op" value="<?php echo (int) $r['hidden'] ? 'show' : 'hide'; ?>">
 								<button class="button-link"><?php echo (int) $r['hidden'] ? 'показать' : 'скрыть'; ?></button>
 							</form>
+							<?php if ( (int) $r['detailed'] && ! (int) $r['vk_id'] ) : ?>
+								<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="display:inline">
+									<?php wp_nonce_field( 'kzv_row_' . $bid ); ?>
+									<input type="hidden" name="action" value="kzv_row">
+									<input type="hidden" name="bid" value="<?php echo esc_attr( (string) $bid ); ?>">
+									<input type="hidden" name="op" value="recheck">
+									<button class="button-link">проверить ссылки снова</button>
+								</form>
+							<?php endif; ?>
 						</td>
 					</tr>
 				<?php endforeach; ?>
@@ -245,6 +288,7 @@ final class KZV_Admin {
 		KZV_Settings::update(
 			array(
 				'mode'         => (string) ( $in['mode'] ?? 'off' ),
+				'tv_page'      => (int) ( $in['tv_page'] ?? 0 ),
 				'live_page'    => (int) ( $in['live_page'] ?? 0 ),
 				'archive_page' => (int) ( $in['archive_page'] ?? 0 ),
 				'vk_owner'     => (int) ( $in['vk_owner'] ?? 0 ),
@@ -256,6 +300,7 @@ final class KZV_Admin {
 			)
 		);
 		delete_transient( KZV_Live::CACHE );
+		self::sync_tv_status();
 		self::purge_pages();
 		wp_safe_redirect( self::url( array( 'kzv_msg' => 'saved' ) ) );
 		exit;
@@ -273,6 +318,16 @@ final class KZV_Admin {
 				KZV_Store::set_hidden( $bid, 'hide' === $op );
 			} elseif ( 'title' === $op ) {
 				KZV_Store::set_custom_title( $bid, sanitize_text_field( wp_unslash( $_POST['title'] ?? '' ) ) );
+			} elseif ( 'recheck' === $op ) {
+				KZV_Store::recheck( $bid );
+			} elseif ( 'concert' === $op ) {
+				$raw = trim( sanitize_text_field( wp_unslash( $_POST['concert'] ?? '' ) ) );
+				$pid = ctype_digit( $raw ) ? (int) $raw : ( '' !== $raw ? (int) url_to_postid( $raw ) : 0 );
+				if ( $pid <= 0 || ! get_post( $pid ) ) {
+					wp_safe_redirect( self::url( array( 'kzv_msg' => 'nopost' ) ) );
+					exit;
+				}
+				KZV_Store::set_match( $bid, $pid, KZV_Util::clean_title( get_the_title( $pid ) ), KZV_Concerts::genres( $pid ) );
 			}
 			self::purge_pages();
 		}
@@ -317,15 +372,58 @@ final class KZV_Admin {
 		}
 	}
 
-	/** Сбросить кэш страниц эфира и архива (W3 Total Cache), чтобы посетители увидели изменения. */
-	public static function purge_pages() {
-		if ( ! function_exists( 'w3tc_flush_post' ) ) {
-			return;
+	/**
+	 * Создать страницу /tv/. Пока Kozlov TV не включён для всех, она видна только редакторам
+	 * (статус «личная»), поисковики и посетители её не видят.
+	 */
+	public static function create_tv() {
+		if ( ! current_user_can( self::CAP ) ) {
+			wp_die( 'Нет доступа', 403 );
 		}
-		foreach ( array( (int) KZV_Settings::get( 'live_page' ), (int) KZV_Settings::get( 'archive_page' ) ) as $id ) {
-			if ( $id ) {
-				w3tc_flush_post( $id );
+		check_admin_referer( 'kzv_create_tv' );
+		KZV_Settings::forget_pages();
+		if ( ! (int) KZV_Settings::get( 'tv_page' ) ) {
+			$id = wp_insert_post(
+				array(
+					'post_type'    => 'page',
+					'post_title'   => 'Kozlov TV',
+					'post_name'    => 'tv',
+					'post_status'  => 'all' === KZV_Settings::get( 'mode' ) ? 'publish' : 'private',
+					'post_content' => '<p>Концерты Главной сцены Клуба Алексея Козлова в прямом эфире и в записи: <a href="https://vkvideo.ru/@kozlovclubfan">VK Видео</a>, <a href="https://www.youtube.com/@kozlovclubtv">YouTube</a>.</p>',
+					'comment_status' => 'closed',
+					'ping_status'    => 'closed',
+				),
+				true
+			);
+			if ( ! is_wp_error( $id ) ) {
+				KZV_Settings::update( array( 'tv_page' => (int) $id ) );
+			} else {
+				KZV_Settings::note_error( 'страница /tv/: ' . $id->get_error_message() );
 			}
 		}
+		wp_safe_redirect( self::url( array( 'kzv_msg' => 'tv' ) ) );
+		exit;
+	}
+
+	/** Режим «всем»: страница /tv/ опубликована; иначе видна только редакторам. */
+	private static function sync_tv_status() {
+		$tv = (int) KZV_Settings::get( 'tv_page' );
+		if ( ! $tv || ! get_post( $tv ) ) {
+			return;
+		}
+		$want = 'all' === KZV_Settings::get( 'mode' ) ? 'publish' : 'private';
+		$have = get_post_status( $tv );
+		if ( $have !== $want && in_array( $have, array( 'publish', 'private', 'draft' ), true ) ) {
+			wp_update_post(
+				array(
+					'ID'          => $tv,
+					'post_status' => $want,
+				)
+			);
+		}
+	}
+
+	public static function purge_pages() {
+		KZV_Front::purge();
 	}
 }
