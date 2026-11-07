@@ -1,0 +1,395 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kozlovclub.ru/schemas/ezhednevny-standard-issue-v1.json",
+  "title": "Ежедневный стандарт: редакционный черновик выпуска",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "edition_date",
+    "timezone",
+    "edition_number",
+    "publication",
+    "articles",
+    "social",
+    "editorial"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0"
+    },
+    "edition_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "timezone": {
+      "const": "Europe/Moscow"
+    },
+    "edition_number": {
+      "type": "null",
+      "description": "Присваивается WordPress, не моделью"
+    },
+    "publication": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status"
+      ],
+      "properties": {
+        "status": {
+          "const": "draft"
+        }
+      }
+    },
+    "articles": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 7,
+      "items": {
+        "$ref": "#/$defs/article"
+      },
+      "description": "Для полного номера целевой диапазон 4–7; меньше 4 допускается только как неполный черновик с блокером"
+    },
+    "social": {
+      "type": "array",
+      "maxItems": 5,
+      "items": {
+        "$ref": "#/$defs/social"
+      }
+    },
+    "editorial": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ready_for_human_review",
+        "blocking_issues",
+        "source_scan_window_start",
+        "source_scan_window_end",
+        "generation_notes"
+      ],
+      "properties": {
+        "ready_for_human_review": {
+          "type": "boolean"
+        },
+        "blocking_issues": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "source_scan_window_start": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "source_scan_window_end": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "generation_notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title",
+        "publisher",
+        "url",
+        "published_at",
+        "type",
+        "verification_checked_at",
+        "dependency_group"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "publisher": {
+          "type": "string",
+          "minLength": 1
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "published_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "type": {
+          "enum": [
+            "official",
+            "independent_editorial",
+            "press_release",
+            "distributor",
+            "event_organizer",
+            "research_preprint",
+            "other"
+          ]
+        },
+        "verification_checked_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "dependency_group": {
+          "type": "string",
+          "description": "Одинаковое значение для перепечаток одного пресс-релиза"
+        }
+      }
+    },
+    "claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "statement",
+        "verification",
+        "source_ids",
+        "editorial_note"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "statement": {
+          "type": "string",
+          "minLength": 1
+        },
+        "verification": {
+          "enum": [
+            "verified_primary",
+            "verified_independent",
+            "attributed_single",
+            "unverified"
+          ]
+        },
+        "source_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "editorial_note": {
+          "type": "string"
+        }
+      }
+    },
+    "article": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "region",
+        "category",
+        "placement",
+        "headline",
+        "lead",
+        "body_paragraphs",
+        "summary",
+        "event_date",
+        "story_group_id",
+        "story_score",
+        "sources",
+        "claims",
+        "quotes",
+        "conflict_disclosure",
+        "editorial_notes",
+        "media_rights"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "region": {
+          "enum": [
+            "russia",
+            "world",
+            "mixed"
+          ]
+        },
+        "category": {
+          "enum": [
+            "jazz",
+            "blues",
+            "funk_soul",
+            "guitar_rock",
+            "festivals",
+            "instruments",
+            "research",
+            "other"
+          ]
+        },
+        "placement": {
+          "enum": [
+            "lead",
+            "feature",
+            "regular",
+            "brief"
+          ]
+        },
+        "headline": {
+          "type": "string",
+          "minLength": 6
+        },
+        "lead": {
+          "type": "string",
+          "minLength": 15
+        },
+        "body_paragraphs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 10
+        },
+        "event_date": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Дата реального события или релиза отдельно от публикации источника"
+        },
+        "story_group_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "story_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "sources": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/source"
+          }
+        },
+        "claims": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/claim"
+          }
+        },
+        "quotes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "original",
+              "translation_ru",
+              "source_id",
+              "verified"
+            ],
+            "properties": {
+              "original": {
+                "type": "string"
+              },
+              "translation_ru": {
+                "type": "string"
+              },
+              "source_id": {
+                "type": "string"
+              },
+              "verified": {
+                "const": true
+              }
+            }
+          }
+        },
+        "conflict_disclosure": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "editorial_notes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "media_rights": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "image_url",
+            "status",
+            "credit"
+          ],
+          "properties": {
+            "image_url": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "status": {
+              "enum": [
+                "licensed",
+                "owned",
+                "verified_permission",
+                "none"
+              ]
+            },
+            "credit": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "social": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "article_id",
+        "telegram_sentence",
+        "instagram_sentence",
+        "visual_format"
+      ],
+      "properties": {
+        "article_id": {
+          "type": "string"
+        },
+        "telegram_sentence": {
+          "type": "string",
+          "minLength": 10
+        },
+        "instagram_sentence": {
+          "type": "string",
+          "minLength": 10
+        },
+        "visual_format": {
+          "const": "1080x1350"
+        }
+      }
+    }
+  }
+}

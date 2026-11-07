@@ -1,0 +1,226 @@
+{
+  "schema_version": "1.1",
+  "edition_date": "2026-11-07",
+  "timezone": "Europe/Moscow",
+  "edition_number": 18,
+  "publication": {
+    "status": "draft"
+  },
+  "import_id": "jazzeta-2026-11-07-REVIEW-BLOCKED",
+  "articles": [
+    {
+      "id": "nicola-angelucci-identithree-20261107",
+      "region": "world",
+      "category": "releases",
+      "placement": "lead",
+      "headline": "Никола Анджелуччи выпустил Identithree: трио без привычного распределения ролей",
+      "lead": "6 ноября итальянский барабанщик Никола Анджелуччи представил альбом Identithree с пианистом Энрико Дзанизи и контрабасистом Энцо Пьетропаоли.",
+      "body_paragraphs": [
+        "Новый альбом итальянского барабанщика Николы Анджелуччи Identithree вышел 6 ноября на лейбле GleAM. В составе трио — пианист Энрико Дзанизи и контрабасист Энцо Пьетропаоли. Рецензия UK Jazz News называет запись примером современного итальянского джаза, где лидерство проявляется не столько в продолжительности сольных эпизодов, сколько в организации общего музыкального разговора.",
+        "Музыканты записали программу 14 и 15 марта 2026 года на Geko Music Factory в Риме. Пять произведений написал Анджелуччи, по одному — Дзанизи и Пьетропаоли. Рядом с авторской музыкой оказались спиричуэл Swing Low, Sweet Chariot и Solar Майлза Дэвиса.",
+        "Сочетание этих двух известных тем с новыми сочинениями даёт слушателю ориентиры, но не превращает альбом в сборник стандартов. Его основа — репертуар, специально созданный для конкретного состава. Это запись, в которой ритм-секция не просто поддерживает солиста: все три инструмента участвуют в формировании формы.",
+        "Для знакомства с альбомом полезно начать именно с контраста между авторскими пьесами и Solar. Так легче услышать, как ансамбль обращается с заранее известным материалом и как выстраивает собственный музыкальный язык."
+      ],
+      "summary": "6 ноября итальянский барабанщик Никола Анджелуччи представил альбом Identithree с пианистом Энрико Дзанизи и контрабасистом Энцо Пьетропаоли.",
+      "event_date": "2026-11-06",
+      "event_id": "nicola-angelucci-identithree-20261106",
+      "story_group_id": "nicola-angelucci-identithree-2026",
+      "story_score": 70,
+      "sources": [
+        {
+          "id": "source-1",
+          "title": "Обзор новых джазовых релизов, ноябрь 2026",
+          "publisher": "UK Jazz News",
+          "url": "https://ukjazznews.com/nicola-angelucci-identithree/"
+        }
+      ],
+      "claims": [],
+      "quotes": [],
+      "conflict_disclosure": "",
+      "editorial_notes": "REVIEW ONLY: independent primary source verification pending",
+      "media_rights": null,
+      "previous_article_ids": [],
+      "development_note": ""
+    },
+    {
+      "id": "michael-garrick-voyages-20261107",
+      "region": "world",
+      "category": "releases",
+      "placement": "secondary",
+      "headline": "Четыре альбома Майкла Гаррика вернулись в одном виниловом собрании",
+      "lead": "6 ноября вышел бокс Voyages — The Argo Studio Albums Vol. I, посвящённый британскому пианисту и композитору Майклу Гаррику.",
+      "body_paragraphs": [
+        "Серия British Jazz Explosion пополнилась 6 ноября виниловым собранием Voyages — The Argo Studio Albums Vol. I. В центре издания — четыре работы британского пианиста и композитора Майкла Гаррика, первоначально появившиеся на лейбле Argo между 1970 и 1974 годами.",
+        "В коробку вошли The Heart Is a Lotus, Mr Smith’s Apocalypse (под именем Garrick’s Fairground), Home Stretch Blues и Troppo. Сборник представляет не один знаменитый концерт или подборку лучших пьес, а целый отрезок студийной работы музыканта.",
+        "В истории британского джаза Гаррик интересен сочетанием композиционного мышления и импровизационной свободы. Его музыка не ограничивалась копированием американских моделей: в ней уживались камерные формы, большие ансамблевые замыслы и собственная интонация.",
+        "Переиздание важно прежде всего как возможность услышать соседние альбомы в хронологической перспективе. Различия между ними позволяют проследить, как менялись аранжировки и представления Гаррика о возможностях британского джазового ансамбля."
+      ],
+      "summary": "6 ноября вышел бокс Voyages — The Argo Studio Albums Vol. I, посвящённый британскому пианисту и композитору Майклу Гаррику.",
+      "event_date": "2026-11-06",
+      "event_id": "michael-garrick-voyages-20261106",
+      "story_group_id": "michael-garrick-voyages-2026",
+      "story_score": 65,
+      "sources": [
+        {
+          "id": "source-2",
+          "title": "Обзор новых джазовых релизов, ноябрь 2026",
+          "publisher": "Jazz Journal",
+          "url": "https://jazzjournal.co.uk/2026/11/04/new-releases-october-november-2026-f-g/"
+        }
+      ],
+      "claims": [],
+      "quotes": [],
+      "conflict_disclosure": "",
+      "editorial_notes": "REVIEW ONLY: independent primary source verification pending",
+      "media_rights": null,
+      "previous_article_ids": [],
+      "development_note": ""
+    },
+    {
+      "id": "petter-eldh-noah-fuerbringer-drift-20261107",
+      "region": "world",
+      "category": "releases",
+      "placement": "secondary",
+      "headline": "Петтер Эльд и Ноа Фюрбрингер сжали джазовую импровизацию до коротких треков",
+      "lead": "Новый EP Drift соединяет джазовую ритмику, сэмплирование и эстетику хип-хоп-микстейпа.",
+      "body_paragraphs": [
+        "Басист Петтер Эльд и барабанщик Ноа Фюрбрингер представили совместный проект Drift. В обзоре релизов от 6 ноября Presto Music характеризует EP как встречу импровизационной инструментальной музыки с сэмплированием и хип-хоп-эстетикой.",
+        "В отличие от традиционного джазового альбома с длинными композициями, здесь каждая пьеса длится менее трёх минут. Такой формат меняет привычное ожидание: развитие идеи происходит быстро, а переходы между фрагментами становятся частью общего ритма записи.",
+        "В центре внимания — не противопоставление живого инструмента электронному звуку, а их взаимодействие. Ритмические рисунки ударных и баса соседствуют с обработанными звуковыми слоями; в результате импровизация оказывается встроенной в плотную, почти монтажную структуру.",
+        "Drift интересен как пример того, как европейские джазовые музыканты используют язык современной битовой музыки без отказа от ансамблевого мышления. Слушателю, привыкшему к длинным соло, этот EP предлагает иной масштаб музыкального высказывания."
+      ],
+      "summary": "Новый EP Drift соединяет джазовую ритмику, сэмплирование и эстетику хип-хоп-микстейпа.",
+      "event_date": "2026-11-06",
+      "event_id": "petter-eldh-noah-fuerbringer-drift-20261106",
+      "story_group_id": "petter-eldh-noah-fuerbringer-drift-2026",
+      "story_score": 60,
+      "sources": [
+        {
+          "id": "source-3",
+          "title": "Обзор новых джазовых релизов, ноябрь 2026",
+          "publisher": "Presto Music",
+          "url": "https://www.prestomusic.com/jazz/articles/7458--new-release-round-up-new-release-round-up-6th-november-2026"
+        }
+      ],
+      "claims": [],
+      "quotes": [],
+      "conflict_disclosure": "",
+      "editorial_notes": "REVIEW ONLY: independent primary source verification pending",
+      "media_rights": null,
+      "previous_article_ids": [],
+      "development_note": ""
+    },
+    {
+      "id": "matthew-shipp-william-parker-new-release-20261107",
+      "region": "world",
+      "category": "releases",
+      "placement": "secondary",
+      "headline": "Мэттью Шипп и Уильям Паркер вновь встретились в дуэте",
+      "lead": "В подборке релизов 6 ноября Presto Music выделил новую совместную работу пианиста Мэттью Шиппа и контрабасиста Уильяма Паркера.",
+      "body_paragraphs": [
+        "Пианист Мэттью Шипп и контрабасист Уильям Паркер — два заметных участника американской свободно-импровизационной сцены. Их дуэтная работа упомянута в обзоре новых джазовых записей, опубликованном Presto Music 6 ноября.",
+        "Формат фортепиано и контрабаса оставляет музыкантам мало возможностей спрятаться за оркестровкой. Каждое изменение фактуры, регистра и плотности звука становится слышимым. Для свободной импровизации это одновременно ограничение и источник выразительности.",
+        "Шипп и Паркер давно связаны с музыкой, в которой форма возникает непосредственно во время исполнения. Поэтому интерес к их дуэту связан не с обещанием эффектных соло, а с тем, как два самостоятельных голоса договариваются о движении музыки.",
+        "Название и подробный трек-лист новой записи требуют отдельной сверки по каталогу издателя. До такой проверки материал следует рассматривать как редакционный кандидат, а не окончательно подтверждённую новость."
+      ],
+      "summary": "В подборке релизов 6 ноября Presto Music выделил новую совместную работу пианиста Мэттью Шиппа и контрабасиста Уильяма Паркера.",
+      "event_date": "2026-11-06",
+      "event_id": "matthew-shipp-william-parker-new-release-20261106",
+      "story_group_id": "matthew-shipp-william-parker-new-release-2026",
+      "story_score": 55,
+      "sources": [
+        {
+          "id": "source-4",
+          "title": "Обзор новых джазовых релизов, ноябрь 2026",
+          "publisher": "Presto Music",
+          "url": "https://www.prestomusic.com/jazz/articles/7458--new-release-round-up-new-release-round-up-6th-november-2026"
+        }
+      ],
+      "claims": [],
+      "quotes": [],
+      "conflict_disclosure": "",
+      "editorial_notes": "REVIEW ONLY: independent primary source verification pending",
+      "media_rights": null,
+      "previous_article_ids": [],
+      "development_note": ""
+    },
+    {
+      "id": "zohar-adam-osmosis-20261107",
+      "region": "world",
+      "category": "releases",
+      "placement": "secondary",
+      "headline": "Братья Zohar & Adam представили дебют Osmosis на стыке джаза и электроники",
+      "lead": "Дебютный альбом дуэта братьев Zohar & Adam включён в обзор новинок Presto Music от 6 ноября.",
+      "body_paragraphs": [
+        "Дуэт братьев Zohar & Adam выпустил дебютный альбом Osmosis. В обзоре новых релизов Presto Music от 6 ноября запись описана как работа на пересечении джаза, хип-хопа, инди-музыки, электроники и звуков окружающего мира.",
+        "Само название — «Осмос» — подсказывает принцип музыкального обмена: жанровые границы здесь не столько пересекаются, сколько постепенно растворяются. Вместо попытки выдержать единый стиль музыканты используют разнородные звуковые элементы как материал для собственной композиционной логики.",
+        "Дебют такого рода интересен не количеством жанров в рекламном описании, а тем, удаётся ли соединить их в узнаваемый язык. Наиболее существенный вопрос для слушателя — какую роль играет импровизация среди электронных и песенных структур.",
+        "Пока доступный обзор не даёт достаточных данных о полном составе участников и истории записи. Эти сведения необходимо дополнительно проверить перед публикацией."
+      ],
+      "summary": "Дебютный альбом дуэта братьев Zohar & Adam включён в обзор новинок Presto Music от 6 ноября.",
+      "event_date": "2026-11-06",
+      "event_id": "zohar-adam-osmosis-20261106",
+      "story_group_id": "zohar-adam-osmosis-2026",
+      "story_score": 50,
+      "sources": [
+        {
+          "id": "source-5",
+          "title": "Обзор новых джазовых релизов, ноябрь 2026",
+          "publisher": "Presto Music",
+          "url": "https://www.prestomusic.com/jazz/articles/7458--new-release-round-up-new-release-round-up-6th-november-2026"
+        }
+      ],
+      "claims": [],
+      "quotes": [],
+      "conflict_disclosure": "",
+      "editorial_notes": "REVIEW ONLY: independent primary source verification pending",
+      "media_rights": null,
+      "previous_article_ids": [],
+      "development_note": ""
+    }
+  ],
+  "social": [
+    {
+      "article_id": "nicola-angelucci-identithree-20261107",
+      "telegram_sentence": "6 ноября итальянский барабанщик Никола Анджелуччи представил альбом Identithree с пианистом Энрико Дзанизи и контрабасистом Энцо Пьетропаоли.",
+      "instagram_sentence": "Никола Анджелуччи выпустил Identithree: трио без привычного распределения ролей. 6 ноября итальянский барабанщик Никола Анджелуччи представил альбом Identithree с пианистом Энрико Дзанизи и контрабасистом Энцо Пьетропаоли.",
+      "visual_format": "1080x1350"
+    },
+    {
+      "article_id": "michael-garrick-voyages-20261107",
+      "telegram_sentence": "6 ноября вышел бокс Voyages — The Argo Studio Albums Vol. I, посвящённый британскому пианисту и композитору Майклу Гаррику.",
+      "instagram_sentence": "Четыре альбома Майкла Гаррика вернулись в одном виниловом собрании. 6 ноября вышел бокс Voyages — The Argo Studio Albums Vol. I, посвящённый британскому пианисту и композитору Майклу Гаррику.",
+      "visual_format": "1080x1350"
+    },
+    {
+      "article_id": "petter-eldh-noah-fuerbringer-drift-20261107",
+      "telegram_sentence": "Новый EP Drift соединяет джазовую ритмику, сэмплирование и эстетику хип-хоп-микстейпа.",
+      "instagram_sentence": "Петтер Эльд и Ноа Фюрбрингер сжали джазовую импровизацию до коротких треков. Новый EP Drift соединяет джазовую ритмику, сэмплирование и эстетику хип-хоп-микстейпа.",
+      "visual_format": "1080x1350"
+    },
+    {
+      "article_id": "matthew-shipp-william-parker-new-release-20261107",
+      "telegram_sentence": "В подборке релизов 6 ноября Presto Music выделил новую совместную работу пианиста Мэттью Шиппа и контрабасиста Уильяма Паркера.",
+      "instagram_sentence": "Мэттью Шипп и Уильям Паркер вновь встретились в дуэте. В подборке релизов 6 ноября Presto Music выделил новую совместную работу пианиста Мэттью Шиппа и контрабасиста Уильяма Паркера.",
+      "visual_format": "1080x1350"
+    },
+    {
+      "article_id": "zohar-adam-osmosis-20261107",
+      "telegram_sentence": "Дебютный альбом дуэта братьев Zohar & Adam включён в обзор новинок Presto Music от 6 ноября.",
+      "instagram_sentence": "Братья Zohar & Adam представили дебют Osmosis на стыке джаза и электроники. Дебютный альбом дуэта братьев Zohar & Adam включён в обзор новинок Presto Music от 6 ноября.",
+      "visual_format": "1080x1350"
+    }
+  ],
+  "editorial": {
+    "ready_for_human_review": true,
+    "blocking_issues": [
+      "NOT FOR IMPORT: full primary-source verification and claim cards incomplete",
+      "Two stories rely on one secondary roundup and need editorial confirmation",
+      "Published archive full story_group_id/event_id registry not obtained",
+      "WordPress importer compatibility and existing draft version unverified"
+    ],
+    "source_scan_window_start": "2026-11-04",
+    "source_scan_window_end": "2026-11-06",
+    "generation_notes": "Editorial candidates only; do not import."
+  }
+}

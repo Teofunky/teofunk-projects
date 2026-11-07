@@ -1,0 +1,20 @@
+{
+  "schema": "https://kozlovclub.ru/wp-content/plugins/kozlov-jazzeta/schemas/issue.schema.json",
+  "schema_validation": "passed",
+  "articles": 5,
+  "social_items": 5,
+  "claims_source_ids": "passed",
+  "unverified_claims": 0,
+  "publication_status": "draft",
+  "edition_number": null,
+  "archive_articles_checked": 25,
+  "html_structure_and_internal_links": "passed",
+  "embedded_photo_bytes": "passed",
+  "photo_source_and_license_links": "passed",
+  "photo_alt": "passed",
+  "photo_dimensions": [
+    2000,
+    3180
+  ],
+  "visual_browser_render": "not_completed: headless browser executable unavailable; download failed; no visual render claimed"
+}

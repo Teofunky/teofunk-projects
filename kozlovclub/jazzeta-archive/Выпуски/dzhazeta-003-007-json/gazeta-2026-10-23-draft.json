@@ -1,0 +1,481 @@
+{
+  "schema_version": "1.1",
+  "edition_date": "2026-10-23",
+  "timezone": "Europe/Moscow",
+  "edition_number": null,
+  "publication": {
+    "status": "draft"
+  },
+  "articles": [
+    {
+      "quotes": [],
+      "conflict_disclosure": null,
+      "media_rights": {
+        "image_url": "https://kozlovclub.ru/wp-content/uploads/2026/10/Jeff_Parker_Quartet_Transition_Festival_Tivoli_Vredenburg_Utrecht_8_april_2017_-_Josh_Johnson_51335236893.jpg",
+        "status": "licensed",
+        "credit": "Джош Джонсон, Transition Festival, Утрехт, 8 апреля 2017. Фото: Dirk Neven / Wikimedia Commons, CC BY 2.0. Кадрирование для полосы. Источник и лицензия — в ссылках к материалу."
+      },
+      "previous_article_ids": [],
+      "id": "johnson-animative-20261023",
+      "region": "world",
+      "category": "jazz",
+      "placement": "lead",
+      "headline": "Джош Джонсон выпускает Animative: стриминг появится в ноябре",
+      "lead": "Третий сольный альбом саксофониста выходит 23 октября на International Anthem и Nonesuch. Сначала — на физических носителях и в цифровой продаже.",
+      "body_paragraphs": [
+        "У Animative две даты выхода. Лейблы назначили релиз на 23 октября 2026 года, а появление на стриминговых сервисах — на 10 ноября. Поэтому отсутствие полной записи в подписке в день премьеры само по себе не означает переноса.",
+        "Джонсон записал десять композиций и спродюсировал альбом вместе с Полом Брайаном. Среди участников — Мишель Ндегеочелло, Мэйси Стюарт, Маркиз Хилл и Бен Ламсдейн. До релиза были представлены Reece и It Can Be Everywhere.",
+        "По описанию Nonesuch, саксофон здесь служит не только мелодическим голосом: его сигнал участвует в управлении сэмплером и драм-машиной. Это продолжение работы Джонсона на пересечении импровизации и электроники.",
+        "Animative следует за Unusual Object 2024 года и становится первым совместным релизом музыканта на International Anthem и Nonesuch. Помимо сольных записей, Джонсон известен по группе SML и квартету Джеффа Паркера."
+      ],
+      "summary": "У нового альбома Джоша Джонсона раздельные даты продаж и стриминга: 23 октября и 10 ноября.",
+      "event_date": "2026-10-23",
+      "event_id": "josh-johnson-animative-release-20261023",
+      "story_group_id": "josh-johnson-animative",
+      "story_score": 88,
+      "sources": [
+        {
+          "id": "josh-nonesuch",
+          "title": "Josh Johnson's Animative Due October 23 on International Anthem / Nonesuch Records",
+          "publisher": "Nonesuch",
+          "url": "https://www.nonesuch.com/journal/josh-johnson-album-animative-due-october-23-international-anthem-nonesuch-records-2026-09-09",
+          "published_at": "2026-09-09",
+          "type": "official",
+          "verification_checked_at": "2026-10-22T17:08:59Z",
+          "dependency_group": "josh-animative-label"
+        },
+        {
+          "id": "josh-bandcamp",
+          "title": "Animative — Josh Johnson",
+          "publisher": "International Anthem / Bandcamp",
+          "url": "https://intlanthem.bandcamp.com/album/animative",
+          "published_at": null,
+          "type": "official",
+          "verification_checked_at": "2026-10-22T17:08:59Z",
+          "dependency_group": "josh-animative-label"
+        },
+        {
+          "id": "josh-photo",
+          "title": "Josh Johnson: Transition Festival, Utrecht, 8 April 2017 — Dirk Neven",
+          "publisher": "Wikimedia Commons",
+          "url": "https://commons.wikimedia.org/wiki/File:Jeff_Parker_Quartet,_Transition_Festival_Tivoli_Vredenburg_Utrecht,_8_april_2017_-_Josh_Johnson_(51335236893).jpg",
+          "published_at": null,
+          "type": "other",
+          "verification_checked_at": "2026-10-22T17:08:59Z",
+          "dependency_group": "josh-photo-dirkn"
+        },
+        {
+          "id": "josh-license",
+          "title": "Creative Commons Attribution 2.0 Generic",
+          "publisher": "Creative Commons",
+          "url": "https://creativecommons.org/licenses/by/2.0/",
+          "published_at": null,
+          "type": "official",
+          "verification_checked_at": "2026-10-22T17:08:59Z",
+          "dependency_group": "cc-by-2"
+        }
+      ],
+      "claims": [
+        {
+          "id": "josh-dates",
+          "statement": "Релиз — 23 октября 2026 года; стриминг — 10 ноября.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "josh-nonesuch",
+            "josh-bandcamp"
+          ],
+          "editorial_note": "Проверено по указанным источникам."
+        },
+        {
+          "id": "josh-record",
+          "statement": "Третий сольный альбом; десять треков; сопродюсер Пол Брайан.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "josh-nonesuch",
+            "josh-bandcamp"
+          ],
+          "editorial_note": "Проверено по указанным источникам."
+        },
+        {
+          "id": "josh-method",
+          "statement": "Описание работы с электроникой приводится со ссылкой на лейбл.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "josh-nonesuch"
+          ],
+          "editorial_note": "Проверено по указанным источникам."
+        }
+      ],
+      "editorial_notes": [
+        "Даты продаж и стриминга намеренно разделены. Перед публикацией 23 октября проверить, что заявленный релиз состоялся.",
+        "Фото: Dirk Neven, Джош Джонсон на Transition Festival в Утрехте, 8 апреля 2017 года; CC BY 2.0. Это архивный снимок, не фотография с записи Animative. Файл загружен в медиатеку сайта."
+      ]
+    },
+    {
+      "quotes": [],
+      "conflict_disclosure": null,
+      "media_rights": {
+        "image_url": null,
+        "status": "none",
+        "credit": ""
+      },
+      "previous_article_ids": [],
+      "id": "delucia-brubeck-octet-20261023",
+      "region": "world",
+      "category": "jazz",
+      "placement": "feature",
+      "headline": "Джон Де Лючия возвращается к музыке октета Брубека",
+      "lead": "The Brubeck Octet Project Strikes Again! выходит 23 октября. Саксофонист и его ансамбль продолжают работу с репертуаром раннего октета Дэйва Брубека.",
+      "body_paragraphs": [
+        "Это новая исполнительская запись, а не публикация архивной фонограммы Брубека. Де Лючия восстанавливает и заново исполняет музыку октета; первый альбом проекта вышел в 2024 году.",
+        "В новой программе есть Stardust в аранжировке Пола Дезмонда, восстановленной по четырём сохранившимся партиям, и Fugue II Дэвида Ван Кридта. Де Лючия также включил собственную By Heart, основанную на гармонической последовательности My Heart Stood Still.",
+        "В ансамбле играют, в частности, трубач Брэндон Ли, саксофонист Скотт Робинсон и пианист Гленн Залески. Сессия прошла 15 декабря 2025 года в нью-йоркской Pinch Recording.",
+        "Цифровой альбом и CD заявлены на 23 октября 2026 года; на странице предзаказа отправка винила ожидается примерно 10 ноября. В цифровом и CD-издании — одиннадцать пьес."
+      ],
+      "summary": "Новый альбом проекта Джона Де Лючии соединяет восстановленные аранжировки октета Брубека и собственную композицию лидера.",
+      "event_date": "2026-10-23",
+      "event_id": "delucia-brubeck-octet-strikes-again-20261023",
+      "story_group_id": "delucia-brubeck-octet-strikes-again",
+      "story_score": 82,
+      "sources": [
+        {
+          "id": "brubeck-artist",
+          "title": "The Brubeck Octet Project — EPK",
+          "publisher": "Jon De Lucia",
+          "url": "https://www.jondelucia.com/jon-de-lucia-the-brubeck-octet-project-epk",
+          "published_at": null,
+          "type": "official",
+          "verification_checked_at": "2026-10-22T17:08:59Z",
+          "dependency_group": "delucia-brubeck-release"
+        },
+        {
+          "id": "brubeck-bandcamp",
+          "title": "The Brubeck Octet Project Strikes Again!",
+          "publisher": "Jon De Lucia / Bandcamp",
+          "url": "https://jondelucia.bandcamp.com/album/the-brubeck-octet-project-strikes-again",
+          "published_at": null,
+          "type": "official",
+          "verification_checked_at": "2026-10-22T17:08:59Z",
+          "dependency_group": "delucia-brubeck-release"
+        }
+      ],
+      "claims": [
+        {
+          "id": "brubeck-date",
+          "statement": "Цифровой релиз и CD — 23 октября; винил ожидается к отправке около 10 ноября.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "brubeck-bandcamp"
+          ],
+          "editorial_note": "Проверено по указанным источникам."
+        },
+        {
+          "id": "brubeck-program",
+          "statement": "Программа включает восстановленную Stardust, Fugue II и By Heart.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "brubeck-artist",
+            "brubeck-bandcamp"
+          ],
+          "editorial_note": "Проверено по указанным источникам."
+        },
+        {
+          "id": "brubeck-recording",
+          "statement": "Это новая запись ансамбля Де Лючии, сделанная 15 декабря 2025 года.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "brubeck-bandcamp"
+          ],
+          "editorial_note": "Проверено по указанным источникам."
+        }
+      ],
+      "editorial_notes": [
+        "На странице EPK раздел с исходным альбомом 2024 года отделён от описания нового выпуска. Дата отправки винила не приравнена к дате цифрового релиза."
+      ]
+    },
+    {
+      "quotes": [],
+      "conflict_disclosure": null,
+      "media_rights": {
+        "image_url": null,
+        "status": "none",
+        "credit": ""
+      },
+      "previous_article_ids": [],
+      "id": "baikal-jazz-competition-20261023",
+      "region": "russia",
+      "category": "festivals",
+      "placement": "regular",
+      "headline": "«Джаз на Байкале» принимает заявки на конкурс музыкантов",
+      "lead": "В Иркутске готовят конкурс для солистов, ансамблей и оркестров. По сообщению «Глагола», заявки принимаются по 8 ноября включительно.",
+      "body_paragraphs": [
+        "«Глагол. Иркутское обозрение» 22 октября сообщил, что конкурс пройдёт 19–22 ноября 2026 года в рамках фестиваля «Джаз на Байкале». На официальном сайте проекта открыта форма заявки и опубликована ссылка на положение.",
+        "Организаторы приглашают инструменталистов и вокалистов, ансамбли и оркестры. Участвовать могут учащиеся музыкальных школ, колледжей и вузов, а также музыканты из России и других стран.",
+        "Помимо конкурсных выступлений заявлены бесплатные мастер-классы: по данным «Глагола», они пройдут 21 ноября в Иркутской областной детской школе искусств на улице Желябова, 9.",
+        "Проект ведёт историю с 2009 года; с 2011-го его патроном является Игорь Бутман. Условия своей номинации и комплект документов участникам следует сверить с положением на сайте конкурса."
+      ],
+      "summary": "В Иркутске открыт приём заявок на «Джаз на Байкале»; конкурсные дни заявлены на 19–22 ноября.",
+      "event_date": "2026-11-19",
+      "event_id": "jazz-baikal-competition-2026",
+      "story_group_id": "jazz-baikal-competition-2026",
+      "story_score": 77,
+      "sources": [
+        {
+          "id": "baikal-official",
+          "title": "Конкурс «Джаз на Байкале»",
+          "publisher": "Джаз на Байкале",
+          "url": "https://baikaljazz.ru/konkurs/",
+          "published_at": null,
+          "type": "event_organizer",
+          "verification_checked_at": "2026-10-22T17:08:59Z",
+          "dependency_group": "baikal-competition-2026"
+        },
+        {
+          "id": "baikal-announcement",
+          "title": "Фестиваль-конкурс «Джаз на Байкале — 2026»",
+          "publisher": "Джаз на Байкале",
+          "url": "https://baikaljazz.ru/2026/10/12/festival-konkurs-dzhaz-na-bajkale-2026/",
+          "published_at": null,
+          "type": "event_organizer",
+          "verification_checked_at": "2026-10-22T17:08:59Z",
+          "dependency_group": "baikal-competition-2026"
+        },
+        {
+          "id": "baikal-glagol",
+          "title": "Музыкальный конкурс под патронатом Игоря Бутмана пройдет в рамках международного фестиваля «Джаз на Байкале»",
+          "publisher": "Глагол. Иркутское обозрение",
+          "url": "https://glagol38.ru/text/22-10-2026/007",
+          "published_at": "2026-10-22",
+          "type": "independent_editorial",
+          "verification_checked_at": "2026-10-22T17:08:59Z",
+          "dependency_group": "baikal-competition-2026"
+        }
+      ],
+      "claims": [
+        {
+          "id": "baikal-open",
+          "statement": "Официальный сайт принимает заявки солистов и коллективов на конкурс 2026 года.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "baikal-official",
+            "baikal-announcement"
+          ],
+          "editorial_note": "Проверено по указанным источникам."
+        },
+        {
+          "id": "baikal-dates",
+          "statement": "По сообщению «Глагола», конкурс пройдёт 19–22 ноября, приём заявок — до 8 ноября включительно.",
+          "verification": "attributed_single",
+          "source_ids": [
+            "baikal-glagol"
+          ],
+          "editorial_note": "Точные даты атрибутированы изданию; текст положения не проверен."
+        },
+        {
+          "id": "baikal-workshops",
+          "statement": "«Глагол» сообщает о бесплатных мастер-классах 21 ноября в школе искусств на Желябова, 9.",
+          "verification": "attributed_single",
+          "source_ids": [
+            "baikal-glagol"
+          ],
+          "editorial_note": "Не выдавать это сообщение за отдельное независимое подтверждение организатора."
+        }
+      ],
+      "editorial_notes": [
+        "Точные даты и дедлайн приведены с явной атрибуцией «Глаголу». Перед публикацией желательно дополнительно сверить действующее положение конкурса."
+      ]
+    },
+    {
+      "quotes": [],
+      "conflict_disclosure": null,
+      "media_rights": {
+        "image_url": null,
+        "status": "none",
+        "credit": ""
+      },
+      "previous_article_ids": [],
+      "id": "jazzmandu-2026-program-20261023",
+      "region": "world",
+      "category": "festivals",
+      "placement": "regular",
+      "headline": "Jazzmandu готовит неделю концертов с Тито Пуэнте-младшим",
+      "lead": "Фестиваль в Катманду пройдёт с 29 октября по 4 ноября. В программе — латиноамериканский джаз, европейские ансамбли и непальские группы.",
+      "body_paragraphs": [
+        "Организаторы Jazzmandu опубликовали программу на 2026 год. Среди участников — Тито Пуэнте-младший, Manon Mullener Trio, Kevin Saura Group, Cesar Haas и Nick Aggs Quartet. Непальскую сцену представят, в частности, Cadenza Collective и Kanta Dab Dab.",
+        "31 октября в Gokarna Forest Resort состоится Jazz Bazaar: шестичасовая программа с участием фестивальных составов. На 2 ноября назначен вечер Red Hot Latin Jazz с Тито Пуэнте-младшим и фестивальными All Stars.",
+        "Фестиваль соединяет концерты с образовательной программой. 3 ноября объявлены бесплатные мастер-классы; школьный концерт 29 октября проводится по приглашениям. Финал назначен на 4 ноября в The Malla Hotel.",
+        "Концерты распределены между несколькими площадками долины Катманду. Условия входа и время каждого выступления указаны отдельно в официальном расписании."
+      ],
+      "summary": "Jazzmandu объединит международных участников и непальскую сцену в программе с 29 октября по 4 ноября.",
+      "event_date": "2026-10-29",
+      "event_id": "jazzmandu-festival-2026",
+      "story_group_id": "jazzmandu-festival-2026",
+      "story_score": 74,
+      "sources": [
+        {
+          "id": "jazzmandu-home",
+          "title": "Jazzmandu 2026 — artists",
+          "publisher": "Jazzmandu",
+          "url": "https://jazzmandu.org/",
+          "published_at": null,
+          "type": "event_organizer",
+          "verification_checked_at": "2026-10-22T17:08:59Z",
+          "dependency_group": "jazzmandu-2026-program"
+        },
+        {
+          "id": "jazzmandu-program",
+          "title": "Jazzmandu 2026 — Concert Schedule",
+          "publisher": "Jazzmandu",
+          "url": "https://jazzmandu.org/concert-schedule/",
+          "published_at": null,
+          "type": "event_organizer",
+          "verification_checked_at": "2026-10-22T17:08:59Z",
+          "dependency_group": "jazzmandu-2026-program"
+        }
+      ],
+      "claims": [
+        {
+          "id": "jazzmandu-dates",
+          "statement": "Фестиваль запланирован на 29 октября — 4 ноября 2026 года.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "jazzmandu-home",
+            "jazzmandu-program"
+          ],
+          "editorial_note": "Проверено по указанным источникам."
+        },
+        {
+          "id": "jazzmandu-events",
+          "statement": "Jazz Bazaar — 31 октября; Red Hot Latin Jazz — 2 ноября; бесплатные мастер-классы — 3 ноября.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "jazzmandu-program"
+          ],
+          "editorial_note": "Проверено по указанным источникам."
+        }
+      ],
+      "editorial_notes": [
+        "Сведения проверены по программе организатора; две страницы одного фестиваля не считаются двумя независимыми подтверждениями. Школьный концерт не объявлен общедоступным."
+      ]
+    },
+    {
+      "quotes": [],
+      "conflict_disclosure": null,
+      "media_rights": {
+        "image_url": null,
+        "status": "none",
+        "credit": ""
+      },
+      "previous_article_ids": [],
+      "id": "anna-webber-nonet-20261023",
+      "region": "world",
+      "category": "jazz",
+      "placement": "brief",
+      "headline": "Анна Уэббер собрала нонет с Мэри Хэлворсон и Ингрид Лауброк",
+      "lead": "Альбом it's easier to imagine the end of the world... выйдет 30 октября на Intakt. На 23 октября назначен бонус-трек (Lewis Hyde).",
+      "body_paragraphs": [
+        "Саксофонистка, флейтистка и композитор Анна Уэббер записала новую программу для девяти музыкантов. В составе — Мэри Хэлворсон, Ингрид Лауброк, Дэвид Виреллес и Чес Смит; Доён Ким играет на 25-струнном каягыме.",
+        "Сессии прошли 25 и 26 января 2026 года в бруклинской The Bunker Studio. Все композиции написала Уэббер. По пояснению Intakt, литературной отправной точкой стали работы о позднем капитализме и его последствиях.",
+        "До альбома лейбл выпускает три цифровых бонус-трека. (Lewis Hyde) завершает эту последовательность 23 октября; бонусы входят в покупку цифрового альбома или CD."
+      ],
+      "summary": "Новый нонет Анны Уэббер выходит на Intakt через неделю; очередной бонус-трек назначен на 23 октября.",
+      "event_date": "2026-10-23",
+      "event_id": "anna-webber-lewis-hyde-20261023",
+      "story_group_id": "anna-webber-end-world-2026",
+      "story_score": 81,
+      "sources": [
+        {
+          "id": "webber-artist",
+          "title": "it's easier to imagine the end of the world... — release announcement",
+          "publisher": "Anna Webber",
+          "url": "https://www.annakristinwebber.com/",
+          "published_at": null,
+          "type": "official",
+          "verification_checked_at": "2026-10-22T17:08:59Z",
+          "dependency_group": "webber-intakt-459"
+        },
+        {
+          "id": "webber-label",
+          "title": "459: ANNA WEBBER. it's easier to imagine the end of the world...",
+          "publisher": "Intakt Records",
+          "url": "https://intaktrec.ch/collections/artist-collection-anna-webber/products/459-anna-webber-its-easier-to-imagine-the-end-of-the-world",
+          "published_at": null,
+          "type": "official",
+          "verification_checked_at": "2026-10-22T17:08:59Z",
+          "dependency_group": "webber-intakt-459"
+        }
+      ],
+      "claims": [
+        {
+          "id": "webber-dates",
+          "statement": "Альбом — 30 октября; бонус (Lewis Hyde) — 23 октября 2026 года.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "webber-artist",
+            "webber-label"
+          ],
+          "editorial_note": "Проверено по указанным источникам."
+        },
+        {
+          "id": "webber-ensemble",
+          "statement": "Нонет включает Хэлворсон, Лауброк, Виреллеса, Смита и Доён Ким.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "webber-label"
+          ],
+          "editorial_note": "Проверено по указанным источникам."
+        }
+      ],
+      "editorial_notes": [
+        "Материал заменяет исключённую редактором новость о выступлении «Джаз мафии» в Краснодаре. Альбом и цифровой бонус имеют разные даты; не смешивать их."
+      ]
+    }
+  ],
+  "social": [
+    {
+      "article_id": "johnson-animative-20261023",
+      "telegram_sentence": "23 октября выходит Animative Джоша Джонсона: физические носители и цифровая покупка — сейчас, стриминг — с 10 ноября.",
+      "instagram_sentence": "Джош Джонсон выпускает Animative; на стриминговых сервисах альбом появится 10 ноября.",
+      "visual_format": "1080x1350"
+    },
+    {
+      "article_id": "delucia-brubeck-octet-20261023",
+      "telegram_sentence": "Джон Де Лючия возвращает в студию музыку октета Брубека: новый альбом выходит 23 октября.",
+      "instagram_sentence": "Новая запись The Brubeck Octet Project соединяет восстановленные аранжировки и музыку Джона Де Лючии.",
+      "visual_format": "1080x1350"
+    },
+    {
+      "article_id": "baikal-jazz-competition-20261023",
+      "telegram_sentence": "«Джаз на Байкале» открыл приём заявок: по сообщению «Глагола», дедлайн — 8 ноября, конкурс — 19–22 ноября.",
+      "instagram_sentence": "В Иркутске принимают заявки на конкурс «Джаз на Байкале» для солистов и коллективов.",
+      "visual_format": "1080x1350"
+    },
+    {
+      "article_id": "jazzmandu-2026-program-20261023",
+      "telegram_sentence": "Jazzmandu объявил программу на 29 октября — 4 ноября с Тито Пуэнте-младшим и непальскими группами.",
+      "instagram_sentence": "Jazzmandu соединит международные ансамбли и непальскую сцену в недельной программе в Катманду.",
+      "visual_format": "1080x1350"
+    },
+    {
+      "article_id": "anna-webber-nonet-20261023",
+      "telegram_sentence": "Анна Уэббер выпускает альбом нонета 30 октября; цифровой бонус (Lewis Hyde) назначен на 23-е.",
+      "instagram_sentence": "У Анны Уэббер готов новый нонет с Мэри Хэлворсон, Ингрид Лауброк и Дэвидом Виреллесом.",
+      "visual_format": "1080x1350"
+    }
+  ],
+  "editorial": {
+    "ready_for_human_review": true,
+    "blocking_issues": [],
+    "source_scan_window_start": "2026-10-22T00:00:00+03:00",
+    "source_scan_window_end": "2026-10-22T17:08:59Z",
+    "generation_notes": [
+      "Черновик для выпуска 23 октября 2026 года; подготовлен 22 октября. Не публиковать автоматически.",
+      "Пять новых сюжетов; проверено отсутствие повторов выпусков 21 и 22 октября. Материал о «Джаз мафии» исключён по указанию редактора.",
+      "Источники анонсов и страницы покупки могут быть опубликованы раньше окна поиска; даты публикаций не подменены датами событий.",
+      "Оценки story_score отражают редакционный приоритет, а не внешнюю метрику.",
+      "23 октября перед выпуском перепроверить состоявшиеся релизы и изменения программ. Человеческая редакторская проверка не отмечена.",
+      "Тексты написаны как новости по источникам; прослушивание полных альбомов и собственная музыкальная оценка не заявляются."
+    ]
+  },
+  "import_id": "gazeta-20261023-editorial-draft-01"
+}

@@ -1,0 +1,621 @@
+{
+  "schema_version": "1.1",
+  "edition_date": "2026-10-27",
+  "timezone": "Europe/Moscow",
+  "edition_number": null,
+  "publication": {
+    "status": "draft"
+  },
+  "import_id": "jazzeta-20261027-editorial-v1",
+  "articles": [
+    {
+      "id": "2026-10-27-cartagena-jazz-festival-2026",
+      "region": "world",
+      "category": "festivals",
+      "placement": "lead",
+      "headline": "Картахена открывает три недели джаза: от Маалуфа до Кенни Бэррона",
+      "lead": "45-й Cartagena Jazz Festival начнётся 28 октября и продлится до 15 ноября. В афише — Ибрагим Маалуф, Андреа Мотис, Кенни Бэррон и встреча Курта Эллинга с Yellowjackets.",
+      "body_paragraphs": [
+        "У фестиваля два старта. Первым событием программы 28 октября станет концерт Aurora Plazza в Mister Witt Café. Официальное открытие состоится 30 октября в зале El Batel: Ибрагим Маалуф привезёт The Trumpets of Michel-Ange Vol. 2. Между этими датами, 29 октября, выступит американский автор и исполнитель Майка П. Хинсон.",
+        "В первые выходные организаторы соединяют несколько музыкальных традиций. 31 октября певица и трубач Андреа Мотис вместе с Barcelona Gospel Messengers представит To Amy — посвящение Эми Уайнхаус. 1 ноября гитарист Ниньо Хоселе отметит двадцатилетие Paz, своего обращения к музыке Билла Эванса.",
+        "Далее в программе — Songbook Кенни Бэррона 7 ноября и совместное выступление Курта Эллинга и Yellowjackets 8 ноября. 14 ноября сыграют Рита Пайес и Лусия Фумеро, а 15-го фестиваль завершит Самара Джой.",
+        "Помимо больших залов, в расписании есть клубные выступления, джемы и бесплатные уличные концерты. Так, 31 октября Mood Swing сыграет на площади Икуэ. Полная программа с площадками и временем выступлений опубликована на сайте фестиваля."
+      ],
+      "summary": "Картахена начинает фестиваль 28 октября; официальное открытие с Ибрагимом Маалуфом — 30-го.",
+      "event_date": "2026-10-28",
+      "event_id": "cartagena-jazz-festival-2026",
+      "story_group_id": "cartagena-jazz-festival-2026",
+      "story_score": 90,
+      "previous_article_ids": [],
+      "development_note": "",
+      "sources": [
+        {
+          "id": "ct-program",
+          "title": "45 Cartagena Jazz Festival — программа 2026",
+          "publisher": "Cartagena Jazz Festival",
+          "url": "https://jazz.cartagena.es/2026/index.asp",
+          "published_at": null,
+          "type": "event_organizer",
+          "verification_checked_at": "2026-10-26T12:03:09.968Z",
+          "dependency_group": "cartagena-2026-organizer"
+        },
+        {
+          "id": "ct-opening",
+          "title": "El Cartagena Jazz Festival levanta el telón de su 45 edición",
+          "publisher": "Ayuntamiento de Cartagena",
+          "url": "https://www.cartagena.es/detalle_noticias.asp?id=90109",
+          "published_at": "2026-10-26",
+          "type": "official",
+          "verification_checked_at": "2026-10-26T12:03:09.968Z",
+          "dependency_group": "cartagena-2026-organizer"
+        },
+        {
+          "id": "ct-photo",
+          "title": "Ibrahimmaaloufpcm2016.jpg: автор и лицензия CC BY-SA 4.0",
+          "publisher": "Wikimedia Commons",
+          "url": "https://commons.wikimedia.org/wiki/File:Ibrahimmaaloufpcm2016.jpg",
+          "published_at": null,
+          "type": "official",
+          "verification_checked_at": "2026-10-26T12:47:35.089Z",
+          "dependency_group": "maalouf-photo-csdemfrance"
+        }
+      ],
+      "claims": [
+        {
+          "id": "ct-1",
+          "statement": "Фестиваль проходит 28 октября — 15 ноября 2026 года; это 45-й выпуск.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "ct-program",
+            "ct-opening"
+          ],
+          "editorial_note": "Проверено по указанному источнику; дата события отделена от даты сообщения."
+        },
+        {
+          "id": "ct-2",
+          "statement": "Aurora Plazza выступает 28 октября; Майка П. Хинсон — 29-го; официальное открытие с Маалуфом — 30-го.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "ct-program",
+            "ct-opening"
+          ],
+          "editorial_note": "Проверено по указанному источнику; дата события отделена от даты сообщения."
+        },
+        {
+          "id": "ct-3",
+          "statement": "31 октября Мотис и Barcelona Gospel Messengers исполнят To Amy; 1 ноября Ниньо Хоселе представит посвящение Биллу Эвансу к двадцатилетию Paz.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "ct-program",
+            "ct-opening"
+          ],
+          "editorial_note": "Проверено по указанному источнику; дата события отделена от даты сообщения."
+        },
+        {
+          "id": "ct-4",
+          "statement": "Бэррон выступит 7 ноября, Эллинг и Yellowjackets — 8-го, Пайес и Фумеро — 14-го, Самара Джой — 15-го.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "ct-program"
+          ],
+          "editorial_note": "Проверено по указанному источнику; дата события отделена от даты сообщения."
+        },
+        {
+          "id": "ct-5",
+          "statement": "В программе есть джемы, клубные и бесплатные уличные концерты.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "ct-program"
+          ],
+          "editorial_note": "Проверено по указанному источнику; дата события отделена от даты сообщения."
+        }
+      ],
+      "quotes": [],
+      "conflict_disclosure": null,
+      "editorial_notes": [
+        "Свежий повод — сообщение муниципалитета от 26 октября и начало программы 28 октября. Не выдавать июльскую афишу за новое объявление.",
+        "Все сведения об афише происходят от организатора; два источника не считаются двумя независимыми подтверждениями.",
+        "В №001 была новость о концертном альбоме Самары Джой, в №004 — переиздание Back to Black. Здесь другое событие; альбомные новости не пересказываются.",
+        "Пользователь загрузил архивный портрет Маалуфа в медиатеку; восстановлена несохранённая карточка с этим изображением. Добавлены автор CsdemFrance, лицензия CC BY-SA 4.0 и ссылка на страницу файла. Изображение уменьшено сайтом; фотография не изображает фестиваль 2026 года."
+      ],
+      "media_rights": {
+        "image_url": "https://kozlovclub.ru/wp-content/uploads/2026/10/Ibrahimmaaloufpcm2016-scaled.jpg",
+        "status": "licensed",
+        "credit": "Ибрагим Маалуф, архивный портрет. Фото: CsdemFrance / Wikimedia Commons, CC BY-SA 4.0. Размер уменьшен."
+      }
+    },
+    {
+      "id": "2026-10-27-alexey-popov-boney-m-tribute-2026",
+      "region": "russia",
+      "category": "funk_soul",
+      "placement": "feature",
+      "headline": "Алексей Попов собрал Boney M Tribute: семь треков с джазовым составом",
+      "lead": "Boney M Tribute Алексея Попова, запись 2026 года, объединяет семь треков на материале репертуара Boney M. Саксофонист выступил автором всех аранжировок.",
+      "body_paragraphs": [
+        "В основном составе записи пять музыкантов. С Поповым играют клавишник Родион Гоборов, басист Иван Норкин, барабанщик Ярослав Байков и перкуссионист Вартан Бабаян. Сам автор проекта играет на саксофоне и клавишных.",
+        "В семи треках собраны и отдельные песни, и составные номера: One Way Ticket соединена с Bahama Mama, а Rasputin — с Barbra Streisand. Sunny появляется дважды: основную версию дополняет заключительный даб-ремикс с участием DJ LA, Виктора Савича и Алексея Шихова.",
+        "В рецензии от 9 октября для Jazz.ru Ирина Касумова описывает движение аранжировок между эйсид-джазом, латино и фанком. В основе проекта — самостоятельные инструментальные прочтения песен, знакомых по репертуару Boney M."
+      ],
+      "summary": "Boney M Tribute Алексея Попова: семь треков, собственные аранжировки и даб-ремикс Sunny.",
+      "event_date": null,
+      "event_id": "alexey-popov-boney-m-tribute-2026",
+      "story_group_id": "alexey-popov-boney-m-tribute-2026",
+      "story_score": 83,
+      "previous_article_ids": [],
+      "development_note": "",
+      "sources": [
+        {
+          "id": "popov-official",
+          "title": "Алексей Попов — дискография и концерты",
+          "publisher": "Алексей Попов",
+          "url": "https://alexeypopov.org/",
+          "published_at": null,
+          "type": "official",
+          "verification_checked_at": "2026-10-26T12:03:09.968Z",
+          "dependency_group": "popov-official"
+        },
+        {
+          "id": "popov-review",
+          "title": "Алексей Попов: Boney M Tribute",
+          "publisher": "Jazz.ru",
+          "url": "https://www.jazz.ru/2026/10/09/popov-boney-m-tribute/",
+          "published_at": "2026-10-09",
+          "type": "independent_editorial",
+          "verification_checked_at": "2026-10-26T12:03:09.968Z",
+          "dependency_group": "jazzru-kasumova-popov"
+        }
+      ],
+      "claims": [
+        {
+          "id": "popov-1",
+          "statement": "В официальной дискографии за 2026 год указан альбом Boney M Tribute из семи треков, аранжировки — Алексей Попов.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "popov-official"
+          ],
+          "editorial_note": "Проверено по указанному источнику; дата события отделена от даты сообщения."
+        },
+        {
+          "id": "popov-2",
+          "statement": "Участники основного состава: Попов, Гоборов, Норкин, Байков и Бабаян; участники седьмого трека также перечислены в дискографии.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "popov-official"
+          ],
+          "editorial_note": "Проверено по указанному источнику; дата события отделена от даты сообщения."
+        },
+        {
+          "id": "popov-3",
+          "statement": "Трек-лист включает One Way Ticket / Bahama Mama, Kalimba De Luna, Ma Baker, Rivers Of Babylon, Sunny, Rasputin / Barbra Streisand и Sunny [Dub Remix].",
+          "verification": "verified_primary",
+          "source_ids": [
+            "popov-official"
+          ],
+          "editorial_note": "Проверено по указанному источнику; дата события отделена от даты сообщения."
+        },
+        {
+          "id": "popov-4",
+          "statement": "Jazz.ru опубликовал рецензию Ирины Касумовой 9 октября; жанровые характеристики в тексте отнесены к её оценке.",
+          "verification": "attributed_single",
+          "source_ids": [
+            "popov-review"
+          ],
+          "editorial_note": "Субъективная музыкальная оценка атрибутирована рецензенту; собственного прослушивания не заявляем."
+        },
+        {
+          "id": "popov-5",
+          "statement": "Алексей Попов выступает в Клубе Алексея Козлова; эта связь с издателем раскрыта в тексте и соцверсиях.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "popov-official"
+          ],
+          "editorial_note": "Проверено по указанному источнику; дата события отделена от даты сообщения."
+        }
+      ],
+      "quotes": [],
+      "conflict_disclosure": "Алексей Попов выступает в Клубе Алексея Козлова, издателе «Ежедневной Джазеты».",
+      "editorial_notes": [
+        "Материал о записи 2026 года, не новость о релизе 26 или 27 октября. Точная дата выхода не установлена; event_date оставлено null.",
+        "Название Boney M Tribute не означает, что все использованные произведения написаны участниками Boney M; авторство песен не утверждается.",
+        "Связь исполнителя с площадкой издателя раскрыта в поле conflict_disclosure.",
+        "После редакторской проверки: концертный анонс удалён; материал оставлен как заметка о записи 2026 года. Основной состав записи из пяти музыкантов не смешивается с гастрольным квартетом. Раскрытие связи с издателем включено и в соцверсии."
+      ],
+      "media_rights": {
+        "image_url": null,
+        "status": "none",
+        "credit": "Иллюстрация не используется; материал оформляется типографически."
+      }
+    },
+    {
+      "id": "2026-10-27-snoh-aalegra-legendary-love-2026",
+      "region": "world",
+      "category": "funk_soul",
+      "placement": "regular",
+      "headline": "Сно Аалегра анонсировала Legendary Love — с Роджерсом и Саадиком в новом сингле",
+      "lead": "Legendary Love выйдет 13 ноября через Stem. В песне I Love You, предваряющей альбом, Найл Роджерс играет на гитаре, а Рафаэл Саадик — на басу.",
+      "body_paragraphs": [
+        "Об альбоме Сно Аалегра сообщила 21 октября. Одновременно вышла I Love You — следующий сингл после Karma. В опубликованном анонсе заявлено тринадцать композиций.",
+        "По данным релизного сообщения, I Love You написана Аалегрой вместе с Джоэлом Компассом; продюсерами выступили они же и Джош Грант. Роджерс и Саадик указаны среди приглашённых инструменталистов именно этой песни.",
+        "По описанию в релизе, работа над Legendary Love заняла два с половиной года. Альбом связывается с историей длительных отношений, которые так и не сложились, и с личными переменами за это время.",
+        "Сингл сопровождает клип режиссёра Альфреда Маррокина. Пока Legendary Love готовится к ноябрьскому выходу, I Love You и Karma дают возможность познакомиться с новым материалом певицы."
+      ],
+      "summary": "Legendary Love Сно Аалегры намечен на 13 ноября; в I Love You участвуют Найл Роджерс и Рафаэл Саадик.",
+      "event_date": "2026-11-13",
+      "event_id": "snoh-aalegra-legendary-love-2026",
+      "story_group_id": "snoh-aalegra-legendary-love-2026",
+      "story_score": 82,
+      "previous_article_ids": [],
+      "development_note": "",
+      "sources": [
+        {
+          "id": "snoh-release",
+          "title": "Snoh Aalegra announces new album, shares new single I Love You",
+          "publisher": "IMPRINT",
+          "url": "https://imprintent.org/snoh-aalegra-announces-new-album-shares-new-single-i-love-you/",
+          "published_at": null,
+          "type": "press_release",
+          "verification_checked_at": "2026-10-26T12:03:09.968Z",
+          "dependency_group": "snoh-legendary-love-announcement-20261021"
+        },
+        {
+          "id": "snoh-bestfit",
+          "title": "Snoh Aalegra announces new album Legendary Love",
+          "publisher": "The Line of Best Fit",
+          "url": "https://www.thelineofbestfit.com/news/snoh-aalegra-announces-new-album-legendary-love",
+          "published_at": "2026-10-21",
+          "type": "independent_editorial",
+          "verification_checked_at": "2026-10-26T12:03:09.968Z",
+          "dependency_group": "snoh-legendary-love-announcement-20261021"
+        },
+        {
+          "id": "snoh-dork",
+          "title": "Snoh Aalegra announces Legendary Love and shares I Love You",
+          "publisher": "Dork",
+          "url": "https://readdork.com/news/snoh-aalegra-legendary-love-i-love-you-d9a1981801",
+          "published_at": "2026-10-21",
+          "type": "independent_editorial",
+          "verification_checked_at": "2026-10-26T12:03:09.968Z",
+          "dependency_group": "snoh-legendary-love-announcement-20261021"
+        }
+      ],
+      "claims": [
+        {
+          "id": "snoh-1",
+          "statement": "Анонс опубликован 21 октября; заявленный выход Legendary Love — 13 ноября 2026 года через Stem, трек-лист включает 13 позиций.",
+          "verification": "attributed_single",
+          "source_ids": [
+            "snoh-release",
+            "snoh-bestfit",
+            "snoh-dork"
+          ],
+          "editorial_note": "Публикации воспроизводят одну анонсную цепочку; дата выхода предварительная, релиз ещё не состоялся."
+        },
+        {
+          "id": "snoh-2",
+          "statement": "В I Love You гитарная партия указана за Найлом Роджерсом, басовая — за Рафаэлом Саадиком.",
+          "verification": "attributed_single",
+          "source_ids": [
+            "snoh-release",
+            "snoh-bestfit",
+            "snoh-dork"
+          ],
+          "editorial_note": "Кредиты из релизного сообщения; независимая проверка мастер-кредитов не заявляется."
+        },
+        {
+          "id": "snoh-3",
+          "statement": "Авторы I Love You — Аалегра и Джоэл Компасс; продюсеры — Аалегра, Компасс и Джош Грант.",
+          "verification": "attributed_single",
+          "source_ids": [
+            "snoh-release",
+            "snoh-dork"
+          ],
+          "editorial_note": "Данные релизного сообщения."
+        },
+        {
+          "id": "snoh-4",
+          "statement": "Согласно описанию в релизе, альбом записывался два с половиной года; личная история и замысел переданы как описание пресс-релиза.",
+          "verification": "attributed_single",
+          "source_ids": [
+            "snoh-release",
+            "snoh-bestfit"
+          ],
+          "editorial_note": "Описание пресс-релиза не приписывается прямой речи певицы; независимо установленные личные обстоятельства не заявляются."
+        },
+        {
+          "id": "snoh-5",
+          "statement": "I Love You появилась после Karma как предваряющий альбом сингл.",
+          "verification": "attributed_single",
+          "source_ids": [
+            "snoh-release",
+            "snoh-dork"
+          ],
+          "editorial_note": "Анонс релиза; ни одна песня не названа первым синглом вообще."
+        },
+        {
+          "id": "snoh-6",
+          "statement": "Режиссёр клипа I Love You — Альфред Маррокин.",
+          "verification": "attributed_single",
+          "source_ids": [
+            "snoh-release"
+          ],
+          "editorial_note": "Кредит режиссёра указан в релизном сообщении."
+        }
+      ],
+      "quotes": [],
+      "conflict_disclosure": null,
+      "editorial_notes": [
+        "Анонс от 21 октября, не сегодняшняя премьера. Ранее в шести выпусках не использован.",
+        "Три публикации считаются одной зависимой анонсной цепочкой. Все содержательные утверждения этой цепочки атрибутированы.",
+        "Не заявляем рецензию или прослушивание ещё не вышедшего альбома.",
+        "Исправлена атрибуция истории и замысла: это описание пресс-релиза, а не собственная цитата Аалегры."
+      ],
+      "media_rights": {
+        "image_url": null,
+        "status": "none",
+        "credit": "Иллюстрация не используется; материал оформляется типографически."
+      }
+    },
+    {
+      "id": "2026-10-27-cheltenham-tony-dudley-evans-open-call-2027",
+      "region": "world",
+      "category": "jazz",
+      "placement": "regular",
+      "headline": "Челтнем впервые открыл конкурс на джазовый заказ имени Тони Дадли-Эванса",
+      "lead": "Музыканты, работающие в Великобритании, могут до 16 ноября подать заявку на создание часовой программы для Cheltenham Jazz Festival 2027. Общий бюджет заказа — £5 000.",
+      "body_paragraphs": [
+        "Речь о первом открытом приёме заявок на уже существующий Tony Dudley-Evans Commission. Выбранный проект представят 2 мая 2027 года в Parabola Arts Centre в рамках фестиваля.",
+        "Участвовать могут базирующиеся в Великобритании исполнители с профессиональным опытом не менее трёх лет. Организаторы ждут новую оригинальную работу примерно на час, а не заявку с уже готовой концертной программой.",
+        "Из общего бюджета £3 000 предназначены для разработки проекта, включая репетиции, поездки и гонорары привлечённых музыкантов; ещё £2 000 — для фестивального выступления. Эти расходы входят в объявленные £5 000.",
+        "В заявке нужны описание идеи объёмом до 500 слов, бюджет, примеры записей и сведения о профессиональной деятельности. Приём заканчивается 16 ноября; выбранного участника организаторы намерены уведомить до 30 ноября.",
+        "Для претендента это конкретный производственный заказ: замысел, подготовка и премьера связаны одной заявкой. Условия и форма доступны на официальном сайте Cheltenham Festivals."
+      ],
+      "summary": "Открытый приём заявок на Tony Dudley-Evans Commission: £5 000, новая часовая программа и премьера 2 мая 2027 года.",
+      "event_date": "2027-05-02",
+      "event_id": "cheltenham-tony-dudley-evans-open-call-2027",
+      "story_group_id": "cheltenham-tony-dudley-evans-open-call-2027",
+      "story_score": 81,
+      "previous_article_ids": [],
+      "development_note": "",
+      "sources": [
+        {
+          "id": "chelt-official",
+          "title": "Cheltenham Jazz Festival invites UK-based artists to apply for Tony Dudley-Evans Commission",
+          "publisher": "Cheltenham Festivals",
+          "url": "https://www.cheltenhamfestivals.org/news/cheltenham-jazz-festival-invites-uk-based-artists-to-apply-for-tony-dudley-evans-commission-at-2027-festival",
+          "published_at": null,
+          "type": "event_organizer",
+          "verification_checked_at": "2026-10-26T12:03:09.968Z",
+          "dependency_group": "cheltenham-tde-2027"
+        },
+        {
+          "id": "chelt-form",
+          "title": "Tony Dudley-Evans Commission 2027 — application form",
+          "publisher": "Cheltenham Festivals / FestivalPro",
+          "url": "https://cheltjazz.festivalpro.com/form/lvrvmlvnSnALZzDDyvwm/115",
+          "published_at": null,
+          "type": "event_organizer",
+          "verification_checked_at": "2026-10-26T12:03:09.968Z",
+          "dependency_group": "cheltenham-tde-2027"
+        },
+        {
+          "id": "chelt-news",
+          "title": "Public call-out for musicians to apply for Tony Dudley-Evans Commission for 2027 Cheltenham Jazz Festival",
+          "publisher": "UK Jazz News",
+          "url": "https://ukjazznews.com/public-call-out-for-musicians-to-apply-for-tony-dudley-evans-commission-for-2027-cheltenham-jazz-festival/",
+          "published_at": "2026-10-26",
+          "type": "independent_editorial",
+          "verification_checked_at": "2026-10-26T12:03:09.968Z",
+          "dependency_group": "cheltenham-tde-2027"
+        }
+      ],
+      "claims": [
+        {
+          "id": "chelt-1",
+          "statement": "Открытый конкурс проводится впервые для уже существующего заказа; заявки принимаются до 16 ноября 2026 года.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "chelt-official",
+            "chelt-form"
+          ],
+          "editorial_note": "Проверено по указанному источнику; дата события отделена от даты сообщения."
+        },
+        {
+          "id": "chelt-2",
+          "statement": "Участвовать могут UK-based музыканты с профессиональным опытом не менее трёх лет.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "chelt-official",
+            "chelt-form"
+          ],
+          "editorial_note": "Проверено по указанному источнику; дата события отделена от даты сообщения."
+        },
+        {
+          "id": "chelt-3",
+          "statement": "Премьера новой часовой работы назначена на 2 мая 2027 года в Parabola Arts Centre.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "chelt-official",
+            "chelt-form"
+          ],
+          "editorial_note": "Проверено по указанному источнику; дата события отделена от даты сообщения."
+        },
+        {
+          "id": "chelt-4",
+          "statement": "Общий бюджет £5 000: £3 000 на разработку с расходами, £2 000 на выступление.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "chelt-official"
+          ],
+          "editorial_note": "Проверено по указанному источнику; дата события отделена от даты сообщения."
+        },
+        {
+          "id": "chelt-5",
+          "statement": "Нужны описание до 500 слов, бюджет, аудиопримеры и профессиональные сведения; участника планируют уведомить до 30 ноября.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "chelt-official",
+            "chelt-form"
+          ],
+          "editorial_note": "Проверено по указанному источнику; дата события отделена от даты сообщения."
+        }
+      ],
+      "quotes": [],
+      "conflict_disclosure": null,
+      "editorial_notes": [
+        "Не называть конкурс открытым для всех стран: требуется базирование в Великобритании, а не конкретное гражданство.",
+        "Новым является открытый приём заявок, а не сам заказ. Дата новости 26 октября, дедлайн 16 ноября, премьера 2 мая 2027 года.",
+        "Бюджет не трактуется как £5 000 плюс командировочные. Конкретное время дедлайна и его часовой пояс не пересказываются."
+      ],
+      "media_rights": {
+        "image_url": null,
+        "status": "none",
+        "credit": "Иллюстрация не используется; материал оформляется типографически."
+      }
+    },
+    {
+      "id": "2026-10-27-novokuznetsk-jazz-old-fortress-2026",
+      "region": "russia",
+      "category": "festivals",
+      "placement": "regular",
+      "headline": "«Джаз у Старой крепости»: три вечера и образовательный форум в Новокузнецке",
+      "lead": "С 25 по 27 ноября джаз-клуб «Геликон» проведёт форум-фестиваль «Джаз у Старой крепости». В опубликованной программе — Дмитрий Мосьпан, Андрей Кондаков и итальянский вокалист Фабио Лепоре.",
+      "body_paragraphs": [
+        "Открытие 25 ноября объединит «Мосджаз квартет Дмитрия Мосьпана» с программой «Гигантские шаги» и оркестр «Новый Кузнецкий биг-бэнд», которым дирижирует Иван Третьяков. В квартете Мосьпана заявлены пианист Родион Гоборов, басист Иван Норкин и барабанщик Александр Зингер.",
+        "26 ноября выступят Сергей Коренев PROJECT из Новороссийска и трио Андрея Кондакова с Владимиром Волковым и Гарием Багдасарьяном. В заключительный вечер, 27 ноября, выступят «Гнесин Джаз Квинтет» и Фабио Лепоре с квартетом Алексея Черемизова.",
+        "Все три вечерних концерта назначены на 19:00 по местному времени. Дневная часть, по сообщению организатора, включает мастер-классы, панельные дискуссии, круглые столы, образовательные модули, шоу-кейсы и деловые площадки.",
+        "Образовательная программа делает эту афишу полезной и слушателям, и музыкантам, планирующим поездку. Подробное расписание дневных занятий на странице фестиваля пока не приведено; сверять его стоит по обновлениям «Геликона». Концертные даты и составы уже опубликованы."
+      ],
+      "summary": "Фестиваль в Новокузнецке пройдёт 25–27 ноября: Мосьпан, Кондаков, Лепоре и дневная образовательная программа.",
+      "event_date": "2026-11-25",
+      "event_id": "novokuznetsk-jazz-old-fortress-2026",
+      "story_group_id": "novokuznetsk-jazz-old-fortress-2026",
+      "story_score": 78,
+      "previous_article_ids": [],
+      "development_note": "",
+      "sources": [
+        {
+          "id": "helicon-program",
+          "title": "25, 26, 27 ноября 2026 года — Международный образовательный форум-фестиваль «Джаз у Старой крепости»",
+          "publisher": "Губернаторский джаз-клуб «Геликон»",
+          "url": "https://www.jazzhelicon.ru/festivali/mezhdunarodnyj-festival-dzhaz-u-staroj-kreposti-2/25-26-27-noyabrya-2026-goda-mezhdunarodnyj-obrazovatelnyj-forum-festival-dzhaz-u-staroj-kreposti",
+          "published_at": null,
+          "type": "event_organizer",
+          "verification_checked_at": "2026-10-26T12:03:09.968Z",
+          "dependency_group": "helicon-fortress-2026"
+        }
+      ],
+      "claims": [
+        {
+          "id": "helicon-1",
+          "statement": "Форум-фестиваль в Новокузнецке пройдёт 25–27 ноября 2026 года; вечерние концерты начинаются в 19:00.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "helicon-program"
+          ],
+          "editorial_note": "Проверено по указанному источнику; дата события отделена от даты сообщения."
+        },
+        {
+          "id": "helicon-2",
+          "statement": "25 ноября заявлены «Мосджаз квартет Дмитрия Мосьпана» с «Гигантскими шагами» и оркестр «Новый Кузнецкий биг-бэнд», дирижёр Иван Третьяков.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "helicon-program"
+          ],
+          "editorial_note": "Проверено по указанному источнику; дата события отделена от даты сообщения."
+        },
+        {
+          "id": "helicon-3",
+          "statement": "26 ноября выступят Сергей Коренев PROJECT и трио Андрея Кондакова с Волковым и Багдасарьяном.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "helicon-program"
+          ],
+          "editorial_note": "Проверено по указанному источнику; дата события отделена от даты сообщения."
+        },
+        {
+          "id": "helicon-4",
+          "statement": "27 ноября заявлены «Гнесин Джаз Квинтет» и Фабио Лепоре с квартетом Алексея Черемизова.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "helicon-program"
+          ],
+          "editorial_note": "Проверено по указанному источнику; дата события отделена от даты сообщения."
+        },
+        {
+          "id": "helicon-5",
+          "statement": "Дневная часть включает мастер-классы, панельные дискуссии, круглые столы, образовательные модули, шоу-кейсы и деловые площадки.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "helicon-program"
+          ],
+          "editorial_note": "Проверено по указанному источнику; дата события отделена от даты сообщения."
+        }
+      ],
+      "quotes": [],
+      "conflict_disclosure": null,
+      "editorial_notes": [
+        "Материал календарный: дата публикации страницы не указана; не утверждаем, что программа объявлена 26 или 27 октября.",
+        "В №001 обсуждался альбом ГКВ, а не этот фестиваль. Пересечение имён Кондакова и Волкова не является повтором события.",
+        "После проверки исправлены собственные названия коллективов; перечисление образовательной программы приведено по организатору без предположения о возрасте участников шоу-кейсов. «Квартет Алексея Черемизова» передан как официальное название."
+      ],
+      "media_rights": {
+        "image_url": null,
+        "status": "none",
+        "credit": "Иллюстрация не используется; материал оформляется типографически."
+      }
+    }
+  ],
+  "social": [
+    {
+      "article_id": "2026-10-27-cartagena-jazz-festival-2026",
+      "telegram_sentence": "Картахена начнёт джазовый фестиваль 28 октября: впереди Маалуф, Мотис, Бэррон и Эллинг с Yellowjackets — разбираем афишу.",
+      "instagram_sentence": "Три недели музыки в Картахене: программа начинается 28 октября, официальное открытие с Ибрагимом Маалуфом — 30-го.",
+      "visual_format": "1080x1350"
+    },
+    {
+      "article_id": "2026-10-27-alexey-popov-boney-m-tribute-2026",
+      "telegram_sentence": "Boney M Tribute Алексея Попова: состав и семь треков записи 2026 года. Музыкант выступает в Клубе Алексея Козлова, издателе «Джазеты».",
+      "instagram_sentence": "Семь треков Boney M Tribute Алексея Попова, записи 2026 года, в нашей заметке об альбоме (музыкант выступает в Клубе Алексея Козлова, издателе «Джазеты»).",
+      "visual_format": "1080x1350"
+    },
+    {
+      "article_id": "2026-10-27-snoh-aalegra-legendary-love-2026",
+      "telegram_sentence": "Гитара Найла Роджерса и бас Рафаэла Саадика звучат в I Love You Сно Аалегры; её альбом Legendary Love заявлен на 13 ноября.",
+      "instagram_sentence": "Сно Аалегра готовит Legendary Love к 13 ноября — в новом сингле I Love You участвуют Найл Роджерс и Рафаэл Саадик.",
+      "visual_format": "1080x1350"
+    },
+    {
+      "article_id": "2026-10-27-cheltenham-tony-dudley-evans-open-call-2027",
+      "telegram_sentence": "£5 000 на новую часовую программу: Челтнем открыл конкурс для музыкантов, базирующихся в Великобритании, с дедлайном 16 ноября.",
+      "instagram_sentence": "Новая музыка для Челтнема: £5 000 на проект, премьера 2 мая 2027 года, заявки UK-based музыкантов — до 16 ноября.",
+      "visual_format": "1080x1350"
+    },
+    {
+      "article_id": "2026-10-27-novokuznetsk-jazz-old-fortress-2026",
+      "telegram_sentence": "«Джаз у Старой крепости» пройдёт в Новокузнецке 25–27 ноября: Мосьпан, Кондаков и Лепоре плюс дневная образовательная программа.",
+      "instagram_sentence": "Новокузнецк, 25–27 ноября: «Джаз у Старой крепости» объединит вечерние концерты и образовательный форум.",
+      "visual_format": "1080x1350"
+    }
+  ],
+  "editorial": {
+    "ready_for_human_review": true,
+    "blocking_issues": [],
+    "source_scan_window_start": "2026-10-09T00:00:00+03:00",
+    "source_scan_window_end": "2026-10-26T12:56:13.646Z",
+    "generation_notes": [
+      "Подготовлено 26 октября для выпуска 27 октября 2026 года. Только черновик; человеческая проверка и публикация не выполнялись.",
+      "5 материалов: 2 Россия, 3 мир; 5 пар анонсов Telegram/Instagram. Обложка — архивный портрет Ибрагима Маалуфа из медиатеки сайта.",
+      "Сверены 30 карточек материалов опубликованных выпусков №001–006 за 21–26 октября в редакционном интерфейсе WordPress. Проверены смысловые события, не только заголовки. Совпадений выбранных событий не найдено.",
+      "Пересечения персон: Самара Джой и Эми Уайнхаус упомянуты в новой фестивальной афише; Кондаков и Волков — в другом событии. Старые релизные поводы не пересказываются.",
+      "Внутри выпуска Родион Гоборов и Иван Норкин встречаются в двух разных составах: запись Попова и концерт Мосьпана. Это разные проекты и разные события.",
+      "Оперативные поводы 26 октября: старт Картахены и открытый приём Челтнема. Попов — запись 2026 года с рецензией 9 октября; Аалегра — ещё не использованный анонс 21 октября; Новокузнецк — предстоящая фестивальная программа. Даты не замаскированы под сегодняшний релиз.",
+      "Сно Аалегра: зависимые публикации одного анонса не засчитаны как независимая верификация. Оценки чужой рецензии о Попове атрибутированы. Непроверенные прямые цитаты исключены.",
+      "Оригинальные журналистские тексты написаны заново, без утверждений о собственном прослушивании. Спорные исторические и рекламные превосходные формулировки не использованы.",
+      "Фото загружено пользователем в медиатеку и привязано к главному материалу. Указаны CsdemFrance / Wikimedia Commons, CC BY-SA 4.0 и ссылка на страницу снимка; отмечено уменьшение размера.",
+      "До публикации нужен просмотр редактором. Автоматическое расписание, внешняя рассылка и отправка в соцсети не включались.",
+      "По проверке редактора исправлены: «Майка П. Хинсон», «Мосджаз квартет Дмитрия Мосьпана», «Новый Кузнецкий биг-бэнд», программа шоу-кейсов и атрибуция пресс-релиза Сно Аалегры. Синхронизированы тексты и карточки фактов.",
+      "Редакционное решение: Попов остаётся заметкой о записи 2026 года; концертный анонс удалён, состав записи из пяти музыкантов обозначен отдельно. В обе соцверсии добавлено раскрытие связи с издателем.",
+      "Дополнительно перепроверены рецензия Jazz.ru (Ирина Касумова, 9 октября, жанровая характеристика) и официальная страница Cheltenham Festivals (описание заявки до 500 слов). Тире оставлены по правилам русской пунктуации."
+    ]
+  }
+}

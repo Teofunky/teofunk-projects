@@ -1,0 +1,425 @@
+{
+  "schema_version": "1.1",
+  "import_id": "pilot.2026-10-21.v1",
+  "edition_date": "2026-10-21",
+  "timezone": "Europe/Moscow",
+  "edition_number": null,
+  "publication": {
+    "status": "draft"
+  },
+  "articles": [
+    {
+      "id": "story-gkv-ascension-2026",
+      "region": "russia",
+      "category": "jazz",
+      "placement": "lead",
+      "headline": "Пятнадцать лет спустя: трио ГКВ выпускает «Восхождение»",
+      "lead": "Петербургское трио Вячеслава Гайворонского, Андрея Кондакова и Владимира Волкова представило на ArtBeat Music альбом Ascension — запись, сделанную ещё в 2011 году.",
+      "body_paragraphs": [
+        "<p>Время между записью и выходом альбома обычно исчисляется месяцами. В случае петербургского трио ГКВ прошло пятнадцать лет. Как сообщает «Джаз.Ру», 20 октября на цифровых площадках появился альбом «Восхождение» (Ascension), записанный трубачом Вячеславом Гайворонским, пианистом Андреем Кондаковым и контрабасистом Владимиром Волковым в 2011 году.</p>",
+        "<p>Музыка трио существует на пересечении камерного музицирования, свободной импровизации и джаза. В данном случае особенно интересна не попытка выдать архивную запись за сегодняшнюю, а возможность услышать документ работы ансамбля в конкретный период его истории. Слово «новый» относится здесь к изданию, а не к дате исполнения.</p>",
+        "<p>По сообщению издания, к концу октября ArtBeat Music намерен выпустить альбом на виниле и компакт-диске. На 28 октября запланировано прослушивание в Москве, на 30-е — концертная презентация в культурном центре ДОМ, на 8 ноября — концерт на Новой сцене Александринского театра в Петербурге.</p>"
+      ],
+      "summary": "Альбом трио ГКВ, записанный в 2011 году, впервые представлен слушателям в 2026-м.",
+      "event_date": "2026-10-20",
+      "story_group_id": "event-gkv-ascension-2026",
+      "story_score": 89,
+      "event_id": "event-gkv-ascension-2026",
+      "previous_article_ids": [],
+      "development_note": "",
+      "sources": [
+        {
+          "id": "s1",
+          "title": "Трио ГКВ (Гайворонский, Кондаков, Волков) выпускает новый альбом на лейбле ArtBeat Music",
+          "publisher": "Джаз.Ру",
+          "url": "https://www.jazz.ru/2026/10/20/gkv-ascension/",
+          "published_at": "2026-10-20",
+          "type": "independent_editorial",
+          "verification_checked_at": "2026-10-21T11:18:14Z",
+          "dependency_group": "jazzru-gkv-20261020"
+        }
+      ],
+      "claims": [
+        {
+          "id": "f1",
+          "statement": "ArtBeat Music выпустил альбом «Восхождение» трио ГКВ, запись которого сделана в 2011 году.",
+          "verification": "attributed_single",
+          "source_ids": [
+            "s1"
+          ],
+          "editorial_note": "По сообщению «Джаз.Ру» от 20 октября 2026 года."
+        },
+        {
+          "id": "f2",
+          "statement": "Трио ГКВ составляют Вячеслав Гайворонский, Андрей Кондаков и Владимир Волков.",
+          "verification": "attributed_single",
+          "source_ids": [
+            "s1"
+          ],
+          "editorial_note": "Состав указан в публикации «Джаз.Ру»."
+        },
+        {
+          "id": "f3",
+          "statement": "Планируются презентации 28 и 30 октября в Москве и 8 ноября в Петербурге.",
+          "verification": "attributed_single",
+          "source_ids": [
+            "s1"
+          ],
+          "editorial_note": "Расписание из публикации «Джаз.Ру»; непосредственно перед выпуском желательно уточнить у площадок."
+        }
+      ],
+      "quotes": [],
+      "conflict_disclosure": null,
+      "editorial_notes": [
+        "Проверить у лейбла ссылки на цифровую запись и физические носители.",
+        "Источник один, все факты атрибутированы."
+      ],
+      "media_rights": {
+        "image_url": null,
+        "status": "none",
+        "credit": ""
+      }
+    },
+    {
+      "id": "story-osipov-spiral-2026",
+      "region": "russia",
+      "category": "jazz",
+      "placement": "feature",
+      "headline": "«Спираль» Анатолия Осипова: новая запись на Jazzist",
+      "lead": "Саксофонист Анатолий Осипов представил альбом Spiral, записанный весной на «Мосфильме» при участии музыкантов его ансамбля и приглашённых гостей.",
+      "body_paragraphs": [
+        "<p>Альбом Spiral стал первой работой тенор-саксофониста и композитора Анатолия Осипова на лейбле Jazzist. Как сообщает «Джаз.Ру», материал был записан весной 2026 года на тон-студии «Мосфильм». Запись, сведение и мастеринг выполнил звукорежиссёр Андрей Левин.</p>",
+        "<p>В составе участников — трубач Егор Балабанов, пианисты Алексей Рябухин и Николай Сидоренко, гитарист Артём Зудилов, бас-гитарист Иван Башилов и барабанщик Дмитрий Сафонов. Наряду с тенор-саксофоном Осипова в записи используется электроника. Для обложки был выбран фрагмент картины Александра Ростоцкого «Посвящение Джими Хендриксу».</p>",
+        "<p>Релиз был намечен на 19 октября. До прослушивания редакция воздерживается от характеристик звучания: состав, место записи и замысел обложки дают достаточно оснований заинтересоваться альбомом, не подменяя новость рецензией.</p>"
+      ],
+      "summary": "Анатолий Осипов представил Spiral — дебют на Jazzist, записанный в 2026 году на «Мосфильме».",
+      "event_date": "2026-10-19",
+      "story_group_id": "event-osipov-spiral-2026",
+      "story_score": 81,
+      "event_id": "event-osipov-spiral-2026",
+      "previous_article_ids": [],
+      "development_note": "",
+      "sources": [
+        {
+          "id": "s1",
+          "title": "Альбомы русского джаза. Саксофонист Анатолий Осипов выпускает «Spiral» на лейбле Jazzist",
+          "publisher": "Джаз.Ру",
+          "url": "https://www.jazz.ru/2026/10/14/anatoly-osipov-spiral/",
+          "published_at": "2026-10-14",
+          "type": "independent_editorial",
+          "verification_checked_at": "2026-10-21T11:18:14Z",
+          "dependency_group": "jazzru-osipov-20261014"
+        }
+      ],
+      "claims": [
+        {
+          "id": "f1",
+          "statement": "Spiral — первый альбом Анатолия Осипова на лейбле Jazzist, записанный весной 2026 года на «Мосфильме».",
+          "verification": "attributed_single",
+          "source_ids": [
+            "s1"
+          ],
+          "editorial_note": "Факты сообщены «Джаз.Ру» 14 октября 2026 года."
+        },
+        {
+          "id": "f2",
+          "statement": "Запись, сведение и мастеринг осуществил Андрей Левин; обложка использует работу Александра Ростоцкого.",
+          "verification": "attributed_single",
+          "source_ids": [
+            "s1"
+          ],
+          "editorial_note": "По материалу «Джаз.Ру»."
+        },
+        {
+          "id": "f3",
+          "statement": "Релиз был запланирован на 19 октября.",
+          "verification": "attributed_single",
+          "source_ids": [
+            "s1"
+          ],
+          "editorial_note": "Указана именно заявленная дата; фактический статус релиза редактор должен проверить перед публикацией."
+        }
+      ],
+      "quotes": [],
+      "conflict_disclosure": "Связь с издателем: выпускающий продюсер альбома — Араик Акопян, арт-директор Клуба Алексея Козлова, издающего газету. Материал является новостью, а не независимой рецензией.",
+      "editorial_notes": [
+        "Проверить на цифровых платформах фактическую дату выхода: первичный источник говорит о планируемом релизе 19 октября.",
+        "Не выдавать намеченный на 20 октября концерт-презентацию за состоявшийся без проверки."
+      ],
+      "media_rights": {
+        "image_url": null,
+        "status": "none",
+        "credit": ""
+      }
+    },
+    {
+      "id": "story-samara-joy-blue-note-la-2026",
+      "region": "world",
+      "category": "jazz",
+      "placement": "feature",
+      "headline": "Самара Джой выпускает первую концертную запись",
+      "lead": "23 октября Verve намерен издать Live at the Blue Note L.A. — мини-альбом, записанный во время апрельских выступлений певицы в лос-анджелесском клубе.",
+      "body_paragraphs": [
+        "<p>Самара Джой готовит к выходу концертный мини-альбом Live at the Blue Note L.A. Как следует из официального каталога Verve, цифровой релиз назначен на 23 октября 2026 года. Запись сделана в апреле на концертах певицы и её ансамбля в клубе Blue Note Los Angeles.</p>",
+        "<p>Программа включает пять дорожек: «Round Midnight», «Yesterdays», «Lush Life», «No More Blues» и репризу последней композиции. Universal Music называет запись первым концертным альбомом певицы; это определение мы приводим как заявление выпускающей компании.</p>",
+        "<p>Новый формат интересен возможностью услышать ансамбль в условиях клуба — вне студийной работы. Каким окажется собственно исполнение, можно будет судить после выхода записи, а не по рекламному описанию лейбла.</p>"
+      ],
+      "summary": "23 октября Verve выпускает концертный EP Самары Джой из Blue Note Los Angeles.",
+      "event_date": "2026-10-23",
+      "story_group_id": "event-samara-joy-blue-note-la-2026",
+      "story_score": 84,
+      "event_id": "event-samara-joy-blue-note-la-2026",
+      "previous_article_ids": [],
+      "development_note": "",
+      "sources": [
+        {
+          "id": "s1",
+          "title": "Samara Joy: Live At The Blue Note L.A. Digital Album",
+          "publisher": "Verve Records",
+          "url": "https://store.ververecords.com/collections/the-grammys-collection/products/samara-joy-live-at-the-blue-note-l-a-digital-album",
+          "published_at": null,
+          "type": "official",
+          "verification_checked_at": "2026-10-21T11:18:14Z",
+          "dependency_group": "verve-samara-liveblue2026"
+        }
+      ],
+      "claims": [
+        {
+          "id": "f1",
+          "statement": "EP Live at the Blue Note L.A. запланирован к цифровому выходу 23 октября 2026 года.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "s1"
+          ],
+          "editorial_note": "Официальная товарная страница Verve указывает дату поставки цифровых файлов."
+        },
+        {
+          "id": "f2",
+          "statement": "Запись была сделана во время апрельских выступлений 2026 года в Blue Note Los Angeles.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "s1"
+          ],
+          "editorial_note": "Указано в официальном описании Verve."
+        },
+        {
+          "id": "f3",
+          "statement": "В EP перечислены пять дорожек, включая Round Midnight, Yesterdays и Lush Life.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "s1"
+          ],
+          "editorial_note": "Трек-лист опубликован Verve."
+        }
+      ],
+      "quotes": [],
+      "conflict_disclosure": null,
+      "editorial_notes": [
+        "Не создавать музыкальную рецензию до прослушивания.",
+        "Официальную страницу лейбла надо проверить накануне публикации, если изменится срок релиза."
+      ],
+      "media_rights": {
+        "image_url": null,
+        "status": "none",
+        "credit": ""
+      }
+    },
+    {
+      "id": "story-john-mayer-chris-buck-2026",
+      "region": "world",
+      "category": "guitar_rock",
+      "placement": "regular",
+      "headline": "Джон Майер выделил Криса Бака среди современных гитаристов",
+      "lead": "В интервью Guitar World музыкант высоко оценил британского блюз-рок-гитариста Криса Бака — и вспомнил выступление Маркуса Кинга с MonoNeon.",
+      "body_paragraphs": [
+        "<p>Джон Майер назвал Криса Бака одним из музыкантов, за которыми следит сейчас. В интервью Guitar World он отдельно отметил характерную манеру британского гитариста работать с подтяжками струн и интонацией. Речь не о скорости или сложности техники, а о том, сколько выразительности можно поместить в одну ноту.</p>",
+        "<p>Крис Бак известен, в частности, по группе Cardinal Black. По сообщению Guitar World, его игрой ранее заинтересовался и Слэш, помогавший коллективу решить визовые вопросы перед американскими гастролями.</p>",
+        "<p>Тот же разговор затронул и другие музыкальные впечатления Майера: он упомянул, что видел выступление Маркуса Кинга с MonoNeon, а среди артистов, чью игру внимательно слушает, назвал Билла Фризелла, Чарли Хантера и Джулиана Лажа. Такое соседство имён любопытно: границы между джазом, блюзом и современной гитарной музыкой в живой музыкальной практике оказываются значительно свободнее привычных рубрик.</p>"
+      ],
+      "summary": "Джон Майер назвал Криса Бака выдающимся гитаристом и упомянул Маркуса Кинга с MonoNeon.",
+      "event_date": null,
+      "story_group_id": "event-john-mayer-chris-buck-2026",
+      "story_score": 78,
+      "event_id": "event-john-mayer-chris-buck-2026",
+      "previous_article_ids": [],
+      "development_note": "",
+      "sources": [
+        {
+          "id": "s1",
+          "title": "John Mayer’s current favorite guitar player… Chris Buck",
+          "publisher": "Guitar World",
+          "url": "https://www.guitarworld.com/artists/guitarists/john-mayer-favorite-guitar-player-2026",
+          "published_at": "2026-10-20",
+          "type": "independent_editorial",
+          "verification_checked_at": "2026-10-21T11:18:14Z",
+          "dependency_group": "guitarworld-mayer-buck-20261020"
+        }
+      ],
+      "claims": [
+        {
+          "id": "f1",
+          "statement": "В интервью Guitar World Джон Майер высоко оценил британского гитариста Криса Бака и его манеру исполнения бендов.",
+          "verification": "attributed_single",
+          "source_ids": [
+            "s1"
+          ],
+          "editorial_note": "По сообщению Guitar World, интервью с Джоном Майером от 20 октября 2026 года."
+        },
+        {
+          "id": "f2",
+          "statement": "Guitar World сообщает, что Слэш ранее помог Cardinal Black с визовыми вопросами.",
+          "verification": "attributed_single",
+          "source_ids": [
+            "s1"
+          ],
+          "editorial_note": "Атрибуция к Guitar World сохранена."
+        },
+        {
+          "id": "f3",
+          "statement": "Майер упомянул Marcus King с MonoNeon, Bill Frisell, Charlie Hunter и Julian Lage.",
+          "verification": "attributed_single",
+          "source_ids": [
+            "s1"
+          ],
+          "editorial_note": "Список основан на пересказе интервью Guitar World; имена сверены по публикации."
+        }
+      ],
+      "quotes": [],
+      "conflict_disclosure": null,
+      "editorial_notes": [
+        "Материал связан с интервью, а не с новым альбомом или концертом.",
+        "Не публиковать прямые цитаты без отдельной сверки оригинала."
+      ],
+      "media_rights": {
+        "image_url": null,
+        "status": "none",
+        "credit": ""
+      }
+    },
+    {
+      "id": "story-malou-oheix-hancock-2026",
+      "region": "world",
+      "category": "jazz",
+      "placement": "regular",
+      "headline": "Парижский финал конкурса Херби Хэнкока выиграла Малу Оэй",
+      "lead": "Французская певица получила первую премию Международного конкурса джазового вокала Института Херби Хэнкока; финал впервые прошёл за пределами США.",
+      "body_paragraphs": [
+        "<p>В Париже завершился Международный конкурс джазового вокала Института Херби Хэнкока. Победительницей стала 27-летняя французская певица Малу Оэй. По официальному сообщению института, она получила стипендию в размере 50 тысяч долларов.</p>",
+        "<p>Финал проходил в Fondation Louis Vuitton. В жюри работали Ди Ди Бриджуотер, Роберта Гамбарини, Анжелика Киджо, Гретчен Парлато и Грегори Портер. Второе место досталось американской певице Джорджии Хирс, третье — британке Люси-Энн Дэниелс.</p>",
+        "<p>Особенность нынешнего конкурса — не только имена лауреатов. Впервые за почти сорок лет существования соревнования решающий этап прошёл за пределами США. Это решение подчеркнуло международный характер современной джазовой сцены, не отменяя американских корней самого конкурса.</p>"
+      ],
+      "summary": "Француженка Малу Оэй выиграла конкурс Херби Хэнкока и получила стипендию в 50 тысяч долларов.",
+      "event_date": "2026-10-11",
+      "story_group_id": "event-malou-oheix-hancock-2026",
+      "story_score": 77,
+      "event_id": "event-malou-oheix-hancock-2026",
+      "previous_article_ids": [],
+      "development_note": "",
+      "sources": [
+        {
+          "id": "s1",
+          "title": "Malou Oheix from France Wins First Place in 2026 Herbie Hancock Institute International Jazz Vocals Competition",
+          "publisher": "Herbie Hancock Institute of Jazz",
+          "url": "https://hancockinstitute.org/2026/10/malou-oheix-from-francewins-first-place-in-2026-herbie-hancock-institute-international-jazz-vocals-competition-at-fondation-louis-vuitton/",
+          "published_at": "2026-10-13",
+          "type": "event_organizer",
+          "verification_checked_at": "2026-10-21T11:18:14Z",
+          "dependency_group": "hancock-competition-malou-202610"
+        }
+      ],
+      "claims": [
+        {
+          "id": "f1",
+          "statement": "Малу Оэй выиграла конкурс вокала Института Херби Хэнкока 2026 года в Париже.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "s1"
+          ],
+          "editorial_note": "Официальный пресс-релиз Института Херби Хэнкока."
+        },
+        {
+          "id": "f2",
+          "statement": "Победительнице назначена стипендия 50 тысяч долларов.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "s1"
+          ],
+          "editorial_note": "Официальный пресс-релиз, опубликованный 13 октября."
+        },
+        {
+          "id": "f3",
+          "statement": "Второе и третье места получили Georgia Heers и Lucy-Anne Daniels.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "s1"
+          ],
+          "editorial_note": "Официальный пресс-релиз института."
+        },
+        {
+          "id": "f4",
+          "statement": "Финал впервые за почти 40 лет проходил за пределами США.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "s1"
+          ],
+          "editorial_note": "Утверждение организатора конкурса в первоисточнике."
+        }
+      ],
+      "quotes": [],
+      "conflict_disclosure": null,
+      "editorial_notes": [
+        "Событие произошло 11 октября, это ретроспективное включение важного итога в первый номер; не называть его сегодняшним."
+      ],
+      "media_rights": {
+        "image_url": null,
+        "status": "none",
+        "credit": ""
+      }
+    }
+  ],
+  "social": [
+    {
+      "article_id": "story-gkv-ascension-2026",
+      "telegram_sentence": "Трио ГКВ выпустило «Восхождение» — альбом, записанный пятнадцать лет назад и впервые представленный слушателям на ArtBeat Music.",
+      "instagram_sentence": "Пятнадцать лет между записью и релизом: петербургское трио ГКВ представило альбом «Восхождение».",
+      "visual_format": "1080x1350"
+    },
+    {
+      "article_id": "story-osipov-spiral-2026",
+      "telegram_sentence": "Анатолий Осипов представил Spiral — альбом для Jazzist, записанный на «Мосфильме» при участии Андрея Левина.",
+      "instagram_sentence": "«Спираль» Осипова: новый альбом саксофониста записан на «Мосфильме» для Jazzist.",
+      "visual_format": "1080x1350"
+    },
+    {
+      "article_id": "story-samara-joy-blue-note-la-2026",
+      "telegram_sentence": "23 октября Verve представит Live at the Blue Note L.A. — пять концертных дорожек Самары Джой, записанных в апреле.",
+      "instagram_sentence": "Пять песен, один клуб: Самара Джой готовит концертный EP из Blue Note Los Angeles.",
+      "visual_format": "1080x1350"
+    },
+    {
+      "article_id": "story-john-mayer-chris-buck-2026",
+      "telegram_sentence": "Джон Майер назвал Криса Бака выдающимся мастером бендов, а среди впечатлений упомянул выступление Маркуса Кинга с MonoNeon.",
+      "instagram_sentence": "От Криса Бака до Фризелла: Джон Майер рассказал, чью гитару слушает сегодня.",
+      "visual_format": "1080x1350"
+    },
+    {
+      "article_id": "story-malou-oheix-hancock-2026",
+      "telegram_sentence": "Малу Оэй победила на первом парижском финале конкурса Херби Хэнкока и получила стипендию 50 тысяч долларов.",
+      "instagram_sentence": "Париж впервые принял финал конкурса Херби Хэнкока; победила француженка Малу Оэй.",
+      "visual_format": "1080x1350"
+    }
+  ],
+  "editorial": {
+    "ready_for_human_review": false,
+    "blocking_issues": [],
+    "source_scan_window_start": "2026-10-11T00:00:00+03:00",
+    "source_scan_window_end": "2026-10-21T14:18:14+03:00",
+    "generation_notes": [
+      "РУЧНОЙ ПИЛОТ: 5 материалов (2 Россия, 3 мир), подготовлены по проверяемым публикациям.",
+      "Список не является результатом полного автоматического мониторинга источников.",
+      "Перед публикацией владелец должен открыть каждый URL и подтвердить факты, даты, права, соцверсии и раскрытие связи с издателем.",
+      "Дата проверки источников — время извлечения сведений во время подготовки, а не гарантия независимого фактчекинга.",
+      "Выпуск не одобрен: ready_for_human_review=false, публикация заблокирована до ручной проверки."
+    ]
+  }
+}

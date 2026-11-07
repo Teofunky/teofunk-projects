@@ -1,0 +1,14 @@
+[
+ {
+  "date": "10-13", "year": 1935, "kind": "birth", "qid": "Q2547071",
+  "name_ru": "Алексей Козлов", "occupation_ru": "саксофонист, основатель клуба",
+  "russian": true, "club": true, "verified": true,
+  "source": "https://www.wikidata.org/wiki/Q2547071"
+ },
+ {
+  "date": "09-25", "year": 2026, "kind": "death", "qid": "Q2547071",
+  "name_ru": "Алексей Козлов", "occupation_ru": "саксофонист, основатель клуба",
+  "russian": true, "club": true, "verified": true,
+  "source": "https://expert.ru/news/umer-dzhazovyy-saksofonist-aleksey-kozlov"
+ }
+]

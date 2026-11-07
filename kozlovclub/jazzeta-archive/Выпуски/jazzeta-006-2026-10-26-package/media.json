@@ -1,0 +1,20 @@
+{
+  "article_id": "mayer-tom-and-jerry-sob-rock-20261026",
+  "local_file": "john-mayer-barclays-2013.jpeg",
+  "image_url": "https://upload.wikimedia.org/wikipedia/commons/2/2e/John_Mayer_at_the_Barclays_Center.jpeg",
+  "source_page": "https://commons.wikimedia.org/wiki/File:John_Mayer_at_the_Barclays_Center.jpeg",
+  "author": "slgckgc",
+  "license": "CC BY 2.0",
+  "license_url": "https://creativecommons.org/licenses/by/2.0/",
+  "alt": "Джон Майер поёт в микрофон и играет на акустической гитаре на сцене Barclays Center.",
+  "caption": "Архивное фото: Джон Майер в Barclays Center, декабрь 2013 года. Фото: slgckgc / Wikimedia Commons, CC BY 2.0. Кадрировано в версии Commons.",
+  "date_note": "Декабрь 2013 года; точный день расходится в описании и метаданных Commons.",
+  "modifications": "Использована существующая кадрированная версия Commons без дополнительного редактирования.",
+  "sha256": "2d5e1bb84c8f64e51c16e239dc61ead3b0d2e86e3c64ffa5dbe8bfc927700717",
+  "wordpress_steps": [
+    "Загрузить JPEG в медиатеку и заполнить alt.",
+    "Заменить media_rights.image_url на URL вложения.",
+    "Сохранить автора, ссылку на страницу файла и CC BY 2.0 в подписи. Источник mayer-photo уже включён в sources.",
+    "Выбрать обложку «Фото главного материала» и проверить подпись и alt на главной и в статье."
+  ]
+}

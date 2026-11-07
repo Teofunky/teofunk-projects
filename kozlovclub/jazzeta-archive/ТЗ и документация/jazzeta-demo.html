@@ -1,0 +1,152 @@
+<!DOCTYPE html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ДЖАЗЕТА — демонстрационный выпуск</title><meta name="description" content="Демонстрационный выпуск ежедневной джазовой газеты Клуба Алексея Козлова."><style>
+:root{--paper:#f2eddf;--white:#fbf7ed;--ink:#201d1b;--muted:#696257;--line:#88806f;--red:#853b2f;--green:#485e58}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#292a29;color:var(--ink);font-family:Georgia,'Times New Roman',serif}button,a{touch-action:manipulation}button{font:inherit;cursor:pointer}a{color:inherit}#paper{max-width:1220px;margin:28px auto 80px;background:var(--paper);padding:23px 46px 55px;box-shadow:0 24px 75px #0c0d0d65, 0 0 0 1px #c6bca4;min-height:90vh;background-image:repeating-linear-gradient(90deg,transparent,transparent 2px,#82705306 3px),linear-gradient(#fcf9f028,#e3d7ba22)}.paper-top{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:0 0 12px;border-bottom:1px solid var(--ink);font:11px/1.4 Arial,sans-serif;letter-spacing:1.3px;text-transform:uppercase}.paper-top .tag{border:1px solid var(--red);color:var(--red);padding:5px 8px;font-weight:700}.masthead{text-align:center;border-bottom:6px double var(--ink);padding:9px 0 12px}.eyebrow{font:11px Arial,sans-serif;letter-spacing:3px;text-transform:uppercase}.mastword{font-family:Georgia,serif;letter-spacing:-8px;font-size:clamp(66px,11vw,147px);font-weight:900;line-height:.96;transform:scaleX(.94);text-shadow:1.2px 0 currentColor,-1px 0 currentColor}.submast{font:14px Arial,sans-serif;letter-spacing:1.4px;text-transform:uppercase;margin-top:3px}.edition{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;border-bottom:1px solid var(--ink);min-height:38px;gap:9px;font:11px Arial,sans-serif;letter-spacing:1.1px;text-transform:uppercase}.edition>*:last-child{text-align:right}.star{color:var(--red)}.nav{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:17px 0 15px;border-bottom:1px solid var(--line);font:700 11px Arial,sans-serif;letter-spacing:1.1px}.nav button{background:none;color:var(--ink);border:none;padding:8px 12px;text-transform:uppercase}.nav button.active{background:var(--ink);color:var(--paper)}.intro{display:grid;grid-template-columns:1fr auto;align-items:end;gap:20px;padding:18px 0;border-bottom:1px solid var(--line)}.intro h2{font:700 12px Arial,sans-serif;letter-spacing:1.7px;text-transform:uppercase;color:var(--red);margin:0 0 5px}.intro p{margin:0;font:14px/1.5 Georgia,serif;color:var(--muted)}.intro .date-count{font:11px Arial,sans-serif;color:var(--muted);text-transform:uppercase;letter-spacing:1px}.leading{display:grid;grid-template-columns:1.45fr .9fr;gap:25px;padding:25px 0;border-bottom:3px double var(--ink)}.rubric{display:inline-block;font:700 11px Arial,sans-serif;letter-spacing:1.4px;text-transform:uppercase;color:var(--red);margin-bottom:10px}.leading h1{font:bold clamp(34px,5.1vw,63px)/1.02 Georgia,serif;letter-spacing:-1.7px;margin:0 0 14px}.summary{font:17px/1.53 Georgia,serif;margin:0 0 15px}.byline{font:10px Arial,sans-serif;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin:13px 0 15px}.action{display:inline-block;padding:9px 13px;border:1px solid var(--ink);background:transparent;color:var(--ink);font:700 11px Arial,sans-serif;text-decoration:none;letter-spacing:.7px;text-transform:uppercase}.action:hover{background:var(--ink);color:var(--paper)}.illustration{min-height:290px;background:#29302e;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;border:6px solid #ede6d3;outline:1px solid #817c70}.illustration:before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 3px,#0003 4px);pointer-events:none;z-index:2}.record{width:250px;height:250px;border-radius:50%;background:repeating-radial-gradient(circle,#1d211f 0 4px,#414640 5px 6px,#181d19 7px 9px);box-shadow:12px 15px 28px #0007;border:1px solid #444;position:relative;transform:rotate(-15deg)}.record:before{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:97px;height:97px;background:radial-gradient(circle at center,#141a17 0 4px,#ae6650 5px 7px,#bd755d 8px 100%);border-radius:50%;box-shadow:0 0 0 2px #191919}.record:after{content:'78 RPM';position:absolute;color:#eee4d0;letter-spacing:2px;left:94px;top:115px;font:8px Arial,sans-serif;transform:rotate(-25deg)}.ill-cap{position:absolute;left:12px;bottom:10px;color:#d4c7a7;font:10px Arial,sans-serif;letter-spacing:2px;text-transform:uppercase;z-index:3}.content-columns{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-bottom:3px double var(--ink)}.story{padding:25px 21px 28px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);min-height:275px}.story:nth-child(3n+1){padding-left:0}.story:nth-child(3n){padding-right:0;border-right:0}.story h3{font:bold 27px/1.08 Georgia,serif;letter-spacing:-.5px;margin:0 0 10px}.story p{font:15px/1.5 Georgia,serif;color:#453f36;margin:0 0 12px}.story .footerline{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-top:15px;font:10px Arial,sans-serif;color:var(--muted)}.story .footerline a{color:var(--red);text-decoration:none;font-weight:700}.story hr{height:1px;border:0;background:var(--line);width:45px;margin:18px 0 12px}.quote{font:italic 24px Georgia,serif;border-left:4px solid var(--red);margin:30px 0 0;padding:7px 18px}.pagefoot{display:flex;align-items:center;justify-content:space-between;gap:20px;padding-top:18px;font:11px Arial,sans-serif;color:var(--muted)}.bottomline{display:flex;align-items:center;justify-content:center;gap:10px;color:var(--red);margin-top:25px}.bottomline:before,.bottomline:after{content:'';background:var(--line);height:1px;flex:1}.section-title{font:700 clamp(30px,5vw,50px) Georgia,serif;margin:26px 0 8px}.section-desc{font:16px/1.55 Georgia,serif;color:var(--muted);margin:0 0 20px}.archive-box{padding:35px;border:1px solid var(--line);margin:28px 0 100px;background:#faf5e844}.archive-box h3{margin:0 0 12px;font-size:27px}.archive-card{width:100%;text-align:left;padding:22px;border:1px solid var(--ink);background:var(--white);display:grid;grid-template-columns:80px 1fr auto;align-items:center;gap:15px}.archive-card strong{font-size:20px}.archive-card span{font:11px Arial,sans-serif;text-transform:uppercase;letter-spacing:.7px}.social-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin:30px 0}.social-card{aspect-ratio:1;display:flex;flex-direction:column;justify-content:space-between;background:var(--white);padding:24px;border:1px solid var(--ink);box-shadow:4px 4px 0 #9f9587}.social-card:nth-child(2){background:#e7ded0}.social-card:nth-child(3){background:#e7e7de}.social-card:nth-child(4){background:#eddfd5}.social-card:nth-child(5){background:#e9e5d9}.social-card .micro{display:flex;justify-content:space-between;border-bottom:3px double var(--ink);padding-bottom:10px;font:10px Arial,sans-serif;letter-spacing:1px}.social-card h3{font-size:clamp(21px,3vw,35px);line-height:1.12;letter-spacing:-.5px;margin:10px 0}.social-card .social-bottom{display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--ink);padding-top:12px}.social-card button{border:0;background:var(--ink);color:var(--white);padding:8px;font:11px Arial,sans-serif}.social-card .counter{font:12px Arial,sans-serif}.social-copy{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:25px}.social-copy button{padding:11px 14px;background:var(--ink);color:var(--white);border:0;font:700 12px Arial,sans-serif}.notice{font:12px/1.5 Arial,sans-serif;color:#696155;border:1px dashed #9a8c7c;padding:12px 15px;margin-top:16px}.hidden{display:none!important}dialog{border:1px solid var(--ink);background:var(--paper);max-width:780px;width:calc(100vw - 28px);padding:30px 34px;box-shadow:0 20px 80px #0009;max-height:85vh;overflow-y:auto}dialog::backdrop{background:#181b19b9}.dialog-top{display:flex;justify-content:space-between;align-items:center;gap:8px;border-bottom:1px solid var(--ink);padding-bottom:10px;font:11px Arial,sans-serif;text-transform:uppercase;letter-spacing:1px}dialog h2{font-size:clamp(30px,5vw,48px);line-height:1.1}dialog p{font-size:19px;line-height:1.6}.source-item{display:block;margin:8px 0;color:var(--red);font:13px Arial,sans-serif}.close{border:0;background:var(--ink);color:var(--paper);padding:9px 14px}button:focus-visible,a:focus-visible{outline:3px solid #bd755d;outline-offset:3px}@media(max-width:800px){#paper{margin:0;padding:14px 18px 32px}.mastword{font-size:clamp(52px,12vw,95px);letter-spacing:-4px}.submast{font-size:10px}.paper-top .issueinfo{display:none}.leading{grid-template-columns:1fr}.illustration{min-height:210px}.record{width:180px;height:180px}.record:before{width:67px;height:67px}.record:after{left:66px;top:84px;font-size:6px}.content-columns{grid-template-columns:repeat(2,minmax(0,1fr))}.story:nth-child(n){padding:20px 16px;border-right:1px solid var(--line)}.story:nth-child(2n+1){padding-left:0}.story:nth-child(2n){padding-right:0;border-right:0}.social-grid{grid-template-columns:repeat(2,1fr)}.social-card{padding:15px}.social-card h3{font-size:23px}}@media(max-width:540px){.mastword{font-size:clamp(45px,12vw,75px);letter-spacing:-3.5px}.eyebrow{font-size:9px}.edition{font-size:9px;grid-template-columns:1fr auto}.edition>*:last-child{display:none}.leading h1{font-size:43px}.content-columns{grid-template-columns:1fr}.story:nth-child(n){padding:20px 0;border-right:0;min-height:auto}.story h3{font-size:29px}.social-grid{grid-template-columns:1fr}.social-card{max-width:450px;width:100%;margin:auto}.social-card h3{font-size:30px}.paper-top{font-size:9px}.pagefoot{flex-direction:column;align-items:flex-start}.intro{grid-template-columns:1fr}.archive-card{grid-template-columns:55px 1fr}.archive-card span:last-child{display:none}}
+</style></head><body><main id="paper"><div class="paper-top"><span class="tag">Тестовая вёрстка</span><span class="issueinfo">Независимый взгляд на джазовую жизнь</span><span>Клуб Алексея Козлова • Москва</span></div><header class="masthead"><div class="eyebrow">Музыкальные новости и обстоятельства времени</div><div class="mastword">ДЖАЗЕТА</div><div class="submast">Ежедневная газета о джазе и людях, которые его создают</div></header><div class="edition"><span id="edition-no">№ 001 — ПЕРВЫЙ ОПЫТ</span><span class="star">✶</span><span id="edition-date">20 октября 2026 · вторник</span></div><nav class="nav" aria-label="Разделы"><button data-tab="today" class="active">Первая полоса</button><button data-tab="archive">Архив выпусков</button><button data-tab="social">5 новостей / соцсети</button></nav><section id="today"><div class="intro"><div><h2>Что происходит в джазе</h2><p>Шесть новостей из России и мира — без информационного шума.</p></div><div class="date-count">2 Россия <span class="star">✶</span> 4 Мир</div></div><div id="lead"></div><div id="more"></div><blockquote class="quote">Главные новости не обязаны быть громкими. Они должны быть важными.</blockquote><div class="bottomline">✶</div></section><section id="archive" class="hidden"><h2 class="section-title">Подшивка номеров</h2><p class="section-desc">Вчерашняя газета не исчезает: каждый номер получает собственную дату и постоянную ссылку.</p><div class="archive-box"><h3>Пилотный выпуск</h3><button class="archive-card" data-tab="today"><span>№ 001</span><strong>20 октября 2026<br><small>Демонстрационная первая полоса</small></strong><span>Открыть номер ↗</span></button><p class="notice">Исторические выпуски здесь не выдуманы: после запуска архив будет пополняться опубликованными номерами.</p></div></section><section id="social" class="hidden"><h2 class="section-title">Джаз за 60 секунд</h2><p class="section-desc">Пять новостей — пять предложений. Формат для карусели Instagram и короткого дайджеста Telegram.</p><div id="socialgrid" class="social-grid"></div><div class="social-copy"><button id="copy-social">Скопировать пять новостей для Telegram</button><span id="copy-status" aria-live="polite"></span></div><p class="notice">Кнопки «PNG» создают отдельные квадратные карточки 1080×1080 прямо в браузере. Для Instagram понадобится отдельное подключение авторизованного бизнес-аккаунта.</p></section><footer class="pagefoot"><span>© Концепт газеты Клуба Алексея Козлова</span><span>При использовании материалов указываются ссылки на оригиналы; полные тексты не перепечатываются.</span></footer></main><dialog id="reader"><div class="dialog-top"><span id="dialogmeta"></span><button class="close" id="close">Закрыть ×</button></div><h2 id="dialogtitle"></h2><div id="dialogbody"></div><div id="dialogsources"></div></dialog><script id="edition-json" type="application/json">{
+  "schema_version": "1.0",
+  "publication": "ДЖАЗЕТА",
+  "publisher": "Клуб Алексея Козлова",
+  "issue": {
+    "number": 1,
+    "date": "2026-10-20",
+    "timezone": "Europe/Moscow",
+    "status": "demo",
+    "edition_label": "ДЕМОНСТРАЦИОННЫЙ НОМЕР — НЕ ОПУБЛИКОВАН",
+    "editor_note": "Макет на основе проверенных публикаций за 10–16 октября 2026 года. Это не автоматически выпущенная сегодняшняя газета."
+  },
+  "articles": [
+    {
+      "id": "ru-osipov",
+      "region": "Россия",
+      "section": "Новые записи",
+      "date": "2026-10-14",
+      "title": "«Спираль» Анатолия Осипова: новая глава российского джаза",
+      "summary": "Тенор-саксофонист Анатолий Осипов представил альбом Spiral на лейбле Jazzist. Пластинка записана на «Мосфильме» весной 2026 года и открывает новую главу в дискографии музыканта.",
+      "body": "Альбом Spiral стал первой записью Анатолия Осипова на лейбле Jazzist и первым его альбомом в текущем десятилетии. Материал записан весной 2026 года на тон-студии «Мосфильм». Сведение и мастеринг выполнил Андрей Левин. В издательской газете такую новость следует сопровождать пометкой о связи с лейблом и не подменять анонсом независимую рецензию.",
+      "social": "Саксофонист Анатолий Осипов выпустил на Jazzist альбом Spiral, записанный на «Мосфильме».",
+      "sources": [
+        {
+          "name": "Джаз.Ру",
+          "url": "https://www.jazz.ru/2026/10/14/anatoly-osipov-spiral/",
+          "published": "2026-10-14",
+          "type": "публикация"
+        }
+      ],
+      "verified": true,
+      "related": true,
+      "importance": 9
+    },
+    {
+      "id": "world-samara",
+      "region": "Мир",
+      "section": "Первая полоса",
+      "date": "2026-10-16",
+      "title": "Самара Джой выпускает первый концертный мини-альбом",
+      "summary": "23 октября на Verve Records выйдет Live at the Blue Note L.A. — запись выступлений певицы с септетом в лос-анджелесском Blue Note. В программу вошли пять треков.",
+      "body": "Концертная запись сделана во время аншлаговых апрельских выступлений Самары Джой с её септетом в Blue Note Los Angeles. Релиз Live at the Blue Note L.A. назначен на 23 октября на лейбле Verve Records. В трек-лист вошли 'Round Midnight, Yesterdays, Lush Life, No More Blues и реприза No More Blues. Это первый концертный релиз певицы — важное событие для слушателей, которым интересна её работа не только в студии.",
+      "social": "Самара Джой 23 октября выпустит первый концертный EP — Live at the Blue Note L.A. на Verve Records.",
+      "sources": [
+        {
+          "name": "JAZZ.FM91",
+          "url": "https://jazz.fm/samara-joy-to-release-live-ep-live-at-the-blue-note-l-a/",
+          "published": "2026-10-16",
+          "type": "новость"
+        }
+      ],
+      "verified": true,
+      "importance": 10
+    },
+    {
+      "id": "world-vocals",
+      "region": "Мир",
+      "section": "Люди и события",
+      "date": "2026-10-15",
+      "title": "Вокальный конкурс Херби Хэнкока выиграла Малу Оэй",
+      "summary": "Французская певица Малу Оэй стала победительницей международного джазового вокального конкурса Института Херби Хэнкока. Финал впервые состоялся за пределами США — в Париже.",
+      "body": "Победительницей конкурса 2026 года стала певица из Нанта Малу Оэй (Malou Oheix). Финал прошёл в парижском Fondation Louis Vuitton. Второе место заняла Джорджия Хирс, третье — Люси-Энн Дэниелс. Имя лауреатки важно не только как результат соревнования: конкурс известен своей ролью в открытии молодых вокалистов для международной сцены.",
+      "social": "Француженка Малу Оэй победила на конкурсе джазового вокала Института Херби Хэнкока в Париже.",
+      "sources": [
+        {
+          "name": "JAZZ.FM91",
+          "url": "https://jazz.fm/malou-oheix-wins-2026-herbie-hancock-institute-international-jazz-vocals-competition/",
+          "published": "2026-10-15",
+          "type": "новость"
+        }
+      ],
+      "verified": true,
+      "importance": 8
+    },
+    {
+      "id": "ru-province",
+      "region": "Россия",
+      "section": "Сцена России",
+      "date": "2026-10-10",
+      "title": "«Джазовая провинция» отмечает тридцатый сезон",
+      "summary": "Основанный в Курске фестиваль «Джазовая провинция» возвращается к большой дате: его тридцатилетие связано с творчеством Леонида Винцкевича и памятью об Олеге Лундстреме.",
+      "body": "«Джазовая провинция» ведёт историю с 1996 года и на протяжении трёх десятилетий связана с Леонидом Винцкевичем, бессменным художественным руководителем. В афише юбилейного сезона заявлены концерты-посвящения Олегу Лундстрему. История этого фестиваля показывает, насколько значимой джазовой площадкой остаётся не только столичная сцена.",
+      "social": "Курская «Джазовая провинция» отмечает 30-летие концертами-посвящениями Олегу Лундстрему.",
+      "sources": [
+        {
+          "name": "Джаз.Ру",
+          "url": "https://www.jazz.ru/2026/10/10/jazz-province-kursk/",
+          "published": "2026-10-10",
+          "type": "новость"
+        }
+      ],
+      "verified": true,
+      "importance": 7
+    },
+    {
+      "id": "world-egbo",
+      "region": "Мир",
+      "section": "Слушать новое",
+      "date": "2026-10-15",
+      "title": "Томпсон Эгбо-Эгбо соединяет джазовое трио и струнный квартет",
+      "summary": "Альбом Just a Thought, намеченный на 23 октября, сочетает камерность фортепианного трио с расширенными аранжировками при участии Odin Quartet.",
+      "body": "Канадский пианист и композитор Томпсон Эгбо-Эгбо готовит альбом Just a Thought к выпуску 23 октября. В записи участвует его трио, а на отдельных пьесах — струнный Odin Quartet. Материал соединяет авторские сочинения и новые прочтения джазовой классики. Это пример сегодняшнего камерного джаза, в котором импровизация естественно соседствует со струнными фактурами.",
+      "social": "23 октября выйдет Just a Thought пианиста Томпсона Эгбо-Эгбо — джазовое трио со струнным Odin Quartet.",
+      "sources": [
+        {
+          "name": "JAZZ.FM91",
+          "url": "https://jazz.fm/review-thompson-egbo-egbos-just-a-thought-is-an-innovative-work-of-creative-possibilities/",
+          "published": "2026-10-15",
+          "type": "рецензия"
+        }
+      ],
+      "verified": true,
+      "importance": 6
+    },
+    {
+      "id": "world-research",
+      "region": "Мир",
+      "section": "Наука о музыке",
+      "date": "2026-10-11",
+      "title": "Исследователи обучают алгоритмы лучше понимать джаз",
+      "summary": "Представлен JSIR — открытый исследовательский набор из 267 записей 44 джазовых стандартов с разметкой гармонии, ритма и музыкальной формы.",
+      "body": "В препринте JSIR: An Audio-Aligned, Multi-Task Dataset of Jazz Standard Recordings исследователи Sihun Lee и Dasaem Jeong описывают набор из 267 записей 44 джазовых стандартов общей длительностью 25,6 часа. Авторы сообщают об улучшении отдельных метрик моделей, обученных с привлечением этого материала. Это результаты исследования, а не доказательство того, что машина научилась понимать музыкальную импровизацию как человек; работа опубликована как препринт.",
+      "social": "На arXiv представлен JSIR: 267 записей 44 джазовых стандартов для обучения алгоритмов музыки.",
+      "sources": [
+        {
+          "name": "arXiv (препринт)",
+          "url": "https://arxiv.org/abs/2610.15356",
+          "published": "2026-10-11",
+          "type": "исследование"
+        }
+      ],
+      "verified": true,
+      "importance": 5
+    }
+  ],
+  "social": {
+    "count": 5,
+    "article_ids": [
+      "world-samara",
+      "ru-osipov",
+      "world-vocals",
+      "ru-province",
+      "world-research"
+    ]
+  }
+}</script><script>
+(()=>{'use strict';const issue=JSON.parse(document.getElementById('edition-json').textContent);const $=s=>document.querySelector(s);const esc=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));const articles=issue.articles;const lead=articles.find(a=>a.importance===10)||articles[0];const others=articles.filter(a=>a!==lead);const fmtDate=s=>new Date(s+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long'});$('#lead').innerHTML=`<article class="leading"><div><div class="rubric">Главная тема · ${esc(lead.region)} · ${esc(lead.section)}</div><h1>${esc(lead.title)}</h1><p class="summary">${esc(lead.summary)}</p><div class="byline">${fmtDate(lead.date)} · Источник: ${esc(lead.sources[0].name)}</div><button class="action" data-read="${esc(lead.id)}">Читать заметку ↗</button></div><div class="illustration" aria-hidden="true"><div class="record"></div><span class="ill-cap">Музыка, пойманная во времени</span></div></article>`;$('#more').innerHTML=`<div class="content-columns">${others.map((a,i)=>`<article class="story"><span class="rubric">${esc(a.region)} · ${esc(a.section)}</span><h3>${esc(a.title)}</h3><p>${esc(a.summary)}</p><hr><div class="footerline"><span>${fmtDate(a.date)} · ${esc(a.sources[0].name)}</span><a href="#" data-read="${esc(a.id)}">Подробнее ↗</a></div></article>`).join('')}</div>`;
+function tab(v){['today','archive','social'].forEach(id=>$('#'+id).classList.toggle('hidden',id!==v));document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===v));window.scrollTo({top:0,behavior:'smooth'});}document.addEventListener('click',e=>{let b=e.target.closest('[data-tab]');if(b){tab(b.dataset.tab);return}b=e.target.closest('[data-read]');if(b){e.preventDefault();let a=articles.find(i=>i.id===b.dataset.read);if(a)open(a)}});const dlg=$('#reader');function open(a){$('#dialogmeta').textContent=`${a.region} · ${a.section} · ${fmtDate(a.date)}`;$('#dialogtitle').textContent=a.title;$('#dialogbody').innerHTML=`<p>${esc(a.body)}</p>${a.related?'<p class="notice">Редакционная пометка: материал связан с лейблом Jazzist.</p>':''}`;$('#dialogsources').innerHTML='<h3>Источники</h3>'+a.sources.map(s=>`<a class="source-item" href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.name)} · ${fmtDate(s.published)} ↗</a>`).join('');dlg.showModal()}$('#close').onclick=()=>dlg.close();dlg.onclick=e=>{if(e.target===dlg)dlg.close()};
+const socials=issue.social.article_ids.map(id=>articles.find(a=>a.id===id)).filter(Boolean);$('#socialgrid').innerHTML=socials.map((a,i)=>`<div class="social-card"><div class="micro"><span>ДЖАЗЕТА / ${String(i+1).padStart(2,'0')}</span><span>${esc(a.region).toUpperCase()}</span></div><h3>${esc(a.social)}</h3><div class="social-bottom"><span class="counter">20.10.2026 · № 001</span><button data-png="${esc(a.id)}">PNG ↓</button></div></div>`).join('');$('#copy-social').onclick=async()=>{const txt=['ДЖАЗЕТА · 5 главных новостей',...socials.map((a,i)=>`${i+1}. ${a.social}\n${a.sources[0].url}`)].join('\n\n');try{await navigator.clipboard.writeText(txt);$('#copy-status').textContent='Скопировано'}catch{const t=document.createElement('textarea');t.value=txt;document.body.append(t);t.select();document.execCommand('copy');t.remove();$('#copy-status').textContent='Скопировано'}};function roundText(ctx,text,maxWidth){let words=text.split(' '),lines=[],line='';for(let word of words){let test=line?line+' '+word:word;if(ctx.measureText(test).width>maxWidth&&line){lines.push(line);line=word}else line=test}if(line)lines.push(line);return lines};document.addEventListener('click',e=>{const b=e.target.closest('[data-png]');if(!b)return;let a=articles.find(a=>a.id===b.dataset.png),c=document.createElement('canvas');c.width=c.height=1080;let k=c.getContext('2d');k.fillStyle='#f2eddf';k.fillRect(0,0,1080,1080);k.strokeStyle='#211d1a';k.lineWidth=4;k.strokeRect(35,35,1010,1010);k.font='900 112px Georgia';k.fillStyle='#211d1a';k.fillText('ДЖАЗЕТА',70,178);k.fillRect(70,202,940,5);k.font='bold 26px Arial';k.fillStyle='#853b2f';k.fillText(a.region.toUpperCase()+' / '+a.section.toUpperCase(),75,285);let font=64,lines;k.fillStyle='#211d1a';do{k.font=`bold ${font}px Georgia`;lines=roundText(k,a.social,915);font-=2}while(lines.length*font*1.27>500&&font>30);let y=365;for(let l of lines){k.fillText(l,75,y);y+=font*1.27}k.fillStyle='#211d1a';k.fillRect(70,916,940,2);k.font='25px Arial';k.fillText('20 ОКТЯБРЯ 2026 · НОВОСТЬ '+(socials.indexOf(a)+1),72,970);let link=document.createElement('a');link.href=c.toDataURL('image/png');link.download=`jazzeta-card-${a.id}.png`;link.click()});})();
+</script></body></html>

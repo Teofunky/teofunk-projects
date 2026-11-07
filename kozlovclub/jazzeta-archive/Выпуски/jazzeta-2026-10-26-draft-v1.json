@@ -1,0 +1,567 @@
+{
+  "schema_version": "1.1",
+  "edition_date": "2026-10-26",
+  "timezone": "Europe/Moscow",
+  "edition_number": null,
+  "publication": {
+    "status": "draft"
+  },
+  "import_id": "jazzeta-2026-10-26-draft-v1",
+  "articles": [
+    {
+      "id": "mayer-tom-and-jerry-sob-rock-20261026",
+      "region": "world",
+      "category": "guitar_rock",
+      "placement": "lead",
+      "headline": "Джон Майер выпустил Tom and Jerry на собственном лейбле",
+      "lead": "23 октября вышел сингл Tom and Jerry — первая новая сольная запись Джона Майера после альбома Sob Rock, по сообщению лейбла. Одновременно музыкант запустил Sob Rock Records в партнёрстве с Mercury Records.",
+      "body_paragraphs": [
+        "Песню записали в Chaplin Studios в Голливуде. Продюсерами стали сам Майер и Блейк Слаткин, сведением занимался Сербан Генеа. За сутки до появления на стриминговых сервисах трек прозвучал на LIFE with John Mayer — авторском канале гитариста на SiriusXM.",
+        "У названия есть вполне домашнее происхождение: по словам Майера, Tom and Jerry он назвал первую голосовую заметку с наброском песни. Рабочее имя файла в итоге осталось и у законченной записи. Эту историю музыкант рассказал в сообщении Universal Music Canada о выходе сингла.",
+        "Собственный лейбл получил название последнего студийного альбома Майера, выпущенного в 2021 году. Его прежнее сотрудничество с Columbia завершилось в 2022-м: музыкант решил не продлевать договор после 21 года и восьми студийных альбомов. Теперь релиз выходит под двумя именами — Sob Rock Records и Mercury.",
+        "Music Business Worldwide отмечает, что финансовые условия и устройство нового партнёрства не раскрыты. Поэтому из объявления пока нельзя сделать вывод о том, как стороны распределили права на записи. Зато новая песня уже даёт этому деловому повороту конкретный музыкальный результат."
+      ],
+      "summary": "Новый сингл Майера вышел 23 октября; Sob Rock Records работает в партнёрстве с Mercury.",
+      "event_date": "2026-10-23",
+      "story_group_id": "mayer-tom-and-jerry-sob-rock",
+      "story_score": 88,
+      "sources": [
+        {
+          "id": "mayer-umc",
+          "title": "JOHN MAYER RELEASES HIGHLY ANTICIPATED NEW SINGLE “TOM AND JERRY”",
+          "publisher": "Universal Music Canada",
+          "url": "https://www.universalmusic.ca/2026/10/23/john-mayer-releases-highly-anticipated-new-single-tom-and-jerry/",
+          "published_at": "2026-10-23",
+          "type": "press_release",
+          "verification_checked_at": "2026-10-26T04:55:01+00:00",
+          "dependency_group": "mayer-mercury-launch-20261023"
+        },
+        {
+          "id": "mayer-mbw",
+          "title": "John Mayer launches Sob Rock Records in partnership with Universal’s Mercury",
+          "publisher": "Music Business Worldwide",
+          "url": "https://www.musicbusinessworldwide.com/john-mayer-launches-sob-rock-records-in-partnership-with-universals-mercury/",
+          "published_at": "2026-10-23",
+          "type": "independent_editorial",
+          "verification_checked_at": "2026-10-26T04:55:01+00:00",
+          "dependency_group": "mayer-mercury-launch-20261023"
+        },
+        {
+          "id": "mayer-photo",
+          "title": "File:John Mayer at the Barclays Center.jpeg",
+          "publisher": "Wikimedia Commons",
+          "url": "https://commons.wikimedia.org/wiki/File:John_Mayer_at_the_Barclays_Center.jpeg",
+          "published_at": null,
+          "type": "other",
+          "verification_checked_at": "2026-10-26T04:55:01+00:00",
+          "dependency_group": "mayer-photo-slgckgc"
+        }
+      ],
+      "claims": [
+        {
+          "id": "mayer-c1",
+          "statement": "Релиз Tom and Jerry — 23 октября 2026 года; Sob Rock Records сотрудничает с Mercury.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "mayer-umc",
+            "mayer-mbw"
+          ],
+          "editorial_note": ""
+        },
+        {
+          "id": "mayer-c2",
+          "statement": "Продюсеры — Майер и Блейк Слаткин; сведение — Сербан Генеа; запись — Chaplin Studios.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "mayer-umc",
+            "mayer-mbw"
+          ],
+          "editorial_note": ""
+        },
+        {
+          "id": "mayer-c3",
+          "statement": "Премьерный эфир SiriusXM состоялся 22 октября; название песни взято из имени голосовой заметки.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "mayer-umc"
+          ],
+          "editorial_note": ""
+        },
+        {
+          "id": "mayer-c4",
+          "statement": "Майер покинул Columbia в 2022 году; условия нового партнёрства не раскрыты.",
+          "verification": "attributed_single",
+          "source_ids": [
+            "mayer-mbw"
+          ],
+          "editorial_note": "Контекст и отсутствие раскрытых условий сообщены MBW."
+        },
+        {
+          "id": "mayer-c5",
+          "statement": "Автор фото — slgckgc; лицензия CC BY 2.0.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "mayer-photo"
+          ],
+          "editorial_note": ""
+        }
+      ],
+      "quotes": [],
+      "conflict_disclosure": null,
+      "editorial_notes": [
+        "Сюжет отличается от №001: там — отзыв Майера о Крисе Баке, здесь — собственный релиз и лейбл.",
+        "Формулировка о первой новой сольной записи атрибутирована лейблу. Не заявлены дата нового альбома, владение мастер-записями или полная независимость от мейджора.",
+        "MBW использует то же объявление: для фактов запуска источникам назначена общая dependency_group.",
+        "Фото архивное. На Commons описание указывает 13 декабря, метаданные — 17 декабря 2013 года; в подписи оставлены только месяц и год.",
+        "Перед публикацией загрузить приложенный JPEG в медиатеку, заменить image_url на URL вложения и заполнить alt из media.json. Обложка — фото главного материала."
+      ],
+      "media_rights": {
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/2/2e/John_Mayer_at_the_Barclays_Center.jpeg",
+        "status": "licensed",
+        "credit": "Архивное фото: Джон Майер в Barclays Center, декабрь 2013 года. Фото: slgckgc / Wikimedia Commons, CC BY 2.0. Кадрировано в версии Commons."
+      }
+    },
+    {
+      "id": "zhilin-rachmaninoff-album-20261026",
+      "region": "russia",
+      "category": "jazz",
+      "placement": "regular",
+      "headline": "Сергей Жилин представил альбом с обработками музыки Рахманинова",
+      "lead": "Сергей Жилин рассказал о новом альбоме «Рахманинов. Многогранность гения» на юбилейном концерте 23 октября. По словам пианиста, в него вошли двенадцать треков с обработками произведений композитора.",
+      "body_paragraphs": [
+        "Об этом музыкант сообщил корреспонденту НСН в Большом зале Московской консерватории, где отмечал своё 60-летие. Жилин пояснил, что альбом напечатан именно к этому дню. В интервью он связал работу аранжировщика с другими своими занятиями — исполнительством, дирижированием и сочинением музыки.",
+        "Одноимённая концертная программа «Фонограф-Джаз-Квинтета» уже существует. В опубликованной Москонцертом афише перечислены, в частности, «Вокализ», «Элегия», прелюдии и фантазии на темы Второго и Третьего фортепианных концертов. Это репертуар сценической программы; её перечень не следует принимать за подтверждённый трек-лист альбома.",
+        "Новый выпуск продолжает работу Жилина с рахманиновскими темами за пределами академического концертного формата. О дате появления записи на цифровых площадках в разговоре с НСН не сообщается."
+      ],
+      "summary": "На своём 60-летии Жилин рассказал о двенадцати треках альбома «Рахманинов. Многогранность гения».",
+      "event_date": "2026-10-23",
+      "story_group_id": "zhilin-rachmaninoff-album",
+      "story_score": 77,
+      "sources": [
+        {
+          "id": "zhilin-nsn",
+          "title": "«Расширять границы!»: Сергей Жилин о Радио JAZZ и новом альбоме",
+          "publisher": "НСН",
+          "url": "https://nsn.fm/music/rasshiryat-granitsy-sergei-zhilin-o-radio-jazz-i-novom-albome",
+          "published_at": "2026-10-23",
+          "type": "independent_editorial",
+          "verification_checked_at": "2026-10-26T04:55:01+00:00",
+          "dependency_group": "zhilin-nsn-interview-20261023"
+        },
+        {
+          "id": "zhilin-mosconcert",
+          "title": "Рахманинов. Многогранность гения. Сергей Жилин и «Фонограф-Джаз-Квинтет»",
+          "publisher": "Москонцерт",
+          "url": "https://mosconcert.moscow/meropriyatiya/klassika/rakhmaninov-mnogogrannost-geniya-sergey-zhilin-i-fonograf-dzhaz-kvintet/",
+          "published_at": null,
+          "type": "event_organizer",
+          "verification_checked_at": "2026-10-26T04:55:01+00:00",
+          "dependency_group": "zhilin-mosconcert-program"
+        }
+      ],
+      "claims": [
+        {
+          "id": "zhilin-c1",
+          "statement": "23 октября Жилин сообщил НСН о напечатанном альбоме из 12 треков.",
+          "verification": "attributed_single",
+          "source_ids": [
+            "zhilin-nsn"
+          ],
+          "editorial_note": "Прямой разговор с артистом; наличие в продаже и на стримингах отдельно не проверено."
+        },
+        {
+          "id": "zhilin-c2",
+          "statement": "Разговор состоялся на концерте к 60-летию в Большом зале Московской консерватории.",
+          "verification": "attributed_single",
+          "source_ids": [
+            "zhilin-nsn"
+          ],
+          "editorial_note": ""
+        },
+        {
+          "id": "zhilin-c3",
+          "statement": "Одноимённая концертная программа содержит «Вокализ», «Элегию» и темы фортепианных концертов №2 и №3.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "zhilin-mosconcert"
+          ],
+          "editorial_note": ""
+        }
+      ],
+      "quotes": [],
+      "conflict_disclosure": null,
+      "editorial_notes": [
+        "Об альбоме сообщает один прямой источник — интервью НСН. Сохранена атрибуция.",
+        "Афиша Москонцерта подтверждает только концертную программу, а не состав и трек-лист записи.",
+        "Не перенесены исторические утверждения из рекламного текста афиши: в нём есть сомнительная дата премьеры «Рапсодии в стиле блюз»."
+      ],
+      "media_rights": {
+        "image_url": null,
+        "status": "none",
+        "credit": ""
+      }
+    },
+    {
+      "id": "raye-mercury-prize-2026-20261026",
+      "region": "world",
+      "category": "funk_soul",
+      "placement": "regular",
+      "headline": "RAYE получила Mercury Prize за This Music May Contain Hope",
+      "lead": "RAYE стала лауреатом Mercury Prize 2026 за альбом This Music May Contain Hope. Победительницу объявили 22 октября на церемонии в Ньюкасле.",
+      "body_paragraphs": [
+        "Объясняя решение, жюри выделило устройство альбома из четырёх разделов и его движение между джазом, соулом, R&B и академической музыкой. Эти характеристики — оценка премии: судьи рассматривали работу как цельное авторское высказывание, выходящее за пределы одного жанра.",
+        "На церемонии певица исполнила I Hate the Way I Look Today. Как сообщает Pitchfork, её сопровождал биг-бэнд. Издание также напоминает, что дебютный альбом RAYE My 21st Century Blues уже попадал в шорт-лист в 2023 году; тогда награду получил Ezra Collective.",
+        "Mercury отмечает альбомы британских и ирландских музыкантов. В нынешнюю финальную двенадцатку вошли, среди прочих, Knats, Оливия Дин, Пол Маккартни и Florence + the Machine. Для джазовой аудитории здесь интересен сам выбор жюри: сочетание нескольких музыкальных языков стало одной из причин награды."
+      ],
+      "summary": "Альбом RAYE победил на Mercury Prize; жюри отметило его структуру и соединение джаза, соула, R&B и академической музыки.",
+      "event_date": "2026-10-22",
+      "story_group_id": "raye-mercury-prize-2026",
+      "story_score": 82,
+      "sources": [
+        {
+          "id": "raye-mercury",
+          "title": "Raye announced as overall winner of the 2026 Mercury Prize Album of the Year",
+          "publisher": "Mercury Prize",
+          "url": "https://www.mercuryprize.com/news/2026/raye-announced-as-overall-winner-of-the-2026-mercury-prize-album-of-the-year/",
+          "published_at": "2026-10-22",
+          "type": "event_organizer",
+          "verification_checked_at": "2026-10-26T04:55:01+00:00",
+          "dependency_group": "mercury-official-20261022"
+        },
+        {
+          "id": "raye-pitchfork",
+          "title": "Raye Wins 2026 Mercury Prize",
+          "publisher": "Pitchfork",
+          "url": "https://pitchfork.com/story/raye-wins-2026-mercury-prize/",
+          "published_at": "2026-10-22",
+          "type": "independent_editorial",
+          "verification_checked_at": "2026-10-26T04:55:01+00:00",
+          "dependency_group": "pitchfork-mercury-20261022"
+        }
+      ],
+      "claims": [
+        {
+          "id": "raye-c1",
+          "statement": "Победа RAYE объявлена 22 октября в Ньюкасле.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "raye-mercury",
+            "raye-pitchfork"
+          ],
+          "editorial_note": ""
+        },
+        {
+          "id": "raye-c2",
+          "statement": "Жюри отметило четыре раздела и жанровый диапазон альбома.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "raye-mercury"
+          ],
+          "editorial_note": "Оценка принадлежит жюри."
+        },
+        {
+          "id": "raye-c3",
+          "statement": "На церемонии RAYE выступила с биг-бэндом; в 2023 году её дебют уступил Ezra Collective.",
+          "verification": "attributed_single",
+          "source_ids": [
+            "raye-pitchfork"
+          ],
+          "editorial_note": ""
+        },
+        {
+          "id": "raye-c4",
+          "statement": "В финале — 12 альбомов, включая Knats, Оливию Дин, Пола Маккартни и Florence + the Machine.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "raye-mercury"
+          ],
+          "editorial_note": ""
+        }
+      ],
+      "quotes": [],
+      "conflict_disclosure": null,
+      "editorial_notes": [
+        "Дата события — 22 октября, дата выпуска газеты — 26 октября. Не названа новостью сегодняшнего дня.",
+        "Автор не заявляет прослушивание записи. Музыкальная характеристика атрибутирована жюри."
+      ],
+      "media_rights": {
+        "image_url": null,
+        "status": "none",
+        "credit": ""
+      }
+    },
+    {
+      "id": "plovdiv-jazz-fest-autumn-2026-20261026",
+      "region": "world",
+      "category": "festivals",
+      "placement": "regular",
+      "headline": "Аарон Паркс и Шай Маэстро выступят на фестивале в Пловдиве",
+      "lead": "Осенний Plovdiv Jazz Fest пройдёт 6–8 ноября в Доме культуры «Борис Христов». Три вечера объединят шесть концертов — от программы к столетию Майлза Дэвиса до современных фортепианных трио.",
+      "body_paragraphs": [
+        "Первый вечер откроет проект трубача Росена Захариева All Stars, посвящённый Дэвису; затем сыграет трио Аарона Паркса. В описании программы на сайте муниципалитета заявлен материал разных периодов Дэвиса, от Birth of the Cool до Doo-Bop.",
+        "На 7 ноября назначены концерты трио гитариста Дженка Эрдогана и квартета британской певицы Эммы Смит. Финальный вечер составят квартет Элины Дуни и трио Шая Маэстро.",
+        "По официальному расписанию, первые концерты каждого дня начинаются в 19:30, вторые — в 21:15 по местному времени. Один вечерний билет действует на оба выступления. Организатор фестиваля — Blue M; программа опубликована на сайте муниципалитета Пловдива и в билетной системе Eventim.",
+        "Так устроенная афиша позволяет за один вечер услышать два самостоятельных проекта: юбилейное посвящение соседствует с авторским трио, а вокальные ансамбли — с инструментальными."
+      ],
+      "summary": "В Пловдиве 6–8 ноября заявлены Аарон Паркс, Шай Маэстро, Элина Дуни, Эмма Смит, Дженк Эрдоган и посвящение Майлзу Дэвису.",
+      "event_date": "2026-11-06",
+      "story_group_id": "plovdiv-jazz-fest-autumn-2026",
+      "story_score": 78,
+      "sources": [
+        {
+          "id": "plovdiv-city",
+          "title": "Plovdiv Jazz Fest 2026: Дванадесетото есенно издание събира световни джаз имена в Пловдив от 6 до 8 ноември",
+          "publisher": "Община Пловдив",
+          "url": "https://www.plovdiv.bg/plovdiv-jazz-fest-2026-dvanadesetoto-esenno-izdanie-sabira-svetovni-dzhaz-imena-v-plovdiv-ot-6-do-8-noemvri/",
+          "published_at": null,
+          "type": "official",
+          "verification_checked_at": "2026-10-26T04:55:01+00:00",
+          "dependency_group": "plovdiv-autumn-program-2026"
+        },
+        {
+          "id": "plovdiv-sofiaglobe",
+          "title": "Autumn 2026 Plovdiv Jazz Fest being held from November 6 to 8",
+          "publisher": "The Sofia Globe",
+          "url": "https://sofiaglobe.com/2026/10/24/autumn-2026-plovdiv-jazz-fest-being-held-from-november-6-to-8/",
+          "published_at": "2026-10-24",
+          "type": "independent_editorial",
+          "verification_checked_at": "2026-10-26T04:55:01+00:00",
+          "dependency_group": "plovdiv-autumn-program-2026"
+        },
+        {
+          "id": "plovdiv-eventim",
+          "title": "Plovdiv Jazz Fest - Дати и билети",
+          "publisher": "Eventim Bulgaria",
+          "url": "https://www.eventim.bg/artist/plovdiv-jazz-fest/",
+          "published_at": null,
+          "type": "distributor",
+          "verification_checked_at": "2026-10-26T04:55:01+00:00",
+          "dependency_group": "plovdiv-autumn-program-2026"
+        }
+      ],
+      "claims": [
+        {
+          "id": "plovdiv-c1",
+          "statement": "Фестиваль запланирован на 6–8 ноября, площадка — Дом культуры «Борис Христов».",
+          "verification": "verified_primary",
+          "source_ids": [
+            "plovdiv-city",
+            "plovdiv-sofiaglobe",
+            "plovdiv-eventim"
+          ],
+          "editorial_note": ""
+        },
+        {
+          "id": "plovdiv-c2",
+          "statement": "На каждый вечер заявлено два концерта, начало — 19:30 и 21:15 по местному времени.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "plovdiv-city",
+            "plovdiv-eventim"
+          ],
+          "editorial_note": ""
+        },
+        {
+          "id": "plovdiv-c3",
+          "statement": "Вечерний билет включает оба концерта; организатор — Blue M.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "plovdiv-city"
+          ],
+          "editorial_note": ""
+        },
+        {
+          "id": "plovdiv-c4",
+          "statement": "Посвящение Дэвису охватывает период от Birth of the Cool до Doo-Bop.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "plovdiv-city"
+          ],
+          "editorial_note": "Содержание заявленной программы, не отчёт о состоявшемся исполнении."
+        }
+      ],
+      "quotes": [],
+      "conflict_disclosure": null,
+      "editorial_notes": [
+        "Это календарный материал по опубликованной программе; не утверждается, что состав впервые объявлен 26 октября.",
+        "Публикация The Sofia Globe от 24 октября повторяет программу организатора; источникам назначена общая dependency_group.",
+        "Англоязычная туристическая афиша содержит несогласованные дни недели; использованы даты и часы официального болгарского расписания. Цены и наличие билетов не заявлены."
+      ],
+      "media_rights": {
+        "image_url": null,
+        "status": "none",
+        "credit": ""
+      }
+    },
+    {
+      "id": "prince-madhouse-8-history-20261026",
+      "region": "world",
+      "category": "jazz",
+      "placement": "feature",
+      "headline": "Джазовая мистификация Принса: кто скрывался за группой Madhouse",
+      "lead": "В 1987 году Madhouse представили как ансамбль с собственной биографией. Но дебютный альбом 8 записали вдвоём Принс и саксофонист Эрик Лидс. Вспоминаем историю выдуманного состава — и настоящей музыки.",
+      "body_paragraphs": [
+        "Официальная история группы выглядела правдоподобно: клавишник из Атланты Austra Chanel, барабанщик John Lewis, басист Bill Lewis и Эрик Лидс. Согласно нынешней официальной дискографии Принса, первые трое были вымышленными. Лидс действительно участвовал в записи: играл на тенор- и баритон-саксофонах и флейте. Все остальные инструменты взял на себя Принс.",
+        "В интервью The Last Miles Лидс вспоминал, как после тура Parade Принс позвал его домой поиграть джаз. Несколько заготовок уже существовали; по оценке саксофониста, работа над альбомом заняла около трёх дней. Лишь по ходу сессий он понял, во что складываются эти записи.",
+        "Объяснение тайны тоже известно со слов Лидса. Принс хотел услышать реакцию на музыку без заранее заданного отношения к своему имени и не рассчитывал ограничиваться собственной поклоннической аудиторией. Для этого придумали имена участников и подробности их биографий. Лидсу досталась неудобная роль единственного публичного лица ансамбля: именно ему приходилось поддерживать легенду в интервью.",
+        "Однако выражение «группа, которой не существовало» требует оговорки. Для европейских концертов тура Sign O’ the Times в 1987 году появился реальный состав Madhouse: к Лидсу присоединились басист Леви Сисер-младший, клавишник Мэтт Финк и барабанщик Дейл Александер. Этот этап описан в дискографическом архиве Goldies Parade.",
+        "Второй альбом, 16, также записывали уже с дополнительными музыкантами. Официальные кредиты называют Шейлу И., Леви Сисера-младшего и Dr. Fink наряду с Принсом и Лидсом. Поэтому мистификация относится прежде всего к представлению дебюта. За ней стоял вполне реальный интерес Принса к инструментальной музыке — и проект, который со временем обрёл живой ансамбль."
+      ],
+      "summary": "Дебют Madhouse записали Принс и Эрик Лидс за вымышленной биографией группы; позднее проект получил настоящий концертный состав.",
+      "event_date": null,
+      "story_group_id": "prince-madhouse-8-history",
+      "story_score": 84,
+      "sources": [
+        {
+          "id": "madhouse-estate8",
+          "title": "Madhouse - 8",
+          "publisher": "Prince Official Discography",
+          "url": "https://discography.prince.com/albums/8",
+          "published_at": null,
+          "type": "official",
+          "verification_checked_at": "2026-10-26T04:55:01+00:00",
+          "dependency_group": "prince-estate-discography"
+        },
+        {
+          "id": "madhouse-leeds",
+          "title": "Interview: Eric Leeds [Part Two]",
+          "publisher": "The Last Miles",
+          "url": "https://www.thelastmiles.com/interviews-eric-leeds-part2/",
+          "published_at": null,
+          "type": "independent_editorial",
+          "verification_checked_at": "2026-10-26T04:55:01+00:00",
+          "dependency_group": "eric-leeds-lastmiles-interview"
+        },
+        {
+          "id": "madhouse-live",
+          "title": "Madhouse 8",
+          "publisher": "Goldies Parade",
+          "url": "https://goldiesparade.co.uk/discography/related-artists/madhouse-8/",
+          "published_at": null,
+          "type": "other",
+          "verification_checked_at": "2026-10-26T04:55:01+00:00",
+          "dependency_group": "goldiesparade-madhouse-discography"
+        },
+        {
+          "id": "madhouse-estate16",
+          "title": "Madhouse - 16",
+          "publisher": "Prince Official Discography",
+          "url": "https://discography.prince.com/albums/16",
+          "published_at": null,
+          "type": "official",
+          "verification_checked_at": "2026-10-26T04:55:01+00:00",
+          "dependency_group": "prince-estate-discography"
+        }
+      ],
+      "claims": [
+        {
+          "id": "madhouse-c1",
+          "statement": "Дебют 8 (1987) записали Принс и Лидс; Austra Chanel, John Lewis и Bill Lewis — вымышленные участники.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "madhouse-estate8"
+          ],
+          "editorial_note": ""
+        },
+        {
+          "id": "madhouse-c2",
+          "statement": "Лидс играл на двух саксофонах и флейте, Принс — на остальных инструментах.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "madhouse-estate8"
+          ],
+          "editorial_note": ""
+        },
+        {
+          "id": "madhouse-c3",
+          "statement": "По воспоминаниям Лидса, сессии заняли около трёх дней, а легенда должна была убрать предубеждения к имени Принса.",
+          "verification": "attributed_single",
+          "source_ids": [
+            "madhouse-leeds"
+          ],
+          "editorial_note": "Воспоминания участника, не объективно установленная длительность и мотивация."
+        },
+        {
+          "id": "madhouse-c4",
+          "statement": "В 1987 году существовал концертный состав: Лидс, Сисер, Финк, Александер.",
+          "verification": "attributed_single",
+          "source_ids": [
+            "madhouse-live"
+          ],
+          "editorial_note": "Состав приведён с указанием дискографического архива."
+        },
+        {
+          "id": "madhouse-c5",
+          "statement": "На 16 участвовали также Sheila E., Levi Seacer Jr. и Dr. Fink.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "madhouse-estate16"
+          ],
+          "editorial_note": ""
+        }
+      ],
+      "quotes": [],
+      "conflict_disclosure": null,
+      "editorial_notes": [
+        "Согласованный исторический материал, а не новость об открытии 2026 года. event_date=null; год дебюта указан в тексте.",
+        "Заголовок уточнён, чтобы не отрицать существование реального позднейшего состава.",
+        "Не приводится точный день выхода 8: найденные вторичные дискографии расходятся.",
+        "Прямых цитат, неустановленного диалога или утверждений об услышанном звучании нет."
+      ],
+      "media_rights": {
+        "image_url": null,
+        "status": "none",
+        "credit": ""
+      }
+    }
+  ],
+  "social": [
+    {
+      "article_id": "mayer-tom-and-jerry-sob-rock-20261026",
+      "telegram_sentence": "Джон Майер выпустил Tom and Jerry 23 октября и запустил Sob Rock Records в партнёрстве с Mercury.",
+      "instagram_sentence": "Tom and Jerry — новый сингл Джона Майера на его Sob Rock Records и Mercury.",
+      "visual_format": "1080x1350"
+    },
+    {
+      "article_id": "zhilin-rachmaninoff-album-20261026",
+      "telegram_sentence": "Сергей Жилин рассказал НСН об альбоме «Рахманинов. Многогранность гения»: по его словам, в нём двенадцать треков.",
+      "instagram_sentence": "К своему 60-летию Сергей Жилин представил альбом с обработками Рахманинова.",
+      "visual_format": "1080x1350"
+    },
+    {
+      "article_id": "raye-mercury-prize-2026-20261026",
+      "telegram_sentence": "RAYE получила Mercury Prize 2026 за This Music May Contain Hope — жюри отметило структуру и жанровое разнообразие альбома.",
+      "instagram_sentence": "This Music May Contain Hope принёс RAYE победу на Mercury Prize 2026.",
+      "visual_format": "1080x1350"
+    },
+    {
+      "article_id": "plovdiv-jazz-fest-autumn-2026-20261026",
+      "telegram_sentence": "Plovdiv Jazz Fest пройдёт 6–8 ноября с Аароном Парксом, Шаем Маэстро, Элиной Дуни и посвящением столетию Майлза Дэвиса.",
+      "instagram_sentence": "Шесть концертов за три вечера: осенний Plovdiv Jazz Fest запланирован на 6–8 ноября.",
+      "visual_format": "1080x1350"
+    },
+    {
+      "article_id": "prince-madhouse-8-history-20261026",
+      "telegram_sentence": "История Madhouse: за вымышленной биографией дебюта стояли Принс и Эрик Лидс, а позднее появился реальный концертный состав.",
+      "instagram_sentence": "За дебютом Madhouse стояли Принс и Эрик Лидс — вспоминаем джазовую мистификацию 1987 года.",
+      "visual_format": "1080x1350"
+    }
+  ],
+  "editorial": {
+    "ready_for_human_review": true,
+    "blocking_issues": [],
+    "source_scan_window_start": "2026-10-12T00:00:00+03:00",
+    "source_scan_window_end": "2026-10-26T04:55:01+00:00",
+    "generation_notes": [
+      "Ежедневная Джазета. Черновик за 26 октября 2026 года, ожидаемый порядковый номер 006. edition_number оставлен null: его присваивает WordPress.",
+      "Две ранее выбранные темы: Джон Майер и исторический материал Madhouse. Дополнены тремя материалами: Жилин, RAYE, Пловдив.",
+      "Сверены пять опубликованных выпусков 21–25 октября и тексты 25 страниц материалов. Более ранних номеров в доступной подшивке нет. Не утверждается отсутствие неопубликованных черновиков.",
+      "Повторов событий нет. Совпадение имени Майера с №001 разобрано: прежний материал был о Крисе Баке. Контрольный список архива — editorial-check.md.",
+      "Один российский материал и четыре зарубежных; искусственно дополнять российскую квоту не стали. Один материал исторический.",
+      "Публичные заголовки источников сохранены. Даты источников и даты событий разделены; неизвестные даты — null.",
+      "Фотография включена в пакет. Права, подпись, alt и порядок загрузки в WordPress — media.json и README.md.",
+      "JSON проверяется по схеме, полученной с действующего сайта. Схема не содержит поля alt; оно заполняется у вложения WordPress.",
+      "Черновик не загружен в WordPress и не опубликован. Карточки соцсетей представлены текстами, PNG не создавались."
+    ]
+  }
+}

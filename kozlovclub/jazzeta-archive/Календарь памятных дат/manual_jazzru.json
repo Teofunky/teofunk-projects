@@ -1,0 +1,1404 @@
+[
+ {
+  "date": "12-02",
+  "year": 2010,
+  "kind": "death",
+  "name_ru": "Григорий Шабров",
+  "occupation_ru": "пианист",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2010/12/16/in-memoriam-shabrov/"
+ },
+ {
+  "date": "06-02",
+  "year": 1931,
+  "kind": "birth",
+  "name_ru": "Валерий Мысовский",
+  "occupation_ru": "барабанщик",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2011/12/26/r-i-p-valery-mysovsky/"
+ },
+ {
+  "date": "12-23",
+  "year": 2011,
+  "kind": "death",
+  "name_ru": "Валерий Мысовский",
+  "occupation_ru": "барабанщик",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2011/12/26/r-i-p-valery-mysovsky/"
+ },
+ {
+  "date": "07-31",
+  "year": 1945,
+  "kind": "birth",
+  "name_ru": "Валерий Колесников",
+  "occupation_ru": "трубач",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2012/09/17/in-memoriam-valery-kolesnikov/"
+ },
+ {
+  "date": "09-16",
+  "year": 2012,
+  "kind": "death",
+  "name_ru": "Валерий Колесников",
+  "occupation_ru": "трубач",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2012/09/17/in-memoriam-valery-kolesnikov/"
+ },
+ {
+  "date": "11-01",
+  "year": 2012,
+  "kind": "death",
+  "name_ru": "Алексей Тимшин",
+  "occupation_ru": "саксофонист",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2012/11/03/in-memoriam-timshin/"
+ },
+ {
+  "date": "07-30",
+  "year": 1934,
+  "kind": "birth",
+  "name_ru": "Моисей Рыбак",
+  "occupation_ru": "джазовый радиоведущий",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2013/01/03/moisei-rybak-r-i-p/"
+ },
+ {
+  "date": "01-01",
+  "year": 2013,
+  "kind": "death",
+  "name_ru": "Моисей Рыбак",
+  "occupation_ru": "джазовый радиоведущий",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2013/01/03/moisei-rybak-r-i-p/"
+ },
+ {
+  "date": "01-29",
+  "year": 2013,
+  "kind": "death",
+  "name_ru": "Сергей Кушилкин",
+  "occupation_ru": "барабанщик",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2013/01/31/rip-sergei-kushilkin/"
+ },
+ {
+  "date": "02-12",
+  "year": 2013,
+  "kind": "death",
+  "name_ru": "Владимир Ратнер",
+  "occupation_ru": "пианист",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2013/03/01/in-memoriam-vladimir-ratner/"
+ },
+ {
+  "date": "04-27",
+  "year": 2013,
+  "kind": "death",
+  "name_ru": "Адель Сабирьянов",
+  "occupation_ru": "барабанщик",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2013/05/10/inmemoriam-sabiryanov-abdullaev/"
+ },
+ {
+  "date": "07-24",
+  "year": 1944,
+  "kind": "birth",
+  "name_ru": "Владимир Васильков",
+  "occupation_ru": "барабанщик",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2013/08/15/r-i-p-vladimir-vasilkov/"
+ },
+ {
+  "date": "08-15",
+  "year": 2013,
+  "kind": "death",
+  "name_ru": "Владимир Васильков",
+  "occupation_ru": "барабанщик",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2013/08/15/r-i-p-vladimir-vasilkov/"
+ },
+ {
+  "date": "09-17",
+  "year": 2013,
+  "kind": "death",
+  "name_ru": "Вадим Юрченков",
+  "occupation_ru": "журналист и организатор",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2013/09/21/r-i-p-vadim-yurchenkov/"
+ },
+ {
+  "date": "11-19",
+  "year": 2013,
+  "kind": "death",
+  "name_ru": "Сергей Шуленин",
+  "occupation_ru": "педагог и дирижёр",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2013/11/25/educator-sergei-shulenin/"
+ },
+ {
+  "date": "12-02",
+  "year": 2013,
+  "kind": "death",
+  "name_ru": "Борис Алексеев",
+  "occupation_ru": "джазовый радиоведущий",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2013/12/02/radio-host-boris-alekseev/"
+ },
+ {
+  "date": "04-24",
+  "year": 1949,
+  "kind": "birth",
+  "name_ru": "Игорь Широков",
+  "occupation_ru": "флюгельгорнист",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2014/01/11/r-i-p-igor-shirokov/"
+ },
+ {
+  "date": "01-10",
+  "year": 2014,
+  "kind": "death",
+  "name_ru": "Игорь Широков",
+  "occupation_ru": "флюгельгорнист",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2014/01/11/r-i-p-igor-shirokov/"
+ },
+ {
+  "date": "05-29",
+  "year": 1938,
+  "kind": "birth",
+  "name_ru": "Всеволод Данилочкин",
+  "occupation_ru": "саксофонист и пианист",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2014/02/07/r-i-p-vsevolod-danilochkin/"
+ },
+ {
+  "date": "02-07",
+  "year": 2014,
+  "kind": "death",
+  "name_ru": "Всеволод Данилочкин",
+  "occupation_ru": "саксофонист и пианист",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2014/02/07/r-i-p-vsevolod-danilochkin/"
+ },
+ {
+  "date": "06-01",
+  "year": 1945,
+  "kind": "birth",
+  "name_ru": "Виктор Лившиц",
+  "occupation_ru": "продюсер",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2014/03/02/r-i-p-victor-livshitz/"
+ },
+ {
+  "date": "03-01",
+  "year": 2014,
+  "kind": "death",
+  "name_ru": "Виктор Лившиц",
+  "occupation_ru": "продюсер",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2014/03/02/r-i-p-victor-livshitz/"
+ },
+ {
+  "date": "04-30",
+  "year": 2014,
+  "kind": "death",
+  "name_ru": "Александр Сахаров",
+  "occupation_ru": "трубач",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2014/05/01/r-i-p-aleksandr-sakharov/"
+ },
+ {
+  "date": "04-22",
+  "year": 2014,
+  "kind": "death",
+  "name_ru": "Геннадий Лебедев",
+  "occupation_ru": "педагог и звукорежиссёр",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2014/05/06/r-i-p-gennady-lebedev/"
+ },
+ {
+  "date": "07-09",
+  "year": 1946,
+  "kind": "birth",
+  "name_ru": "Вадим Вядро",
+  "occupation_ru": "саксофонист",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2014/08/14/r-i-p-vadim-vyadro/"
+ },
+ {
+  "date": "02-04",
+  "year": 2014,
+  "kind": "death",
+  "name_ru": "Вадим Вядро",
+  "occupation_ru": "саксофонист",
+  "russian": true,
+  "verified": false,
+  "source": "https://www.jazz.ru/2014/08/14/r-i-p-vadim-vyadro/"
+ },
+ {
+  "date": "02-25",
+  "year": 1946,
+  "kind": "birth",
+  "name_ru": "Татьяна Конькова",
+  "occupation_ru": "вокалистка",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2015/05/24/r-i-p-tatiana-konkova/"
+ },
+ {
+  "date": "05-21",
+  "year": 2015,
+  "kind": "death",
+  "name_ru": "Татьяна Конькова",
+  "occupation_ru": "вокалистка",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2015/05/24/r-i-p-tatiana-konkova/"
+ },
+ {
+  "date": "05-18",
+  "year": 2015,
+  "kind": "death",
+  "name_ru": "Борис Савельев",
+  "occupation_ru": "барабанщик",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2015/05/26/r-i-p-boris-saveliev/"
+ },
+ {
+  "date": "06-26",
+  "year": 1939,
+  "kind": "birth",
+  "name_ru": "Альберт Мелконов",
+  "occupation_ru": "трубач",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2015/07/08/r-i-p-albert-melkonov/"
+ },
+ {
+  "date": "06-28",
+  "year": 2015,
+  "kind": "death",
+  "name_ru": "Альберт Мелконов",
+  "occupation_ru": "трубач",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2015/07/08/r-i-p-albert-melkonov/"
+ },
+ {
+  "date": "04-07",
+  "year": 1946,
+  "kind": "birth",
+  "name_ru": "Евгений Казарян",
+  "occupation_ru": "барабанщик",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2015/10/21/r-i-p-yevgeni-kazaryan/"
+ },
+ {
+  "date": "10-20",
+  "year": 2015,
+  "kind": "death",
+  "name_ru": "Евгений Казарян",
+  "occupation_ru": "барабанщик",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2015/10/21/r-i-p-yevgeni-kazaryan/"
+ },
+ {
+  "date": "12-15",
+  "year": 2015,
+  "kind": "death",
+  "name_ru": "Валерий Дмитриев",
+  "occupation_ru": "бэндлидер",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2015/12/16/valery-dmitiev-r-i-p/"
+ },
+ {
+  "date": "07-11",
+  "year": 1953,
+  "kind": "birth",
+  "name_ru": "Юрий Кузнецов",
+  "occupation_ru": "пианист",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2016/05/02/r-i-p-yuri-kuznetsov/"
+ },
+ {
+  "date": "05-02",
+  "year": 2016,
+  "kind": "death",
+  "name_ru": "Юрий Кузнецов",
+  "occupation_ru": "пианист",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2016/05/02/r-i-p-yuri-kuznetsov/"
+ },
+ {
+  "date": "04-27",
+  "year": 2006,
+  "kind": "death",
+  "name_ru": "Анатолий Берестов",
+  "occupation_ru": "пианист и продюсер",
+  "russian": true,
+  "verified": false,
+  "source": "https://www.jazz.ru/2016/05/24/in-memoriam-anatoly-berestov/"
+ },
+ {
+  "date": "04-16",
+  "year": 1961,
+  "kind": "birth",
+  "name_ru": "Юрий Соболев",
+  "occupation_ru": "пианист",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2016/06/19/in-memoriam-yuri-sobolev-gomberg/"
+ },
+ {
+  "date": "06-15",
+  "year": 2016,
+  "kind": "death",
+  "name_ru": "Юрий Соболев",
+  "occupation_ru": "пианист",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2016/06/19/in-memoriam-yuri-sobolev-gomberg/"
+ },
+ {
+  "date": "07-15",
+  "year": 2016,
+  "kind": "death",
+  "name_ru": "Алексей Лейкин",
+  "occupation_ru": "режиссёр фестиваля «Какой удивительный мир»",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2016/07/15/aleksei-leikin-in-memoriam/"
+ },
+ {
+  "date": "08-10",
+  "year": 2016,
+  "kind": "death",
+  "name_ru": "Александр Шишкин",
+  "occupation_ru": "пианист",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2016/08/16/r-i-p-aleksandr-shishkin/"
+ },
+ {
+  "date": "07-06",
+  "year": 1945,
+  "kind": "birth",
+  "name_ru": "Александр Сухих",
+  "occupation_ru": "тромбонист и композитор",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2017/01/09/r-i-p-alexander-sukhikh/"
+ },
+ {
+  "date": "01-06",
+  "year": 2017,
+  "kind": "death",
+  "name_ru": "Александр Сухих",
+  "occupation_ru": "тромбонист и композитор",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2017/01/09/r-i-p-alexander-sukhikh/"
+ },
+ {
+  "date": "10-01",
+  "year": 1938,
+  "kind": "birth",
+  "name_ru": "Николай Громин",
+  "occupation_ru": "гитарист",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2017/02/21/nicolai-gromin-obituary/"
+ },
+ {
+  "date": "02-17",
+  "year": 2017,
+  "kind": "death",
+  "name_ru": "Николай Громин",
+  "occupation_ru": "гитарист",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2017/02/21/nicolai-gromin-obituary/"
+ },
+ {
+  "date": "05-15",
+  "year": 2017,
+  "kind": "death",
+  "name_ru": "Сергей Богданов",
+  "occupation_ru": "художник джаз-клуба «Квадрат»",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2017/05/18/r-i-p-designer-sergei-bogdanov/"
+ },
+ {
+  "date": "08-06",
+  "year": 1929,
+  "kind": "birth",
+  "name_ru": "Надежда Оксюта",
+  "occupation_ru": "переводчица",
+  "russian": true,
+  "verified": false,
+  "source": "https://www.jazz.ru/2017/06/02/in-memoriam-nadezhda-oksiuta/"
+ },
+ {
+  "date": "04-05",
+  "year": 2017,
+  "kind": "death",
+  "name_ru": "Надежда Оксюта",
+  "occupation_ru": "переводчица",
+  "russian": true,
+  "verified": false,
+  "source": "https://www.jazz.ru/2017/06/02/in-memoriam-nadezhda-oksiuta/"
+ },
+ {
+  "date": "06-05",
+  "year": 2017,
+  "kind": "death",
+  "name_ru": "Владимир Чернов",
+  "occupation_ru": "контрабасист",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2017/06/14/in-memoriam-vladimir-chernov/"
+ },
+ {
+  "date": "03-12",
+  "year": 1944,
+  "kind": "birth",
+  "name_ru": "Рафаэль Аваков",
+  "occupation_ru": "вице-президент «Джаз Арт клуба»",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2017/06/30/in-memoriam-raf-avakov/"
+ },
+ {
+  "date": "06-30",
+  "year": 2017,
+  "kind": "death",
+  "name_ru": "Рафаэль Аваков",
+  "occupation_ru": "вице-президент «Джаз Арт клуба»",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2017/06/30/in-memoriam-raf-avakov/"
+ },
+ {
+  "date": "05-07",
+  "year": 1970,
+  "kind": "birth",
+  "name_ru": "Дмитрий Севастьянов",
+  "occupation_ru": "барабанщик",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2017/08/16/in-memoriam-dmitry-sevastianov/"
+ },
+ {
+  "date": "08-15",
+  "year": 2017,
+  "kind": "death",
+  "name_ru": "Дмитрий Севастьянов",
+  "occupation_ru": "барабанщик",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2017/08/16/in-memoriam-dmitry-sevastianov/"
+ },
+ {
+  "date": "04-06",
+  "year": 1947,
+  "kind": "birth",
+  "name_ru": "Николай Баранов",
+  "occupation_ru": "бэндлидер",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2017/10/30/in-memoriam-baranov/"
+ },
+ {
+  "date": "10-29",
+  "year": 2017,
+  "kind": "death",
+  "name_ru": "Николай Баранов",
+  "occupation_ru": "бэндлидер",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2017/10/30/in-memoriam-baranov/"
+ },
+ {
+  "date": "09-30",
+  "year": 1951,
+  "kind": "birth",
+  "name_ru": "Вячеслав Преображенский",
+  "occupation_ru": "саксофонист",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2017/10/31/in-memoriam-viacheslav-preobrazhenski/"
+ },
+ {
+  "date": "10-21",
+  "year": 2017,
+  "kind": "death",
+  "name_ru": "Вячеслав Преображенский",
+  "occupation_ru": "саксофонист",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2017/10/31/in-memoriam-viacheslav-preobrazhenski/"
+ },
+ {
+  "date": "11-25",
+  "year": 2017,
+  "kind": "death",
+  "name_ru": "Александр Смирнов",
+  "occupation_ru": "фотохудожник",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2017/11/29/in-memoriam-aleksandr-smirnov/"
+ },
+ {
+  "date": "10-03",
+  "year": 1963,
+  "kind": "birth",
+  "name_ru": "Владимир Кирпичёв",
+  "occupation_ru": "барабанщик",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2017/12/05/in-memoriam-vladimir-kirpichev/"
+ },
+ {
+  "date": "12-03",
+  "year": 2017,
+  "kind": "death",
+  "name_ru": "Владимир Кирпичёв",
+  "occupation_ru": "барабанщик",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2017/12/05/in-memoriam-vladimir-kirpichev/"
+ },
+ {
+  "date": "11-16",
+  "year": 1963,
+  "kind": "birth",
+  "name_ru": "Юрий Щёткин",
+  "occupation_ru": "гитарист",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2018/01/30/in-memoriam-yuri-schetkin/"
+ },
+ {
+  "date": "01-29",
+  "year": 2018,
+  "kind": "death",
+  "name_ru": "Юрий Щёткин",
+  "occupation_ru": "гитарист",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2018/01/30/in-memoriam-yuri-schetkin/"
+ },
+ {
+  "date": "09-06",
+  "year": 2018,
+  "kind": "death",
+  "name_ru": "Роман Копп",
+  "occupation_ru": "ветеран джаз-клуба «Квадрат»",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2018/09/07/in-memoriam-roman-kopp/"
+ },
+ {
+  "date": "07-05",
+  "year": 1972,
+  "kind": "birth",
+  "name_ru": "Леонид Ольховский",
+  "occupation_ru": "барабанщик",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2018/12/08/in-memoriam-leonid-olkhovsky/"
+ },
+ {
+  "date": "12-08",
+  "year": 2018,
+  "kind": "death",
+  "name_ru": "Леонид Ольховский",
+  "occupation_ru": "барабанщик",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2018/12/08/in-memoriam-leonid-olkhovsky/"
+ },
+ {
+  "date": "04-15",
+  "year": 2019,
+  "kind": "death",
+  "name_ru": "Владимир Риккер",
+  "occupation_ru": "контрабасист",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2019/04/16/in-memoriam-vladimir-rikker/"
+ },
+ {
+  "date": "06-16",
+  "year": 2019,
+  "kind": "death",
+  "name_ru": "Сергей Остроумов",
+  "occupation_ru": "барабанщик",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2019/06/16/in-memoriam-sergei-ostroumov/"
+ },
+ {
+  "date": "01-31",
+  "year": 1938,
+  "kind": "birth",
+  "name_ru": "Владислав Кадерский",
+  "occupation_ru": "бэндлидер и композитор",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2019/06/25/in-memoriam-vladislav-kadersky/"
+ },
+ {
+  "date": "06-25",
+  "year": 2019,
+  "kind": "death",
+  "name_ru": "Владислав Кадерский",
+  "occupation_ru": "бэндлидер и композитор",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2019/06/25/in-memoriam-vladislav-kadersky/"
+ },
+ {
+  "date": "07-10",
+  "year": 1975,
+  "kind": "birth",
+  "name_ru": "Армен Мерабов",
+  "occupation_ru": "пианист и композитор",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2019/08/15/in-memoriam-armen-merabov/",
+  "priority": true
+ },
+ {
+  "date": "08-14",
+  "year": 2019,
+  "kind": "death",
+  "name_ru": "Армен Мерабов",
+  "occupation_ru": "пианист и композитор",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2019/08/15/in-memoriam-armen-merabov/",
+  "priority": true
+ },
+ {
+  "date": "04-03",
+  "year": 1944,
+  "kind": "birth",
+  "name_ru": "Николай Новичков",
+  "occupation_ru": "тромбонист",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2019/11/21/in-memoriam-nikolai-novichkov/"
+ },
+ {
+  "date": "11-20",
+  "year": 2019,
+  "kind": "death",
+  "name_ru": "Николай Новичков",
+  "occupation_ru": "тромбонист",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2019/11/21/in-memoriam-nikolai-novichkov/"
+ },
+ {
+  "date": "09-28",
+  "year": 1946,
+  "kind": "birth",
+  "name_ru": "Владимир Каушанский",
+  "occupation_ru": "журналист и продюсер",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2019/11/24/in-memoriam-vladimir-kaushansky/"
+ },
+ {
+  "date": "11-23",
+  "year": 2019,
+  "kind": "death",
+  "name_ru": "Владимир Каушанский",
+  "occupation_ru": "журналист и продюсер",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2019/11/24/in-memoriam-vladimir-kaushansky/"
+ },
+ {
+  "date": "11-03",
+  "year": 2019,
+  "kind": "death",
+  "name_ru": "Владлен Неплох",
+  "occupation_ru": "контрабасист",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2019/11/26/r-i-p-vadim-neplokh/"
+ },
+ {
+  "date": "09-04",
+  "year": 1975,
+  "kind": "birth",
+  "name_ru": "Алексей Секацкий",
+  "occupation_ru": "тромбонист и вокалист",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2020/01/14/in-memoriam-alexey-sekatsky/"
+ },
+ {
+  "date": "01-12",
+  "year": 2020,
+  "kind": "death",
+  "name_ru": "Алексей Секацкий",
+  "occupation_ru": "тромбонист и вокалист",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2020/01/14/in-memoriam-alexey-sekatsky/"
+ },
+ {
+  "date": "01-26",
+  "year": 2020,
+  "kind": "death",
+  "name_ru": "Анатолий Иващенко",
+  "occupation_ru": "джазовый педагог",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2020/02/03/in-memoriam-anatoly-ivashchenko/"
+ },
+ {
+  "date": "05-06",
+  "year": 1966,
+  "kind": "birth",
+  "name_ru": "Леонид Гусев",
+  "occupation_ru": "барабанщик",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2020/02/21/in-memoriam-leonid-gusev/"
+ },
+ {
+  "date": "02-20",
+  "year": 2020,
+  "kind": "death",
+  "name_ru": "Леонид Гусев",
+  "occupation_ru": "барабанщик",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2020/02/21/in-memoriam-leonid-gusev/"
+ },
+ {
+  "date": "03-02",
+  "year": 1968,
+  "kind": "birth",
+  "name_ru": "Вадим Лебедев",
+  "occupation_ru": "гитарист и вокалист",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2020/04/07/in-memoriam-vadim-lebedev/"
+ },
+ {
+  "date": "04-05",
+  "year": 2020,
+  "kind": "death",
+  "name_ru": "Вадим Лебедев",
+  "occupation_ru": "гитарист и вокалист",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2020/04/07/in-memoriam-vadim-lebedev/"
+ },
+ {
+  "date": "08-06",
+  "year": 1938,
+  "kind": "birth",
+  "name_ru": "Владимир Грибов",
+  "occupation_ru": "трубач и педагог",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2020/05/10/in-memoriam-vladimir-gribov/"
+ },
+ {
+  "date": "05-03",
+  "year": 2020,
+  "kind": "death",
+  "name_ru": "Владимир Грибов",
+  "occupation_ru": "трубач и педагог",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2020/05/10/in-memoriam-vladimir-gribov/"
+ },
+ {
+  "date": "06-15",
+  "year": 2020,
+  "kind": "death",
+  "name_ru": "Юрий Пармёнов",
+  "occupation_ru": "саксофонист",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2020/06/18/in-memoriam-yuri-parmyonov/"
+ },
+ {
+  "date": "01-03",
+  "year": 1941,
+  "kind": "birth",
+  "name_ru": "Николай Голощапов",
+  "occupation_ru": "джазовый педагог",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2020/08/15/in-memoriam-nikolai-goloshchapov/"
+ },
+ {
+  "date": "08-15",
+  "year": 2020,
+  "kind": "death",
+  "name_ru": "Николай Голощапов",
+  "occupation_ru": "джазовый педагог",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2020/08/15/in-memoriam-nikolai-goloshchapov/"
+ },
+ {
+  "date": "11-10",
+  "year": 2020,
+  "kind": "death",
+  "name_ru": "Игорь Берукштис",
+  "occupation_ru": "контрабасист",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2020/11/16/in-memoriam-igor-berukshtis/"
+ },
+ {
+  "date": "08-13",
+  "year": 1946,
+  "kind": "birth",
+  "name_ru": "Алексей Исплатовский",
+  "occupation_ru": "контрабасист",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2021/01/20/in-memoriam-alexei-isplatovsky/"
+ },
+ {
+  "date": "01-19",
+  "year": 2021,
+  "kind": "death",
+  "name_ru": "Алексей Исплатовский",
+  "occupation_ru": "контрабасист",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2021/01/20/in-memoriam-alexei-isplatovsky/"
+ },
+ {
+  "date": "02-13",
+  "year": 2021,
+  "kind": "death",
+  "name_ru": "Тамара Иванова",
+  "occupation_ru": "педагог и организатор",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2021/02/14/rip-tamara-ivanova/"
+ },
+ {
+  "date": "04-10",
+  "year": 2021,
+  "kind": "death",
+  "name_ru": "Владимир Мак",
+  "occupation_ru": "автор «Джаз.Ру», продюсер",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2021/04/10/in-memoriam-vladimir-mak/"
+ },
+ {
+  "date": "05-23",
+  "year": 2021,
+  "kind": "death",
+  "name_ru": "Никита Мошков",
+  "occupation_ru": "автор «Джаз.Ру»",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2021/05/28/nikita-moshkow/"
+ },
+ {
+  "date": "04-23",
+  "year": 1937,
+  "kind": "birth",
+  "name_ru": "Александр Гореткин",
+  "occupation_ru": "барабанщик",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2021/06/14/in-memoriam-alexandr-goretkin/"
+ },
+ {
+  "date": "06-13",
+  "year": 2021,
+  "kind": "death",
+  "name_ru": "Александр Гореткин",
+  "occupation_ru": "барабанщик",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2021/06/14/in-memoriam-alexandr-goretkin/"
+ },
+ {
+  "date": "11-30",
+  "year": 2021,
+  "kind": "death",
+  "name_ru": "Игорь Высоцкий",
+  "occupation_ru": "саксофонист",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2021/12/02/in-memoriam-igor-vysotski/"
+ },
+ {
+  "date": "10-15",
+  "year": 1945,
+  "kind": "birth",
+  "name_ru": "Владимир Мишин",
+  "occupation_ru": "бэндлидер",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2022/02/17/vladimir-mishin/"
+ },
+ {
+  "date": "02-14",
+  "year": 2022,
+  "kind": "death",
+  "name_ru": "Владимир Мишин",
+  "occupation_ru": "бэндлидер",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2022/02/17/vladimir-mishin/"
+ },
+ {
+  "date": "02-04",
+  "year": 2022,
+  "kind": "death",
+  "name_ru": "Владимир Романенко",
+  "occupation_ru": "джазовый педагог",
+  "russian": true,
+  "verified": false,
+  "source": "https://www.jazz.ru/2022/03/28/vladimir-romanenko/"
+ },
+ {
+  "date": "11-30",
+  "year": 1962,
+  "kind": "birth",
+  "name_ru": "Андрей Евдокимов",
+  "occupation_ru": "музыкальный журналист и радиоведущий",
+  "russian": true,
+  "verified": true,
+  "source": "https://ru.wikipedia.org/wiki/Евдокимов,_Андрей_Витальевич"
+ },
+ {
+  "date": "12-06",
+  "year": 2022,
+  "kind": "death",
+  "name_ru": "Андрей Евдокимов",
+  "occupation_ru": "музыкальный журналист и радиоведущий",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2022/12/08/evdokimov/"
+ },
+ {
+  "date": "12-14",
+  "year": 2022,
+  "kind": "death",
+  "name_ru": "Руслан Хаин",
+  "occupation_ru": "контрабасист",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2022/12/15/ruslan-khain/"
+ },
+ {
+  "date": "08-14",
+  "year": 1937,
+  "kind": "birth",
+  "name_ru": "Станислав Стрельцов",
+  "occupation_ru": "барабанщик",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2023/03/20/stanislav-streltsov/"
+ },
+ {
+  "date": "03-19",
+  "year": 2023,
+  "kind": "death",
+  "name_ru": "Станислав Стрельцов",
+  "occupation_ru": "барабанщик",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2023/03/20/stanislav-streltsov/"
+ },
+ {
+  "date": "08-15",
+  "year": 1947,
+  "kind": "birth",
+  "name_ru": "Пётр Корнев",
+  "occupation_ru": "пианист",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2023/03/24/petr-kornev/"
+ },
+ {
+  "date": "05-31",
+  "year": 1946,
+  "kind": "birth",
+  "name_ru": "Нелло Москателли",
+  "occupation_ru": "участник московской джазовой сцены",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2023/05/02/in-memoriam-nello-moscatelli/"
+ },
+ {
+  "date": "04-29",
+  "year": 2023,
+  "kind": "death",
+  "name_ru": "Нелло Москателли",
+  "occupation_ru": "участник московской джазовой сцены",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2023/05/02/in-memoriam-nello-moscatelli/"
+ },
+ {
+  "date": "04-05",
+  "year": 1937,
+  "kind": "birth",
+  "name_ru": "Владимир Сермакашев",
+  "occupation_ru": "саксофонист и пианист",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2023/05/06/vladimir-sermakashev/"
+ },
+ {
+  "date": "05-03",
+  "year": 2023,
+  "kind": "death",
+  "name_ru": "Владимир Сермакашев",
+  "occupation_ru": "саксофонист и пианист",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2023/05/06/vladimir-sermakashev/"
+ },
+ {
+  "date": "05-05",
+  "year": 1944,
+  "kind": "birth",
+  "name_ru": "Георгий Искендеров",
+  "occupation_ru": "джазовый просветитель",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2023/09/24/georg-iskenderov/"
+ },
+ {
+  "date": "09-24",
+  "year": 2023,
+  "kind": "death",
+  "name_ru": "Георгий Искендеров",
+  "occupation_ru": "джазовый просветитель",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2023/09/24/georg-iskenderov/"
+ },
+ {
+  "date": "10-11",
+  "year": 2023,
+  "kind": "death",
+  "name_ru": "Владимир Круглов",
+  "occupation_ru": "пианист и певец",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2023/12/15/vladimir-kruglov/"
+ },
+ {
+  "date": "02-12",
+  "year": 2024,
+  "kind": "death",
+  "name_ru": "Евгений Балашов",
+  "occupation_ru": "джазовый организатор",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2024/02/13/in-memoriam-balashov/"
+ },
+ {
+  "date": "01-03",
+  "year": 1942,
+  "kind": "birth",
+  "name_ru": "Виктор Прудовский",
+  "occupation_ru": "пианист",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2024/05/22/in-memoriam-prudovsky/"
+ },
+ {
+  "date": "05-20",
+  "year": 2024,
+  "kind": "death",
+  "name_ru": "Виктор Прудовский",
+  "occupation_ru": "пианист",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2024/05/22/in-memoriam-prudovsky/"
+ },
+ {
+  "date": "06-25",
+  "year": 1949,
+  "kind": "birth",
+  "name_ru": "Олег Юданов",
+  "occupation_ru": "барабанщик",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2024/05/28/in-memoriam-oleg-yudanov/"
+ },
+ {
+  "date": "05-27",
+  "year": 2024,
+  "kind": "death",
+  "name_ru": "Олег Юданов",
+  "occupation_ru": "барабанщик",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2024/05/28/in-memoriam-oleg-yudanov/"
+ },
+ {
+  "date": "06-08",
+  "year": 2024,
+  "kind": "death",
+  "name_ru": "Юрий Чугунов",
+  "occupation_ru": "саксофонист и композитор",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2024/06/09/in-memoriam-chugunov/"
+ },
+ {
+  "date": "06-09",
+  "year": 2024,
+  "kind": "death",
+  "name_ru": "Саркис Папазян",
+  "occupation_ru": "трубач",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2024/06/10/sarkis-papazyan/"
+ },
+ {
+  "date": "11-03",
+  "year": 1962,
+  "kind": "birth",
+  "name_ru": "Константин Корчагин",
+  "occupation_ru": "гитарист",
+  "russian": true,
+  "verified": false,
+  "source": "https://www.jazz.ru/2024/10/14/konstantin-korchagin/"
+ },
+ {
+  "date": "10-13",
+  "year": 2024,
+  "kind": "death",
+  "name_ru": "Константин Корчагин",
+  "occupation_ru": "гитарист",
+  "russian": true,
+  "verified": false,
+  "source": "https://www.jazz.ru/2024/10/14/konstantin-korchagin/"
+ },
+ {
+  "date": "10-17",
+  "year": 2024,
+  "kind": "death",
+  "name_ru": "Джерри Ким",
+  "occupation_ru": "гитарист",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2024/10/20/jerry-kim/"
+ },
+ {
+  "date": "11-30",
+  "year": 2024,
+  "kind": "death",
+  "name_ru": "Михаил Сапожников",
+  "occupation_ru": "переводчик и продюсер",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2024/12/01/mn-sapozhnikov/"
+ },
+ {
+  "date": "03-31",
+  "year": 1972,
+  "kind": "birth",
+  "name_ru": "Алексей Кривский",
+  "occupation_ru": "продюсер",
+  "russian": true,
+  "verified": false,
+  "source": "https://www.jazz.ru/2025/01/03/krivsky/"
+ },
+ {
+  "date": "01-02",
+  "year": 2025,
+  "kind": "death",
+  "name_ru": "Алексей Кривский",
+  "occupation_ru": "продюсер",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2025/01/03/krivsky/"
+ },
+ {
+  "date": "10-02",
+  "year": 1950,
+  "kind": "birth",
+  "name_ru": "Владимир Туров",
+  "occupation_ru": "клавишник и трубач",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2025/04/09/vladimir-turov/"
+ },
+ {
+  "date": "04-08",
+  "year": 2025,
+  "kind": "death",
+  "name_ru": "Владимир Туров",
+  "occupation_ru": "клавишник и трубач",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2025/04/09/vladimir-turov/"
+ },
+ {
+  "date": "04-21",
+  "year": 2025,
+  "kind": "death",
+  "name_ru": "Сергей Шарыгин",
+  "occupation_ru": "джазовый педагог",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2025/04/21/sergei-sharygin/"
+ },
+ {
+  "date": "02-20",
+  "year": 1940,
+  "kind": "birth",
+  "name_ru": "Валерий Рыбаков",
+  "occupation_ru": "автор «Джаз.Ру»",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2025/07/06/valery-rybakov/"
+ },
+ {
+  "date": "07-06",
+  "year": 2025,
+  "kind": "death",
+  "name_ru": "Валерий Рыбаков",
+  "occupation_ru": "автор «Джаз.Ру»",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2025/07/06/valery-rybakov/"
+ },
+ {
+  "date": "03-13",
+  "year": 1953,
+  "kind": "birth",
+  "name_ru": "Вадим Ахметгареев",
+  "occupation_ru": "тромбонист",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2025/08/21/vadim-ahmetgareev/"
+ },
+ {
+  "date": "08-18",
+  "year": 2025,
+  "kind": "death",
+  "name_ru": "Вадим Ахметгареев",
+  "occupation_ru": "тромбонист",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2025/08/21/vadim-ahmetgareev/"
+ },
+ {
+  "date": "03-24",
+  "year": 2026,
+  "kind": "death",
+  "name_ru": "Игорь Володин",
+  "occupation_ru": "пианист и композитор",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2026/03/24/igor-volodin/"
+ },
+ {
+  "date": "09-12",
+  "year": 1941,
+  "kind": "birth",
+  "name_ru": "Виктор Епанешников",
+  "occupation_ru": "барабанщик",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2026/05/15/victor-epaneshnikov/"
+ },
+ {
+  "date": "05-15",
+  "year": 2026,
+  "kind": "death",
+  "name_ru": "Виктор Епанешников",
+  "occupation_ru": "барабанщик",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2026/05/15/victor-epaneshnikov/"
+ },
+ {
+  "date": "10-16",
+  "year": 1937,
+  "kind": "birth",
+  "name_ru": "Владимир Чижик",
+  "occupation_ru": "трубач",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2026/05/28/vladimir-chizhik/"
+ },
+ {
+  "date": "05-23",
+  "year": 2026,
+  "kind": "death",
+  "name_ru": "Владимир Чижик",
+  "occupation_ru": "трубач",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2026/05/28/vladimir-chizhik/"
+ },
+ {
+  "date": "09-19",
+  "year": 1952,
+  "kind": "birth",
+  "name_ru": "Виктор Борилов",
+  "occupation_ru": "гитарист",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2026/07/06/in-memoriam-victor-borilov/"
+ },
+ {
+  "date": "06-30",
+  "year": 2026,
+  "kind": "death",
+  "name_ru": "Виктор Борилов",
+  "occupation_ru": "гитарист",
+  "russian": true,
+  "verified": true,
+  "source": "https://www.jazz.ru/2026/07/06/in-memoriam-victor-borilov/"
+ }
+]

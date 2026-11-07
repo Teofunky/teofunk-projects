@@ -1,0 +1,39 @@
+{
+  "date": "2026-11-07",
+  "edition_number": 18,
+  "published_issues_read": [],
+  "published_issue_dates": [
+    "2026-10-21",
+    "2026-10-22",
+    "2026-10-23",
+    "2026-10-24",
+    "2026-10-25",
+    "2026-10-26",
+    "2026-10-27",
+    "2026-10-28",
+    "2026-10-29",
+    "2026-10-30",
+    "2026-10-31",
+    "2026-11-01",
+    "2026-11-02",
+    "2026-11-03",
+    "2026-11-04",
+    "2026-11-05",
+    "2026-11-06"
+  ],
+  "published_issues_unread": [],
+  "published_issues_count": 17,
+  "article_count": 5,
+  "photo_count": 0,
+  "duplicate_registry": "Published pages inspected; semantic duplicates excluded at headline/topic level, full historical story IDs unavailable",
+  "wordpress": "No authenticated read or write; draft state unknown",
+  "import_status": "BLOCKED",
+  "link_validation": "URLs surfaced in web search; HTTP 200 not independently confirmed for all",
+  "schema_compatibility": "1.1 shape based on prior local draft; current importer not verified",
+  "blocking_issues": [
+    "NOT FOR IMPORT: full primary-source verification and claim cards incomplete",
+    "Two stories rely on one secondary roundup and need editorial confirmation",
+    "Published archive full story_group_id/event_id registry not obtained",
+    "WordPress importer compatibility and existing draft version unverified"
+  ]
+}

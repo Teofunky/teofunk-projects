@@ -1,0 +1,881 @@
+{
+  "issue_date": "2026-10-31",
+  "timezone_for_date": "Asia/Yerevan",
+  "publication": "Ежедневная Джазета",
+  "expected_issue_number": 11,
+  "archive": {
+    "archive_url": "https://kozlovclub.ru/gazeta/archive/",
+    "live_checked_at": "2026-10-30T22:10:41+04:00",
+    "published_issues_read": [
+      "№001 — 2026-10-21",
+      "№002 — 2026-10-22",
+      "№003 — 2026-10-23",
+      "№004 — 2026-10-24",
+      "№005 — 2026-10-25",
+      "№006 — 2026-10-26",
+      "№007 — 2026-10-27",
+      "№008 — 2026-10-28",
+      "№009 — 2026-10-29",
+      "№010 — 2026-10-30"
+    ],
+    "published_issues_not_read": [],
+    "published_articles_count": 50,
+    "published_registry": [
+      {
+        "edition_date": "2026-10-21",
+        "issue_number": 1,
+        "headline": "Пятнадцать лет спустя: трио ГКВ выпускает «Восхождение»",
+        "article_id": "story-rdh0dzib",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-21-story-rdh0dzib/",
+        "story_group_id": null,
+        "event_id": null,
+        "ids_source": "not_publicly_exposed",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-21",
+        "issue_number": 1,
+        "headline": "«Спираль» Анатолия Осипова: новая запись на Jazzist",
+        "article_id": "story-cobsnhaq",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-21-story-cobsnhaq/",
+        "story_group_id": null,
+        "event_id": null,
+        "ids_source": "not_publicly_exposed",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-21",
+        "issue_number": 1,
+        "headline": "Самара Джой выпускает первую концертную запись",
+        "article_id": "story-bupp3xex",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-21-story-bupp3xex/",
+        "story_group_id": null,
+        "event_id": null,
+        "ids_source": "not_publicly_exposed",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-21",
+        "issue_number": 1,
+        "headline": "Джон Майер выделил Криса Бака среди современных гитаристов",
+        "article_id": "story-h3b8dsgh",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-21-story-h3b8dsgh/",
+        "story_group_id": null,
+        "event_id": null,
+        "ids_source": "not_publicly_exposed",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-21",
+        "issue_number": 1,
+        "headline": "Парижский финал конкурса Херби Хэнкока выиграла Малу Оэй",
+        "article_id": "story-oaroyr9f",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-21-story-oaroyr9f/",
+        "story_group_id": null,
+        "event_id": null,
+        "ids_source": "not_publicly_exposed",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-22",
+        "issue_number": 2,
+        "headline": "Джеймс Брэндон Льюис готовит джазовый разговор с Дворжаком",
+        "article_id": "lewis-calling-antonin-20261022",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-22-lewis-calling-antonin-20261022/",
+        "story_group_id": null,
+        "event_id": null,
+        "ids_source": "not_publicly_exposed",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-22",
+        "issue_number": 2,
+        "headline": "К юбилею Алексея Кузнецова выпущен авторский сборник на виниле",
+        "article_id": "kuznetsov-vinyl-85-20261022",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-22-kuznetsov-vinyl-85-20261022/",
+        "story_group_id": null,
+        "event_id": null,
+        "ids_source": "not_publicly_exposed",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-22",
+        "issue_number": 2,
+        "headline": "Chicago Underground Duo выступит на Белградском джазовом фестивале",
+        "article_id": "belgrade-chicago-underground-20261022",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-22-belgrade-chicago-underground-20261022/",
+        "story_group_id": null,
+        "event_id": null,
+        "ids_source": "not_publicly_exposed",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-22",
+        "issue_number": 2,
+        "headline": "Кортни Пайн присоединился к Rolling Stones на новом сингле",
+        "article_id": "stones-courtney-pine-20261022",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-22-stones-courtney-pine-20261022/",
+        "story_group_id": null,
+        "event_id": null,
+        "ids_source": "not_publicly_exposed",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-22",
+        "issue_number": 2,
+        "headline": "Stankov Jazz Band представит программу об эпохе ар-деко",
+        "article_id": "stankov-art-deco-20261022",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-22-stankov-art-deco-20261022/",
+        "story_group_id": null,
+        "event_id": null,
+        "ids_source": "not_publicly_exposed",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-23",
+        "issue_number": 3,
+        "headline": "Джош Джонсон выпускает Animative: стриминг появится в ноябре",
+        "article_id": "johnson-animative-20261023",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-23-johnson-animative-20261023/",
+        "story_group_id": null,
+        "event_id": null,
+        "ids_source": "not_publicly_exposed",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-23",
+        "issue_number": 3,
+        "headline": "Джон Де Лючия возвращается к музыке октета Брубека",
+        "article_id": "delucia-brubeck-octet-20261023",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-23-delucia-brubeck-octet-20261023/",
+        "story_group_id": null,
+        "event_id": null,
+        "ids_source": "not_publicly_exposed",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-23",
+        "issue_number": 3,
+        "headline": "«Джаз на Байкале» принимает заявки на конкурс музыкантов",
+        "article_id": "baikal-jazz-competition-20261023",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-23-baikal-jazz-competition-20261023/",
+        "story_group_id": null,
+        "event_id": null,
+        "ids_source": "not_publicly_exposed",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-23",
+        "issue_number": 3,
+        "headline": "Jazzmandu готовит неделю концертов с Тито Пуэнте-младшим",
+        "article_id": "jazzmandu-2026-program-20261023",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-23-jazzmandu-2026-program-20261023/",
+        "story_group_id": null,
+        "event_id": null,
+        "ids_source": "not_publicly_exposed",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-23",
+        "issue_number": 3,
+        "headline": "Анна Уэббер собрала нонет с Мэри Хэлворсон и Ингрид Лауброк",
+        "article_id": "anna-webber-nonet-20261023",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-23-anna-webber-nonet-20261023/",
+        "story_group_id": null,
+        "event_id": null,
+        "ids_source": "not_publicly_exposed",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-24",
+        "issue_number": 4,
+        "headline": "Back to Black Эми Уайнхаус переиздали с демозаписями и концертом",
+        "article_id": "winehouse-back-to-black-20-20261024",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-24-winehouse-back-to-black-20-20261024/",
+        "story_group_id": null,
+        "event_id": null,
+        "ids_source": "not_publicly_exposed",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-24",
+        "issue_number": 4,
+        "headline": "Пётр Востоков открывает в «ЗИЛАРТе» серию джазовых вечеров",
+        "article_id": "zilart-vostokov-series-20261024",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-24-zilart-vostokov-series-20261024/",
+        "story_group_id": null,
+        "event_id": null,
+        "ids_source": "not_publicly_exposed",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-24",
+        "issue_number": 4,
+        "headline": "The Midnight Hour выпустили альбом с записями 2020 года",
+        "article_id": "midnight-hour-lost-tapes-20261024",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-24-midnight-hour-lost-tapes-20261024/",
+        "story_group_id": null,
+        "event_id": null,
+        "ids_source": "not_publicly_exposed",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-24",
+        "issue_number": 4,
+        "headline": "Джазовая комиссия выступит с авторской программой и оркестром Лундстрема",
+        "article_id": "moscow-jazz-commission-20261024",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-24-moscow-jazz-commission-20261024/",
+        "story_group_id": null,
+        "event_id": null,
+        "ids_source": "not_publicly_exposed",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-24",
+        "issue_number": 4,
+        "headline": "Квинтет Кристиана Макбрайда Ursa Major выпускает дебютный альбом",
+        "article_id": "mcbride-ursa-major-20261024",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-24-mcbride-ursa-major-20261024/",
+        "story_group_id": null,
+        "event_id": null,
+        "ids_source": "not_publicly_exposed",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-25",
+        "issue_number": 5,
+        "headline": "Blue Note China представил антологию современного китайского джаза",
+        "article_id": "blue-note-china-nows-the-time-release-20261025",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-25-blue-note-china-nows-the-time-release-20261025/",
+        "story_group_id": "blue-note-china-nows-the-time-vol1-2026",
+        "event_id": "blue-note-china-nows-the-time-vol1-2026",
+        "ids_source": "saved_editorial_json_matched_to_live_headline",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-25",
+        "issue_number": 5,
+        "headline": "Игорь Бутман отметит 65-летие большим джазовым концертом в Кремле",
+        "article_id": "igor-butman-65-kremlin-gala-20261025",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-25-igor-butman-65-kremlin-gala-20261025/",
+        "story_group_id": "igor-butman-65-kremlin-gala-2026",
+        "event_id": "igor-butman-65-kremlin-gala-2026",
+        "ids_source": "saved_editorial_json_matched_to_live_headline",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-25",
+        "issue_number": 5,
+        "headline": "Jazzfest Berlin выходит в город: 26 октября начинается Community Week",
+        "article_id": "jazzfest-berlin-community-week-20261025",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-25-jazzfest-berlin-community-week-20261025/",
+        "story_group_id": "jazzfest-berlin-2026-community-week-start",
+        "event_id": "jazzfest-berlin-2026-community-week-start",
+        "ids_source": "saved_editorial_json_matched_to_live_headline",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-25",
+        "issue_number": 5,
+        "headline": "Новый альбом Ольги Амельченко: шесть пьес о переменах и ожидании",
+        "article_id": "olga-amelchenko-touching-invisible-20261025",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-25-olga-amelchenko-touching-invisible-20261025/",
+        "story_group_id": "olga-amelchenko-touching-the-invisible-2026",
+        "event_id": "olga-amelchenko-touching-the-invisible-2026",
+        "ids_source": "saved_editorial_json_matched_to_live_headline",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-25",
+        "issue_number": 5,
+        "headline": "В Клубе Козлова начинается конкурсная неделя Jazz Birds",
+        "article_id": "jazz-birds-2026-competition-start-20261025",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-25-jazz-birds-2026-competition-start-20261025/",
+        "story_group_id": "jazz-birds-2026-competition-week",
+        "event_id": "jazz-birds-2026-competition-week",
+        "ids_source": "saved_editorial_json_matched_to_live_headline",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-26",
+        "issue_number": 6,
+        "headline": "Джазовая мистификация Принса: кто скрывался за группой Madhouse",
+        "article_id": "prince-madhouse-8-history-20261026",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-26-prince-madhouse-8-history-20261026/",
+        "story_group_id": "prince-madhouse-8-history",
+        "event_id": "prince-madhouse-8-history",
+        "ids_source": "saved_editorial_json_matched_to_live_headline",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-26",
+        "issue_number": 6,
+        "headline": "Джон Майер выпустил Tom and Jerry на собственном лейбле",
+        "article_id": "mayer-tom-and-jerry-sob-rock-20261026",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-26-mayer-tom-and-jerry-sob-rock-20261026/",
+        "story_group_id": "mayer-tom-and-jerry-sob-rock",
+        "event_id": "mayer-tom-and-jerry-sob-rock",
+        "ids_source": "saved_editorial_json_matched_to_live_headline",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-26",
+        "issue_number": 6,
+        "headline": "Сергей Жилин представил альбом с обработками музыки Рахманинова",
+        "article_id": "zhilin-rachmaninoff-album-20261026",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-26-zhilin-rachmaninoff-album-20261026/",
+        "story_group_id": "zhilin-rachmaninoff-album",
+        "event_id": "zhilin-rachmaninoff-album",
+        "ids_source": "saved_editorial_json_matched_to_live_headline",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-26",
+        "issue_number": 6,
+        "headline": "RAYE получила Mercury Prize за This Music May Contain Hope",
+        "article_id": "raye-mercury-prize-2026-20261026",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-26-raye-mercury-prize-2026-20261026/",
+        "story_group_id": "raye-mercury-prize-2026",
+        "event_id": "raye-mercury-prize-2026",
+        "ids_source": "saved_editorial_json_matched_to_live_headline",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-26",
+        "issue_number": 6,
+        "headline": "«Джазовая провинция» посвятит ноябрьскую программу Олегу Лундстрему",
+        "article_id": "kursk-jazz-province-lundstrem-20261026",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-26-kursk-jazz-province-lundstrem-20261026/",
+        "story_group_id": "kursk-jazz-province-lundstrem",
+        "event_id": "kursk-jazz-province-lundstrem",
+        "ids_source": "saved_editorial_json_matched_to_live_headline",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-27",
+        "issue_number": 7,
+        "headline": "Картахена открывает три недели джаза: от Маалуфа до Кенни Бэррона",
+        "article_id": "2026-10-27-cartagena-jazz-festival-2026",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-27-2026-10-27-cartagena-jazz-festival-2026/",
+        "story_group_id": "cartagena-jazz-festival-2026",
+        "event_id": "cartagena-jazz-festival-2026",
+        "ids_source": "saved_editorial_json_matched_to_live_headline",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-27",
+        "issue_number": 7,
+        "headline": "Алексей Попов собрал Boney M Tribute: семь треков с джазовым составом",
+        "article_id": "2026-10-27-alexey-popov-boney-m-tribute-2026",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-27-2026-10-27-alexey-popov-boney-m-tribute-2026/",
+        "story_group_id": "alexey-popov-boney-m-tribute-2026",
+        "event_id": "alexey-popov-boney-m-tribute-2026",
+        "ids_source": "saved_editorial_json_matched_to_live_headline",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-27",
+        "issue_number": 7,
+        "headline": "Сно Аалегра анонсировала Legendary Love — с Роджерсом и Саадиком в новом сингле",
+        "article_id": "2026-10-27-snoh-aalegra-legendary-love-2026",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-27-2026-10-27-snoh-aalegra-legendary-love-2026/",
+        "story_group_id": "snoh-aalegra-legendary-love-2026",
+        "event_id": "snoh-aalegra-legendary-love-2026",
+        "ids_source": "saved_editorial_json_matched_to_live_headline",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-27",
+        "issue_number": 7,
+        "headline": "Челтнем впервые открыл конкурс на джазовый заказ имени Тони Дадли-Эванса",
+        "article_id": "2026-10-27-cheltenham-tony-dudley-evans-open-call-2027",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-27-2026-10-27-cheltenham-tony-dudley-evans-open-call-2027/",
+        "story_group_id": "cheltenham-tony-dudley-evans-open-call-2027",
+        "event_id": "cheltenham-tony-dudley-evans-open-call-2027",
+        "ids_source": "saved_editorial_json_matched_to_live_headline",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-27",
+        "issue_number": 7,
+        "headline": "«Джаз у Старой крепости»: три вечера и образовательный форум в Новокузнецке",
+        "article_id": "2026-10-27-novokuznetsk-jazz-old-fortress-2026",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-27-2026-10-27-novokuznetsk-jazz-old-fortress-2026/",
+        "story_group_id": "novokuznetsk-jazz-old-fortress-2026",
+        "event_id": "novokuznetsk-jazz-old-fortress-2026",
+        "ids_source": "saved_editorial_json_matched_to_live_headline",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-28",
+        "issue_number": 8,
+        "headline": "Колтрейн в тканевой сумке: история записей Фрэнка Тибери",
+        "article_id": "coltrane-tiberi-tapes-20261028",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-28-coltrane-tiberi-tapes-20261028/",
+        "story_group_id": "coltrane-tiberi-tapes-impulse-2026",
+        "event_id": "coltrane-tiberi-tapes-impulse-2026",
+        "ids_source": "saved_editorial_json_matched_to_live_headline",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-28",
+        "issue_number": 8,
+        "headline": "Дженевьев Артади готовит GVA!!!!!: аниме, рок и пятнадцать песен",
+        "article_id": "genevieve-artadi-gva-anime-20261028",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-28-genevieve-artadi-gva-anime-20261028/",
+        "story_group_id": "genevieve-artadi-gva-album-2026",
+        "event_id": "genevieve-artadi-gva-album-2026",
+        "ids_source": "saved_editorial_json_matched_to_live_headline",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-28",
+        "issue_number": 8,
+        "headline": "Импровизация линиями: кто победил в конкурсе плаката к столетию Майлза Дэвиса",
+        "article_id": "we-want-jazz-poster-erwann-20261028",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-28-we-want-jazz-poster-erwann-20261028/",
+        "story_group_id": "we-want-jazz-poster-erwann-gauthier-miles-centenary-2026",
+        "event_id": "we-want-jazz-poster-erwann-gauthier-miles-centenary-2026",
+        "ids_source": "saved_editorial_json_matched_to_live_headline",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-28",
+        "issue_number": 8,
+        "headline": "Роман Мирошниченко продолжит «Эволюцию» со струнным оркестром",
+        "article_id": "roman-miroshnichenko-strings-moscow-20261028",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-28-roman-miroshnichenko-strings-moscow-20261028/",
+        "story_group_id": "roman-miroshnichenko-vladimir-strings-mmdm-20261030",
+        "event_id": "roman-miroshnichenko-vladimir-strings-mmdm-20261030",
+        "ids_source": "saved_editorial_json_matched_to_live_headline",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-28",
+        "issue_number": 8,
+        "headline": "Кливленд Уоткисс привезёт в Москву песни Эллингтона и Монка",
+        "article_id": "cleveland-watkiss-ellington-monk-moscow-20261028",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-28-cleveland-watkiss-ellington-monk-moscow-20261028/",
+        "story_group_id": "cleveland-watkiss-ellington-monk-moscow-20261031",
+        "event_id": "cleveland-watkiss-ellington-monk-moscow-20261031",
+        "ids_source": "saved_editorial_json_matched_to_live_headline",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-29",
+        "issue_number": 9,
+        "headline": "Дэйв Холланд собрал три своих ансамбля в архиве Freedom Call",
+        "article_id": "holland-freedom-call-2026",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-29-holland-freedom-call-2026/",
+        "story_group_id": null,
+        "event_id": null,
+        "ids_source": "not_publicly_exposed",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-29",
+        "issue_number": 9,
+        "headline": "Энрико Рава записал Corners со своим квинтетом Fearless Five и Джо Ловано",
+        "article_id": "rava-corners-2026",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-29-rava-corners-2026/",
+        "story_group_id": null,
+        "event_id": null,
+        "ids_source": "not_publicly_exposed",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-29",
+        "issue_number": 9,
+        "headline": "В Риге назвали финалистов конкурса молодых джазовых исполнителей",
+        "article_id": "baltic-young-jazz-2026",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-29-baltic-young-jazz-2026/",
+        "story_group_id": null,
+        "event_id": null,
+        "ids_source": "not_publicly_exposed",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-29",
+        "issue_number": 9,
+        "headline": "В Екатеринбурге пройдёт десятый фестиваль джазовых гитаристов",
+        "article_id": "everjazz-guitar-festival-2026",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-29-everjazz-guitar-festival-2026/",
+        "story_group_id": null,
+        "event_id": null,
+        "ids_source": "not_publicly_exposed",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-29",
+        "issue_number": 9,
+        "headline": "В Чебоксарах посвятят вечер «Квинтоли» музыке Андрея Петрова",
+        "article_id": "cheboksary-quintole-petrov-2026",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-29-cheboksary-quintole-petrov-2026/",
+        "story_group_id": null,
+        "event_id": null,
+        "ids_source": "not_publicly_exposed",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-30",
+        "issue_number": 10,
+        "headline": "Дом Колтрейна вдохновил Джима Снайдеро на новый альбом",
+        "article_id": "jim-snidero-house-of-trane-20261030",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-30-jim-snidero-house-of-trane-20261030/",
+        "story_group_id": "jim-snidero-house-of-trane-2026",
+        "event_id": "savant-jim-snidero-house-of-trane-20261030",
+        "ids_source": "saved_editorial_json_matched_to_live_headline",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-30",
+        "issue_number": 10,
+        "headline": "Мифы диаспоры становятся джазовой сюитой: Стивен Филип Харви представляет Mythos",
+        "article_id": "stephen-harvey-mythos-20261030",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-30-stephen-harvey-mythos-20261030/",
+        "story_group_id": "stephen-philip-harvey-mythos-new-jazz-works-2026",
+        "event_id": "sph-octet-mythos-premiere-2026",
+        "ids_source": "saved_editorial_json_matched_to_live_headline",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-30",
+        "issue_number": 10,
+        "headline": "Ингрид Лауброк собирает «сезон Грэмми» — без церемоний и красных дорожек",
+        "article_id": "ingrid-laubrock-grammy-season-20261030",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-30-ingrid-laubrock-grammy-season-20261030/",
+        "story_group_id": "ingrid-laubrock-spirit-fire-fact-2026",
+        "event_id": "intakt-461-spirit-fire-fact-20261106",
+        "ids_source": "saved_editorial_json_matched_to_live_headline",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-30",
+        "issue_number": 10,
+        "headline": "Девятнадцать бесплатных концертов: лондонская Guildhall открывает джазовую сцену всем",
+        "article_id": "guildhall-free-jazz-festival-20261030",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-30-guildhall-free-jazz-festival-20261030/",
+        "story_group_id": "guildhall-jazz-festival-2026-nineteen-free-shows",
+        "event_id": "guildhall-jazz-festival-2026",
+        "ids_source": "saved_editorial_json_matched_to_live_headline",
+        "publication_verified_live": true
+      },
+      {
+        "edition_date": "2026-10-30",
+        "issue_number": 10,
+        "headline": "В Краснодаре биг-бенд Георгия Гараняна обратится к кубинскому джазу",
+        "article_id": "garanyan-territoriya-jazza-krasnodar-20261030",
+        "published_article_url": "https://kozlovclub.ru/gazeta/material/2026-10-30-garanyan-territoriya-jazza-krasnodar-20261030/",
+        "story_group_id": "garanyan-bigband-territoriya-jazza-krasnodar-2026",
+        "event_id": "premiera-krasnodar-garanyan-20261030",
+        "ids_source": "saved_editorial_json_matched_to_live_headline",
+        "publication_verified_live": true
+      }
+    ],
+    "target_public_url": "https://kozlovclub.ru/gazeta/2026-10-31/",
+    "target_public_url_status": 404,
+    "wp_admin_status": "redirects_to_login",
+    "wp_write_performed": false,
+    "existing_draft_status": "unknown"
+  },
+  "deduplication": {
+    "new_articles_count": 5,
+    "checks": [
+      {
+        "new_article_id": "bb-king-montreux-thrill-20261031",
+        "story_group_id": "bb-king-montreux-years-2026-new-thrill-single",
+        "event_id": "bb-king-montreux-years-2026-new-thrill-single",
+        "semantic_entities": {
+          "artist": "B.B. King",
+          "work": "The Montreux Years / The Thrill Is Gone",
+          "event": "new 2026-10-28 Montreux 1990 single"
+        },
+        "exact_group_or_event_id_matches": 0,
+        "top_title_matches": [
+          {
+            "score": 0.381,
+            "published_issue": 5,
+            "headline": "Игорь Бутман отметит 65-летие большим джазовым концертом в Кремле"
+          },
+          {
+            "score": 0.38,
+            "published_issue": 5,
+            "headline": "В Клубе Козлова начинается конкурсная неделя Jazz Birds"
+          },
+          {
+            "score": 0.34,
+            "published_issue": 8,
+            "headline": "Кливленд Уоткисс привезёт в Москву песни Эллингтона и Монка"
+          }
+        ],
+        "semantic_editorial_review": "no_same_story",
+        "manual_attention": null
+      },
+      {
+        "new_article_id": "rostov-mir-jazza-competition-20261031",
+        "story_group_id": "rostov-mir-jazza-21-competition-2026",
+        "event_id": "rostov-mir-jazza-21-competition-2026",
+        "semantic_entities": {
+          "artist": "Igor Butman / Kim Nazaretov",
+          "work": "Мир джаза XXI",
+          "event": "Rostov competition application deadline and November auditions"
+        },
+        "exact_group_or_event_id_matches": 0,
+        "top_title_matches": [
+          {
+            "score": 0.426,
+            "published_issue": 3,
+            "headline": "«Джаз на Байкале» принимает заявки на конкурс музыкантов"
+          },
+          {
+            "score": 0.381,
+            "published_issue": 6,
+            "headline": "«Джазовая провинция» посвятит ноябрьскую программу Олегу Лундстрему"
+          },
+          {
+            "score": 0.372,
+            "published_issue": 5,
+            "headline": "Новый альбом Ольги Амельченко: шесть пьес о переменах и ожидании"
+          }
+        ],
+        "semantic_editorial_review": "no_same_story",
+        "manual_attention": "В №005 был юбилей Игоря Бутмана, но новый материал посвящён XXI ростовскому конкурсу, а не юбилею."
+      },
+      {
+        "new_article_id": "rebecka-edlund-virgin-forest-trio-20261031",
+        "story_group_id": "rebecka-edlund-virgin-forest-2026-tour-single",
+        "event_id": "rebecka-edlund-virgin-forest-2026-tour-single",
+        "semantic_entities": {
+          "artist": "Rebecka Edlund / Laura Jurd / Ruth Goller",
+          "work": "Virgin Forest",
+          "event": "Nov 2026 trio tour and future 2027 album"
+        },
+        "exact_group_or_event_id_matches": 0,
+        "top_title_matches": [
+          {
+            "score": 0.322,
+            "published_issue": 7,
+            "headline": "Челтнем впервые открыл конкурс на джазовый заказ имени Тони Дадли-Эванса"
+          },
+          {
+            "score": 0.321,
+            "published_issue": 10,
+            "headline": "Мифы диаспоры становятся джазовой сюитой: Стивен Филип Харви представляет Mythos"
+          },
+          {
+            "score": 0.31,
+            "published_issue": 5,
+            "headline": "Игорь Бутман отметит 65-летие большим джазовым концертом в Кремле"
+          }
+        ],
+        "semantic_editorial_review": "no_same_story",
+        "manual_attention": null
+      },
+      {
+        "new_article_id": "eric-jerardi-the-game-20261031",
+        "story_group_id": "eric-jerardi-the-game-album-2026",
+        "event_id": "eric-jerardi-the-game-album-2026",
+        "semantic_entities": {
+          "artist": "Eric Jerardi",
+          "work": "The Game",
+          "event": "2026-10-30 blues rock album"
+        },
+        "exact_group_or_event_id_matches": 0,
+        "top_title_matches": [
+          {
+            "score": 0.383,
+            "published_issue": 1,
+            "headline": "Пятнадцать лет спустя: трио ГКВ выпускает «Восхождение»"
+          },
+          {
+            "score": 0.368,
+            "published_issue": 8,
+            "headline": "Дженевьев Артади готовит GVA!!!!!: аниме, рок и пятнадцать песен"
+          },
+          {
+            "score": 0.329,
+            "published_issue": 10,
+            "headline": "Девятнадцать бесплатных концертов: лондонская Guildhall открывает джазовую сцену всем"
+          }
+        ],
+        "semantic_editorial_review": "no_same_story",
+        "manual_attention": null
+      },
+      {
+        "new_article_id": "jazztoevsky-dostoevskaya-metro-20261031",
+        "story_group_id": "spb-metro-jazztoevsky-dostoevskaya-2026",
+        "event_id": "spb-metro-jazztoevsky-dostoevskaya-2026",
+        "semantic_entities": {
+          "artist": "Jazz Fruits",
+          "work": "Джазтоевский",
+          "event": "2026-10-30 metro performance"
+        },
+        "exact_group_or_event_id_matches": 0,
+        "top_title_matches": [
+          {
+            "score": 0.43,
+            "published_issue": 1,
+            "headline": "Парижский финал конкурса Херби Хэнкока выиграла Малу Оэй"
+          },
+          {
+            "score": 0.357,
+            "published_issue": 7,
+            "headline": "Картахена открывает три недели джаза: от Маалуфа до Кенни Бэррона"
+          },
+          {
+            "score": 0.357,
+            "published_issue": 9,
+            "headline": "В Риге назвали финалистов конкурса молодых джазовых исполнителей"
+          }
+        ],
+        "semantic_editorial_review": "no_same_story",
+        "manual_attention": null
+      }
+    ],
+    "manual_semantic_check": "Проверены все 50 опубликованных заголовков и поводы, включая повтор имени Игоря Бутмана с другим событием. Повторов пяти новых событий нет.",
+    "semantic_overlap_flags": [
+      "№005: Игорь Бутман — юбилей в Кремле; №011: конкурс молодых музыкантов «Мир джаза» в Ростове. Разные сюжеты.",
+      "№003: Ингрид Лауброк участвует в нонете Анны Уэббер; №011: Ребекка Эдлунд, Лора Джёрд и Рут Голлер — иной состав и проект."
+    ]
+  },
+  "sources_checked": [
+    {
+      "url": "https://themontreuxyears.tmstor.es/product/bb-king-the-montreux-years-double-vinyl-2cd",
+      "type": "official",
+      "checked_at": "2026-10-30T22:10:41+04:00",
+      "dependency_group": "bbking-montreux-years-bmg",
+      "http_status": 200,
+      "check_method": "live_read_only_scrape"
+    },
+    {
+      "url": "https://www.thebluesmagazine.com/new-blues-albums-singles-october-30-2026/",
+      "type": "independent_editorial",
+      "checked_at": "2026-10-30T22:10:41+04:00",
+      "dependency_group": "bbking-single-bluesmagazine",
+      "http_status": 200,
+      "check_method": "live_read_only_scrape"
+    },
+    {
+      "url": "https://frontview-magazine.be/en/article/b-b-king-the-montreux-years-out-november-20th",
+      "type": "press_release",
+      "checked_at": "2026-10-30T22:10:41+04:00",
+      "dependency_group": "bbking-montreux-years-bmg",
+      "http_status": 200,
+      "check_method": "live_read_only_scrape"
+    },
+    {
+      "url": "https://www.gorodn.ru/razdel/obshchestvo_free/v_gorode/v-rostove_na_donu-v-21_y-raz-proydet-mezhdunarodnyy-konkurs-_mir-dzhaza/",
+      "type": "independent_editorial",
+      "checked_at": "2026-10-30T22:10:41+04:00",
+      "dependency_group": "rostov-mir-jazza-organizer-release",
+      "http_status": 200,
+      "check_method": "live_read_only_scrape"
+    },
+    {
+      "url": "https://igorbutman.com/concerts/",
+      "type": "official",
+      "checked_at": "2026-10-30T22:10:41+04:00",
+      "dependency_group": "rostov-mir-jazza-official-gala",
+      "http_status": 200,
+      "check_method": "live_read_only_scrape"
+    },
+    {
+      "url": "https://www.rebeckaedlund.com/virgin_forest.html",
+      "type": "official",
+      "checked_at": "2026-10-30T22:10:41+04:00",
+      "dependency_group": "rebecka-edlund-virgin-forest-official",
+      "http_status": 200,
+      "check_method": "live_read_only_scrape"
+    },
+    {
+      "url": "https://ukjazznews.com/rebecka-edlund-trio-with-laura-jurd-and-ruth-goller/",
+      "type": "independent_editorial",
+      "checked_at": "2026-10-30T22:10:41+04:00",
+      "dependency_group": "rebecka-edlund-ukjazznews-interview",
+      "http_status": 200,
+      "check_method": "live_read_only_scrape"
+    },
+    {
+      "url": "https://www.ericjerardi.com/",
+      "type": "official",
+      "checked_at": "2026-10-30T22:10:41+04:00",
+      "dependency_group": "eric-jerardi-the-game-official",
+      "http_status": 200,
+      "check_method": "live_read_only_scrape"
+    },
+    {
+      "url": "https://www.thebluesmagazine.com/eric-jerardi-the-game-12-week-songwriting-challenge/",
+      "type": "independent_editorial",
+      "checked_at": "2026-10-30T22:10:41+04:00",
+      "dependency_group": "eric-jerardi-the-game-press",
+      "http_status": 200,
+      "check_method": "live_read_only_scrape"
+    },
+    {
+      "url": "https://www.dp.ru/a/2026/10/30/na-stancii-metro-dostoevskaja",
+      "type": "independent_editorial",
+      "checked_at": "2026-10-30T22:10:41+04:00",
+      "dependency_group": "spb-transport-committee-jazztoevsky",
+      "http_status": 200,
+      "check_method": "live_read_only_scrape"
+    },
+    {
+      "url": "https://nevgorod.ru/news/2026/10/30/1718879",
+      "type": "independent_editorial",
+      "checked_at": "2026-10-30T22:10:41+04:00",
+      "dependency_group": "spb-transport-committee-jazztoevsky",
+      "http_status": 200,
+      "check_method": "live_read_only_scrape"
+    }
+  ],
+  "photo_candidate": {
+    "status": "rights_confirmed_but_not_attached",
+    "is_in_json": false,
+    "subject": "B.B. King at Audimax University of Hamburg, November 1971",
+    "author": "Heinrich Klaffs",
+    "file_page": "https://commons.wikimedia.org/wiki/File:B.B._King_3011710047.jpg",
+    "original_image_url": "https://upload.wikimedia.org/wikipedia/commons/6/67/B.B._King_3011710047.jpg",
+    "license": "CC BY-SA 2.0",
+    "license_url": "https://creativecommons.org/licenses/by-sa/2.0/",
+    "source_dimensions": [
+      3497,
+      2313
+    ],
+    "crop_performed": false,
+    "crop": "не выполнено: файл не удалось получить в рабочую среду",
+    "front_caption": "Би Би Кинг на сцене в Гамбурге, ноябрь 1971 года. Фото: Heinrich Klaffs / Wikimedia Commons, CC BY-SA 2.0. Архивный снимок; не Монтрё.",
+    "front_alt": "Би Би Кинг играет на полуакустической электрогитаре, стоя на сцене в смокинге",
+    "article_caption": "Би Би Кинг выступает в гамбургском Audimax в ноябре 1971 года. Heinrich Klaffs / Wikimedia Commons, CC BY-SA 2.0.",
+    "article_alt": "Черно-белый кадр: Би Би Кинг держит гитару с крупным полым корпусом во время выступления"
+  },
+  "validation": {
+    "json_parse": true,
+    "previous_v1_0_schema_compatible_after_v1_1_field_projection": true,
+    "current_live_v1_1_importer_compatibility": "unconfirmed",
+    "five_articles": true,
+    "five_social_pairs": true,
+    "utf8": true,
+    "old_name_in_reader_fields": false,
+    "source_urls_syntactically_valid": true,
+    "source_links_opened_in_web_research": true,
+    "all_eleven_source_urls_http_200": true
+  },
+  "blockers": [
+    "WordPress: сеанс не авторизован; существующий неопубликованный черновик за 31 октября, его версия и ручные изменения не проверены. Автоматическая загрузка не выполнена.",
+    "Действующая схема импортёра в админке WordPress не прочитана; JSON составлен по структуре версии 1.1, которая использовалась в предыдущих опубликованных выпусках. Совместимость с текущим импортёром не подтверждена."
+  ],
+  "rejected_candidates": [
+    {
+      "story": "Domo Branch — Hand of Gifts",
+      "reason": "Альбом вышел в октябре 2025; рецензия 30.10.2026 не является новым релизом."
+    },
+    {
+      "story": "Shirley Horn — The Garden of the Blues",
+      "reason": "Оригинальное издание 1984 года, CD был в продаже с 2008; даты переиздания 2026 у продавцов расходятся (сентябрь/октябрь)."
+    },
+    {
+      "story": "Джаз на Байкале — фестивальная программа",
+      "reason": "В №003 уже публиковался приём заявок этого же фестиваля; не использовано без однозначного существенного нового развития."
+    }
+  ]
+}

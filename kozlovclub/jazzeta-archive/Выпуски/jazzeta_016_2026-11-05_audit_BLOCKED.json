@@ -1,0 +1,77 @@
+{
+  "edition_date": "2026-11-05",
+  "archive_status": "Archive index lists 15 published issues, 2026-10-21 to 2026-11-04, 74 articles (14*5 + 4); full article text not comprehensively verified.",
+  "issue_number_provisional": 16,
+  "published_issues_read_index": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ],
+  "published_issues_full_content_verified_this_run": [],
+  "articles": [
+    {
+      "id": "ribot-hurry-red-telephone-20261105",
+      "event_id": "marc-ribot-hurry-red-telephone-release-20261030",
+      "group": "marc-ribot-hurry-red-telephone-2026",
+      "headline": "Марк Рибо выпустил Hurry Red Telephone: два состава и шесть инструментальных пьес",
+      "event_date": "2026-10-30"
+    },
+    {
+      "id": "murakami-peter-cat-london-20261105",
+      "event_id": "barbican-murakami-peter-cat-20261121",
+      "group": "murakami-peter-cat-jazz-london-2026",
+      "headline": "Джазовый клуб Мураками возродят на один вечер в Лондоне",
+      "event_date": "2026-11-21"
+    },
+    {
+      "id": "church-of-sound-ten-years-20261105",
+      "event_id": "church-of-sound-barbican-20261120",
+      "group": "church-of-sound-10-years-british-jazz-songbook",
+      "headline": "Десять лет Church of Sound: британский джаз соберут в одной программе",
+      "event_date": "2026-11-20"
+    },
+    {
+      "id": "blue-note-tone-poet-november-20261105",
+      "event_id": "blue-note-tone-poet-mobley-smith-20261106",
+      "group": "blue-note-tone-poet-dippin-sermon-2026",
+      "headline": "Blue Note возвращает на винил Хэнка Мобли и Джимми Смита",
+      "event_date": "2026-11-06"
+    },
+    {
+      "id": "cheboksary-quintol-20261105",
+      "event_id": "cheboksary-quintol-classic-jazz-rock-20261105",
+      "group": "cheboksary-quintol-2026-classic-jazz-rock",
+      "headline": "«Чебоксарская квинтоль» соединит классику, джаз и рок в одном концерте",
+      "event_date": "2026-11-05"
+    }
+  ],
+  "checks": {
+    "count": 5,
+    "unique_story_ids": true,
+    "unique_event_ids": true,
+    "social_count": 5,
+    "old_publication_name_absent": true,
+    "full_archive_semantic_dedupe": "BLOCKED",
+    "wordpress_import": "NOT_ATTEMPTED",
+    "json_schema": "STRUCTURE BASED ON PREVIOUS v1.1 JSON; NOT VALIDATED AGAINST LIVE IMPORTER"
+  },
+  "blocking_issues": [
+    "Полный текст всех фактически опубликованных выпусков №001–015 не извлечён; архивное оглавление прочитано, но смысловая проверка 74 опубликованных материалов не завершена.",
+    "Номер №016 предполагается по архиву; состояние неопубликованного черновика за 05.11 и его If-Match неизвестно.",
+    "Действующий импортёр и авторизованная запись в WordPress не проверены.",
+    "Пять материалов требуют независимой проверки фактов и редакторской оценки новизны; некоторые сюжеты основаны на заранее опубликованных афишах.",
+    "Для материалов не подобраны фотографии с подтверждёнными правами."
+  ]
+}

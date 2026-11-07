@@ -1,0 +1,557 @@
+{
+  "schema_version": "1.1",
+  "edition_date": "2026-10-25",
+  "timezone": "Europe/Moscow",
+  "edition_number": null,
+  "publication": {
+    "status": "draft"
+  },
+  "import_id": "manual.2026-10-25.v4-dedup",
+  "articles": [
+    {
+      "id": "blue-note-china-nows-the-time-release-20261025",
+      "region": "world",
+      "category": "recording",
+      "placement": "lead",
+      "headline": "Blue Note China представил антологию современного китайского джаза",
+      "lead": "23 октября Blue Note Records China выпустил Now’s the Time: An Anthology of Contemporary Chinese Jazz, Vol. 1. В сборнике подразделения американского лейбла собраны шесть пьес музыкантов из Китая.",
+      "body_paragraphs": [
+        "В числе продюсеров — президент Blue Note Дон Уос, Чжан Ядун и основатель JZ Music Жэнь Юйцин. По данным лейбла, Уос приезжал в Шанхай и Пекин, встречался с исполнителями и участвовал в сессиях записи. Проект предназначен не для одного направления: издатель стремится показать международной аудитории разные грани современной китайской сцены.",
+        "Альбом открывает Arc Light ансамбля Red Hand Band, сочинённая пианистом Ся Цзя. Далее следуют One Is Too Many гитариста Чжан Сюнгуаня и Harvest трубача Ли Сяочуаня. Как объясняет Blue Note, Harvest вдохновлена народным искусством шанхайского района Цзиньшань. Haven of the Wandering Desert объединила гитариста Сюй Чжиханя, барабанщика Сюй Чжитуна и электронного музыканта Gooooose. В Song for My Family играют басист Ван Чэньхуай и итальянский пианист Морено Донадель; завершает релиз Where It All Began мультиинструменталиста Eugene Sun.",
+        "В одном выпуске соседствуют фортепианный ансамбль, акустический дуэт и музыка с электронными элементами. Эта разнородность — заявленный принцип отбора, а не попытка представить шесть записей исчерпывающим портретом джаза Китая. Название Vol. 1 обозначает первый том антологии, но само по себе не гарантирует продолжения."
+      ],
+      "summary": "Blue Note Records China выпустил антологию: шесть записей и три продюсера, включая Дона Уоса.",
+      "event_date": "2026-10-23",
+      "story_group_id": "blue-note-china-nows-the-time-vol1-2026",
+      "event_id": "blue-note-china-nows-the-time-vol1-2026",
+      "story_score": 94,
+      "sources": [
+        {
+          "id": "bnote-release",
+          "title": "Blue Note Records China Releases Now’s the Time: An Anthology of Contemporary Chinese Jazz [Vol. 1]",
+          "publisher": "Blue Note Records",
+          "url": "https://www.bluenote.com/blue-note-records-china-announces-nows-the-time-an-anthology-of-contemporary-chinese-jazz-vol-1/",
+          "published_at": "2026-10-23",
+          "type": "official",
+          "verification_checked_at": "2026-10-25T06:10:56+03:00",
+          "dependency_group": "blue-note-universal-china-release"
+        },
+        {
+          "id": "thepaper-china",
+          "title": "唐·沃斯联手张亚东任宇清，中国爵士乐迎来重磅合辑",
+          "publisher": "The Paper / 澎湃新闻",
+          "url": "https://m.thepaper.cn/newsDetail_forward_34088376",
+          "published_at": "2026-09-17",
+          "type": "independent_editorial",
+          "verification_checked_at": "2026-10-25T06:10:56+03:00",
+          "dependency_group": "blue-note-universal-china-release"
+        }
+      ],
+      "claims": [
+        {
+          "id": "bn-date",
+          "statement": "23 октября 2026 Blue Note Records China сообщил о выходе Now’s the Time: Vol. 1.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "bnote-release"
+          ],
+          "editorial_note": "На той же странице Blue Note ранее был размещён анонс от 17 сентября, но на момент проверки опубликован обновлённый релиз от 23 октября."
+        },
+        {
+          "id": "bn-producers",
+          "statement": "Дон Уос, Чжан Ядун и Жэнь Юйцин — продюсеры альбома; Уос был в Шанхае и Пекине.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "bnote-release"
+          ],
+          "editorial_note": ""
+        },
+        {
+          "id": "bn-tracks",
+          "statement": "Перечень шести пьес, имена основных участников и связь Harvest с районом Цзиньшань изложены издателем.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "bnote-release"
+          ],
+          "editorial_note": ""
+        }
+      ],
+      "quotes": [],
+      "conflict_disclosure": null,
+      "editorial_notes": [
+        "Первая полоса. Это первый том данной антологии Blue Note Records China, а не первый альбом китайского джаза вообще. Не подтверждено, что это самый первый сборник подразделения.",
+        "Blue Note 17 сентября публиковал анонс по этому же адресу; сейчас URL ведёт на публикацию от 23 октября, фиксирующую релиз. Не путать дату анонса с датой релиза.",
+        "Eugene Sun оставлен в написании лейбла: отождествление с китайскими иероглифами и русская транскрипция без надёжного подтверждения не вводятся.",
+        "The Paper опирается на пресс-материалы Universal/Blue Note и не считается независимым подтверждением.",
+        "Фотография: обложка сборника — только с письменным разрешением правообладателя. Не включена."
+      ],
+      "media_rights": {
+        "image_url": null,
+        "status": "none",
+        "credit": ""
+      },
+      "previous_article_ids": [],
+      "development_note": ""
+    },
+    {
+      "id": "igor-butman-65-kremlin-gala-20261025",
+      "region": "russia",
+      "category": "jazz",
+      "placement": "secondary",
+      "headline": "Игорь Бутман отметит 65-летие большим джазовым концертом в Кремле",
+      "lead": "27 октября саксофонист Игорь Бутман отметит 65-летие на сцене Государственного Кремлёвского дворца. Вместе с Московским джазовым оркестром выступят приглашённые артисты разных музыкальных направлений; концерт откроет юбилейную гастрольную программу.",
+      "body_paragraphs": [
+        "Гала-концерт «Игорь Бутман 65» назначен на 27 октября, 19:00, в Большом зале Государственного Кремлёвского дворца. Дата совпадает с днём рождения музыканта. В основе программы — выступление Московского джазового оркестра под управлением Бутмана, которого организаторы представляют как центрального участника юбилейного вечера.",
+        "По опубликованной афише, с оркестром заявлены певцы Валерий Сюткин и Лариса Долина, оперный бас Ильдар Абдразаков, Сергей Мазаев, а также L’One и Shaman. В анонсе фигурируют и артисты театра и кино, среди них Алексей Гуськов и Виктор Добронравов. Таким образом, концерт задуман как встреча исполнителей из разных жанров, а не исключительно джазовый сет одного оркестра.",
+        "В программе организаторы обещают новые сочинения, известные песни в джазовых аранжировках и совместные номера. Конкретные произведения и окончательный порядок выступлений не опубликованы, поэтому называть какие-либо премьеры состоявшимися или утверждать точный сет-лист пока нельзя.",
+        "Вечер станет началом юбилейного тура, связанного также с 30-летием альбома Blues for 4. Официальный концертный календарь Бутмана уже содержит следующие выступления в Ярославле 29 октября и Санкт-Петербурге 1 ноября. Российские гастроли продолжат юбилейную программу за пределами московской площадки."
+      ],
+      "summary": "27 октября в 19:00 в Кремлёвском дворце пройдёт юбилейный концерт Игоря Бутмана с Московским джазовым оркестром и приглашёнными артистами.",
+      "event_date": "2026-10-27",
+      "story_group_id": "igor-butman-65-kremlin-gala-2026",
+      "event_id": "igor-butman-65-kremlin-gala-2026",
+      "story_score": 83,
+      "sources": [
+        {
+          "id": "butman-kremlin-official",
+          "title": "«Игорь Бутман 65». Юбилейный гала-концерт",
+          "publisher": "Государственный Кремлёвский дворец",
+          "url": "https://www.kremlinpalace.org/events/igor-butman-65-yubileynyy-gala-koncert",
+          "published_at": null,
+          "type": "event_organizer",
+          "verification_checked_at": null,
+          "dependency_group": "butman-gala-2026-official-announcement"
+        },
+        {
+          "id": "butman-artist-calendar",
+          "title": "Концерты: юбилейный гала-концерт и последующие даты",
+          "publisher": "Официальный сайт Игоря Бутмана",
+          "url": "https://igorbutman.com/concerts/",
+          "published_at": null,
+          "type": "artist_official",
+          "verification_checked_at": null,
+          "dependency_group": "butman-gala-2026-official-announcement"
+        },
+        {
+          "id": "butman-announcement-september",
+          "title": "Ильдар Абдразаков, Сергей Безруков, L’One и Shaman выступят на юбилейном концерте Игоря Бутмана",
+          "publisher": "Официальный сайт Игоря Бутмана",
+          "url": "https://igorbutman.com/blog/2026/09/30/ildar-abdrazakov-sergej-bezrukov-l-one-i-shaman-vystupyat-na-yubilejnom-kontserte-igorya-butmana-v-gosudarstvennom-kremlyovskom-dvortse/",
+          "published_at": "2026-09-30",
+          "type": "artist_press_release",
+          "verification_checked_at": null,
+          "dependency_group": "butman-gala-2026-official-announcement"
+        }
+      ],
+      "claims": [
+        {
+          "id": "butman-date-venue",
+          "statement": "Юбилейный гала-концерт намечен 27 октября 2026 года на 19:00 в Большом зале Государственного Кремлёвского дворца.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "butman-kremlin-official"
+          ],
+          "editorial_note": "Это подтверждение анонсированной программы, а не состоявшегося концерта."
+        },
+        {
+          "id": "butman-artist-lineup",
+          "statement": "Организаторы перечисляют среди заявленных участников Сюткина, Долину, Абдразакова, Мазаева, L’One, Shaman, Гуськова и Добронравова.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "butman-kremlin-official"
+          ],
+          "editorial_note": "Фактическое участие после 27 октября потребует отдельной проверки."
+        },
+        {
+          "id": "butman-tour",
+          "statement": "Гала-вечер объявлен началом юбилейного тура к 65-летию Бутмана и 30-летию Blues for 4; в календаре указаны концерты 29 октября в Ярославле и 1 ноября в Санкт-Петербурге.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "butman-kremlin-official",
+            "butman-artist-calendar"
+          ],
+          "editorial_note": "Сет-лист и конкретные премьеры не подтверждены."
+        }
+      ],
+      "quotes": [],
+      "conflict_disclosure": null,
+      "editorial_notes": [
+        "Замена обнаруженного 25 октября повтора: концерт Джазовой комиссии с оркестром Лундстрема уже опубликован в выпуске №004 от 24 октября (https://kozlovclub.ru/gazeta/material/2026-10-24-moscow-jazz-commission-20261024/). Повтор удалён целиком.",
+        "Официальные источники согласны по дате, времени и месту. Списки приглашённых могут измениться — перед публикацией перепроверить афишу.",
+        "Анонс юбилейного концерта появился ранее октября; актуальность сюжета основана на близости даты 27 октября. Не представлять его как только что объявленный.",
+        "Источники артиста и площадки, вероятно, используют единый анонс; все они объединены в одну dependency_group. Не заявлять независимую верификацию состава.",
+        "Фото и афиша не добавлены: разрешение на использование не подтверждено."
+      ],
+      "media_rights": {
+        "image_url": null,
+        "status": "none",
+        "credit": ""
+      },
+      "previous_article_ids": [],
+      "development_note": ""
+    },
+    {
+      "id": "jazzfest-berlin-community-week-20261025",
+      "region": "world",
+      "category": "festival",
+      "placement": "secondary",
+      "headline": "Jazzfest Berlin выходит в город: 26 октября начинается Community Week",
+      "lead": "26 октября в берлинском Моабите начнётся общественная неделя Jazzfest Berlin. Основной фестиваль пройдёт с 29 октября по 1 ноября: в афише 24 проекта и более 135 музыкантов из свыше 25 стран.",
+      "body_paragraphs": [
+        "В программу 63-го Jazzfest Berlin включены четыре мировые, две европейские и пять немецких премьер. Основные концерты пройдут в Haus der Berliner Festspiele, клубах A-Trane и Quasimodo и Мемориальной церкви кайзера Вильгельма. Художественный руководитель — Надин Девентер.",
+        "До открытия основных сцен фестиваль займёт городские пространства Моабита. Jazzfest Community Week предусматривает восемь районных концертов, занятия для детей и студентов, кинопоказы и экскурсии. 26 октября в PAS Berlin намечено открытие общественной недели; 30 октября Энтони Брэкстон представит результат занятий примерно с 25 студентами Jazz Institut Berlin — JIB Creative Music Orchestra. Сам Брэкстон также заявлен на основной фестиваль с новым септетом.",
+        "Главная тема года, Dream Baby Dream, связана с одноимённым короткометражным фильмом, созданным в 2025 году с участием 60 человек. Организаторы планируют открыть основной фестиваль показом фильма. В заключительный день Globe Unity Orchestra Александра фон Шлиппенбаха представит Apokalyptische Nabelschau в год шестидесятилетия дебюта коллектива на Jazzfest Berlin."
+      ],
+      "summary": "Jazzfest Community Week стартует 26 октября в Моабите; основная программа Jazzfest Berlin — 29 октября — 1 ноября.",
+      "event_date": "2026-10-26",
+      "story_group_id": "jazzfest-berlin-2026-community-week-start",
+      "event_id": "jazzfest-berlin-2026-community-week-start",
+      "story_score": 87,
+      "sources": [
+        {
+          "id": "berlin-ejn",
+          "title": "Jazzfest Berlin 2026: Dream Baby Dream",
+          "publisher": "Jazzfest Berlin / Europe Jazz Network",
+          "url": "https://www.europejazz.net/news/jazzfest-berlin-2026-dream-baby-dream",
+          "published_at": "2026-10-05",
+          "type": "event_organizer",
+          "verification_checked_at": "2026-10-25T06:10:56+03:00",
+          "dependency_group": "jazzfest-berlin-organizer-press"
+        },
+        {
+          "id": "berlin-moabit",
+          "title": "Jazzfest Community Week 2026: программа и открытие",
+          "publisher": "Bildungsverbund Moabit",
+          "url": "https://www.bildungsverbund-moabit.de/aktuell/",
+          "published_at": null,
+          "type": "event_organizer",
+          "verification_checked_at": null,
+          "dependency_group": "jazzfest-community-local"
+        },
+        {
+          "id": "berlin-ukjazz",
+          "title": "Full Programme for Jazzfest Berlin 2026 Announced",
+          "publisher": "UK Jazz News",
+          "url": "https://ukjazznews.com/full-programme-for-jazzfest-berlin-2026-announced/",
+          "published_at": "2026-09-11",
+          "type": "independent_editorial",
+          "verification_checked_at": "2026-10-25T06:10:56+03:00",
+          "dependency_group": "jazzfest-berlin-organizer-press"
+        }
+      ],
+      "claims": [
+        {
+          "id": "berlin-date",
+          "statement": "Community Week с 26 октября, основной фестиваль 29 октября — 1 ноября.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "berlin-ejn"
+          ],
+          "editorial_note": "Подтверждение — текст самого фестиваля на Europe Jazz Network и локальный организатор."
+        },
+        {
+          "id": "berlin-count",
+          "statement": "24 проекта, более 135 участников из более 25 стран, премьеры 4/2/5.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "berlin-ejn"
+          ],
+          "editorial_note": ""
+        },
+        {
+          "id": "berlin-braxton",
+          "statement": "Новый септет Брэкстона и образовательный проект JIB на примерно 25 студентов.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "berlin-ejn",
+            "berlin-moabit"
+          ],
+          "editorial_note": ""
+        },
+        {
+          "id": "berlin-globe",
+          "statement": "Globe Unity закрывает фестиваль в год 60-летия дебюта на Jazzfest Berlin.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "berlin-ejn"
+          ],
+          "editorial_note": "Не писать, что оркестр не выступал в Берлине все 60 лет."
+        }
+      ],
+      "quotes": [],
+      "conflict_disclosure": null,
+      "editorial_notes": [
+        "Не выдавать анонс за репортаж: основные события ещё не начались.",
+        "Europe Jazz Network размещает сообщение от самого Jazzfest Berlin, а UK Jazz News опирается на общий пресс-релиз: не считать независимыми подтверждениями.",
+        "Сведения о локальной программе дополнительно сверены с Bildungsverbund Moabit.",
+        "Фотографии и афиши Berliner Festspiele не включены: права на перепубликацию не подтверждены."
+      ],
+      "media_rights": {
+        "image_url": null,
+        "status": "none",
+        "credit": ""
+      },
+      "previous_article_ids": [],
+      "development_note": ""
+    },
+    {
+      "id": "olga-amelchenko-touching-invisible-20261025",
+      "region": "world",
+      "category": "recording",
+      "placement": "secondary",
+      "headline": "Новый альбом Ольги Амельченко: шесть пьес о переменах и ожидании",
+      "lead": "23 октября на Edition Records вышел Touching the Invisible саксофонистки и композитора Ольги Амельченко. Альбом записан квартетом, а в двух пьесах появляется приглашённый тенор-саксофонист Мусина Эбобиссе.",
+      "body_paragraphs": [
+        "Ольга Амельченко родилась в Сибири, выступала на берлинской сцене и ныне живёт в Париже. В 2026 году она получила номинацию Révélation французской премии Victoires du Jazz. Touching the Invisible — её пятый альбом; по информации рецензента Paris-Move, запись прошла за один день, 10 июня 2025 года, когда музыкантка ожидала рождения дочери.",
+        "Студийный состав — альт-саксофон Амельченко, фортепиано и клавишные Роба Клирфилда, бас Хуана Вильярроэля, ударные Джона Хэдфилда. Мусина Эбобиссе добавил тенор-саксофон в Little Victories и Unwritten Skies. Запись сделана в студии Quai Son во Франции; сведение и мастеринг выполнил Дэйв Дарлингтон в Bass Hit Studio в Нью-Йорке.",
+        "В рецензии Paris-Move приводятся слова Амельченко о коротком промежутке между звонком музыкантам и студийной сессией: сочинения создавались без долгих репетиций. Edition Records описывает альбом как более ритмичный и светлый по сравнению с её прежними работами. Программа посвящена дочери; 14 ноября музыкантка представит квартет на Jazzdor в Страсбурге — с тем же составом из четырёх основных участников, который указан для записи."
+      ],
+      "summary": "Ольга Амельченко выпустила Touching the Invisible: шесть композиций квартета с приглашённым саксофонистом в двух пьесах.",
+      "event_date": "2026-10-23",
+      "story_group_id": "olga-amelchenko-touching-the-invisible-2026",
+      "event_id": "olga-amelchenko-touching-the-invisible-2026",
+      "story_score": 86,
+      "sources": [
+        {
+          "id": "olga-edition",
+          "title": "Touching the Invisible — Olga Amelchenko",
+          "publisher": "Edition Records",
+          "url": "https://editionrecords.com/releases/touching-the-invisible/",
+          "published_at": null,
+          "type": "official",
+          "verification_checked_at": "2026-10-25T06:10:56+03:00",
+          "dependency_group": "olga-edition"
+        },
+        {
+          "id": "olga-parismove",
+          "title": "OLGA AMELCHENKO – Touching the Invisible (рецензия)",
+          "publisher": "Paris-Move",
+          "url": "https://www.paris-move.com/reviews/olga-amelchenko-touching-the-invisible/",
+          "published_at": "2026-10-12",
+          "type": "independent_editorial",
+          "verification_checked_at": "2026-10-25T06:10:56+03:00",
+          "dependency_group": "olga-parismove"
+        },
+        {
+          "id": "olga-jazzdor",
+          "title": "Olga Amelchenko 4Tet Touching the Invisible",
+          "publisher": "Jazzdor",
+          "url": "https://jazzdor.com/en/olga-amelchenko-4tet-touching-invisible",
+          "published_at": null,
+          "type": "event_organizer",
+          "verification_checked_at": "2026-10-25T06:10:56+03:00",
+          "dependency_group": "olga-jazzdor"
+        }
+      ],
+      "claims": [
+        {
+          "id": "olga-release",
+          "statement": "23 октября 2026 года Edition Records выпустил Touching the Invisible.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "olga-edition"
+          ],
+          "editorial_note": ""
+        },
+        {
+          "id": "olga-lineup",
+          "statement": "Основной студийный квартет и Мусина Эбобиссе (треки 1 и 6).",
+          "verification": "verified_primary",
+          "source_ids": [
+            "olga-edition"
+          ],
+          "editorial_note": ""
+        },
+        {
+          "id": "olga-session",
+          "statement": "Пятый альбом, однодневная сессия 10 июня 2025 года, посвящение дочери.",
+          "verification": "attributed_single",
+          "source_ids": [
+            "olga-parismove"
+          ],
+          "editorial_note": "Даты и контекст приводит рецензент Paris-Move; это не интервью редакции."
+        },
+        {
+          "id": "olga-tour",
+          "statement": "14 ноября Jazzdor анонсирует квартет с Хэдфилдом.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "olga-jazzdor"
+          ],
+          "editorial_note": ""
+        }
+      ],
+      "quotes": [],
+      "conflict_disclosure": null,
+      "editorial_notes": [
+        "Paris-Move от 12 октября — рецензия Доминика Буле с цитатами музыкантки, а не отдельное интервью.",
+        "Ричард Спейвен не указан ни на записи, ни в подтверждённом составе Jazzdor; не включать это имя.",
+        "Оценка «ритмичнее и светлее» принадлежит Edition Records; самостоятельная рецензия редакции не проводилась.",
+        "Фотография Тумена Дондукова и обложка — без подтверждённой лицензии на использование в газете, не добавлены."
+      ],
+      "media_rights": {
+        "image_url": null,
+        "status": "none",
+        "credit": ""
+      },
+      "previous_article_ids": [],
+      "development_note": ""
+    },
+    {
+      "id": "jazz-birds-2026-competition-start-20261025",
+      "region": "russia",
+      "category": "education",
+      "placement": "secondary",
+      "headline": "В Клубе Козлова начинается конкурсная неделя Jazz Birds",
+      "lead": "26 октября в Москве начнутся конкурсные выступления XI Jazz Birds: первыми на сцену Клуба Алексея Козлова выйдут инструменталисты. С 27 по 30 октября здесь же состоятся вокальные прослушивания.",
+      "body_paragraphs": [
+        "Фестиваль проходит с 23 октября по 1 ноября. Подготовительные репетиции идут 23–26 октября; инструментальное отделение откроется в понедельник, 26-го. Как следует из афиши Jazzmap, на этот день заявлен свободный вход, прослушивания начинаются в 10:00. Вокальные конкурсы займут четыре следующих дня. 31 октября в клубе «Эссе» пройдёт «Великолепная десятка», а 1 ноября там же запланирован гала-концерт членов жюри.",
+        "Участникам предоставляется живой аккомпанирующий ансамбль, а после выступлений предусмотрены разборы и рекомендации членов жюри. Инструментальный конкурс оценивают Алексей Подымкин, Овагем Султанян и Ольга Андреева; среди вокальных экспертов — Дмитрий Носков, Ирина Остин, Жоандер Сантос и Людмила Сваровская, президент фестиваля.",
+        "Примечание редакции: Клуб Алексея Козлова, на сайте которого выходит эта газета, является партнёром Jazz Birds и принимает конкурсные выступления 26–30 октября. Сообщение носит информационный характер; результаты конкурса и оценка участников не приводятся."
+      ],
+      "summary": "Jazz Birds 2026 начнёт инструментальные прослушивания 26 октября в Клубе Козлова, который является партнёром фестиваля.",
+      "event_date": "2026-10-26",
+      "story_group_id": "jazz-birds-2026-competition-week",
+      "event_id": "jazz-birds-2026-competition-week",
+      "story_score": 81,
+      "sources": [
+        {
+          "id": "jazzbirds-official",
+          "title": "Jazz Birds 2026: программа и жюри",
+          "publisher": "Jazz Birds",
+          "url": "https://jazz-birds.com/",
+          "published_at": null,
+          "type": "event_organizer",
+          "verification_checked_at": "2026-10-25T06:10:56+03:00",
+          "dependency_group": "jazzbirds-official"
+        },
+        {
+          "id": "jazzbirds-jazzmap",
+          "title": "Jazz Birds 2026: Инструментальный конкурс",
+          "publisher": "Jazzmap",
+          "url": "https://www.jazzmap.ru/afisha/2025-10-20-klub-alekseya-kozlova-jazz-birds-2025-instrumentalnyi-konkurs.php",
+          "published_at": null,
+          "type": "independent_editorial",
+          "verification_checked_at": "2026-10-25T06:10:56+03:00",
+          "dependency_group": "jazzbirds-program-republication"
+        }
+      ],
+      "claims": [
+        {
+          "id": "jb-date",
+          "statement": "Jazz Birds 23 октября — 1 ноября, инструменталисты 26-го, вокалисты 27–30-го, гала 1 ноября в Эссе.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "jazzbirds-official"
+          ],
+          "editorial_note": ""
+        },
+        {
+          "id": "jb-jury",
+          "statement": "Состав жюри, включая президента фестиваля Людмилу Сваровскую.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "jazzbirds-official"
+          ],
+          "editorial_note": ""
+        },
+        {
+          "id": "jb-format",
+          "statement": "Живое сопровождение и обратная связь жюри.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "jazzbirds-official"
+          ],
+          "editorial_note": ""
+        },
+        {
+          "id": "jb-entrance",
+          "statement": "Jazzmap указывает свободный вход на инструментальные прослушивания 26 октября, начало 10:00.",
+          "verification": "attributed_single",
+          "source_ids": [
+            "jazzbirds-jazzmap"
+          ],
+          "editorial_note": "Оперативно перепроверить у площадки; на официальном сайте фестиваля цена входа не указана."
+        },
+        {
+          "id": "jb-conflict",
+          "statement": "Клуб Козлова указан среди партнёров Jazz Birds и принимает конкурсы 26–30 октября.",
+          "verification": "verified_primary",
+          "source_ids": [
+            "jazzbirds-official"
+          ],
+          "editorial_note": "Связь прямо раскрыта читателю в абзаце."
+        }
+      ],
+      "quotes": [],
+      "conflict_disclosure": "Клуб Алексея Козлова издаёт «Ежедневный стандарт», выступает партнёром Jazz Birds и принимает конкурсную программу 26–30 октября.",
+      "editorial_notes": [
+        "Партнёрство клуба и связь с издаваемой им газетой явно раскрыты в статье и поле conflict_disclosure.",
+        "По официальному графику репетиция есть также 26 октября. Не писать «первые три дня» как исчерпывающее расписание.",
+        "Свободный вход заявлен агрегатором Jazzmap для инструментального конкурса; перед публикацией стоит уточнить у площадки.",
+        "На сайте организатора ещё виден устаревший призыв подать заявку; регистрация до 10 октября, не анонсировать действующий приём.",
+        "Фотографии конкурса не добавлены: права на перепубликацию не подтверждены."
+      ],
+      "media_rights": {
+        "image_url": null,
+        "status": "none",
+        "credit": ""
+      },
+      "previous_article_ids": [],
+      "development_note": ""
+    }
+  ],
+  "social": [
+    {
+      "article_id": "blue-note-china-nows-the-time-release-20261025",
+      "telegram_sentence": "Blue Note Records China выпустил антологию современной китайской джазовой сцены — шесть пьес с участием Дона Уоса как продюсера.",
+      "instagram_sentence": "Китайская джазовая сцена в антологии Blue Note Records China.",
+      "visual_format": "1080x1350"
+    },
+    {
+      "article_id": "igor-butman-65-kremlin-gala-20261025",
+      "telegram_sentence": "27 октября Игорь Бутман отметит 65-летие гала-концертом в Кремлёвском дворце вместе с Московским джазовым оркестром и приглашёнными артистами.",
+      "instagram_sentence": "«Игорь Бутман 65»: 27 октября в Кремле состоится юбилейный вечер с Московским джазовым оркестром и гостями разных жанров.",
+      "visual_format": "1080x1350"
+    },
+    {
+      "article_id": "jazzfest-berlin-community-week-20261025",
+      "telegram_sentence": "26 октября стартует Jazzfest Community Week в Моабите; основной Jazzfest Berlin пройдёт 29 октября — 1 ноября.",
+      "instagram_sentence": "Jazzfest Berlin: кварталы Моабита, Брэкстон и Globe Unity Orchestra.",
+      "visual_format": "1080x1350"
+    },
+    {
+      "article_id": "olga-amelchenko-touching-invisible-20261025",
+      "telegram_sentence": "Edition Records выпустил Touching the Invisible: новый альбом Ольги Амельченко с квартетом и приглашённым тенор-саксофоном.",
+      "instagram_sentence": "Ольга Амельченко представила Touching the Invisible — музыку о переменах.",
+      "visual_format": "1080x1350"
+    },
+    {
+      "article_id": "jazz-birds-2026-competition-start-20261025",
+      "telegram_sentence": "26 октября в Клубе Козлова начинаются инструментальные конкурсы Jazz Birds; клуб является партнёром фестиваля и издаёт эту газету.",
+      "instagram_sentence": "Jazz Birds 2026: конкурсная неделя в Клубе Козлова, партнёре фестиваля.",
+      "visual_format": "1080x1350"
+    }
+  ],
+  "editorial": {
+    "ready_for_human_review": false,
+    "blocking_issues": [
+      "Обнаружен и удалён дубликат: сюжет о Джазовой комиссии и оркестре Лундстрема уже опубликован в номере №004 24 октября. Заменён статьёй об Игоре Бутмане. Полная проверка опубликованных номеров №001–003 напрямую на сайте не завершена; доступны сохранённые материалы и черновики, которые могут отличаться от окончательных версий.",
+      "Прямое чтение WordPress доступно только через открытую вкладку №004. Перед импортом обязательно просмотреть архив публикаций №001–003 и сопоставить новые пять событий.",
+      "Нет подтверждения совместимости схемы JSON 1.1 с текущим плагином импорта и процедуры сохранения без перезаписи ручных правок. Не импортировать в опубликованный выпуск.",
+      "Для всех пяти материалов отсутствуют изображения с проверенными правами на публикацию; при необходимости подготовить лицензированные иллюстрации.",
+      "Согласование выпусков и окончательная проверка источников перед публикацией остаются обязательными."
+    ],
+    "source_scan_window_start": "2026-10-22T00:00:00+03:00",
+    "source_scan_window_end": "2026-10-25T06:34:02+03:00",
+    "generation_notes": [
+      "Версия 4: по опубликованному номеру №004 за 24 октября, прочитанному через открытый браузер пользователя, установлен точный дубль истории о Джазовой комиссии/Лундстреме. Статья удалена из номера 25 октября.",
+      "Пять заголовков опубликованного номера №004: юбилейное переиздание Back to Black Эми Уайнхаус; серия Петра Востокова в ЗИЛАРТе; The Midnight Hour Lost Tapes; Джазовая комиссия/Лундстрем; альбом Ursa Major Кристиана Макбрайда Points of Light.",
+      "В доступных архивах и черновиках выпусков 21–23 октября сюжет о юбилейном кремлёвском концерте Игоря Бутмана не обнаружен. Но полноценная сверка именно опубликованных версий 21–23 октября не произведена, поэтому гарантии отсутствия дублей нет.",
+      "Самара Джой исключена как повтор №001. Повторно не включать тематику анонс/релиз одного и того же альбома без существенного развития.",
+      "Остальные темы (Blue Note China, Jazzfest Berlin Community Week, Ольга Амельченко, Jazz Birds) сохранены из v3, утверждения не менялись.",
+      "Источник по концерту Бутмана — официальные сайты площадки и артиста. Дата 27 октября ещё в будущем относительно даты выпуска 25 октября; не писать о состоявшемся концерте.",
+      "Газета не изменялась: опубликованные материалы не редактировались, авторизованный импорт и автоматическая публикация не выполнялись."
+    ]
+  }
+}
