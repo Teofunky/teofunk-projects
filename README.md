@@ -15,7 +15,7 @@
 | [`kozlovclub/jazzeta-archive/`](kozlovclub/jazzeta-archive) | архив Джазеты: ранние версии плагина 0.1.0–0.5.11, черновики выпусков, ТЗ, кроссворды, календарь памятных дат |
 | [`kozlovclub/tools/`](kozlovclub/tools), [`kozlovclub/tests/`](kozlovclub/tests) | диагностика, служебные скрипты, тестовые стенды плагинов |
 | [`jazzartclub/themes/jazzart`](jazzartclub/themes/jazzart) | тема нового сайта jazzartclub.ru |
-| [`apps/`](apps) | Konnakol Master (с историей коммитов), Reel Practice, метроном PULSE, гитарные инструменты (Tone Lab, ЛЮФТ, Rig Lab, JSFX) |
+| [`apps/`](apps) | Konnakol Master (с историей коммитов), Reel Practice, метроном PULSE, гитарные инструменты (Tone Lab, ЛЮФТ, Rig Lab, JSFX), SmartFind (умный поиск и уборка файлов на Mac) |
 | [`sites/`](sites) | другие сайты: HATIK, AgroLook, Илья Вартанян, implantarm, Kontiky Film Lab, Mousework |
 | [`texts/`](texts) | «НеСелинджер», «Кто написал Баха» |
 
