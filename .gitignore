@@ -1,0 +1,62 @@
+# Секреты
+wp-config.php
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.mobileprovision
+auth.json
+credentials*.json
+secrets*.json
+
+# Дампы базы и резервные копии
+*.sql
+*.sql.gz
+!**/migrations/**/*.sql
+!**/db/schema.sql
+*.sql.zip
+*.wpress
+backup*/
+backups/
+
+# Медиа и медиатека сайта
+uploads/
+*.mp4
+*.mov
+*.m4v
+*.avi
+*.wav
+*.aif
+*.aiff
+*.psd
+*.ai
+
+# Данные импорта старого сайта (содержат контакты) и кэши картинок
+kozlovclub/plugins/kozlov-import/data/
+kozlov-import-cache-*/
+
+# Собранные архивы (выкладываются в Releases)
+*.zip
+*.dmg
+# исключение: пакет логотипов для прессы, тема отдаёт его посетителям
+!kozlovclub/themes/kozlov-2026/assets/press/*.zip
+
+# Зависимости и сборка
+node_modules/
+vendor/
+__pycache__/
+*.pyc
+.venv/
+build/
+dist/
+DerivedData/
+.build/
+.swiftpm/
+*.xcuserstate
+xcuserdata/
+
+# Системное
+.DS_Store
+Thumbs.db
