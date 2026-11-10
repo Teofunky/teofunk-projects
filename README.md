@@ -4,15 +4,20 @@
 
 ## Карта
 
-| Папка | Что внутри | Статус |
-|---|---|---|
-| [`kozlovclub/plugins/`](kozlovclub/plugins) | плагины WordPress обоих сайтов клуба: афиша, поиск, календарь, «Живой фасад», страницы концертов и артистов, разметка, Kozlov TV, StreamVi и другие | перенесено с историей версий |
-| [`kozlovclub/themes/`](kozlovclub/themes) | тема Kozlov Club 2026 (новый сайт), снимок темы текущего сайта и правки к ней | перенесено |
-| [`kozlovclub/tools/`](kozlovclub/tools), [`kozlovclub/tests/`](kozlovclub/tests) | диагностика, служебные скрипты, тестовые стенды плагинов | перенесено |
-| [`jazzartclub/themes/jazzart`](jazzartclub/themes/jazzart) | тема нового сайта jazzartclub.ru | перенесено с историей версий |
-| `kozlovclub/apps/`, `kozlovclub/prototypes/` | барометр, конкурентный радар, Козловск, прототипы страниц | этап 2 |
-| `apps/` | приложения: Konnakol Master, Reel Practice, PULSE и другие | этап 2 |
-| `sites/` | другие сайты: implantarm, HATIK, Вартанян, Kontiky Film Lab, Mousework | этап 2 |
+| Папка | Что внутри |
+|---|---|
+| [`kozlovclub/plugins/`](kozlovclub/plugins) | плагины WordPress обоих сайтов клуба, у каждой версии свой коммит |
+| [`kozlovclub/themes/`](kozlovclub/themes) | тема Kozlov Club 2026, снимок темы текущего сайта и правки к ней |
+| [`kozlovclub/apps/`](kozlovclub/apps) | Концертный барометр (с историей коммитов) и его ранний прототип, конкурентный радар, Козловск, J and Joy PWA |
+| [`kozlovclub/prototypes/`](kozlovclub/prototypes) | прототипы: концепции сайта и Джаз-навигатора, главная сцена, фасад, календарь, поиск, Новый год 2027, кроссворд, настольные игры, макеты нового сайта |
+| [`kozlovclub/pages/`](kozlovclub/pages), [`kozlovclub/brand/`](kozlovclub/brand) | страница корпоративных мероприятий, логотипы и графика |
+| [`kozlovclub/docs/`](kozlovclub/docs) | аудиты сайта, SEO и аналитики, брифы и ТЗ, материалы страницы БДО, проверка Codex |
+| [`kozlovclub/jazzeta-archive/`](kozlovclub/jazzeta-archive) | архив Джазеты: ранние версии плагина 0.1.0–0.5.11, черновики выпусков, ТЗ, кроссворды, календарь памятных дат |
+| [`kozlovclub/tools/`](kozlovclub/tools), [`kozlovclub/tests/`](kozlovclub/tests) | диагностика, служебные скрипты, тестовые стенды плагинов |
+| [`jazzartclub/themes/jazzart`](jazzartclub/themes/jazzart) | тема нового сайта jazzartclub.ru |
+| [`apps/`](apps) | Konnakol Master (с историей коммитов), Reel Practice, метроном PULSE, гитарные инструменты (Tone Lab, ЛЮФТ, Rig Lab, JSFX) |
+| [`sites/`](sites) | другие сайты: HATIK, AgroLook, Илья Вартанян, implantarm, Kontiky Film Lab, Mousework |
+| [`texts/`](texts) | «НеСелинджер», «Кто написал Баха» |
 
 Подробная таблица плагинов с версиями для каждого сайта: [`kozlovclub/README.md`](kozlovclub/README.md).
 
@@ -22,7 +27,7 @@
 
 - пароли, ключи API, `wp-config.php`, `.env`;
 - дампы базы (`*.sql`) и выгрузки из них: в них данные гостей, артистов и сотрудников;
-- фото, видео и медиатеку сайта;
+- видео, музыку и медиатеку сайта (картинки прототипов, бренда и сайтов лежат рядом с ними);
 - собранные ZIP: их собирают из исходников.
 
 Перед каждым коммитом запускается проверка `scripts/check-secrets.sh`. Чтобы она срабатывала сама, один раз после клонирования выполните:

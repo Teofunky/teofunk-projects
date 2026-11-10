@@ -42,7 +42,8 @@
 
 - `kozlov-import/data/`: выгрузка контента из дампа базы от 22.10.2026. В ней контакты артистов и сотрудников, поэтому в репозиторий она не попадает. Готовые ZIP с данными остаются на Mac.
 - `kozlov-import-cache-1` и `-2`: архивы картинок для импорта, это не код.
-- `kozlov-jazzeta`: плагин Джазеты живёт в репозитории [Teofunky/jazzeta-pipeline](https://github.com/Teofunky/jazzeta-pipeline).
+- `kozlov-jazzeta`: актуальный плагин Джазеты живёт в репозитории [Teofunky/jazzeta-pipeline](https://github.com/Teofunky/jazzeta-pipeline), ранние версии 0.1.0–0.5.11 лежат в `jazzeta-archive/plugin-history`.
+- Выгрузка продаж (EventsPeriodicReport) и таблицы xlsx из «Аудит и аналитика», локальные базы приложений, промо-видео.
 
 ## Остальное
 
@@ -50,3 +51,7 @@
 - `tools/diagnostics` и `tools/wp-snippets`: скрипты диагностики и служебные сниппеты для текущего сайта.
 - `tests/`: тестовые стенды плагинов.
 - `docs/2026-10-13-status`: сводка состояния работ на 13 октября 2026.
+- `apps/`: Концертный барометр (история коммитов сохранена), его ранний прототип, конкурентный радар, Козловск, J and Joy PWA.
+- `prototypes/`, `pages/`, `brand/`: прототипы, страница корпоративов, логотипы и графика.
+- `docs/audits`, `docs/briefs`, `docs/artists-bdo`, `docs/codex-2026-10-05-site-check`: аудиты, брифы, материалы артиста, проверка Codex.
+- `jazzeta-archive/`: архив Джазеты до переезда в jazzeta-pipeline.
