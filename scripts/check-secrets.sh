@@ -39,7 +39,7 @@ while IFS= read -r f; do
       echo "ЗАПРЕЩЁННЫЙ ФАЙЛ: $f"; fail=1; continue ;;
   esac
   size=$(wc -c < "$f" | tr -d ' ')
-  if [ "$size" -gt "$MAX_BYTES" ]; then
+  if [ "$size" -gt "$MAX_BYTES" ] && ! grep -qxF -- "$f" .githooks/allow-large.txt 2>/dev/null; then
     echo "СЛИШКОМ БОЛЬШОЙ ($((size / 1024 / 1024)) МБ): $f"; fail=1
   fi
   # Бинарные файлы не сканируем на текстовые шаблоны
@@ -50,7 +50,9 @@ while IFS= read -r f; do
   done
   if [ -z "$hit" ]; then
     for p in "${loose[@]}"; do
-      hit=$(grep -nE -i -m1 -- "$p" "$f" 2>/dev/null | cut -c1-160); [ -n "$hit" ] && break
+      # значение в кавычках должно содержать цифру: так не ловятся 'new-password' и подобные слова
+      hit=$(grep -noE -i -- "$p" "$f" 2>/dev/null | grep -E "[0-9][^'\"]*['\"]$" | head -1 | cut -c1-160)
+      [ -n "$hit" ] && break
     done
   fi
   if [ -z "$hit" ]; then
