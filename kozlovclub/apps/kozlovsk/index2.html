@@ -192,10 +192,24 @@ function reportWin(prizeName) {
   } catch (e) {}
 }
 
-/* --- забрать приз: чат с менеджером с готовым сообщением --- */
+/* --- забрать приз: бот клуба @KozlovClub_app, заявка уходит в группу менеджеров ---
+   Код в ссылке: только латиница a-z и цифры (кириллицу, пробелы и % Telegram не пропускает).
+   Старые названия оставлены, чтобы у гостей работали призы, выигранные в прошлых версиях. */
+const PRIZE_CODES = {
+  "Промокод −10%": "minus10",
+  "Промокод −15%": "minus15",
+  "Промокод −30%": "minus30",
+  "Промокод −50%": "minus50",
+  "Промокод −70%": "minus70",
+  "Золотой билет · месяц концертов": "goldticket",
+  "Сертификат на двоих": "cert2",
+  "Сертификат на двоих · любой концерт": "cert2",
+  "Коктейль от шефа": "cocktail",
+};
 function claimPrize(prizeName) {
-  const text = encodeURIComponent("Хочу забрать свой приз: " + prizeName);
-  const link = "https://t.me/" + MANAGER + "?text=" + text;
+  const key = String(prizeName || "").replace(/[-–]/g, "−"); /* дефис и короткое тире -> минус, как в названиях */
+  const code = PRIZE_CODES[key] || "prize";
+  const link = "https://t.me/KozlovClub_app?start=prize_kozlovsk_" + code;
   if (tg && tg.openTelegramLink) tg.openTelegramLink(link);
   else window.open(link, "_blank");
 }
