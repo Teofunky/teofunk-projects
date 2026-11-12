@@ -194,6 +194,22 @@ def clean_question(text: str) -> tuple[str, list]:
     return text.strip(), notes
 
 
+def step(client, model: str, system: list, session: dict, folder: Path) -> dict:
+    """Один ход интервьюера: спросить модель, добавить вопрос в сессию, сохранить файлы.
+
+    Общая часть для терминала и веб-чата. Ответ на предыдущий вопрос должен быть уже записан.
+    """
+    decision, usage = next_turn(client, model, system, session)
+    q, notes = clean_question(decision.get("next_question", ""))
+    turn = {"n": len(session["turns"]) + 1, "decision": decision, "question": q,
+            "answer": None, "asked_at": now(), "usage": usage, "notes": notes}
+    session["turns"].append(turn)
+    if decision.get("next_action") == "end":
+        session["finished"] = now()
+    write_outputs(session, folder)
+    return turn
+
+
 # ---------- подставной клиент для проверки без API
 
 class FakeClient:
@@ -226,15 +242,10 @@ def run(client, model: str, session: dict, folder: Path, system: list, read=inpu
         if session["turns"] and session["turns"][-1].get("answer") is None:
             turn = session["turns"][-1]          # вопрос задан, ответа ещё нет (после resume)
         else:
-            decision, usage = next_turn(client, model, system, session)
-            q, notes = clean_question(decision.get("next_question", ""))
-            turn = {"n": len(session["turns"]) + 1, "decision": decision, "question": q,
-                    "answer": None, "asked_at": now(), "usage": usage, "notes": notes}
-            session["turns"].append(turn)
-            write_outputs(session, folder)
+            turn = step(client, model, system, session, folder)
         show(f"\nИнтервьюер: {turn['question']}\n")
         if turn["decision"].get("next_action") == "end":
-            session["finished"] = now()
+            session.setdefault("finished", now())
             write_outputs(session, folder)
             show(f"[интервью завершено; файлы: {folder}]")
             return session
