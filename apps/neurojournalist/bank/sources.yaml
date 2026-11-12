@@ -1,0 +1,102 @@
+# Источники банка вопросов «Нейрожурналиста».
+# turns: число реплик интервьюера (вместе с короткими реакциями вроде «Ничего себе»).
+# new_topics: номера реплик, которые открывают новую тему (остальные: уточнения).
+# coded: true, если реплики разобраны по приёмам (techniques.yaml).
+# Разметка автоматическая: страницу открывал инструмент чтения веб-страниц,
+# он выдал пересказ каждой реплики и пометку «новая тема / уточнение».
+# Номера и пометки приблизительные, уверенность средняя.
+
+coded:
+  - id: iverson-carter-2007
+    outlet: Do the Math (Ethan Iverson)
+    interviewer: Ethan Iverson
+    subject: Ron Carter, контрабас
+    date: "2007-06"
+    format: телефонный разговор, расшифровка
+    url: https://ethaniverson.com/interviews/interview-with-ron-carter
+    access: открыт
+    turns: 31
+    new_topics: [1, 2, 3, 6, 10, 12, 17, 19, 23, 24, 25, 31]
+
+  - id: iverson-threadgill-2016
+    outlet: Do the Math (Ethan Iverson), запись для BBC Jazz on 3
+    interviewer: Ethan Iverson
+    subject: Henry Threadgill, композитор, саксофон, флейта
+    date: "2016-04"
+    format: устная расшифровка, часть 1 из 2
+    url: https://ethaniverson.com/interview-with-henry-threadgill-part-1/
+    access: открыт
+    turns: 52
+    new_topics: [1, 10, 15, 19, 28, 33, 37, 40, 42]
+
+  - id: toneglow-railton-2023
+    outlet: Tone Glow
+    interviewer: Joshua Minsoo Kim
+    subject: Lucy Railton, виолончель, композиция
+    date: "2023-10-08"
+    format: разговор по Zoom, расшифровка
+    url: https://toneglow.substack.com/p/tone-glow-109-lucy-railton
+    access: открыт
+    turns: 37
+    new_topics: [1, 4, 5, 8, 12, 14, 19, 20, 22, 28, 31, 32, 33, 35]
+
+  - id: toneglow-lewis-2021
+    outlet: Tone Glow
+    interviewer: Joshua Minsoo Kim
+    subject: George Lewis, тромбон, композиция, программа Voyager
+    date: "2020-10-21"
+    format: устная расшифровка, опубликована 2021-06-08
+    url: https://toneglow.substack.com/p/tone-glow-067-george-lewis
+    access: открыт
+    turns: 24
+    new_topics: [1, 2, 3, 5, 7, 11, 13, 18, 19, 23, 24]
+
+  - id: parisreview-murakami-2004
+    outlet: The Paris Review, The Art of Fiction No. 182
+    interviewer: John Wray
+    subject: Haruki Murakami, писатель (бывший владелец джаз-клуба)
+    date: "2004"
+    format: журнальное интервью, отредактировано
+    url: https://theparisreview.org/interviews/2/the-art-of-fiction-no-182-haruki-murakami
+    access: "открылся адрес без www; адрес с www отдал ошибку"
+    turns: 92
+    new_topics: [1, 9, 11, 13, 16, 24, 25, 26, 28, 30, 31, 34, 36, 38, 39, 42, 44, 46, 51, 54, 55, 57, 58, 59, 62, 69, 77, 81, 83, 88, 91]
+
+  - id: panken-smith-1978
+    outlet: Ted Panken (архив, Substack); вне списка ТЗ, добавлен в пилот
+    interviewer: Ted Panken
+    subject: Wadada Leo Smith, труба, композиция
+    date: "1978-02-22"
+    format: устное интервью для истории сцены, расшифровка
+    url: https://tedpanken.substack.com/p/chicago-chronicles-part-7-an-interview
+    access: открыт
+    turns: 63
+    new_topics: [1, 5, 7, 10, 11, 17, 18, 19, 23, 25, 26, 28, 30, 32, 33, 36, 38, 42, 43, 45, 46, 48, 50, 51, 55, 56, 58, 60, 61, 62, 63]
+
+# Посчитаны раньше (замер из ТЗ), по приёмам ещё не разобраны.
+counted_only:
+  - {id: believer-muhly, outlet: The Believer, subject: Nico Muhly, turns: 19}
+  - {id: believer-monk, outlet: The Believer, subject: Meredith Monk, turns: 35}
+  - {id: iverson-crouch, outlet: Do the Math, subject: Stanley Crouch, turns: 52}
+  - {id: iverson-colligan, outlet: Do the Math, subject: George Colligan, turns: 68}
+  - id: toneglow-guionnet
+    outlet: Tone Glow
+    subject: Jean-Luc Guionnet
+    url: https://toneglow.substack.com/p/tone-glow-075-jean-luc-guionnet
+    turns: 85
+
+# Не удалось разобрать в пилоте.
+blocked:
+  - id: bomb-threadgill
+    outlet: BOMB
+    subject: Henry Threadgill (интервьюер Frederic Tuten)
+    url: https://bombmagazine.org/articles/henry-threadgill
+    reason: сайт BOMB открывается только после подтверждения владельцем; запрос остался без ответа
+  - id: believer-moran
+    outlet: The Believer
+    subject: Jason Moran (интервьюер Ross Simonini)
+    url: https://thebeliever.net/?p=60578
+    reason: платный доступ, видна только первая реплика
+  - id: jazzru
+    outlet: «Джаз.Ру»
+    reason: поиск не выдал ни одного большого интервью на jazz.ru; нужен другой путь (архив журнала или браузер)

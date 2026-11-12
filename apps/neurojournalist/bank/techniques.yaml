@@ -1,0 +1,626 @@
+# Банк приёмов «Нейрожурналиста». Версия 0.1, пилот на 6 интервью.
+#
+# Храним приёмы и собственные шаблоны вопросов, а не чужие тексты.
+# Поля карточки:
+#   id, name      код и название приёма
+#   family        семья приёмов (см. families)
+#   goal          зачем приём нужен
+#   template      наш шаблон вопроса; {в скобках} то, что подставляется из досье
+#   needs         что должно быть в досье, чтобы приём можно было применить
+#   placement     где в интервью: start, early, middle, late, end, any
+#   themes        к каким темам ТЗ относится (см. themes)
+#   evidence      где приём встретился: id из sources.yaml и номера реплик интервьюера
+#   notes         как применять нейросети, оговорки
+# Частоты не пишем руками: их считает bank_stats.py по полю evidence.
+
+version: "0.1"
+updated: "2026-11-12"
+
+themes:
+  authentic_art: подлинное искусство (ремесло, ценность, что выдержит время)
+  deep_experience: глубокие переживания (утрата, сомнение, тело, перелом)
+  neuro_era: эпоха нейроискусства и профанации
+  roots: истоки и путь
+  craft: ремесло и метод
+
+families:
+  A: Вход и доверие
+  B: Истоки
+  C: Ремесло
+  D: Путь
+  E: Смысл и переживание
+  F: Человек и машина
+  G: Разговорные ходы
+  H: Финал
+
+techniques:
+
+  # A. Вход и доверие
+
+  - id: A1
+    name: Разминка о сегодняшнем дне
+    family: A
+    goal: Снять напряжение и услышать живой голос до серьёзных вопросов.
+    template: "Чем вы были заняты сегодня до нашего разговора?"
+    needs: []
+    placement: start
+    themes: []
+    evidence: {toneglow-lewis-2021: [1]}
+    notes: Одна реплика, не больше. В замере так же начинается Tone Glow с Гионне.
+
+  - id: A2
+    name: Вход через найденный факт
+    family: A
+    goal: Сразу показать подготовку и уйти от биографии, которую герой пересказывал сто раз.
+    template: "Я нашёл, что {малоизвестный факт}. Как это отозвалось в {работа или путь}?"
+    needs: [малоизвестный факт с источником, подтверждённый героем на шаге досье]
+    placement: start
+    themes: [roots]
+    evidence:
+      toneglow-railton-2023: [1, 2]
+      panken-smith-1978: [1]
+      toneglow-lewis-2021: [2, 3]
+      parisreview-murakami-2004: [1]
+    notes: Лучше малоизвестный факт, чем знаменитый. Если факт не подтверждён, не использовать.
+
+  - id: A3
+    name: Вместе слушаем запись
+    family: A
+    goal: Говорить о конкретном звуке, а не об абстракциях; поднять память о сессии.
+    template: "Давайте послушаем {трек, альбом, год}, с {таймкод}. Что вы слышите в себе тогдашнем?"
+    needs: [ссылка на запись, таймкод]
+    placement: early
+    themes: [authentic_art, craft]
+    evidence: {iverson-carter-2007: [2]}
+    notes: >
+      Айверсон ставит пластинку по телефону как верительную грамоту. В пилоте приём встретился
+      один раз, но он опорный в ТЗ. В приложении нужен плеер или ссылка с таймкодом.
+
+  - id: A4
+    name: Чужое свидетельство вместо личного воспоминания
+    family: A
+    goal: Дать герою конкретную сцену из прошлого, на которую можно отреагировать.
+    template: "В рецензии на ваш концерт в {место, год} {автор} пишет, что {деталь}. Что тогда происходило?"
+    needs: [рецензия или репортаж с источником]
+    placement: middle
+    themes: [deep_experience]
+    evidence:
+      iverson-carter-2007: [17]
+      toneglow-railton-2023: [4, 14]
+      iverson-threadgill-2016: [9]
+    notes: >
+      У живых интервьюеров это личное воспоминание («я был на вашем концерте»).
+      У нейросети личного опыта нет, поэтому она опирается на свидетельство с источником
+      и никогда не выдумывает собственных воспоминаний.
+
+  # B. Истоки
+
+  - id: B1
+    name: Первый звук, который задел
+    family: B
+    goal: Заменить «как вы пришли в музыку» конкретным моментом.
+    template: "Помните первый звук {инструмента или музыки}, который вас по-настоящему задел? Где это было?"
+    needs: [город детства, первый инструмент, если известен]
+    placement: early
+    themes: [roots, deep_experience]
+    evidence:
+      toneglow-lewis-2021: [13]
+      parisreview-murakami-2004: [28, 29, 30]
+      panken-smith-1978: [5, 17, 18]
+      toneglow-railton-2023: [1, 2]
+    notes: Голый вопрос «как вы пришли в музыку» в пилоте не встретился ни разу.
+
+  - id: B2
+    name: Семья и дом
+    family: B
+    goal: Найти, что из дома живёт в музыке.
+    template: "Что из того, что было у вас дома, вы узнаёте в своей музыке сейчас?"
+    needs: [что известно о семье из открытых источников]
+    placement: early
+    themes: [roots, deep_experience]
+    evidence:
+      toneglow-railton-2023: [12, 13, 23, 24]
+      toneglow-lewis-2021: [5, 6]
+      parisreview-murakami-2004: [11, 12, 14, 15]
+      panken-smith-1978: [1]
+    notes: Деликатно. Если герой уходит от темы, не настаивать.
+
+  - id: B3
+    name: Учитель и то, чему нельзя научиться по книге
+    family: B
+    goal: Заменить «кто на вас повлиял» вопросом о конкретном знании.
+    template: "Кто показал вам то, чего нет в учебниках? Что именно он показал?"
+    needs: [учителя и наставники из досье]
+    placement: early
+    themes: [roots, craft]
+    evidence:
+      parisreview-murakami-2004: [13]
+      toneglow-lewis-2021: [9]
+      toneglow-railton-2023: [10]
+      panken-smith-1978: [15]
+    notes: ""
+
+  - id: B4
+    name: Место и среда
+    family: B
+    goal: Понять, как город, сцена и время сформировали музыку.
+    template: "Как {город или сцена, годы} слышны в вашей музыке? Что было бы иначе в другом месте?"
+    needs: [города и сцены из биографии]
+    placement: early
+    themes: [roots]
+    evidence:
+      iverson-threadgill-2016: [3, 7, 8]
+      panken-smith-1978: [11, 26, 27, 36, 44, 63]
+      parisreview-murakami-2004: [25, 88, 89]
+      toneglow-lewis-2021: [12]
+    notes: ""
+
+  # C. Ремесло
+
+  - id: C1
+    name: Как это устроено технически
+    family: C
+    goal: Спросить про механику, а не про вдохновение.
+    template: "Что вы технически делаете, когда {особенность звучания или формы}?"
+    needs: [точное описание особенности из рецензий или разбора записи]
+    placement: middle
+    themes: [craft, authentic_art]
+    evidence:
+      iverson-carter-2007: [7, 9]
+      iverson-threadgill-2016: [34, 35, 36]
+      parisreview-murakami-2004: [6, 7, 8, 35, 76]
+      panken-smith-1978: [23, 24]
+      toneglow-lewis-2021: [16]
+    notes: Заменяет вопросы вроде «что для вас импровизация».
+
+  - id: C2
+    name: Деталь конкретной записи
+    family: C
+    goal: Показать, что запись действительно слушали, и получить рассказ о решении.
+    template: "В {трек, альбом}, на {таймкод}, {деталь}. Откуда это решение?"
+    needs: [дискография, разбор 1–2 записей с таймкодами]
+    placement: middle
+    themes: [craft, authentic_art]
+    evidence:
+      iverson-carter-2007: [13, 14, 20, 22]
+      iverson-threadgill-2016: [24, 26, 29, 31, 44, 45, 48]
+      toneglow-railton-2023: [19, 20, 22, 27, 28, 31]
+      parisreview-murakami-2004: [2, 34, 42, 44, 45]
+      panken-smith-1978: [18, 21, 30, 32, 35, 37, 53, 56, 59, 62]
+      toneglow-lewis-2021: [3, 11, 17]
+    notes: >
+      Самый частый приём пилота: встречается во всех шести интервью.
+      Значит, досье должно включать разбор записей, а не только биографию.
+
+  - id: C3
+    name: Можно ли этому научить
+    family: C
+    goal: Отделить передаваемое ремесло от того, что человек находит сам.
+    template: "Этому можно научить или это можно только найти самому?"
+    needs: []
+    placement: middle
+    themes: [authentic_art, craft]
+    evidence:
+      iverson-carter-2007: [9]
+      panken-smith-1978: [4]
+      toneglow-lewis-2021: [10]
+    notes: ""
+
+  - id: C4
+    name: Имя на отклик
+    family: C
+    goal: Вместо «кто на вас повлиял» назвать предшественника и ждать реакции.
+    template: "{Имя}. Что вы у него взяли?"
+    needs: [3–5 предшественников по инструменту или стилю]
+    placement: late
+    themes: [roots, craft]
+    evidence: {iverson-carter-2007: [25, 26, 28, 30]}
+    notes: Серия из 3–5 имён в быстром темпе. В письменном чате работает как блиц.
+
+  - id: C5
+    name: Портрет партнёра
+    family: C
+    goal: Через другого человека увидеть музыку героя.
+    template: "Каким {партнёр} был вне сцены? Что он давал музыке, чего не дал бы никто другой?"
+    needs: [постоянные партнёры и составы]
+    placement: middle
+    themes: [craft, deep_experience]
+    evidence:
+      iverson-threadgill-2016: [15, 17, 18, 19, 20, 21, 22, 23, 40, 49, 50]
+      iverson-carter-2007: [12, 13]
+      panken-smith-1978: [32, 54]
+    notes: С ушедшими партнёрами переходит в E3.
+
+  - id: C6
+    name: Мастерская
+    family: C
+    goal: Увидеть рабочий день и путь вещи от наброска до записи.
+    template: "Как выглядит ваш рабочий день, когда вы пишете? Сколько вариантов вещь проходит до конца?"
+    needs: []
+    placement: middle
+    themes: [craft]
+    evidence:
+      parisreview-murakami-2004: [36, 37, 38, 39, 75]
+      iverson-threadgill-2016: [29, 30, 31]
+    notes: ""
+
+  - id: C7
+    name: Первый слушатель
+    family: C
+    goal: Узнать, кому герой доверяет незаконченное.
+    template: "Кому вы показываете вещь, пока она не готова? Чьё мнение может вас остановить?"
+    needs: []
+    placement: middle
+    themes: [craft, deep_experience]
+    evidence: {parisreview-murakami-2004: [20, 21, 22, 23]}
+    notes: ""
+
+  - id: C8
+    name: Отношения с инструментом
+    family: C
+    goal: Спросить об инструменте как о спутнике, а не о технике.
+    template: "{Инструмент} для вас близкий спутник или средство? Менялось ли это со временем?"
+    needs: [основной инструмент, смены инструментов]
+    placement: middle
+    themes: [authentic_art, deep_experience]
+    evidence:
+      toneglow-lewis-2021: [13, 14, 15]
+      iverson-threadgill-2016: [42, 47]
+    notes: ""
+
+  # D. Путь
+
+  - id: D1
+    name: Решение и его цена
+    family: D
+    goal: Найти переломный выбор и то, чем за него заплачено.
+    template: "Был момент, когда вы выбрали музыку вопреки {обстоятельство}. Чем пришлось заплатить?"
+    needs: [переломы биографии]
+    placement: middle
+    themes: [roots, deep_experience]
+    evidence:
+      parisreview-murakami-2004: [9, 10, 11, 12]
+      toneglow-railton-2023: [5]
+      panken-smith-1978: [11, 29]
+    notes: ""
+
+  - id: D2
+    name: Сомнение
+    family: D
+    goal: Дать место неуверенности, которую обычно прячут.
+    template: "Было ли чувство, что вы занимаете не своё место? Что вы с ним сделали?"
+    needs: []
+    placement: middle
+    themes: [deep_experience]
+    evidence:
+      toneglow-railton-2023: [31]
+      parisreview-murakami-2004: [12]
+    notes: Задавать после того, как разговор набрал доверие.
+
+  - id: D3
+    name: Одиночка или часть круга
+    family: D
+    goal: Понять, с кем герой сверяет свою работу.
+    template: "Есть ли круг, с которым вы сверяете свою работу, или вы держитесь в стороне? Почему?"
+    needs: [объединения, школы, сцены]
+    placement: middle
+    themes: [roots]
+    evidence:
+      parisreview-murakami-2004: [16, 17, 18, 19, 24]
+      toneglow-lewis-2021: [7, 10]
+      toneglow-railton-2023: [14]
+      panken-smith-1978: [26, 50]
+    notes: ""
+
+  - id: D4
+    name: Критика и непонимание
+    family: D
+    goal: Услышать ответ герою, которого не поняли.
+    template: "Что о вашей музыке писали неверно? Что вы ответили бы тогда и что ответите сейчас?"
+    needs: [рецензии, особенно резкие]
+    placement: middle
+    themes: [authentic_art]
+    evidence:
+      panken-smith-1978: [20, 21, 22]
+      toneglow-railton-2023: [6]
+      parisreview-murakami-2004: [27]
+    notes: ""
+
+  - id: D5
+    name: Ярлык
+    family: D
+    goal: Проверить, согласен ли герой с тем, как его называют.
+    template: "Вас называют {ярлык из прессы}. Вы с этим согласны?"
+    needs: [ярлыки из прессы с источником]
+    placement: middle
+    themes: [authentic_art]
+    evidence:
+      toneglow-railton-2023: [7]
+      parisreview-murakami-2004: [55, 73]
+      toneglow-lewis-2021: [8]
+    notes: ""
+
+  # E. Смысл и переживание
+
+  - id: E1
+    name: Сквозной мотив
+    family: E
+    goal: Предъявить гипотезу о том, что проходит через всё творчество.
+    template: "Мне кажется, через все ваши работы проходит {мотив}. Вы это видите так же?"
+    needs: [гипотеза о мотиве, выведенная из досье]
+    placement: late
+    themes: [authentic_art, deep_experience]
+    evidence: {parisreview-murakami-2004: [46, 47, 48, 49, 50]}
+    notes: Мотив выводит интервьюер, поэтому его надо предъявлять как гипотезу, а не как факт.
+
+  - id: E2
+    name: Тело и звук
+    family: E
+    goal: Спросить, где музыка живёт физически.
+    template: "Что происходит с телом, когда музыка получается? Где вы это чувствуете?"
+    needs: []
+    placement: middle
+    themes: [deep_experience]
+    evidence:
+      toneglow-railton-2023: [17, 30]
+      parisreview-murakami-2004: [38]
+    notes: ""
+
+  - id: E3
+    name: Утрата и память
+    family: E
+    goal: Дать говорить об ушедших так, чтобы это было про музыку и благодарность.
+    template: "{Имя}: что от него осталось в вашей игре?"
+    needs: [ушедшие партнёры или учителя, о которых герой говорил публично]
+    placement: late
+    themes: [deep_experience]
+    evidence:
+      toneglow-railton-2023: [23, 24]
+      iverson-carter-2007: [12]
+    notes: Только если утрата публична или герой сам её упомянул. Частное не вскрывать.
+
+  - id: E4
+    name: Что вы чувствовали тогда
+    family: E
+    goal: Вернуть героя в конкретный день.
+    template: "Что вы чувствовали в день, когда записывали {запись}?"
+    needs: [дата и обстоятельства записи]
+    placement: middle
+    themes: [deep_experience]
+    evidence:
+      iverson-carter-2007: [15]
+      toneglow-railton-2023: [18]
+    notes: ""
+
+  - id: E5
+    name: Что выдержит время
+    family: E
+    goal: Разговор о ценности без оценочных слов.
+    template: "Что из того, что сейчас хвалят, через тридцать лет будет звучать так же? А что нет?"
+    needs: []
+    placement: late
+    themes: [authentic_art, neuro_era]
+    evidence:
+      iverson-threadgill-2016: [12]
+      panken-smith-1978: [19]
+    notes: Подходит как мост к блоку о нейроискусстве.
+
+  - id: E6
+    name: Искусство и общество
+    family: E
+    goal: Увидеть, какие условия вокруг сделали музыку возможной.
+    template: "Что должно было случиться вокруг, чтобы эта музыка вообще могла появиться?"
+    needs: [исторический контекст сцены]
+    placement: middle
+    themes: [authentic_art]
+    evidence:
+      toneglow-lewis-2021: [4, 7, 8]
+      panken-smith-1978: [19, 26, 36]
+    notes: ""
+
+  - id: E7
+    name: Соседнее искусство как линза
+    family: E
+    goal: Посмотреть на музыку через танец, кино, литературу, живопись.
+    template: "Что в {танце, кино, литературе} научило вас музыке больше, чем сама музыка?"
+    needs: [связи героя с другими искусствами]
+    placement: middle
+    themes: [authentic_art]
+    evidence:
+      iverson-threadgill-2016: [10, 11, 39]
+      toneglow-railton-2023: [1, 2, 17, 28, 29]
+      parisreview-murakami-2004: [62, 63, 64, 77, 78]
+      panken-smith-1978: [15]
+    notes: ""
+
+  # F. Человек и машина
+
+  - id: F1
+    name: Чего не умеет машина
+    family: F
+    goal: Спросить о подлинности через границу между человеком и машиной.
+    template: "Что в вашем ремесле нельзя подделать?"
+    needs: []
+    placement: late
+    themes: [neuro_era, authentic_art]
+    evidence: {toneglow-lewis-2021: [17, 18, 20, 21]}
+    notes: >
+      В пилоте единственный пример, и это особый случай: Джордж Льюис сам написал
+      программу-импровизатора Voyager. Вопросы о машинах стоят в последней трети (реплики 15–23 из 24)
+      и не содержат оценочных слов. Это довод в пользу нейтральной формулировки,
+      но один пример не доказательство. Решение за редактором.
+
+  - id: F2
+    name: Опыт работы с машиной
+    family: F
+    goal: Узнать, что герой сам пробовал и что это показало ему о себе.
+    template: "Вы когда-нибудь работали с машиной как с партнёром? Что она показала вам о вас самом?"
+    needs: [электроника, программы, эксперименты героя, если есть]
+    placement: late
+    themes: [neuro_era]
+    evidence: {toneglow-lewis-2021: [15, 16, 19, 22, 23]}
+    notes: Если опыта нет, приём пропускается.
+
+  # G. Разговорные ходы
+
+  - id: G1
+    name: Старая цитата
+    family: G
+    goal: Проверить, изменился ли взгляд, и уйти от заготовленного ответа.
+    template: "В {год} вы сказали {пересказ}. Вы и сейчас так думаете?"
+    needs: [цитата с источником и годом]
+    placement: middle
+    themes: []
+    evidence:
+      toneglow-railton-2023: [6, 7, 9]
+      panken-smith-1978: [7, 20]
+      parisreview-murakami-2004: [58]
+    notes: Цитата только из досье с источником. По памяти нейросеть не цитирует.
+
+  - id: G2
+    name: Возврат к сказанному
+    family: G
+    goal: Связать новую тему с тем, что герой сказал раньше в этом же разговоре.
+    template: "Вы сказали раньше, что {пересказ}. Как это связано с {новая тема}?"
+    needs: []
+    placement: any
+    themes: []
+    evidence:
+      iverson-threadgill-2016: [13]
+      parisreview-murakami-2004: [65, 73]
+      toneglow-railton-2023: [25, 30, 34]
+      toneglow-lewis-2021: [17, 21, 22]
+      panken-smith-1978: [12, 16]
+    notes: ""
+
+  - id: G3
+    name: Своё наблюдение как приглашение
+    family: G
+    goal: Высказать конкретное наблюдение и дать герою согласиться или поправить.
+    template: "Мне слышится, что {наблюдение}. Вы бы так сказали?"
+    needs: [наблюдение из рецензий или разбора записи]
+    placement: any
+    themes: []
+    evidence:
+      iverson-carter-2007: [3, 6, 7, 8, 12, 14, 27]
+      iverson-threadgill-2016: [5, 10, 11, 14, 17, 20, 23, 32, 39, 51]
+      toneglow-railton-2023: [22, 28]
+      parisreview-murakami-2004: [31, 40, 43, 46, 72]
+      panken-smith-1978: [13, 14, 45, 50, 57, 60]
+    notes: >
+      Главный ход Айверсона. У него наблюдения часто звучат как восхищение;
+      в ТЗ комплименты запрещены, поэтому нейросеть формулирует наблюдение, а не похвалу.
+
+  - id: G4
+    name: Несогласие
+    family: G
+    goal: Уважительно возразить, чтобы получить ответ глубже первого.
+    template: "Но ведь {контрпример}. Как это сочетается с тем, что вы сказали?"
+    needs: []
+    placement: middle
+    themes: []
+    evidence:
+      parisreview-murakami-2004: [32, 34, 69]
+      iverson-threadgill-2016: [12]
+      toneglow-railton-2023: [7]
+      panken-smith-1978: [31]
+      toneglow-lewis-2021: [8, 20]
+    notes: Не чаще 2–3 раз за интервью.
+
+  - id: G5
+    name: Мысленный эксперимент
+    family: G
+    goal: Вывести героя из привычных формулировок.
+    template: "Представим, что {ситуация}. Что бы вы сделали?"
+    needs: []
+    placement: middle
+    themes: []
+    evidence:
+      iverson-carter-2007: [18]
+      toneglow-lewis-2021: [4]
+      parisreview-murakami-2004: [33, 70]
+      panken-smith-1978: [22]
+    notes: ""
+
+  - id: G6
+    name: Слова третьего лица
+    family: G
+    goal: Предъявить чужое мнение о герое и дать ответить на него.
+    template: "{Коллега или критик} говорил о вас, что {пересказ}. Это точно?"
+    needs: [высказывания коллег и критиков с источником]
+    placement: middle
+    themes: []
+    evidence:
+      iverson-carter-2007: [19]
+      iverson-threadgill-2016: [18]
+      parisreview-murakami-2004: [55, 69]
+      panken-smith-1978: [7, 25, 27, 41]
+      toneglow-railton-2023: [27]
+    notes: ""
+
+  - id: G7
+    name: Короткое уточнение
+    family: G
+    goal: Не дать ответу остаться общим.
+    template: "Что вы имеете в виду? Можно пример?"
+    needs: []
+    placement: any
+    themes: []
+    evidence:
+      iverson-threadgill-2016: [34]
+      toneglow-railton-2023: [11, 15]
+      parisreview-murakami-2004: [41]
+    notes: ""
+
+  - id: G8
+    name: Пересказ для проверки
+    family: G
+    goal: Убедиться, что смысл понят верно, пока герой рядом.
+    template: "То есть {пересказ}. Я правильно понял?"
+    needs: []
+    placement: any
+    themes: []
+    evidence:
+      parisreview-murakami-2004: [3, 49, 61]
+      toneglow-railton-2023: [3]
+      panken-smith-1978: [12]
+    notes: Снижает риск исказить смысл при редактуре.
+
+  # H. Финал
+
+  - id: H1
+    name: Незавершённое
+    family: H
+    goal: Закончить взглядом вперёд.
+    template: "Что из задуманного ещё не сделано? Что лежит в столе?"
+    needs: []
+    placement: end
+    themes: []
+    evidence:
+      toneglow-lewis-2021: [23]
+      iverson-threadgill-2016: [45, 46]
+    notes: ""
+
+  - id: H2
+    name: О чём я не спросил
+    family: H
+    goal: Дать герою сказать то, до чего вопросы не дошли.
+    template: "О чём я не спросил, а стоило?"
+    needs: []
+    placement: end
+    themes: []
+    evidence:
+      toneglow-railton-2023: [32]
+      toneglow-lewis-2021: [24]
+    notes: ""
+
+  - id: H3
+    name: Постоянный финальный вопрос рубрики
+    family: H
+    goal: "Сделать рубрику узнаваемой: один и тот же последний вопрос всем героям."
+    template: "{формулировку выбирает редактор}"
+    needs: []
+    placement: end
+    themes: []
+    evidence: {toneglow-railton-2023: [33]}
+    notes: У Tone Glow такой вопрос есть; для Джазеты формулировку выбирает редактор.
