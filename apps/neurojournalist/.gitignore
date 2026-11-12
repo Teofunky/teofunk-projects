@@ -1,0 +1,5 @@
+# личные ответы героев интервью
+pilot/*/sessions/
+# виртуальное окружение Python
+engine/.venv/
+__pycache__/
