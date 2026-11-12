@@ -3,7 +3,7 @@
  * Plugin Name:       Kozlov Perf
  * Plugin URI:        https://kozlovclub.ru/
  * Description:       Изолированные оптимизации загрузки: нативная ленивая загрузка вместо a3 Lazy Load, превью нужного размера для retina (srcset только из лёгких вариантов с WebP), уборка неиспользуемых скриптов (FancyBox, YouTube Embed Plus, emoji), preconnect, дедупликация тегов. Не меняет тему, данные и другие плагины. Отключается галочкой в настройках, параметром ?kperf=off или деактивацией.
- * Version:           1.2.0
+ * Version:           1.2.1
  * Author:            Kozlov Club
  * Requires at least: 6.3
  * Requires PHP:      7.4
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class Kozlov_Perf {
 
 	const OPTION  = 'kozlov_perf_options';
-	const VERSION = '1.2.0';
+	const VERSION = '1.2.1';
 
 	/**
 	 * sizes для карточек афиши главной (size-category-thumb2): ширина картинки в теме KozlovCLub по замеру
@@ -207,6 +207,10 @@ final class Kozlov_Perf {
 		// Обработка готового HTML. Приоритет большой, чтобы наш буфер был внутренним относительно кеш-плагинов:
 		// тогда кеш сохраняет уже оптимизированную страницу.
 		add_action( 'template_redirect', array( $this, 'maybe_buffer' ), 9999 );
+		// Второй, ранний буфер (приоритет 0 = снаружи плагинов, которые собирают страницу в своём буфере,
+		// например Kozlov Event Page с приоритетом 1). Он видит их разметку и дописывает srcset превью,
+		// которые основной буфер не видел. Внешний буфер WebP Express (init, 1) работает ещё позже.
+		add_action( 'template_redirect', array( $this, 'maybe_buffer_late' ), 0 );
 	}
 
 	public function drop_emoji_prefetch( $urls, $relation ) {
@@ -333,17 +337,71 @@ final class Kozlov_Perf {
 	/* Буфер вывода                                                        */
 	/* ------------------------------------------------------------------ */
 
-	public function maybe_buffer() {
+	private function can_buffer() {
 		if ( ! $this->active() ) {
-			return;
+			return false;
 		}
 		if ( is_admin() || is_feed() || is_embed() || is_robots() || is_trackback() || is_preview() || is_customize_preview() ) {
-			return;
+			return false;
 		}
 		if ( ( defined( 'DOING_AJAX' ) && DOING_AJAX ) || ( defined( 'DOING_CRON' ) && DOING_CRON ) || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) || ( defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST ) ) {
-			return;
+			return false;
 		}
 		if ( isset( $_SERVER['REQUEST_METHOD'] ) && 'GET' !== strtoupper( (string) $_SERVER['REQUEST_METHOD'] ) ) {
+			return false;
+		}
+		return true;
+	}
+
+	public function maybe_buffer_late() {
+		if ( $this->can_buffer() && 'cap' === $this->opt( 'srcset_mode' ) && $this->opt( 'srcset_fill' ) ) {
+			ob_start( array( $this, 'process_late' ) );
+		}
+	}
+
+	/** Ранний буфер: только srcset превью, которые основной проход не видел (у них нет метки data-kperf). */
+	public function process_late( $html ) {
+		try {
+			if ( ! $this->html_page( $html ) ) {
+				return $html;
+			}
+			$t0 = microtime( true );
+			foreach ( array( 'srcset_capped', 'srcset_dropped', 'srcset_filled' ) as $k ) {
+				$this->stats[ $k ] = 0;
+			}
+			$out = $this->step( $html, 'srcset_only' );
+			$sum = array();
+			foreach ( array( 'srcset_capped', 'srcset_dropped', 'srcset_filled' ) as $k ) {
+				if ( ! empty( $this->stats[ $k ] ) ) {
+					$sum[] = $k . '=' . $this->stats[ $k ];
+				}
+			}
+			if ( ! $sum ) {
+				return $out;
+			}
+			$comment = "\n<!-- Kozlov Perf " . self::VERSION . ' late: ' . round( ( microtime( true ) - $t0 ) * 1000, 1 ) . 'ms; ' . implode( '; ', $sum ) . " -->\n";
+			$pos     = strripos( $out, '</body>' );
+			return ( false !== $pos ) ? substr_replace( $out, $comment, $pos, 0 ) : $out . $comment;
+		} catch ( \Throwable $e ) {
+			return $html;
+		}
+	}
+
+	/** Полная HTML-страница (не JSON, не кусок буфера). */
+	private function html_page( $html ) {
+		if ( ! is_string( $html ) || strlen( $html ) < 512 || false === stripos( $html, '</html' ) ) {
+			return false;
+		}
+		foreach ( headers_list() as $h ) {
+			if ( 0 === stripos( $h, 'content-type:' ) && false === stripos( $h, 'text/html' ) ) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public function maybe_buffer() {
+		if ( ! $this->can_buffer() ) {
 			return;
 		}
 		if ( ! $this->opt( 'native_lazy' ) && ! $this->srcset_on() && ! $this->opt( 'strip_unused' ) && ! $this->opt( 'dedupe' ) && ! $this->opt( 'mobile_zoom' ) && ! $this->patterns( 'dequeue_patterns' ) ) {
@@ -453,6 +511,10 @@ final class Kozlov_Perf {
 		$this->stats['srcset_dropped'] = 0;
 		$this->stats['srcset_filled']  = 0;
 
+		if ( $this->srcset_on() ) {
+			$html = $this->step( $html, 'pictures' );
+		}
+
 		$res = $this->outside(
 			$html,
 			array( 'comment', 'script', 'noscript', 'style', 'template', 'textarea' ),
@@ -507,6 +569,9 @@ final class Kozlov_Perf {
 		if ( null === $res ) {
 			return $html;
 		}
+		if ( $this->srcset_on() ) {
+			$res = $this->step( $res, 'sync_sources' );
+		}
 		if ( $lazy ) {
 			$this->stats['img_total']   = $count;
 			$this->stats['img_lazy']    = $lazied;
@@ -560,6 +625,164 @@ final class Kozlov_Perf {
 		return null;
 	}
 
+	/** Ранний проход: srcset у превью без метки data-kperf (их разметку собрали плагины снаружи основного буфера). */
+	private function srcset_only( $html ) {
+		$self = $this;
+		$res  = $this->outside(
+			$html,
+			array( 'comment', 'script', 'noscript', 'style', 'template', 'textarea' ),
+			function ( $part ) use ( $self ) {
+				return preg_replace_callback(
+					'/<picture\b' . Kozlov_Perf::ATTRS . '>.*?<\/picture\s*>|<img\b' . Kozlov_Perf::ATTRS . '>/is',
+					function ( $m ) use ( $self ) {
+						$x = $m[0];
+						if ( false !== strpos( $x, 'data-kperf' ) || ! preg_match( '/-\d{2,4}x\d{2,4}\.(?:jpe?g|png|gif|webp)/i', $x ) ) {
+							return $x; // уже обработано основным проходом или не превью
+						}
+						if ( 0 === stripos( $x, '<picture' ) ) {
+							return $self->picture_sync( $self->picture_srcset( $x ) );
+						}
+						return $self->sizes_auto( $self->thumb_srcset( $x ) );
+					},
+					$part
+				);
+			}
+		);
+		return null === $res ? $html : $res;
+	}
+
+	/** Все <picture> страницы (вне script, noscript, style, template, textarea, комментариев). */
+	private function each_picture( $html, $method ) {
+		$self = $this;
+		return $this->outside(
+			$html,
+			array( 'comment', 'script', 'noscript', 'style', 'template', 'textarea' ),
+			function ( $part ) use ( $self, $method ) {
+				return preg_replace_callback(
+					'/<picture\b' . Kozlov_Perf::ATTRS . '>.*?<\/picture\s*>/is',
+					function ( $m ) use ( $self, $method ) {
+						return $self->$method( $m[0] );
+					},
+					$part
+				);
+			}
+		);
+	}
+
+	private function pictures( $html ) {
+		return $this->each_picture( $html, 'picture_srcset' );
+	}
+
+	private function sync_sources( $html ) {
+		return $this->each_picture( $html, 'picture_sync' );
+	}
+
+	/**
+	 * <picture>, который внутренний буфер WebP Express собрал раньше нас (template_redirect, 10000): в <source>
+	 * полный srcset WordPress в WebP, браузер берёт его. Ограничиваем список и в <source>, и в <img>.
+	 * Варианты берутся из самого <source> (WebP Express пишет туда «адрес.webp» и уже проверил, что такие файлы
+	 * есть), поэтому диск не трогаем. Другой формат WebP: <picture> не трогаем.
+	 */
+	public function picture_srcset( $pic ) {
+		try {
+			if ( ! preg_match( '/<img\b' . self::ATTRS . '>/i', $pic, $im ) ) {
+				return $pic;
+			}
+			$img  = $im[0];
+			$mode = (string) $this->opt( 'srcset_mode' );
+			if ( 'keep' === $mode || false !== strpos( $img, 'data-kperf' ) ) {
+				return $pic;
+			}
+			$src = $this->attr( $img, 'src' );
+			if ( null === $src || ! $this->thumb_dims( $src ) || null === $this->upload_rel( $src ) || ! preg_match_all( '/<source\b' . self::ATTRS . '>/i', $pic, $sm ) ) {
+				return $pic;
+			}
+			$sources = array();
+			$hay     = '';
+			foreach ( $sm[0] as $s ) {
+				$set = $this->attr( $s, 'srcset' );
+				if ( null !== $set && 'image/webp' === strtolower( trim( (string) $this->attr( $s, 'type' ) ) ) ) {
+					$sources[] = $s;
+					$hay      .= ' ' . $set . ' ,';
+				}
+			}
+			$has = function ( $url ) use ( $hay ) {
+				return false !== strpos( $hay, ' ' . $url . '.webp ' ) || false !== strpos( $hay, ', ' . $url . '.webp ' );
+			};
+			if ( ! $sources || ! $has( $src ) ) {
+				return $pic; // нет WebP превью в формате «адрес.webp»: обычная потеговая обработка
+			}
+			$self   = $this;
+			$srcset = $this->attr( $img, 'srcset' );
+			$filled = false;
+			if ( null !== $srcset && '' !== trim( $srcset ) ) {
+				$list = ( 'cap' === $mode ) ? $this->pick( $this->parse_srcset( $srcset ), $src, $has ) : null;
+			} elseif ( 'cap' === $mode && $this->opt( 'srcset_fill' ) ) {
+				// Превью без srcset в <picture> с одним WebP: варианты по вложению, их WebP проверяем на диске.
+				$list   = $this->fill_list(
+					$src,
+					function ( $url ) use ( $self, $has ) {
+						return $has( $url ) || $self->has_webp( $url );
+					}
+				);
+				$filled = true;
+				if ( null === $list ) {
+					return $pic;
+				}
+			} else {
+				return $pic;
+			}
+
+			if ( null === $list ) {
+				// Как в 1.1.0: только превью и в <img>, и в <source>.
+				$out = $this->replace_once( $pic, $img, $this->drop_attr( $this->drop_attr( $img, 'srcset' ), 'sizes' ) );
+				foreach ( $sources as $s ) {
+					$out = $this->replace_once( $out, $s, $this->drop_attr( $this->set_attr( $s, 'srcset', $src . '.webp' ), 'sizes' ) );
+				}
+				$this->stats['srcset_dropped']++;
+				return $out;
+			}
+
+			$new_img = $this->apply_srcset( $img, $list, $src );
+			$parts   = array();
+			foreach ( $list as $e ) {
+				$parts[] = $e['url'] . '.webp ' . $e['w'] . 'w';
+			}
+			$set_webp = implode( ', ', $parts );
+			$sizes    = (string) $this->attr( $new_img, 'sizes' );
+			$out      = $this->replace_once( $pic, $img, $new_img );
+			foreach ( $sources as $s ) {
+				$out = $this->replace_once( $out, $s, $this->set_attr( $this->set_attr( $s, 'srcset', $set_webp ), 'sizes', $sizes ) );
+			}
+			$this->stats[ $filled ? 'srcset_filled' : 'srcset_capped' ]++;
+			return $out;
+		} catch ( \Throwable $e ) {
+			return $pic;
+		}
+	}
+
+	/** После ленивой загрузки у <img> мог появиться sizes="auto, …": WebP-источник получает тот же sizes. */
+	public function picture_sync( $pic ) {
+		if ( false === strpos( $pic, 'data-kperf' ) || ! preg_match( '/<img\b' . self::ATTRS . '>/i', $pic, $im ) || 'srcset' !== $this->attr( $im[0], 'data-kperf' ) ) {
+			return $pic;
+		}
+		$sizes = $this->attr( $im[0], 'sizes' );
+		if ( null === $sizes || ! preg_match_all( '/<source\b' . self::ATTRS . '>/i', $pic, $sm ) ) {
+			return $pic;
+		}
+		foreach ( $sm[0] as $s ) {
+			if ( 'image/webp' === strtolower( trim( (string) $this->attr( $s, 'type' ) ) ) && $this->attr( $s, 'sizes' ) !== $sizes ) {
+				$pic = $this->replace_once( $pic, $s, $this->set_attr( $s, 'sizes', $sizes ) );
+			}
+		}
+		return $pic;
+	}
+
+	private function replace_once( $hay, $from, $to ) {
+		$pos = strpos( $hay, $from );
+		return false === $pos ? $hay : substr_replace( $hay, $to, $pos, strlen( $from ) );
+	}
+
 	/**
 	 * Превью (src вида …-450x338.jpg) получает srcset нужного размера.
 	 *
@@ -571,8 +794,11 @@ final class Kozlov_Perf {
 	 */
 	public function thumb_srcset( $tag ) {
 		try {
+			if ( false !== strpos( $tag, 'data-kperf' ) || ! preg_match( '/-\d{2,4}x\d{2,4}\./', $tag ) ) {
+				return $tag;
+			}
 			$src = $this->attr( $tag, 'src' );
-			if ( null === $src || '' === $src || ! $this->thumb_dims( $src ) ) {
+			if ( null === $src || '' === $src || ! $this->thumb_dims( $src ) || null !== $this->attr( $tag, 'data-kperf' ) ) {
 				return $tag;
 			}
 			$mode   = (string) $this->opt( 'srcset_mode' );
@@ -645,7 +871,7 @@ final class Kozlov_Perf {
 	 * фактической ширине картинки, остальные пропускают auto и читают список дальше.
 	 */
 	public function sizes_auto( $tag ) {
-		if ( 'srcset' !== $this->attr( $tag, 'data-kperf' ) || ! preg_match( '/\sloading\s*=\s*(["\'])lazy\1/i', $tag ) ) {
+		if ( false === strpos( $tag, 'data-kperf' ) || 'srcset' !== $this->attr( $tag, 'data-kperf' ) || ! preg_match( '/\sloading\s*=\s*(["\'])lazy\1/i', $tag ) ) {
 			return $tag;
 		}
 		$sizes = (string) $this->attr( $tag, 'sizes' );
@@ -681,55 +907,70 @@ final class Kozlov_Perf {
 	 *
 	 * @return array|null Список по возрастанию ширины или null, если вариантов меньше двух.
 	 */
-	private function pick( $list, $src ) {
+	private function pick( $list, $src, $avail = null ) {
 		if ( ! is_array( $list ) ) {
 			return null;
 		}
+		$self = $this;
+		if ( null === $avail ) {
+			$avail = $this->opt( 'srcset_webp' )
+				? function ( $url ) use ( $self ) {
+					return $self->has_webp( $url );
+				}
+				: function () {
+					return true;
+				};
+		}
 		$max     = max( 450, (int) $this->opt( 'srcset_max' ) );
-		$webp    = (bool) $this->opt( 'srcset_webp' );
 		$dims    = $this->thumb_dims( $src );
 		$src_rel = $this->upload_rel( $src );
 		// WebP Express собирает <picture> только если WebP есть для всех вариантов. Нет WebP у самого превью:
 		// <picture> не будет, и браузер взял бы большой JPEG/PNG. Тогда, как в 1.1.0, только превью.
-		if ( null === $src_rel || ( $webp && ! $this->has_webp( $src ) ) ) {
+		if ( null === $src_rel || ! $avail( $src ) ) {
 			return null;
 		}
-		$keep = array();
+		$src_w = (int) $dims[0];
+		$cand  = array();
 		foreach ( $list as $e ) {
-			$rel    = $this->upload_rel( $e['url'] );
-			$is_src = ( $rel === $src_rel );
-			if ( $is_src || null === $rel || isset( $keep[ $rel ] ) || $e['w'] > $max || ( $webp && ! $this->has_webp( $e['url'] ) ) ) {
+			$rel = $this->upload_rel( $e['url'] );
+			if ( null === $rel ) {
 				continue;
 			}
-			$e['src']     = false;
-			$keep[ $rel ] = $e;
-		}
-		$src_w = (int) $dims[0];
-		foreach ( $list as $e ) {
-			if ( $this->upload_rel( $e['url'] ) === $src_rel ) {
+			if ( $rel === $src_rel ) {
 				$src_w = (int) $e['w'];
-				break;
+				continue;
 			}
+			if ( $e['w'] > $max || isset( $cand[ $rel ] ) ) {
+				continue;
+			}
+			$cand[ $rel ] = array(
+				'url' => $e['url'],
+				'w'   => (int) $e['w'],
+				'src' => false,
+			);
 		}
-		$keep[ $src_rel ] = array(
+		$cand[ $src_rel ] = array(
 			'url' => $src,
 			'w'   => $src_w,
 			'src' => true,
 		);
-		$keep = array_values( $keep );
+		$cand = array_values( $cand );
 		usort(
-			$keep,
+			$cand,
 			function ( $a, $b ) {
-				return $b['w'] - $a['w'];
+				return ( $b['w'] - $a['w'] ) ?: ( (int) $b['src'] - (int) $a['src'] );
 			}
 		);
+		// От широкого к узкому: почти одинаковый по ширине (меньше 10 %) пропускаем, WebP проверяем только у
+		// тех, кто иначе попал бы в список (каждая проверка это обращение к диску).
 		$out  = array();
 		$last = 0;
-		foreach ( $keep as $e ) {
-			if ( $e['src'] || ! $last || $e['w'] < 0.9 * $last ) {
-				$out[] = $e;
-				$last  = $e['w'];
+		foreach ( $cand as $e ) {
+			if ( ! $e['src'] && ( ( $last && $e['w'] >= 0.9 * $last ) || ! $avail( $e['url'] ) ) ) {
+				continue;
 			}
+			$out[] = $e;
+			$last  = $e['w'];
 		}
 		if ( count( $out ) < 2 ) {
 			return null;
@@ -738,7 +979,7 @@ final class Kozlov_Perf {
 	}
 
 	/** Варианты для превью без srcset: через вложение WordPress, которому принадлежит файл. */
-	private function fill_list( $src ) {
+	private function fill_list( $src, $avail = null ) {
 		$id = $this->attachment_for( $src );
 		if ( ! $id ) {
 			return null;
@@ -752,7 +993,7 @@ final class Kozlov_Perf {
 		if ( ! is_string( $srcset ) || '' === $srcset ) {
 			return null;
 		}
-		return $this->pick( $this->parse_srcset( $srcset ), $src );
+		return $this->pick( $this->parse_srcset( $srcset ), $src, $avail );
 	}
 
 	/** ID вложения по адресу превью (…-300x225.jpg → оригинал). Результат кешируется, запросов не больше FILL_LIMIT за страницу. */
@@ -811,8 +1052,16 @@ final class Kozlov_Perf {
 		if ( array_key_exists( $k, $this->memo ) ) {
 			return $this->memo[ $k ];
 		}
-		$up  = $this->uploads();
-		$u   = preg_replace( '/[?#].*$/', '', html_entity_decode( (string) $url, ENT_QUOTES, 'UTF-8' ) );
+		$up = $this->uploads();
+		$u  = (string) $url;
+		// Быстрый путь: обычный абсолютный адрес из uploads без параметров и сущностей.
+		if ( 0 === strpos( $u, $up['abs'] ) && false === strpbrk( $u, '?#&%' ) ) {
+			$rel = substr( $u, strlen( $up['abs'] ) );
+			if ( '' !== $rel && false === strpos( $rel, '..' ) && false === strpos( $rel, "\0" ) ) {
+				return $this->memo[ $k ] = $rel;
+			}
+		}
+		$u   = preg_replace( '/[?#].*$/', '', html_entity_decode( $u, ENT_QUOTES, 'UTF-8' ) );
 		$u   = preg_replace( '#^https?:#i', '', $u );
 		$rel = null;
 		if ( '/' !== $up['host'] && 0 === stripos( $u, $up['host'] ) ) {
