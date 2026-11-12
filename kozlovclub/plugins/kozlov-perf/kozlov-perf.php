@@ -3,7 +3,7 @@
  * Plugin Name:       Kozlov Perf
  * Plugin URI:        https://kozlovclub.ru/
  * Description:       Изолированные оптимизации загрузки: нативная ленивая загрузка вместо a3 Lazy Load, превью нужного размера для retina (srcset только из лёгких вариантов с WebP), уборка неиспользуемых скриптов (FancyBox, YouTube Embed Plus, emoji), preconnect, дедупликация тегов. Не меняет тему, данные и другие плагины. Отключается галочкой в настройках, параметром ?kperf=off или деактивацией.
- * Version:           1.2.1
+ * Version:           1.2.2
  * Author:            Kozlov Club
  * Requires at least: 6.3
  * Requires PHP:      7.4
@@ -18,7 +18,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class Kozlov_Perf {
 
 	const OPTION  = 'kozlov_perf_options';
-	const VERSION = '1.2.1';
+	const VERSION = '1.2.2';
+
+	/**
+	 * Опция-кеш вариантов для превью без srcset: адрес превью → вложение и srcset WordPress. Поиск вложения по
+	 * адресу файла на Beget стоит 60–70 мс, а кеш объектов (Redis в W3TC) попаданий не даёт, поэтому кеш свой.
+	 * Не автозагружается, читается одним запросом только на странице, где есть такие превью.
+	 */
+	const FILL_OPTION = 'kozlov_perf_fill_cache';
 
 	/**
 	 * sizes для карточек афиши главной (size-category-thumb2): ширина картинки в теме KozlovCLub по замеру
@@ -370,11 +377,15 @@ final class Kozlov_Perf {
 				$this->stats[ $k ] = 0;
 			}
 			$out = $this->step( $html, 'srcset_only' );
+			$this->fill_cache_save();
 			$sum = array();
 			foreach ( array( 'srcset_capped', 'srcset_dropped', 'srcset_filled' ) as $k ) {
 				if ( ! empty( $this->stats[ $k ] ) ) {
 					$sum[] = $k . '=' . $this->stats[ $k ];
 				}
+			}
+			if ( $sum && $this->lookups ) {
+				$sum[] = 'db_lookups=' . $this->lookups;
 			}
 			if ( ! $sum ) {
 				return $out;
@@ -445,6 +456,10 @@ final class Kozlov_Perf {
 				$out = $this->step( $out, 'viewport' );
 			}
 
+			$this->fill_cache_save();
+			if ( $this->lookups ) {
+				$this->stats['db_lookups'] = $this->lookups;
+			}
 			$ms  = round( ( microtime( true ) - $t0 ) * 1000, 1 );
 			$sum = array();
 			foreach ( $this->stats as $k => $v ) {
@@ -980,20 +995,75 @@ final class Kozlov_Perf {
 
 	/** Варианты для превью без srcset: через вложение WordPress, которому принадлежит файл. */
 	private function fill_list( $src, $avail = null ) {
-		$id = $this->attachment_for( $src );
-		if ( ! $id ) {
-			return null;
-		}
-		$meta = wp_get_attachment_metadata( $id );
-		$dims = $this->thumb_dims( $src );
-		if ( ! is_array( $meta ) || ! $dims || ! function_exists( 'wp_calculate_image_srcset' ) ) {
-			return null;
-		}
-		$srcset = wp_calculate_image_srcset( $dims, $src, $meta, $id );
-		if ( ! is_string( $srcset ) || '' === $srcset ) {
+		$srcset = $this->fill_srcset( $src );
+		if ( '' === $srcset ) {
 			return null;
 		}
 		return $this->pick( $this->parse_srcset( $srcset ), $src, $avail );
+	}
+
+	/** srcset WordPress для превью без srcset: из своего кеша или по вложению (с записью в кеш). '' = нет. */
+	private function fill_srcset( $src ) {
+		$key = md5( $src );
+		$hit = $this->fill_cache_get( $key );
+		// найденное хранится неделю, «не найдено» сутки (вдруг вложение загрузят)
+		if ( is_array( $hit ) && isset( $hit['t'], $hit['s'] ) && $hit['t'] > time() - ( '' !== $hit['s'] ? 7 : 1 ) * DAY_IN_SECONDS ) {
+			return (string) $hit['s'];
+		}
+		if ( $this->lookups >= self::FILL_LIMIT ) {
+			return '';
+		}
+		$srcset = '';
+		$id     = $this->attachment_for( $src );
+		if ( $id ) {
+			$meta = wp_get_attachment_metadata( $id );
+			$dims = $this->thumb_dims( $src );
+			if ( is_array( $meta ) && $dims && function_exists( 'wp_calculate_image_srcset' ) ) {
+				$calc   = wp_calculate_image_srcset( $dims, $src, $meta, $id );
+				$srcset = is_string( $calc ) ? $calc : '';
+			}
+		}
+		$this->fill_cache_set(
+			$key,
+			array(
+				's' => $srcset,
+				't' => time(),
+			)
+		);
+		return $srcset;
+	}
+
+	/** @var array|null Кеш вариантов (опция FILL_OPTION), читается при первой надобности. */
+	private $fill_cache = null;
+
+	/** @var bool В кеше вариантов есть несохранённые записи. */
+	private $fill_dirty = false;
+
+	private function fill_cache_get( $key ) {
+		if ( null === $this->fill_cache ) {
+			$c                = get_option( self::FILL_OPTION, array() );
+			$this->fill_cache = is_array( $c ) ? $c : array();
+		}
+		return isset( $this->fill_cache[ $key ] ) ? $this->fill_cache[ $key ] : null;
+	}
+
+	private function fill_cache_set( $key, $val ) {
+		if ( null === $this->fill_cache ) {
+			$this->fill_cache_get( $key );
+		}
+		if ( count( $this->fill_cache ) >= 3000 ) {
+			$this->fill_cache = array(); // не даём опции разрастись: начинаем заново
+		}
+		$this->fill_cache[ $key ] = $val;
+		$this->fill_dirty         = true;
+	}
+
+	/** Сохраняет кеш вариантов, если в нём есть новые записи (один запрос, только при промахе кеша страниц). */
+	private function fill_cache_save() {
+		if ( $this->fill_dirty && is_array( $this->fill_cache ) ) {
+			$this->fill_dirty = false;
+			update_option( self::FILL_OPTION, $this->fill_cache, false );
+		}
 	}
 
 	/** ID вложения по адресу превью (…-300x225.jpg → оригинал). Результат кешируется, запросов не больше FILL_LIMIT за страницу. */
@@ -1001,13 +1071,6 @@ final class Kozlov_Perf {
 		$key = 'att_' . md5( $src );
 		if ( isset( $this->memo[ $key ] ) ) {
 			return $this->memo[ $key ];
-		}
-		$hit = wp_cache_get( $key, 'kozlov_perf' );
-		if ( false !== $hit ) {
-			return $this->memo[ $key ] = (int) $hit;
-		}
-		if ( $this->lookups >= self::FILL_LIMIT ) {
-			return 0;
 		}
 		$this->lookups++;
 		$abs = $this->absolute_upload_url( $src );
@@ -1019,7 +1082,6 @@ final class Kozlov_Perf {
 				$id = (int) attachment_url_to_postid( preg_replace( '/(\.[a-z0-9]+)$/i', '-scaled$1', $orig ) );
 			}
 		}
-		wp_cache_set( $key, $id, 'kozlov_perf', DAY_IN_SECONDS );
 		return $this->memo[ $key ] = $id;
 	}
 
@@ -1551,6 +1613,7 @@ final class Kozlov_Perf {
 	}
 
 	public function sanitize( $in ) {
+		delete_option( self::FILL_OPTION ); // настройки поменялись: варианты соберутся заново
 		$in  = is_array( $in ) ? $in : array();
 		$out = array();
 		foreach ( array( 'enabled', 'native_lazy', 'srcset_webp', 'srcset_fill', 'strip_unused', 'emoji', 'head_cleanup', 'dedupe', 'fix_ver', 'block_css', 'mobile_zoom' ) as $k ) {
@@ -1689,4 +1752,5 @@ Kozlov_Perf::instance();
 register_uninstall_hook( __FILE__, 'kozlov_perf_uninstall' );
 function kozlov_perf_uninstall() {
 	delete_option( Kozlov_Perf::OPTION );
+	delete_option( Kozlov_Perf::FILL_OPTION );
 }
