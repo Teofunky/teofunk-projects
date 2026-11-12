@@ -28,7 +28,7 @@
 
 ## kozlov-afisha-week
 
-[1.0.0](https://github.com/Teofunky/teofunk-projects/commit/2a6c257a32220cdb66e4b96a62174323771092c1) (05.11.2026) · [1.0.1](https://github.com/Teofunky/teofunk-projects/commit/a51fbfed1dd49197fe820103ce89881a3bc3e514) (05.11.2026) · [1.0.2](https://github.com/Teofunky/teofunk-projects/commit/22ab3a6364b0fe79c5898557838dabe7684bbdeb) (05.11.2026) · [1.0.3](https://github.com/Teofunky/teofunk-projects/commit/16b40dea5b3272aa036bef89ddf4a0a1ee73ec82) (05.11.2026)
+[1.0.0](https://github.com/Teofunky/teofunk-projects/commit/2a6c257a32220cdb66e4b96a62174323771092c1) (05.11.2026) · [1.0.1](https://github.com/Teofunky/teofunk-projects/commit/a51fbfed1dd49197fe820103ce89881a3bc3e514) (05.11.2026) · [1.0.2](https://github.com/Teofunky/teofunk-projects/commit/22ab3a6364b0fe79c5898557838dabe7684bbdeb) (05.11.2026) · [1.0.3](https://github.com/Teofunky/teofunk-projects/commit/16b40dea5b3272aa036bef89ddf4a0a1ee73ec82) (05.11.2026) · [1.0.4](https://github.com/Teofunky/teofunk-projects/commit/0206ce860229f341c96cd4fb109d843a29073510) (12.11.2026)
 
 ## kozlov-artists
 
@@ -84,7 +84,7 @@
 
 ## kozlov-perf
 
-[1.0.0](https://github.com/Teofunky/teofunk-projects/commit/d246681f8a7a92e413b04e56bd03a553070ffce1) (26.10.2026) · [1.0.1](https://github.com/Teofunky/teofunk-projects/commit/c49b9012d2194d0ff8221c5c05adeb719a4e60a3) (26.10.2026) · [1.0.2](https://github.com/Teofunky/teofunk-projects/commit/bf23f9c4f33c9da062040fc477325a850caee789) (26.10.2026) · [1.1.0](https://github.com/Teofunky/teofunk-projects/commit/3f4b226fbeea913830ed5d3b79e16937d4d896dd) (27.10.2026)
+[1.0.0](https://github.com/Teofunky/teofunk-projects/commit/d246681f8a7a92e413b04e56bd03a553070ffce1) (26.10.2026) · [1.0.1](https://github.com/Teofunky/teofunk-projects/commit/c49b9012d2194d0ff8221c5c05adeb719a4e60a3) (26.10.2026) · [1.0.2](https://github.com/Teofunky/teofunk-projects/commit/bf23f9c4f33c9da062040fc477325a850caee789) (26.10.2026) · [1.1.0](https://github.com/Teofunky/teofunk-projects/commit/3f4b226fbeea913830ed5d3b79e16937d4d896dd) (27.10.2026) · [1.2.0](https://github.com/Teofunky/teofunk-projects/commit/cae80ed8173c9180c394dd8e0e28bf8bf98a2241) (12.11.2026) · [1.2.1](https://github.com/Teofunky/teofunk-projects/commit/59768438e191d2e16ee3347147545d20760783da) (12.11.2026) · [1.2.2](https://github.com/Teofunky/teofunk-projects/commit/da1c146242aeefe2c12c2e0a32fb89fa8d1f3872) (12.11.2026)
 
 ## kozlov-redirect-guard
 
