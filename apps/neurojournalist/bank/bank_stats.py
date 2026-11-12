@@ -31,6 +31,7 @@ def check(tech, src, qs):
     coded = {s["id"]: s for s in src["coded"]}
     selected = {s["id"]: s for s in src.get("selected", [])}
     formats = {s["id"]: s for s in src.get("formats", [])}
+    formats.update({s["id"]: s for s in src.get("authored", [])})
     all_ids = [*coded, *selected, *formats]
     errors += [f"повтор id источника {i}" for i, n in Counter(all_ids).items() if n > 1]
     known = set(all_ids)
@@ -67,7 +68,7 @@ def check(tech, src, qs):
                 if bad:
                     errors.append(f"{tid}: {sid} реплики вне 1..{coded[sid]['turns']}: {bad}")
             elif sid in formats and turns:
-                errors.append(f"{tid}: у формата {sid} не бывает номеров реплик")
+                errors.append(f"{tid}: у формата или авторского банка {sid} не бывает номеров реплик")
 
     qids = Counter(q["id"] for q in qs["questions"])
     errors += [f"повтор id вопроса {i}" for i, n in qids.items() if n > 1]
@@ -84,6 +85,14 @@ def check(tech, src, qs):
                 errors.append(f"{q['id']}: {q['src']} реплики вне диапазона: {bad}")
         if "—" in q.get("q", ""):
             errors.append(f"{q['id']}: длинное тире в вопросе")
+        if q.get("topic") not in qs.get("topics", {}):
+            errors.append(f"{q['id']}: неизвестный раздел {q.get('topic')}")
+        if "precondition" in q and q["precondition"] not in qs.get("preconditions", {}):
+            errors.append(f"{q['id']}: неизвестное условие {q['precondition']}")
+        if "skip" in q and not isinstance(q["skip"], bool):
+            errors.append(f"{q['id']}: skip должен быть true или false")
+        if "[" in q.get("q", ""):
+            errors.append(f"{q['id']}: квадратные скобки вместо фигурных")
     return errors
 
 
@@ -153,9 +162,21 @@ def report(tech, src, qs):
     used = {q["technique"] for q in qs["questions"]}
     missing = [t["id"] for t in tech["techniques"] if t["id"] not in used]
     out.append(f"Приёмов с образцами: {len(used)} из {len(tech['techniques'])}. Без образцов: {', '.join(missing)}.")
+    authored_ids = {s['id'] for s in src.get('authored', [])}
+    n_auth = sum(1 for q in qs['questions'] if q['src'] in authored_ids)
+    out.append(f"Из разобранных интервью и форматов: {len(qs['questions']) - n_auth}; из присланного банка: {n_auth}.")
+    n_skip = sum(1 for q in qs['questions'] if q.get('skip'))
+    out.append(f"С правом пропустить: {n_skip}.")
+    out.append("\n| Раздел | Вопросов | Из корпуса | Из банка v0.1 |")
+    out.append("|---|---|---|---|")
+    for tid, name in qs['topics'].items():
+        inq = [q for q in qs['questions'] if q['topic'] == tid]
+        a = sum(1 for q in inq if q['src'] in authored_ids)
+        out.append(f"| {tid} {name} | {len(inq)} | {len(inq) - a} | {a} |")
 
     out.append(f"\nИсточников: полная разметка {len(coded)}, отбор {len(selected)}, "
-               f"форматы {len(formats)}, только счёт {len(src['counted_only'])}, недоступны {len(src['blocked'])}.")
+               f"форматы {len(formats)}, только счёт {len(src['counted_only'])}, недоступны {len(src['blocked'])}, "
+               f"авторский банк {len(src.get('authored', []))}, в очереди на разметку {len(src.get('queue', []))}.")
     out.append(f"Всего приёмов: {len(tech['techniques'])}.")
     return "\n".join(out)
 

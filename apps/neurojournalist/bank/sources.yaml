@@ -241,3 +241,235 @@ blocked:
   - id: jazzru
     outlet: «Джаз.Ру»
     reason: поиск не выдал ни одного большого интервью на jazz.ru; нужен другой путь (архив журнала или браузер)
+
+# Присланный банк «Нейрожурналист» v0.1: авторские вопросы и приёмы, без привязки к интервью.
+authored:
+  - id: nj-bank-v01
+    outlet: банк «Нейрожурналист» v0.1 (присланные материалы, 12.11.2026)
+    what: 160 вопросов в 16 разделах и 18 приёмов углубления, написаны для Джазеты; не цитаты из интервью
+    original: imported/nejrojurnalist_bank_v0.1.json
+
+# Очередь на разметку: каталог источников присланного банка (32 интервью и 4 методических текста).
+# status_in_nj: насколько источник изучен там; нами не разобран, если нет поля in_bank.
+queue:
+  - id: nj-I01
+    publisher: "Do the Math / Ethan Iverson"
+    title: "Interview with George Colligan"
+    url: https://ethaniverson.com/interview-with-george-colligan/
+    year: "2017"
+    status_in_nj: "изучены содержательные фрагменты"
+    in_bank: "iverson-colligan (только счёт)"
+  - id: nj-I02
+    publisher: "Do the Math / Ethan Iverson"
+    title: "Interview with Keith Jarrett"
+    url: https://ethaniverson.com/interviews/interview-with-keith-jarrett/
+    year: "2009"
+    status_in_nj: "изучены содержательные фрагменты"
+  - id: nj-I03
+    publisher: "Do the Math / Ethan Iverson"
+    title: "Interview with Wayne Shorter"
+    url: https://ethaniverson.com/interview-with-wayne-shorter/
+    year: "н/д"
+    status_in_nj: "проверено описание / отдельные выдержки"
+  - id: nj-I04
+    publisher: "Do the Math / Ethan Iverson"
+    title: "Interview with Henry Threadgill, part 1"
+    url: https://ethaniverson.com/interview-with-henry-threadgill-part-1/
+    year: "н/д"
+    status_in_nj: "проверено описание / отдельные выдержки"
+    in_bank: "iverson-threadgill-2016"
+  - id: nj-I05
+    publisher: "Do the Math / Ethan Iverson"
+    title: "Interview with Cedar Walton"
+    url: https://ethaniverson.com/interview-with-cedar-walton/
+    year: "н/д"
+    status_in_nj: "проверено описание / отдельные выдержки"
+  - id: nj-I06
+    publisher: "Do the Math / Ethan Iverson"
+    title: "Best of DTM: Interviews"
+    url: https://ethaniverson.com/2018/07/03/best-of-dtm-6-interviews/
+    year: "2018"
+    status_in_nj: "изучены содержательные фрагменты"
+  - id: nj-I07
+    publisher: "The Believer"
+    title: "An Interview with Nico Muhly"
+    url: https://www.thebeliever.net/an-interview-with-nico-muhly/
+    year: "2008"
+    status_in_nj: "изучены содержательные фрагменты"
+    in_bank: "believer-muhly (только счёт)"
+  - id: nj-I08
+    publisher: "The Believer"
+    title: "An Interview with Meredith Monk"
+    url: https://www.thebeliever.net/an-interview-with-meredith-monk/
+    year: "2014"
+    status_in_nj: "изучены содержательные фрагменты"
+    in_bank: "believer-monk (только счёт)"
+  - id: nj-I09
+    publisher: "BOMB"
+    title: "Bill Frisell by Marc Ribot"
+    url: https://bombmagazine.org/articles/2002/04/01/bill-frisell/
+    year: "2002"
+    status_in_nj: "изучены содержательные фрагменты"
+  - id: nj-I10
+    publisher: "BOMB"
+    title: "George Lewis by Jeff Parker"
+    url: https://bombmagazine.org/articles/2005/10/01/george-lewis/
+    year: "2005"
+    status_in_nj: "изучены содержательные фрагменты"
+  - id: nj-I11
+    publisher: "BOMB"
+    title: "John Zorn interviewed by Anthony Coleman"
+    url: https://bombmagazine.org/articles/2002/07/01/john-zorn/
+    year: "2002"
+    status_in_nj: "изучены содержательные фрагменты"
+  - id: nj-I12
+    publisher: "BOMB"
+    title: "Joëlle Léandre"
+    url: https://bombmagazine.org/articles/2014/09/16/jo%C3%ABlle-l%C3%A9andre/
+    year: "2014"
+    status_in_nj: "изучены содержательные фрагменты"
+  - id: nj-I13
+    publisher: "BOMB"
+    title: "Maya Dunietz Interviewed"
+    url: https://bombmagazine.org/articles/2022/07/05/maya-dunietz-interviewed/
+    year: "2022"
+    status_in_nj: "проверено описание / отдельные выдержки"
+  - id: nj-I14
+    publisher: "BOMB"
+    title: "Angel Bat Dawid and JJJJJerome Ellis"
+    url: https://bombmagazine.org/articles/2023/01/10/angel-bat-dawid-and-jjjjjerome-ellis/
+    year: "2023"
+    status_in_nj: "проверено описание / отдельные выдержки"
+  - id: nj-I15
+    publisher: "BOMB"
+    title: "Andrea Parkins Interviewed"
+    url: https://bombmagazine.org/articles/2022/05/06/andrea-parkins-interviewed/
+    year: "2022"
+    status_in_nj: "изучены содержательные фрагменты"
+  - id: nj-I16
+    publisher: "BOMB"
+    title: "Mats Gustafsson by Alan Licht"
+    url: https://bombmagazine.org/articles/2020/04/17/mats-gustafsson-interviewed/
+    year: "2020"
+    status_in_nj: "изучены содержательные фрагменты"
+  - id: nj-I17
+    publisher: "BOMB"
+    title: "Mary Halvorson by Steve DiBenedetto"
+    url: https://bombmagazine.org/articles/2014/01/01/mary-halvorson/
+    year: "2014"
+    status_in_nj: "проверено описание / отдельные выдержки"
+  - id: nj-I18
+    publisher: "BOMB"
+    title: "Julius Hemphill by Suzanne McElfresh"
+    url: https://bombmagazine.org/articles/1994/01/01/julius-hemphill/
+    year: "1994"
+    status_in_nj: "проверено описание / отдельные выдержки"
+  - id: nj-I19
+    publisher: "BOMB"
+    title: "Lakecia Benjamin by Dawoud Bey"
+    url: https://bombmagazine.org/articles/2025/06/16/lakecia-benjamin-by-dawoud-bey/
+    year: "2025"
+    status_in_nj: "проверено описание / отдельные выдержки"
+  - id: nj-I20
+    publisher: "The Paris Review"
+    title: "Stephen Sondheim, The Art of the Musical"
+    url: https://www.theparisreview.org/interviews/1283/the-art-of-the-musical-stephen-sondheim
+    year: "1997"
+    status_in_nj: "изучены содержательные фрагменты"
+  - id: nj-I21
+    publisher: "The Paris Review"
+    title: "Toni Morrison, The Art of Fiction No. 134"
+    url: https://www.theparisreview.org/interviews/1888/the-art-of-fiction-no-134-toni-morrison
+    year: "1993"
+    status_in_nj: "изучены содержательные фрагменты"
+  - id: nj-I22
+    publisher: "The Paris Review"
+    title: "James Baldwin, The Art of Fiction No. 78"
+    url: https://www.theparisreview.org/interviews/2994/the-art-of-fiction-no-78-james-baldwin
+    year: "1984"
+    status_in_nj: "изучены содержательные фрагменты"
+  - id: nj-I23
+    publisher: "The Paris Review"
+    title: "Joy Williams, The Art of Fiction No. 223"
+    url: https://www.theparisreview.org/interviews/6303/the-art-of-fiction-no-223-joy-williams
+    year: "2014"
+    status_in_nj: "проверено описание / отдельные выдержки"
+  - id: nj-I24
+    publisher: "Tone Glow"
+    title: "Tone Glow 075: Jean-Luc Guionnet"
+    url: https://toneglow.substack.com/p/tone-glow-075-jean-luc-guionnet
+    year: "2021"
+    status_in_nj: "изучены содержательные фрагменты"
+    in_bank: "toneglow-guionnet (только счёт)"
+  - id: nj-I25
+    publisher: "Tone Glow"
+    title: "Tone Glow 112: Lisa Lerkenfeldt"
+    url: https://toneglow.substack.com/p/tone-glow-112-lisa-lerkenfeldt
+    year: "2023"
+    status_in_nj: "проверено описание / отдельные выдержки"
+  - id: nj-I26
+    publisher: "Tone Glow"
+    title: "Tone Glow 139: Seymour Wright"
+    url: https://toneglow.substack.com/p/tone-glow-139-seymour-wright
+    year: "2024"
+    status_in_nj: "проверено описание / отдельные выдержки"
+  - id: nj-I27
+    publisher: "Tone Glow"
+    title: "Tone Glow 078: Lawrence English"
+    url: https://toneglow.substack.com/p/tone-glow-078-lawrence-english
+    year: "2021"
+    status_in_nj: "проверено описание / отдельные выдержки"
+  - id: nj-I28
+    publisher: "Jazz.ru"
+    title: "Евгений Лебедев: джаз как особый способ мышления"
+    url: https://www.jazz.ru/2024/07/25/evgeny-lebedev-interview/
+    year: "2024"
+    status_in_nj: "изучены содержательные фрагменты"
+  - id: nj-I29
+    publisher: "Jazz.ru"
+    title: "Дмитрий Мосьпан: большое интервью"
+    url: https://www.jazz.ru/2023/05/11/dmitry-mospan-40/
+    year: "2023"
+    status_in_nj: "изучены содержательные фрагменты"
+  - id: nj-I30
+    publisher: "Jazz.ru"
+    title: "Давид Голощёкин: настоящее большое интервью"
+    url: https://www.jazz.ru/2016/06/11/david-goloshokin-interview/
+    year: "2016"
+    status_in_nj: "изучены содержательные фрагменты"
+  - id: nj-I31
+    publisher: "Jazz.ru"
+    title: "Диас Каримов: импровизация — свобода"
+    url: https://www.jazz.ru/2017/05/20/pianist-dias-karimov-interview/
+    year: "2017"
+    status_in_nj: "проверено описание / отдельные выдержки"
+  - id: nj-I32
+    publisher: "Tape Op"
+    title: "Neko Case: Songwriting, Production & Authenticity"
+    url: https://tapeop.com/interviews/127/neko-case-songwriting-production-and-being-real
+    year: "н/д"
+    status_in_nj: "изучены содержательные фрагменты"
+  - id: nj-M01
+    publisher: "Oral History Association"
+    title: "Oral History Best Practices"
+    url: https://oralhistory.org/best-practices/
+    year: "2018"
+    status_in_nj: "изучены содержательные фрагменты"
+  - id: nj-M02
+    publisher: "StoryCorps"
+    title: "Great Questions"
+    url: https://storycorps.org/participate/great-questions/
+    year: "н/д"
+    status_in_nj: "изучены содержательные фрагменты"
+  - id: nj-M03
+    publisher: "Nieman Storyboard"
+    title: "The craft (and art) of the interview"
+    url: https://niemanstoryboard.org/2018/10/04/the-craft-and-art-of-the-interview-from-thoughtful-homework-to-whatever-happens/
+    year: "2018"
+    status_in_nj: "изучены содержательные фрагменты"
+  - id: nj-M04
+    publisher: "Nieman Storyboard"
+    title: "Interviewing as the star of the show"
+    url: https://niemanstoryboard.org/2023/04/04/interviewing-source-relationships-metoo-investigative-reporting/
+    year: "2023"
+    status_in_nj: "проверено описание / отдельные выдержки"

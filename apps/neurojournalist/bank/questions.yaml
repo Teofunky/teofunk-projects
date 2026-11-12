@@ -1,12 +1,39 @@
-# Образцы сильных вопросов для «Нейрожурналиста», версия 0.2.
+# Образцы сильных вопросов для «Нейрожурналиста», версия 0.3.
 #
 # Это не переводы: каждый вопрос переформулирован по-русски под разговор с джазовым
 # музыкантом. Источник и номер показывают, где взята идея (номера см. в sources.yaml, поле numbering).
 # {в скобках} то, что подставляется из досье.
 # Поля: id, q (вопрос), technique (код приёма из techniques.yaml), theme, src, ref, note.
 
-version: "0.2"
+version: "0.3"
 updated: "2026-11-12"
+
+# Разделы (темы-кандидаты для плана интервью); взяты из присланного банка v0.1.
+topics:
+  T01: "Первое слышание и музыкальная память"
+  T02: "Учителя, наследование, разрыв"
+  T03: "Практика, дисциплина, мастерство"
+  T04: "Личный язык, стиль и художественное решение"
+  T05: "Разговор через конкретную запись"
+  T06: "Импровизация, время и неопределённость"
+  T07: "Ансамбль, власть и слушание"
+  T08: "Ошибка, стыд, уязвимость и риск"
+  T09: "Чувство, переживание и личная правда"
+  T10: "Сцена, публика и живое присутствие"
+  T11: "Тишина, звук и пределы выразительности"
+  T12: "Композиция, форма, редактура"
+  T13: "Повороты, изменения, внутренние противоречия"
+  T14: "Традиция, культура, эпоха и коммерция"
+  T15: "Нейроискусство, авторство и подлинность"
+  T16: "Наследие, неизвестное и заключительное открытие"
+
+# Условия применения вопроса.
+preconditions:
+  fact: выбрать конкретный факт или предмет разговора; не задавать вопрос только ради раздела
+  skip: дать право пропустить; не предполагать травмы, вины или определённой позиции
+  audio: запись подтверждена и действительно прослушана; таймкод проверен; слуховой факт отделён от толкования
+  partners: известны конкретные партнёры, выступления и задокументированные совместные работы
+  quote: точная цитата, дата, первоисточник и контекст подтверждены
 
 questions:
 
@@ -15,6 +42,7 @@ questions:
   - id: Q01
     q: "Была ли в вашем детстве вера или какая-то духовная жизнь? Что от неё осталось в музыке?"
     technique: B5
+    topic: T01
     theme: deep_experience
     src: onbeing-cave-2023
     ref: [1]
@@ -23,6 +51,7 @@ questions:
   - id: Q02
     q: "Где, по-вашему, в раннем детстве было посеяно чувство тайны, которое потом стало музыкой?"
     technique: B5
+    topic: T01
     theme: deep_experience
     src: onbeing-rubin-2023
     ref: [1]
@@ -30,6 +59,7 @@ questions:
   - id: Q03
     q: "Был ли путь, который вы всерьёз рассматривали вместо музыки? Что от него в вас осталось?"
     technique: B5
+    topic: T01
     theme: roots
     src: onbeing-mcferrin-2011
     ref: [2]
@@ -38,6 +68,7 @@ questions:
   - id: Q04
     q: "Назовите по одной пластинке, книге или событию на каждые пять лет вашей жизни. Начнём с первой."
     technique: B6
+    topic: T01
     theme: roots
     src: toneglow-orourke
     ref: [1]
@@ -46,6 +77,7 @@ questions:
   - id: Q05
     q: "Какая пластинка или фильм в детстве изменили вашу жизнь? Что стало другим на следующий день?"
     technique: B1
+    topic: T01
     theme: roots
     src: toneglow-orourke
     ref: [2]
@@ -53,6 +85,7 @@ questions:
   - id: Q06
     q: "Чего от вас ждали родители? Совпало ли это с тем, кем вы стали?"
     technique: B2
+    topic: T01
     theme: roots
     src: freshair-rollins-1994
     ref: [9]
@@ -60,6 +93,7 @@ questions:
   - id: Q07
     q: "Ваши родители слушали ту же музыку, что и вы? Где ваши вкусы разошлись?"
     technique: B2
+    topic: T01
     theme: roots
     src: toneglow-orourke
     ref: [8]
@@ -67,6 +101,7 @@ questions:
   - id: Q08
     q: "Кто в вашем раннем окружении был по-настоящему художником? Как вы это поняли?"
     technique: B3
+    topic: T02
     theme: roots
     src: toneglow-railton-2023
     ref: [10]
@@ -74,6 +109,7 @@ questions:
   - id: Q09
     q: "Что место, где вы выросли, дало вашему звуку такого, чего не дала бы никакая школа?"
     technique: B4
+    topic: T14
     theme: roots
     src: panken-smith-1978
     ref: [63]
@@ -81,6 +117,7 @@ questions:
   - id: Q10
     q: "Какой вопрос вам задают чаще всего? Каким он должен быть, чтобы вам было интересно отвечать?"
     technique: G11
+    topic: T16
     theme: craft
     src: raskin-carter
     ref: [12, 25]
@@ -91,6 +128,7 @@ questions:
   - id: Q11
     q: "Давайте послушаем начало {записи}. Что вы слышите в этих минутах сейчас, чего не слышали тогда?"
     technique: A3
+    topic: T05
     theme: authentic_art
     src: iverson-carter-2007
     ref: [2]
@@ -98,6 +136,7 @@ questions:
   - id: Q12
     q: "Я поставлю запись, не называя исполнителя. Кто это, по-вашему, и что в игре его выдало?"
     technique: A5
+    topic: T05
     theme: authentic_art
     src: downbeat-blindfold-evans
     ref: []
@@ -105,6 +144,7 @@ questions:
   - id: Q13
     q: "Сколько звёзд из пяти вы бы дали этой записи? Что бы вы изменили, будь это ваша сессия?"
     technique: A5
+    topic: T05
     theme: craft
     src: downbeat-blindfold-evans
     ref: []
@@ -112,6 +152,7 @@ questions:
   - id: Q14
     q: "Как вы сами слушаете музыку: целыми альбомами или кусками, в наушниках или дома?"
     technique: C10
+    topic: T14
     theme: authentic_art
     src: raskin-carter
     ref: [17, 18]
@@ -119,6 +160,7 @@ questions:
   - id: Q15
     q: "Какой альбом вы последним прослушали целиком, от начала до конца? Почему именно его?"
     technique: C10
+    topic: T14
     theme: authentic_art
     src: raskin-carter
     ref: [19, 20]
@@ -128,6 +170,7 @@ questions:
   - id: Q16
     q: "Когда вы импровизируете, вы думаете? Если нет, то что происходит вместо мысли?"
     technique: C1
+    topic: T06
     theme: craft
     src: freshair-rollins-1994
     ref: [1]
@@ -135,6 +178,7 @@ questions:
   - id: Q17
     q: "Как вы занимаетесь сейчас, когда, казалось бы, всё уже умеете?"
     technique: C6
+    topic: T03
     theme: craft
     src: freshair-rollins-1994
     ref: [2]
@@ -142,6 +186,7 @@ questions:
   - id: Q18
     q: "Что вы физически делаете, когда {особенность игры, например, тянете бит вперёд и звучите расслабленно}?"
     technique: C1
+    topic: T03
     theme: craft
     src: iverson-carter-2007
     ref: [7]
@@ -149,6 +194,7 @@ questions:
   - id: Q19
     q: "В {вещь} первую минуту нет барабанов. Почему вы решили начать так?"
     technique: C2
+    topic: T05
     theme: craft
     src: iverson-threadgill-2016
     ref: [24]
@@ -156,6 +202,7 @@ questions:
   - id: Q20
     q: "Этому можно научить или это можно только найти самому?"
     technique: C3
+    topic: T02
     theme: authentic_art
     src: iverson-carter-2007
     ref: [9]
@@ -163,6 +210,7 @@ questions:
   - id: Q21
     q: "{Имя предшественника}. Что первое приходит в голову?"
     technique: C4
+    topic: T02
     theme: roots
     src: iverson-carter-2007
     ref: [25, 26, 28, 30]
@@ -171,6 +219,7 @@ questions:
   - id: Q22
     q: "Каким {партнёр} был на самом деле, вне сцены? Совпадает ли это с его репутацией?"
     technique: C5
+    topic: T07
     theme: deep_experience
     src: raskin-carter
     ref: [22]
@@ -178,6 +227,7 @@ questions:
   - id: Q23
     q: "Кто научил вас жить в дороге? Или это пришлось понять самому?"
     technique: C9
+    topic: T03
     theme: craft
     src: raskin-carter
     ref: [1]
@@ -185,6 +235,7 @@ questions:
   - id: Q24
     q: "Есть ли у вас ритуалы перед концертом или перед работой?"
     technique: C9
+    topic: T03
     theme: craft
     src: gagosian-obrist-gates-2022
     ref: [10]
@@ -192,6 +243,7 @@ questions:
   - id: Q25
     q: "Что снова возвращает вас к инструменту в дни, когда играть не хочется?"
     technique: C9
+    topic: T03
     theme: deep_experience
     src: gagosian-obrist-gates-2022
     ref: [7]
@@ -199,6 +251,7 @@ questions:
   - id: Q26
     q: "Кому вы показываете вещь, пока она не готова? Чьё мнение может её остановить?"
     technique: C7
+    topic: T12
     theme: craft
     src: parisreview-murakami-2004
     ref: [20]
@@ -206,6 +259,7 @@ questions:
   - id: Q27
     q: "В чём, кроме музыки, вы пытались стать по-настоящему хорошим? Есть ли связь с тем, как вы играете?"
     technique: E7
+    topic: T04
     theme: authentic_art
     src: raskin-carter
     ref: [14, 16]
@@ -213,6 +267,7 @@ questions:
   - id: Q28
     q: "{Инструмент} для вас близкий спутник или средство? Менялось ли это со временем?"
     technique: C8
+    topic: T03
     theme: deep_experience
     src: toneglow-lewis-2021
     ref: [14]
@@ -220,6 +275,7 @@ questions:
   - id: Q29
     q: "Ваша система звучит иначе, чем {близкий метод, например, двенадцатитоновая музыка}. В чём разница изнутри?"
     technique: C1
+    topic: T04
     theme: craft
     src: iverson-threadgill-2016
     ref: [38, 39]
@@ -229,6 +285,7 @@ questions:
   - id: Q30
     q: "Когда вы решили, что музыка будет делом жизни, кто из близких в вас не поверил?"
     technique: D1
+    topic: T13
     theme: deep_experience
     src: parisreview-murakami-2004
     ref: [11, 12]
@@ -236,6 +293,8 @@ questions:
   - id: Q31
     q: "Бывает ли у вас страх перед выходом на сцену? Был ли случай, когда тело подвело?"
     technique: D2
+    topic: T08
+    skip: true
     theme: deep_experience
     src: raskin-carter
     ref: [39, 40, 41]
@@ -243,6 +302,8 @@ questions:
   - id: Q32
     q: "Было ли чувство, что вы самозванец, когда вам доверили большую работу?"
     technique: D2
+    topic: T08
+    skip: true
     theme: deep_experience
     src: toneglow-railton-2023
     ref: [31]
@@ -250,6 +311,7 @@ questions:
   - id: Q33
     q: "Вы надолго уходили со сцены. Как вы поняли, что пора вернуться?"
     technique: D6
+    topic: T13
     theme: deep_experience
     src: freshair-rollins-1994
     ref: [25]
@@ -257,6 +319,7 @@ questions:
   - id: Q34
     q: "Где вы занимались, когда дома было нельзя? Что вы там услышали?"
     technique: D6
+    topic: T03
     theme: craft
     src: freshair-rollins-1994
     ref: [24, 26]
@@ -264,6 +327,7 @@ questions:
   - id: Q35
     q: "Какая ваша запись нравится вам меньше всего? Что в ней не так?"
     technique: D7
+    topic: T08
     theme: authentic_art
     src: toneglow-orourke
     ref: [7]
@@ -271,6 +335,7 @@ questions:
   - id: Q36
     q: "Если бы вы могли ответить критику, который не понял вашу первую пластинку, что бы вы сказали?"
     technique: D4
+    topic: T08
     theme: authentic_art
     src: panken-smith-1978
     ref: [22]
@@ -278,6 +343,7 @@ questions:
   - id: Q37
     q: "Вас называют {ярлык}. Это про вас или про тех, кто так говорит?"
     technique: D5
+    topic: T04
     theme: authentic_art
     src: toneglow-railton-2023
     ref: [7]
@@ -285,6 +351,7 @@ questions:
   - id: Q38
     q: "В молодости вы считали себя радикалом? Назвали бы вы себя так сейчас?"
     technique: D5
+    topic: T13
     theme: authentic_art
     src: raskin-carter
     ref: [29, 30]
@@ -292,6 +359,7 @@ questions:
   - id: Q39
     q: "Вы чувствовали себя частью сообщества музыкантов или всегда немного в стороне?"
     technique: D3
+    topic: T07
     theme: roots
     src: parisreview-murakami-2004
     ref: [24]
@@ -301,6 +369,7 @@ questions:
   - id: Q40
     q: "Можно спросить о {трудная тема}? Если не хотите, скажите, и пойдём дальше."
     technique: G10
+    topic: T08
     theme: deep_experience
     src: toneglow-orourke
     ref: [5]
@@ -309,6 +378,8 @@ questions:
   - id: Q41
     q: "Что вы узнали о себе в самый трудный период? Как это слышно в вашей игре сейчас?"
     technique: E8
+    topic: T08
+    skip: true
     theme: deep_experience
     src: freshair-rollins-1994
     ref: [20, 22]
@@ -317,6 +388,8 @@ questions:
   - id: Q42
     q: "Чего вы тогда боялись больше всего?"
     technique: E8
+    topic: T08
+    skip: true
     theme: deep_experience
     src: freshair-rollins-1994
     ref: [15]
@@ -324,6 +397,8 @@ questions:
   - id: Q43
     q: "Расскажите о человеке, которому посвящена {вещь}. Какое воспоминание о нём самое живое?"
     technique: E3
+    topic: T09
+    skip: true
     theme: deep_experience
     src: toneglow-railton-2023
     ref: [23, 24]
@@ -331,6 +406,8 @@ questions:
   - id: Q44
     q: "Кого из ушедших партнёров вам не хватает на сцене больше всего? Что исчезло вместе с ним?"
     technique: E3
+    topic: T07
+    skip: true
     theme: deep_experience
     src: iverson-carter-2007
     ref: [12]
@@ -338,6 +415,8 @@ questions:
   - id: Q45
     q: "Есть ли в вашей музыке тоска по чему-то, чего нельзя достичь? Откуда она?"
     technique: E9
+    topic: T09
+    skip: true
     theme: deep_experience
     src: onbeing-cave-2023
     ref: [3]
@@ -346,6 +425,8 @@ questions:
   - id: Q46
     q: "Бывают ли на сцене минуты, когда граница между этим миром и чем-то большим становится тонкой?"
     technique: E9
+    topic: T10
+    skip: true
     theme: deep_experience
     src: onbeing-cave-2023
     ref: [5]
@@ -354,6 +435,8 @@ questions:
   - id: Q47
     q: "Вы верите, что что-то есть после смерти? Меняет ли это то, как вы играете?"
     technique: E9
+    topic: T09
+    skip: true
     theme: deep_experience
     src: raskin-carter
     ref: [33]
@@ -361,6 +444,7 @@ questions:
   - id: Q48
     q: "Что, по-вашему, музыка пытается сказать там, где слов уже не хватает?"
     technique: E10
+    topic: T11
     theme: authentic_art
     src: onbeing-cave-2023
     ref: [9]
@@ -368,6 +452,7 @@ questions:
   - id: Q49
     q: "Почему музыка открывает в людях место, до которого не доходит ничто другое?"
     technique: E10
+    topic: T10
     theme: deep_experience
     src: onbeing-mcferrin-2011
     ref: [33]
@@ -375,6 +460,7 @@ questions:
   - id: Q50
     q: "Как вы думаете, музыка старше языка?"
     technique: E10
+    topic: T11
     theme: authentic_art
     src: onbeing-mcferrin-2011
     ref: [61]
@@ -382,6 +468,7 @@ questions:
   - id: Q51
     q: "Может ли музыка быть нравственной дисциплиной, например, способом справляться с гневом?"
     technique: E10
+    topic: T09
     theme: deep_experience
     src: onbeing-mcferrin-2011
     ref: [45]
@@ -389,6 +476,7 @@ questions:
   - id: Q52
     q: "Каково это: находиться внутри своего тела, когда вы играете?"
     technique: E2
+    topic: T09
     theme: deep_experience
     src: onbeing-mcferrin-2011
     ref: [12]
@@ -396,6 +484,7 @@ questions:
   - id: Q53
     q: "Вы понимали, о чём {альбом}, пока его делали, или поняли только потом?"
     technique: E11
+    topic: T12
     theme: authentic_art
     src: onbeing-cave-2023
     ref: [11]
@@ -403,6 +492,7 @@ questions:
   - id: Q54
     q: "В самой яростной музыке вашей молодости было что-то, что тянулось вверх?"
     technique: E10
+    topic: T09
     theme: deep_experience
     src: onbeing-cave-2023
     ref: [10]
@@ -410,6 +500,7 @@ questions:
   - id: Q55
     q: "Мне кажется, через все ваши вещи проходит {мотив}. Вы с этим согласны?"
     technique: E1
+    topic: T04
     theme: authentic_art
     src: parisreview-murakami-2004
     ref: [46]
@@ -417,6 +508,7 @@ questions:
   - id: Q56
     q: "Ваш путь, кажется, шёл наоборот: от мастерства к детской свободе, а не от свободы к мастерству. Это так?"
     technique: G3
+    topic: T13
     theme: authentic_art
     src: onbeing-mcferrin-2011
     ref: [18]
@@ -424,6 +516,7 @@ questions:
   - id: Q57
     q: "Что из того, что сейчас хвалят, через тридцать лет будет звучать так же? А что нет?"
     technique: E5
+    topic: T14
     theme: authentic_art
     src: iverson-threadgill-2016
     ref: [12]
@@ -433,6 +526,7 @@ questions:
   - id: Q58
     q: "Что в вашем ремесле нельзя подделать?"
     technique: F1
+    topic: T15
     theme: neuro_era
     src: toneglow-lewis-2021
     ref: [18]
@@ -441,6 +535,7 @@ questions:
   - id: Q59
     q: "Что в импровизации машина не повторит, даже если сыграет все ноты верно?"
     technique: F1
+    topic: T15
     theme: neuro_era
     src: toneglow-lewis-2021
     ref: [18, 21]
@@ -448,6 +543,7 @@ questions:
   - id: Q60
     q: "Вот {текст или запись}, которую нейросеть сделала «в вашем стиле». Что вы о ней думаете?"
     technique: F3
+    topic: T15
     theme: neuro_era
     src: redhand-218
     ref: []
@@ -456,6 +552,7 @@ questions:
   - id: Q61
     q: "Если машина научится делать вещи в вашем стиле так, что их не отличить, что останется только вашим?"
     technique: F3
+    topic: T15
     theme: neuro_era
     src: fact-herndon-2022
     ref: [22]
@@ -463,6 +560,7 @@ questions:
   - id: Q62
     q: "Должен ли музыкант защищать свой стиль так же, как защищают авторское право?"
     technique: F4
+    topic: T15
     theme: neuro_era
     src: fact-herndon-2022
     ref: [25]
@@ -470,6 +568,7 @@ questions:
   - id: Q63
     q: "Кому принадлежит ваш звук: только вам или всем, кто у вас учился и вас слушал?"
     technique: F4
+    topic: T15
     theme: neuro_era
     src: artbasel-obrist-herndon-2024
     ref: [3]
@@ -477,6 +576,7 @@ questions:
   - id: Q64
     q: "Был ли случай, когда вас по-настоящему тронуло то, что сделала машина? Что именно?"
     technique: F5
+    topic: T15
     theme: neuro_era
     src: onbeing-rubin-2023
     ref: [10]
@@ -484,6 +584,7 @@ questions:
   - id: Q65
     q: "Вы когда-нибудь работали с машиной как с партнёром? Что она показала вам о вас самом?"
     technique: F2
+    topic: T15
     theme: neuro_era
     src: toneglow-lewis-2021
     ref: [15, 22]
@@ -491,6 +592,7 @@ questions:
   - id: Q66
     q: "Новые инструменты годами никто не понимает. Каким, по-вашему, будет инструмент, которого сегодня боятся, лет через двадцать?"
     technique: F2
+    topic: T15
     theme: neuro_era
     src: fader-herndon-2021
     ref: [11]
@@ -501,6 +603,7 @@ questions:
   - id: Q67
     q: "Что такое искусство, одной фразой?"
     technique: G9
+    topic: T14
     theme: authentic_art
     src: gagosian-obrist-gates-2022
     ref: [1]
@@ -508,6 +611,7 @@ questions:
   - id: Q68
     q: "Портят ли искусство деньги?"
     technique: G9
+    topic: T14
     theme: authentic_art
     src: gagosian-obrist-gates-2022
     ref: [2]
@@ -515,6 +619,7 @@ questions:
   - id: Q69
     q: "Какую роль в вашей работе играет случай?"
     technique: G9
+    topic: T12
     theme: craft
     src: gagosian-obrist-gates-2022
     ref: [6]
@@ -522,6 +627,7 @@ questions:
   - id: Q70
     q: "Что для вас значат названия пьес?"
     technique: G9
+    topic: T12
     theme: craft
     src: gagosian-obrist-gates-2022
     ref: [3]
@@ -529,6 +635,7 @@ questions:
   - id: Q71
     q: "Случилось ли с вами недавно что-то похожее на чудо?"
     technique: G9
+    topic: T09
     theme: deep_experience
     src: gagosian-obrist-gates-2022
     ref: [11]
@@ -538,6 +645,7 @@ questions:
   - id: Q72
     q: "Какой ваш проект так и не осуществился? Что ему помешало?"
     technique: H1
+    topic: T16
     theme: authentic_art
     src: gagosian-obrist-gates-2022
     ref: [5]
@@ -546,6 +654,7 @@ questions:
   - id: Q73
     q: "Чьё присутствие в вашей жизни сильнее всего?"
     technique: H4
+    topic: T16
     theme: deep_experience
     src: raskin-carter
     ref: [47]
@@ -553,6 +662,7 @@ questions:
   - id: Q74
     q: "О чём вас никогда не спрашивали, а вы бы хотели ответить?"
     technique: H2
+    topic: T16
     theme: deep_experience
     src: toneglow-lewis-2021
     ref: [24]
@@ -560,6 +670,7 @@ questions:
   - id: Q75
     q: "Если вы окажетесь перед Богом, что вы ему скажете?"
     technique: H3
+    topic: T16
     theme: deep_experience
     src: pozner-proust
     ref: []
@@ -568,6 +679,7 @@ questions:
   - id: Q76
     q: "Если рай существует, что вы хотели бы там услышать?"
     technique: H3
+    topic: T16
     theme: deep_experience
     src: pivot-lipton
     ref: []
@@ -576,7 +688,1642 @@ questions:
   - id: Q77
     q: "Назовите одну вещь, которую вы в себе любите."
     technique: H3
+    topic: T16
     theme: deep_experience
     src: toneglow-railton-2023
     ref: [33]
     note: Постоянный финальный вопрос Tone Glow.
+
+  # Вопросы из присланного банка «Нейрожурналист» v0.1.
+  # Написаны для Джазеты, не цитаты и не привязаны к конкретным интервью (src: nj-bank-v01).
+  # Квадратные скобки оригинала заменены на фигурные, длинные тире на знаки препинания.
+
+  - id: NJ-01-01
+    q: "Какое звучание из вашего детства вы до сих пор слышите точнее, чем помните обстоятельства?"
+    technique: B1
+    topic: T01
+    theme: roots
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-01-02
+    q: "Была ли музыка, которая сначала вызвала у вас отторжение, а впоследствии стала необходимой?"
+    technique: B1
+    topic: T01
+    theme: roots
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-01-03
+    q: "Когда вы впервые услышали не просто красивую музыку, а чужой способ думать?"
+    technique: B1
+    topic: T01
+    theme: roots
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-01-04
+    q: "Какая запись научила вас слушать то, что происходит между нотами?"
+    technique: B1
+    topic: T01
+    theme: roots
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-01-05
+    q: "Вспомните момент, когда знакомая композиция вдруг стала звучать для вас иначе: что изменилось, она или вы?"
+    technique: B1
+    topic: T01
+    theme: roots
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-01-06
+    q: "Что в музыкальном воспитании вашей семьи присутствовало без объяснений и уроков?"
+    technique: B2
+    topic: T01
+    theme: roots
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-01-07
+    q: "Каким был первый звук, который вы захотели не повторить, а сделать своим?"
+    technique: B1
+    topic: T01
+    theme: roots
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-01-08
+    q: "Был ли исполнитель, чьё несовершенство оказалось для вас убедительнее чужой безупречности?"
+    technique: B1
+    topic: T01
+    theme: roots
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-01-09
+    q: "Какое музыкальное впечатление вы долго не могли перевести в слова?"
+    technique: B1
+    topic: T01
+    theme: roots
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-01-10
+    q: "Какое слушательское убеждение молодости вам сегодня кажется ошибочным?"
+    technique: D8
+    topic: T01
+    theme: roots
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-02-01
+    q: "Какое конкретное замечание учителя продолжает влиять на ваше исполнение?"
+    technique: B3
+    topic: T02
+    theme: roots
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-02-02
+    q: "Чему важному вы научились у человека, чьи художественные убеждения не разделяете?"
+    technique: B3
+    topic: T02
+    theme: roots
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-02-03
+    q: "В какой момент подражание любимому музыканту начало мешать вашей музыке?"
+    technique: B3
+    topic: T02
+    theme: roots
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-02-04
+    q: "Был ли опыт, когда учитель оказался неправ, а вы поняли это значительно позже?"
+    technique: B3
+    topic: T02
+    theme: roots
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-02-05
+    q: "Какое знание удалось передать вам только личным присутствием, не словами и не нотами?"
+    technique: B3
+    topic: T02
+    theme: roots
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-02-06
+    q: "Кого вы считаете учителем, хотя никогда не были с ним знакомы?"
+    technique: B3
+    topic: T02
+    theme: roots
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-02-07
+    q: "О каком уроке вы сожалеете, что не спросили вовремя?"
+    technique: B3
+    topic: T02
+    theme: roots
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-02-08
+    q: "Где заканчивается уважение к традиции и начинается подчинение ей?"
+    technique: B3
+    topic: T02
+    theme: roots
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-02-09
+    q: "Какой собственный приём вы не стали бы преподавать ученику как универсальное правило?"
+    technique: C3
+    topic: T02
+    theme: roots
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-02-10
+    q: "Что ученики понимают в вашей музыке лучше, чем вы ожидали?"
+    technique: C3
+    topic: T02
+    theme: roots
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-03-01
+    q: "Какая трудность в вашей игре сохраняется, несмотря на годы работы?"
+    technique: C6
+    topic: T03
+    theme: craft
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-03-02
+    q: "Какое упражнение вы продолжаете выполнять, хотя со стороны оно выглядело бы слишком простым?"
+    technique: C6
+    topic: T03
+    theme: craft
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-03-03
+    q: "Что именно вы делаете в первые десять минут работы с инструментом?"
+    technique: C6
+    topic: T03
+    theme: craft
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-03-04
+    q: "Когда техническое совершенствование перестало автоматически улучшать вашу музыку?"
+    technique: C6
+    topic: T03
+    theme: craft
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-03-05
+    q: "Что происходит в вашей практике, когда вы чувствуете творческую пустоту?"
+    technique: C6
+    topic: T03
+    theme: craft
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-03-06
+    q: "Как вы отличаете физическую привычку от найденного художественного решения?"
+    technique: C1
+    topic: T03
+    theme: craft
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-03-07
+    q: "Какой навык вам пришлось сознательно ослабить ради выразительности?"
+    technique: C1
+    topic: T03
+    theme: craft
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-03-08
+    q: "Когда вы в последний раз меняли способ занятий из-за услышанного на чужом концерте?"
+    technique: C6
+    topic: T03
+    theme: craft
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-03-09
+    q: "Как вы понимаете, что исполнение готово, хотя его ещё можно совершенствовать?"
+    technique: C6
+    topic: T03
+    theme: craft
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-03-10
+    q: "Что из вашей ежедневной работы почти никогда не слышит публика, но без чего музыка не случилась бы?"
+    technique: C6
+    topic: T03
+    theme: craft
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-04-01
+    q: "Назовите один выбор в собственной музыке, который вы делаете почти всегда: откуда он взялся?"
+    technique: E1
+    topic: T04
+    theme: authentic_art
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-04-02
+    q: "Какие признаки собственного стиля вы распознаёте как привычку, а не достоинство?"
+    technique: C1
+    topic: T04
+    theme: authentic_art
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-04-03
+    q: "Может ли музыкант намеренно отказаться от узнаваемого почерка и остаться собой?"
+    technique: D5
+    topic: T04
+    theme: authentic_art
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-04-04
+    q: "Был ли момент, когда публика узнала ваш стиль раньше, чем вы сами?"
+    technique: D5
+    topic: T04
+    theme: authentic_art
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-04-05
+    q: "Какое выразительное средство вы перестали использовать и почему?"
+    technique: C1
+    topic: T04
+    theme: authentic_art
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-04-06
+    q: "Что приходится исключать из произведения, чтобы прозвучало главное?"
+    technique: C1
+    topic: T04
+    theme: authentic_art
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-04-07
+    q: "Есть ли музыкальная идея, которую вы не решаетесь реализовать из страха перед её простотой?"
+    technique: C1
+    topic: T04
+    theme: authentic_art
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-04-08
+    q: "Что в вашем звучании возникло не из замысла, а из ограничения инструмента или тела?"
+    technique: C8
+    topic: T04
+    theme: authentic_art
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-04-09
+    q: "Какую музыкальную находку вы отвергли именно потому, что она слишком хорошо работала?"
+    technique: C1
+    topic: T04
+    theme: authentic_art
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-04-10
+    q: "Что должно измениться в вашем языке, чтобы вы не повторяли самого себя?"
+    technique: C1
+    topic: T04
+    theme: authentic_art
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-05-01
+    q: "В записи {название, таймкод} после {наблюдаемое событие} вы делаете {проверенный слуховой факт}. Какое решение вы принимали в тот момент?"
+    technique: C2
+    topic: T05
+    theme: craft
+    precondition: audio
+    basis: grounded
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-05-02
+    q: "В {конкретная запись} какая нота или пауза принадлежит скорее случаю, чем замыслу?"
+    technique: C2
+    topic: T05
+    theme: craft
+    precondition: audio
+    basis: grounded
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-05-03
+    q: "Если послушать {два исполнения одной темы}, какой музыкальный вопрос вы решаете по-разному?"
+    technique: C2
+    topic: T05
+    theme: craft
+    precondition: audio
+    basis: grounded
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-05-04
+    q: "В каком месте {произведение} партнёр изменил вашу первоначальную идею?"
+    technique: C2
+    topic: T05
+    theme: craft
+    precondition: audio
+    basis: grounded
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-05-05
+    q: "Вы бы сегодня оставили {конкретный слышимый эпизод} таким же, или поступили иначе?"
+    technique: C2
+    topic: T05
+    theme: craft
+    precondition: audio
+    basis: grounded
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-05-06
+    q: "Что в {запись} звучит как спонтанность, хотя было тщательно подготовлено?"
+    technique: C2
+    topic: T05
+    theme: craft
+    precondition: audio
+    basis: grounded
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-05-07
+    q: "Есть ли в {запись} решение, которое слушатели хвалят, а вы считаете компромиссом?"
+    technique: C2
+    topic: T05
+    theme: craft
+    precondition: audio
+    basis: grounded
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-05-08
+    q: "Если убрать из {композиция} один элемент, что окажется совершенно необходимым?"
+    technique: C2
+    topic: T05
+    theme: craft
+    precondition: audio
+    basis: grounded
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-05-09
+    q: "На {таймкод} слышна перемена {тембр/ритм/динамика}. Чем она была вызвана: мыслью, жестом или реакцией на другого?"
+    technique: C2
+    topic: T05
+    theme: craft
+    precondition: audio
+    basis: grounded
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-05-10
+    q: "Можем ли мы вместе послушать 20 секунд {фрагмент} и остановиться там, где, по-вашему, музыка меняет направление?"
+    technique: A3
+    topic: T05
+    theme: craft
+    precondition: audio
+    basis: grounded
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-06-01
+    q: "По какому признаку во время импровизации вы понимаете, что пора прекратить развивать идею?"
+    technique: C1
+    topic: T06
+    theme: craft
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-06-02
+    q: "Как вы отличаете музыкальный риск от простого отсутствия плана?"
+    technique: C1
+    topic: T06
+    theme: craft
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-06-03
+    q: "Что должно произойти, чтобы вы отказались от собственной удачной фразы?"
+    technique: C1
+    topic: T06
+    theme: craft
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-06-04
+    q: "Случалось ли, что ошибка партнёра открывала форму, которую никто не задумал?"
+    technique: C1
+    topic: T06
+    theme: craft
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-06-05
+    q: "Насколько далеко вперёд вы слышите музыку в момент игры: звук, фразу, целый раздел?"
+    technique: C1
+    topic: T06
+    theme: craft
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-06-06
+    q: "Какая часть импровизации для вас наиболее подготовлена заранее, даже если этого не слышно?"
+    technique: C1
+    topic: T06
+    theme: craft
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-06-07
+    q: "Приходилось ли вам сознательно повторить идею, чтобы дать группе время её понять?"
+    technique: C1
+    topic: T06
+    theme: craft
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-06-08
+    q: "Бывает ли, что хороший концерт складывается из решений, каждое из которых по отдельности было неудачным?"
+    technique: C1
+    topic: T06
+    theme: craft
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-06-09
+    q: "Что вы делаете, когда ничего не приходит в голову, но музыка должна продолжаться?"
+    technique: C1
+    topic: T06
+    theme: craft
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-06-10
+    q: "Как изменилось ваше ощущение музыкального времени за последние десять лет?"
+    technique: C1
+    topic: T06
+    theme: craft
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-07-01
+    q: "Когда на сцене вы в последний раз передумали из-за одной ноты другого музыканта?"
+    technique: C5
+    topic: T07
+    theme: craft
+    precondition: partners
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-07-02
+    q: "Каким действием партнёр может показать вам доверие, ничего не говоря?"
+    technique: C5
+    topic: T07
+    theme: craft
+    precondition: partners
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-07-03
+    q: "Как вы узнаёте, что стали занимать слишком много места в общем звуке?"
+    technique: C5
+    topic: T07
+    theme: craft
+    precondition: partners
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-07-04
+    q: "Было ли исполнение, в котором лидерство незаметно перешло к другому?"
+    technique: C5
+    topic: T07
+    theme: craft
+    precondition: partners
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-07-05
+    q: "Чему вас научил музыкант с менее развитой техникой, чем ваша?"
+    technique: C5
+    topic: T07
+    theme: craft
+    precondition: partners
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-07-06
+    q: "Как вы разрешаете художественный спор, когда оба решения убедительны?"
+    technique: C5
+    topic: T07
+    theme: craft
+    precondition: partners
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-07-07
+    q: "Какая ваша привычка помогает ансамблю, а какая затрудняет совместную игру?"
+    technique: C5
+    topic: T07
+    theme: craft
+    precondition: partners
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-07-08
+    q: "Когда молчание одного участника группы оказывается сильнее чужого соло?"
+    technique: C5
+    topic: T07
+    theme: craft
+    precondition: partners
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-07-09
+    q: "Что невозможно узнать о музыканте до совместной игры?"
+    technique: C5
+    topic: T07
+    theme: craft
+    precondition: partners
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-07-10
+    q: "Какая группа заставила вас пересмотреть представление о том, что значит слушать?"
+    technique: C5
+    topic: T07
+    theme: craft
+    precondition: partners
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-08-01
+    q: "Какой неудавшийся концерт вы сегодня считаете профессионально необходимым опытом?"
+    technique: D2
+    topic: T08
+    skip: true
+    theme: deep_experience
+    precondition: skip
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-08-02
+    q: "Что вы сделали на сцене один раз и никогда не решились повторить?"
+    technique: D2
+    topic: T08
+    skip: true
+    theme: deep_experience
+    precondition: skip
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-08-03
+    q: "Когда вы впервые позволили себе звучать некрасиво ради более точного смысла?"
+    technique: D2
+    topic: T08
+    skip: true
+    theme: deep_experience
+    precondition: skip
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-08-04
+    q: "Какую критику вам было особенно трудно принять, хотя в ней оказалась правда?"
+    technique: D4
+    topic: T08
+    skip: true
+    theme: deep_experience
+    precondition: skip
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-08-05
+    q: "Как вы отличаете смелость от стремления произвести впечатление?"
+    technique: D2
+    topic: T08
+    skip: true
+    theme: deep_experience
+    precondition: skip
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-08-06
+    q: "Есть ли запись, которую вам трудно слушать не из-за качества исполнения, а из-за человека, которым вы тогда были?"
+    technique: D7
+    topic: T08
+    skip: true
+    theme: deep_experience
+    precondition: skip
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-08-07
+    q: "Когда страх перед сценой улучшал вашу концентрацию, а когда разрушал её?"
+    technique: D2
+    topic: T08
+    skip: true
+    theme: deep_experience
+    precondition: skip
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-08-08
+    q: "О какой художественной ошибке вы предпочли бы говорить с учеником честнее, чем говорили с вами?"
+    technique: D2
+    topic: T08
+    skip: true
+    theme: deep_experience
+    precondition: skip
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-08-09
+    q: "Какой неудачный эксперимент вы защищаете до сих пор?"
+    technique: D2
+    topic: T08
+    skip: true
+    theme: deep_experience
+    precondition: skip
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-08-10
+    q: "Что в вашей музыке остаётся намеренно незащищённым от критики?"
+    technique: D2
+    topic: T08
+    skip: true
+    theme: deep_experience
+    precondition: skip
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-09-01
+    q: "Была ли работа, в которой вы хотели выразить одно чувство, но музыка сказала о другом?"
+    technique: E11
+    topic: T09
+    skip: true
+    theme: deep_experience
+    precondition: skip
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-09-02
+    q: "Как вы понимаете, что произведение стало слишком личным для публичного исполнения?"
+    technique: E10
+    topic: T09
+    skip: true
+    theme: deep_experience
+    precondition: skip
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-09-03
+    q: "Какое переживание стало музыкально доступным только спустя годы?"
+    technique: E11
+    topic: T09
+    skip: true
+    theme: deep_experience
+    precondition: skip
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-09-04
+    q: "Случается ли, что вы играете эмоционально сильную музыку и сами не испытываете того, что слышит публика?"
+    technique: E10
+    topic: T09
+    skip: true
+    theme: deep_experience
+    precondition: skip
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-09-05
+    q: "Какая работа изменила ваше отношение к человеку, которому была посвящена?"
+    technique: E3
+    topic: T09
+    skip: true
+    theme: deep_experience
+    precondition: skip
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-09-06
+    q: "Было ли выступление, после которого вы иначе увидели событие своей жизни?"
+    technique: E4
+    topic: T09
+    skip: true
+    theme: deep_experience
+    precondition: skip
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-09-07
+    q: "Как не спутать искренность с привычным способом изображать искренность?"
+    technique: E10
+    topic: T09
+    skip: true
+    theme: deep_experience
+    precondition: skip
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-09-08
+    q: "Может ли музыка быть подлинной, если её автор не раскрывает в ней ничего личного?"
+    technique: E10
+    topic: T09
+    skip: true
+    theme: deep_experience
+    precondition: skip
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-09-09
+    q: "В каком музыкальном решении вы слышите не настроение, а нравственный выбор?"
+    technique: E10
+    topic: T09
+    skip: true
+    theme: deep_experience
+    precondition: skip
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-09-10
+    q: "Что вы хотели бы сохранить в музыке от переживания, которое невозможно изложить в интервью?"
+    technique: E10
+    topic: T09
+    skip: true
+    theme: deep_experience
+    precondition: skip
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-10-01
+    q: "В какой момент концерта вы впервые чувствуете присутствие зала: до первой ноты или позже?"
+    technique: C11
+    topic: T10
+    theme: authentic_art
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-10-02
+    q: "Помните ли случай, когда публика поняла произведение совсем иначе, чем вы ожидали?"
+    technique: C11
+    topic: T10
+    theme: authentic_art
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-10-03
+    q: "Как различаются ваша ответственность перед слушателем и ваша свобода от его ожиданий?"
+    technique: C11
+    topic: T10
+    theme: authentic_art
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-10-04
+    q: "Был ли концерт, который казался вам неудачным, но оказался важным для слушателей?"
+    technique: C11
+    topic: T10
+    theme: authentic_art
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-10-05
+    q: "Что меняется в вашем исполнении в маленьком клубе по сравнению с большим залом?"
+    technique: C11
+    topic: T10
+    theme: authentic_art
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-10-06
+    q: "Как на сцене вы реагируете на слушателя, который явно не готов к вашей музыке?"
+    technique: C11
+    topic: T10
+    theme: authentic_art
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-10-07
+    q: "Где проходит граница между увлечением публики и попыткой ею манипулировать?"
+    technique: C11
+    topic: T10
+    theme: authentic_art
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-10-08
+    q: "Приходилось ли вам удерживать паузу дольше, чем вам было комфортно, из-за реакции зала?"
+    technique: C11
+    topic: T10
+    theme: authentic_art
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-10-09
+    q: "Какую часть своего выступления вы создаёте не для записи, а для единственного вечера?"
+    technique: C11
+    topic: T10
+    theme: authentic_art
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-10-10
+    q: "Могло ли присутствие одного человека в зале изменить смысл выступления?"
+    technique: C11
+    topic: T10
+    theme: authentic_art
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-11-01
+    q: "Какая пауза в вашей музыке требует большего мастерства, чем сыгранные ноты?"
+    technique: C12
+    topic: T11
+    theme: authentic_art
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-11-02
+    q: "Есть ли звук, который вы долго считали шумом, пока не научились его слышать?"
+    technique: C12
+    topic: T11
+    theme: authentic_art
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-11-03
+    q: "Когда вам хочется прервать музыкальное высказывание, хотя форма ещё не закончена?"
+    technique: C12
+    topic: T11
+    theme: authentic_art
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-11-04
+    q: "Что изменится, если услышать {композиция} вдвое тише, чем обычно?"
+    technique: C12
+    topic: T11
+    theme: authentic_art
+    precondition: fact
+    basis: grounded
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-11-05
+    q: "Какое качество звука нельзя объяснить его высотой, длительностью и тембром?"
+    technique: C12
+    topic: T11
+    theme: authentic_art
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-11-06
+    q: "В какой момент вы позволяете акустике помещения стать полноценным участником произведения?"
+    technique: C12
+    topic: T11
+    theme: authentic_art
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-11-07
+    q: "Есть ли у вас ощущение, что некоторые ноты лучше оставить несовершенными?"
+    technique: C12
+    topic: T11
+    theme: authentic_art
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-11-08
+    q: "Что становится заметным в вашей музыке, когда перестают звучать самые яркие инструменты?"
+    technique: C12
+    topic: T11
+    theme: authentic_art
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-11-09
+    q: "Чем для вас отличается тишина перед первой нотой от тишины после последней?"
+    technique: C12
+    topic: T11
+    theme: authentic_art
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-11-10
+    q: "Если бы у вас остался всего один звук для музыкального высказывания, что могло бы сделать его выразительным?"
+    technique: C12
+    topic: T11
+    theme: authentic_art
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-12-01
+    q: "Какое первоначальное ограничение сделало {конкретное произведение} возможным?"
+    technique: C13
+    topic: T12
+    theme: craft
+    precondition: fact
+    basis: grounded
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-12-02
+    q: "Где в процессе сочинения вы впервые замечаете форму целиком?"
+    technique: C13
+    topic: T12
+    theme: craft
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-12-03
+    q: "Когда вы понимаете, что красивый фрагмент не принадлежит произведению?"
+    technique: C13
+    topic: T12
+    theme: craft
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-12-04
+    q: "Что в {композиция} появилось последним, хотя сейчас кажется её основой?"
+    technique: C13
+    topic: T12
+    theme: craft
+    precondition: fact
+    basis: grounded
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-12-05
+    q: "Каким способом вы проверяете, выдерживает ли музыкальная идея повторение?"
+    technique: C13
+    topic: T12
+    theme: craft
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-12-06
+    q: "Была ли часть, которую исполнитель понял точнее, чем вы смогли записать?"
+    technique: C13
+    topic: T12
+    theme: craft
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-12-07
+    q: "Есть ли у вас произведение, которое было завершено слишком рано?"
+    technique: C13
+    topic: T12
+    theme: craft
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-12-08
+    q: "Где вы оставляете пространство для решения музыкантов, а где требуете буквальной точности?"
+    technique: C13
+    topic: T12
+    theme: craft
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-12-09
+    q: "Какая работа заставила вас вычеркнуть больше материала, чем оставить?"
+    technique: C13
+    topic: T12
+    theme: craft
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-12-10
+    q: "Что для вас является окончанием композиции: последняя написанная нота, первая репетиция или услышанное исполнение?"
+    technique: C13
+    topic: T12
+    theme: craft
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-13-01
+    q: "В {интервью, год} вы говорили {точная цитата}. В какой мере вы согласны с этим сегодня?"
+    technique: G1
+    topic: T13
+    theme: authentic_art
+    precondition: quote
+    basis: grounded
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-13-02
+    q: "Два ваших высказывания, {цитата A} и {цитата B}, будто противоречат друг другу. Я неверно их сопоставляю или позиция изменилась?"
+    technique: G12
+    topic: T13
+    theme: authentic_art
+    precondition: quote
+    basis: grounded
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-13-03
+    q: "Какая идея, за которую вы когда-то спорили, теперь вызывает у вас сомнение?"
+    technique: D8
+    topic: T13
+    theme: authentic_art
+    precondition: quote
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-13-04
+    q: "Было ли решение, выглядевшее со стороны прорывом, а для вас оказавшееся отступлением?"
+    technique: D8
+    topic: T13
+    theme: authentic_art
+    precondition: quote
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-13-05
+    q: "Когда удача сделала ваше творчество менее свободным?"
+    technique: D8
+    topic: T13
+    theme: authentic_art
+    precondition: quote
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-13-06
+    q: "Кого из современников вы долго недооценивали и что заставило вас пересмотреть мнение?"
+    technique: D8
+    topic: T13
+    theme: authentic_art
+    precondition: quote
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-13-07
+    q: "Какую собственную запись вы сегодня оценили бы противоположно прежней оценке?"
+    technique: D7
+    topic: T13
+    theme: authentic_art
+    precondition: quote
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-13-08
+    q: "Есть ли убеждение, которое вы сохранили вопреки опыту, а не благодаря ему?"
+    technique: D8
+    topic: T13
+    theme: authentic_art
+    precondition: quote
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-13-09
+    q: "Если бы ученик повторил вашу творческую биографию, в какой момент вы посоветовали бы ему свернуть с вашего пути?"
+    technique: G5
+    topic: T13
+    theme: authentic_art
+    precondition: quote
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-13-10
+    q: "В какой точке вашей жизни одно слово (успех, свобода, мастерство) стало означать совсем другое?"
+    technique: D8
+    topic: T13
+    theme: authentic_art
+    precondition: quote
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-14-01
+    q: "Какую музыкальную традицию, на ваш взгляд, чаще чтят на словах, чем действительно слушают?"
+    technique: E6
+    topic: T14
+    theme: authentic_art
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-14-02
+    q: "Что из музыкального прошлого ошибочно кажется нам «естественным», хотя когда-то было радикальным?"
+    technique: E6
+    topic: T14
+    theme: authentic_art
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-14-03
+    q: "Где начинается профессиональная ответственность за исполнение чужой культурной традиции?"
+    technique: E6
+    topic: T14
+    theme: authentic_art
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-14-04
+    q: "Как коммерческий успех изменил (или мог бы изменить) конкретное ваше музыкальное решение?"
+    technique: E6
+    topic: T14
+    theme: authentic_art
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-14-05
+    q: "Какую распространённую оценку современной музыкальной сцены вы считаете несправедливой?"
+    technique: E6
+    topic: T14
+    theme: authentic_art
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-14-06
+    q: "Есть ли музыка, которую лучше всего понимают люди, не знающие её исторического контекста?"
+    technique: E6
+    topic: T14
+    theme: authentic_art
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-14-07
+    q: "В какой момент привычка к качественному звучанию начинает мешать способности слышать новое?"
+    technique: E6
+    topic: T14
+    theme: authentic_art
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-14-08
+    q: "Какие стороны музыкального образования сегодня развивают исполнительство, но мешают собственному голосу?"
+    technique: E6
+    topic: T14
+    theme: authentic_art
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-14-09
+    q: "Что в нынешней музыкальной индустрии на самом деле стало лучше по сравнению с прошлым?"
+    technique: E6
+    topic: T14
+    theme: authentic_art
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-14-10
+    q: "Если слушатель через сто лет найдёт одну вашу запись, какой неверный вывод об эпохе он может из неё сделать?"
+    technique: E5
+    topic: T14
+    theme: authentic_art
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-15-01
+    q: "Если слушатель глубоко пережил музыку, а затем узнал, что она сгенерирована, должно ли измениться его переживание?"
+    technique: F1
+    topic: T15
+    theme: neuro_era
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-15-02
+    q: "Что в музыкальном произведении для вас принадлежит результату, а что поступку человека, который его создал?"
+    technique: F4
+    topic: T15
+    theme: neuro_era
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-15-03
+    q: "Был ли у вас опыт, когда технически безупречное исполнение оставляло вас равнодушным? Что именно отсутствовало?"
+    technique: F1
+    topic: T15
+    theme: neuro_era
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-15-04
+    q: "Представим, что алгоритм точно воспроизводит ваше звучание и решения. Что тогда останется предметом вашего авторства?"
+    technique: F3
+    topic: T15
+    theme: neuro_era
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-15-05
+    q: "Может ли музыка, созданная без человеческого исполнителя, быть подлинным искусством? По каким критериям вы бы это решали?"
+    technique: F1
+    topic: T15
+    theme: neuro_era
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-15-06
+    q: "Где для вас проходит граница между использованием инструмента, помощью соавтора и передачей авторства системе?"
+    technique: F2
+    topic: T15
+    theme: neuro_era
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-15-07
+    q: "Как бы вы относились к произведению ИИ, которое научило бы вас чему-то существенному в собственном ремесле?"
+    technique: F5
+    topic: T15
+    theme: neuro_era
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-15-08
+    q: "Есть ли риск, что мы называем «человеческим» просто то, что пока не умеем моделировать?"
+    technique: F1
+    topic: T15
+    theme: neuro_era
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-15-09
+    q: "Что сильнее тревожит вас в генеративной музыке: способ производства, права создателей исходных записей или изменение культуры слушания?"
+    technique: F4
+    topic: T15
+    theme: neuro_era
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-15-10
+    q: "Если публика больше не сможет на слух различать человеческое и машинное исполнение, на чём вы будете строить художественную оценку?"
+    technique: F3
+    topic: T15
+    theme: neuro_era
+    precondition: fact
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-16-01
+    q: "Какой вопрос о вашей музыке вам хотелось бы услышать, но журналисты его не задают?"
+    technique: G11
+    topic: T16
+    skip: true
+    theme: deep_experience
+    precondition: skip
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-16-02
+    q: "Какая часть вашего опыта до сих пор почти никак не вошла в произведения?"
+    technique: H1
+    topic: T16
+    skip: true
+    theme: deep_experience
+    precondition: skip
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-16-03
+    q: "Если бы у вас была возможность сохранить не запись, а один вечер музицирования, какой бы вы выбрали и почему?"
+    technique: E4
+    topic: T16
+    skip: true
+    theme: deep_experience
+    precondition: skip
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-16-04
+    q: "Кому из музыкантов вы обязаны чем-то важным, о чём почти никто не знает?"
+    technique: B3
+    topic: T16
+    skip: true
+    theme: deep_experience
+    precondition: skip
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-16-05
+    q: "Что вам пока не удалось понять в собственном отношении к музыке?"
+    technique: M15
+    topic: T16
+    skip: true
+    theme: deep_experience
+    precondition: skip
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-16-06
+    q: "Какую мысль из сегодняшнего разговора вы бы хотели оспорить после того, как мы закончим?"
+    technique: M17
+    topic: T16
+    skip: true
+    theme: deep_experience
+    precondition: skip
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-16-07
+    q: "О чём вам пришлось изменить мнение прямо во время нашего разговора, если такое произошло?"
+    technique: M17
+    topic: T16
+    skip: true
+    theme: deep_experience
+    precondition: skip
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-16-08
+    q: "Какой музыкальный вопрос вы не хотите закрывать окончательным ответом?"
+    technique: M15
+    topic: T16
+    skip: true
+    theme: deep_experience
+    precondition: skip
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-16-09
+    q: "Если через много лет сохранится лишь одна фраза из этого интервью, какую мысль вы хотели бы, чтобы она передавала?"
+    technique: H5
+    topic: T16
+    skip: true
+    theme: deep_experience
+    precondition: skip
+    basis: personal
+    src: nj-bank-v01
+    ref: []
+
+  - id: NJ-16-10
+    q: "Мы говорили о {конкретная важная тема собеседника}. Что я не спросил, чтобы действительно её понять?"
+    technique: H2
+    topic: T16
+    skip: true
+    theme: deep_experience
+    precondition: skip
+    basis: grounded
+    src: nj-bank-v01
+    ref: []
