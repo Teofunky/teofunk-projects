@@ -30,6 +30,14 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import interviewer as iv  # noqa: E402
 
+# Python с python.org на Mac не видит системные сертификаты, и HTTPS к Telegram и OpenAI падает
+# с CERTIFICATE_VERIFY_FAILED. truststore (ставится вместе с anthropic) берёт сертификаты из macOS.
+try:
+    import truststore
+    truststore.inject_into_ssl()
+except Exception:  # нет библиотеки: остаются сертификаты Python по умолчанию
+    pass
+
 QUIET = 40                       # секунд тишины, после которых ответ считается законченным
 RETRY_AFTER = 60                 # повтор хода после сбоя API
 STT_MODEL = os.environ.get("NJ_STT_MODEL", "gpt-4o-transcribe")
@@ -310,7 +318,12 @@ def main(argv=None):
     bot = Bot(tg, anthropic.Anthropic(), s.get("model", a.model), iv.build_system(dossier, plan),
               s, folder, quiet=a.quiet)
     bot.save()
-    name = tg.me()["username"]
+    print("Подключаюсь к Telegram...", flush=True)
+    try:
+        name = tg.me()["username"]
+    except Exception as e:
+        sys.exit(f"Не удалось подключиться к Telegram: {e}\n"
+                 "Проверьте токен бота (TELEGRAM_BOT_TOKEN) и интернет.")
     print(f"\nБот @{name} работает.")
     print(f"Ссылка для героя:     https://t.me/{name}?start={s['invite']}")
     print(f"Ссылка наблюдателя:   https://t.me/{name}?start={s['editor_token']}")
