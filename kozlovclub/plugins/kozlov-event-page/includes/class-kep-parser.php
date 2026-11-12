@@ -114,9 +114,12 @@ class KEP_Parser {
 		if ( ! $btn ) {
 			$btn = self::q1( $x, './/*[@tc-event]', $root );
 		}
+		// Галочку «Кнопка Регистрация» (поле btn_text_register) тема показывает текстом кнопки:
+		// «Регистрация» вместо «Купить билет». Берём признак оттуда же, чтобы новая страница писала то же самое.
 		$d['tc'] = ( $btn && '' !== trim( $btn->getAttribute( 'tc-event' ) ) ) ? array(
-			'id'    => trim( $btn->getAttribute( 'tc-event' ) ),
-			'class' => trim( $btn->getAttribute( 'class' ) ),
+			'id'       => trim( $btn->getAttribute( 'tc-event' ) ),
+			'class'    => trim( $btn->getAttribute( 'class' ) ),
+			'register' => (bool) preg_match( '/регистрац|register/iu', self::text( $btn ) ),
 		) : null;
 
 		$cal           = self::q1( $x, './/*[' . self::c( 'add_to_calendar' ) . ']//a[@href]', $root );

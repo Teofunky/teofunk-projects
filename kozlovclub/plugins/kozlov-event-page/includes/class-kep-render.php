@@ -135,12 +135,16 @@ class KEP_Render {
 		$h     = '';
 		switch ( $d['type'] ) {
 			case 'ticket':
+				$reg = self::is_register( $d );
+				if ( $reg ) {
+					$price = self::register_price( $price );
+				}
 				$h .= '<div class="kep-price"><span class="kep-price-v">' . esc_html( $price ) . '</span>';
-				if ( '' !== $s['price_note'] ) {
+				if ( '' !== $s['price_note'] && ! $reg ) { // «без сервисного сбора» у бесплатной регистрации ни к чему
 					$h .= '<span class="kep-price-n">' . esc_html( $s['price_note'] ) . '</span>';
 				}
 				$h .= '</div>';
-				$h .= self::tc_button( $d['tc'], 'Купить билет', $compact ? '' : 'kep-buy-main' );
+				$h .= self::tc_button( $d['tc'], self::tc_label( $d ), $compact ? '' : 'kep-buy-main' );
 				break;
 			case 'deposit':
 			case 'free':
@@ -178,6 +182,22 @@ class KEP_Render {
 	 * Кнопка Ticketscloud: видимая кнопка и прозрачная кнопка виджета поверх неё,
 	 * как это сделано в теме.
 	 */
+	private static function is_register( $d ) {
+		return ! empty( $d['tc']['register'] );
+	}
+
+	private static function tc_label( $d ) {
+		return self::is_register( $d ) ? 'Регистрация' : 'Купить билет';
+	}
+
+	/**
+	 * Цена у события с регистрацией: пусто или одни нули («0», «0 ₽») показываются как «Вход свободный»,
+	 * любой другой текст редактора остаётся как есть.
+	 */
+	private static function register_price( $price ) {
+		return preg_match( '/[1-9]/', $price ) || preg_match( '/\p{L}{3,}/u', preg_replace( '/руб\w*|₽/iu', '', $price ) ) ? $price : 'Вход свободный';
+	}
+
 	private static function tc_button( $tc, $label, $id_class ) {
 		$cls = trim( 'kep-tc ' . $tc['class'] );
 		return '<div class="kep-cta-wrap ' . esc_attr( $id_class ) . '"><span class="kep-cta" aria-hidden="true">' . esc_html( $label ) . '</span>'
@@ -500,7 +520,10 @@ class KEP_Render {
 		$left  = '<span class="kep-bar-t"><span class="kep-bar-p">' . esc_html( $price ) . '</span><span class="kep-bar-d">' . esc_html( $sub ) . '</span></span>';
 		switch ( $d['type'] ) {
 			case 'ticket':
-				$right = self::tc_button( $d['tc'], 'Купить билет', 'kep-bar-cta' );
+				if ( self::is_register( $d ) ) {
+					$left = '<span class="kep-bar-t"><span class="kep-bar-p">' . esc_html( self::register_price( $price ) ) . '</span><span class="kep-bar-d">' . esc_html( $sub ) . '</span></span>';
+				}
+				$right = self::tc_button( $d['tc'], self::tc_label( $d ), 'kep-bar-cta' );
 				break;
 			case 'deposit':
 			case 'free':
@@ -571,8 +594,6 @@ class KEP_Render {
 		if ( preg_match( '/^[«"“]/u', $p ) ) {
 			return $p;
 		}
-		// кавычки внутри программы становятся внутренними: «Презентация альбома „Modern Nomad“»
-		$p = str_replace( array( '«', '»' ), array( '„', '“' ), $p );
 		return '«' . $p . '»';
 	}
 

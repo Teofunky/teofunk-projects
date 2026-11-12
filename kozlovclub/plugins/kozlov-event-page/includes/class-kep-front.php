@@ -36,7 +36,7 @@ class KEP_Front {
 		if ( $editor && 'new' === $force ) {
 			return true;
 		}
-		if ( ! KEP_Data::display_hero_id( $post_id ) ) {
+		if ( ! KEP_Data::hero_id( $post_id ) ) {
 			return false;
 		}
 		$mode = KEP_Settings::get( 'mode' );
@@ -76,7 +76,7 @@ class KEP_Front {
 		self::$is_new  = true;
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'assets' ), 20 );
 		add_filter( 'body_class', array( __CLASS__, 'body_class' ) );
-		self::social_image( KEP_Data::display_hero_id( $post_id ) );
+		self::social_image( KEP_Data::hero_id( $post_id ) );
 		ob_start( array( __CLASS__, 'filter_html' ) );
 	}
 
@@ -165,6 +165,9 @@ class KEP_Front {
 				return self::fail( $html, 'Кнопка Ticketscloud есть в анонсе, но не распознана.' );
 			}
 			$post_id = self::$post_id;
+			if ( ! empty( $d['tc'] ) && empty( $d['tc']['register'] ) && get_post_meta( $post_id, 'btn_text_register', true ) ) {
+				$d['tc']['register'] = true; // галочка «Регистрация» в анонсе, даже если тема написала кнопку иначе
+			}
 			if ( empty( $d['artists'] ) ) {
 				$d['artists'] = KEP_Data::ka_artists( $post_id );
 			}
@@ -175,7 +178,7 @@ class KEP_Front {
 			$d     = self::apply_fields( $d, $post_id, $code );
 			$ctx   = array(
 				'post_id' => $post_id,
-				'hero_id' => KEP_Data::display_hero_id( $post_id ),
+				'hero_id' => KEP_Data::hero_id( $post_id ),
 				'program' => KEP_Data::program( $post_id ),
 				'date'    => $date,
 				'code'    => $code,
