@@ -2,8 +2,8 @@
 /**
  * Plugin Name:       Kozlov Perf
  * Plugin URI:        https://kozlovclub.ru/
- * Description:       Изолированные оптимизации загрузки: нативная ленивая загрузка вместо a3 Lazy Load, уборка неиспользуемых скриптов (FancyBox, YouTube Embed Plus, emoji), preconnect, дедупликация тегов. Не меняет тему, данные и другие плагины. Отключается галочкой в настройках, параметром ?kperf=off или деактивацией.
- * Version:           1.1.0
+ * Description:       Изолированные оптимизации загрузки: нативная ленивая загрузка вместо a3 Lazy Load, превью нужного размера для retina (srcset только из лёгких вариантов с WebP), уборка неиспользуемых скриптов (FancyBox, YouTube Embed Plus, emoji), preconnect, дедупликация тегов. Не меняет тему, данные и другие плагины. Отключается галочкой в настройках, параметром ?kperf=off или деактивацией.
+ * Version:           1.2.0
  * Author:            Kozlov Club
  * Requires at least: 6.3
  * Requires PHP:      7.4
@@ -18,7 +18,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class Kozlov_Perf {
 
 	const OPTION  = 'kozlov_perf_options';
-	const VERSION = '1.1.0';
+	const VERSION = '1.2.0';
+
+	/**
+	 * sizes для карточек афиши главной (size-category-thumb2): ширина картинки в теме KozlovCLub по замеру
+	 * 12.11.2026 (2 колонки до 750 px, 3 до 1030, 2 до 1130, 3 до 1490, 4 до 1800, дальше 375 px).
+	 */
+	const CARD_SIZES = '(max-width: 750px) calc(50vw - 22px), (max-width: 1030px) calc(33.33vw - 50px), (max-width: 1130px) calc(50vw - 90px), (max-width: 1490px) calc(33.33vw - 80px), (max-width: 1800px) calc(25vw - 75px), 375px';
+
+	/** Сколько превью без srcset за одну страницу можно сопоставить с вложением (запросы к базе). */
+	const FILL_LIMIT = 40;
 
 	/**
 	 * Тело тега с учётом кавычек: символ > внутри значения атрибута не завершает тег.
@@ -46,7 +55,11 @@ final class Kozlov_Perf {
 			'enabled'          => 1,
 			'native_lazy'      => 1,
 			'eager_count'      => 8,
-			'thumb_srcset'     => 1,
+			'srcset_mode'      => 'cap',
+			'srcset_max'       => 1024,
+			'srcset_webp'      => 1,
+			'srcset_fill'      => 1,
+			'card_sizes'       => self::CARD_SIZES,
 			'strip_unused'     => 1,
 			'dequeue_patterns' => "jquery.animateNumber",
 			'defer_patterns'   => '',
@@ -61,8 +74,14 @@ final class Kozlov_Perf {
 	}
 
 	private function __construct() {
-		$saved      = get_option( self::OPTION, array() );
-		$this->opts = wp_parse_args( is_array( $saved ) ? $saved : array(), self::defaults() );
+		$saved = get_option( self::OPTION, array() );
+		$saved = is_array( $saved ) ? $saved : array();
+		// Настройки 1.1.0: галочка thumb_srcset. Снятая галочка значила «srcset не трогать».
+		if ( ! isset( $saved['srcset_mode'] ) && isset( $saved['thumb_srcset'] ) && empty( $saved['thumb_srcset'] ) ) {
+			$saved['srcset_mode'] = 'keep';
+		}
+		unset( $saved['thumb_srcset'] );
+		$this->opts = wp_parse_args( $saved, self::defaults() );
 
 		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
 		add_action( 'admin_init', array( $this, 'admin_init' ) );
@@ -122,6 +141,11 @@ final class Kozlov_Perf {
 
 	private function active() {
 		return ! empty( $this->opts['enabled'] ) && ! $this->bypassed();
+	}
+
+	/** Работает ли обработка srcset у превью (ограничение, удаление или дополнение). */
+	private function srcset_on() {
+		return 'keep' !== $this->opt( 'srcset_mode' ) || (bool) $this->opt( 'srcset_fill' );
 	}
 
 	/* ------------------------------------------------------------------ */
@@ -322,7 +346,7 @@ final class Kozlov_Perf {
 		if ( isset( $_SERVER['REQUEST_METHOD'] ) && 'GET' !== strtoupper( (string) $_SERVER['REQUEST_METHOD'] ) ) {
 			return;
 		}
-		if ( ! $this->opt( 'native_lazy' ) && ! $this->opt( 'strip_unused' ) && ! $this->opt( 'dedupe' ) && ! $this->opt( 'mobile_zoom' ) && ! $this->patterns( 'dequeue_patterns' ) ) {
+		if ( ! $this->opt( 'native_lazy' ) && ! $this->srcset_on() && ! $this->opt( 'strip_unused' ) && ! $this->opt( 'dedupe' ) && ! $this->opt( 'mobile_zoom' ) && ! $this->patterns( 'dequeue_patterns' ) ) {
 			return;
 		}
 		ob_start( array( $this, 'process_html' ) );
@@ -349,7 +373,7 @@ final class Kozlov_Perf {
 			$t0  = microtime( true );
 			$out = $html;
 
-			if ( $this->opt( 'native_lazy' ) ) {
+			if ( $this->opt( 'native_lazy' ) || $this->srcset_on() ) {
 				$out = $this->step( $out, 'images' );
 			}
 			if ( $this->opt( 'strip_unused' ) || $this->opt( 'native_lazy' ) || $this->patterns( 'dequeue_patterns' ) ) {
@@ -417,61 +441,63 @@ final class Kozlov_Perf {
 	/* ---------- шаг 1: картинки ---------- */
 
 	private function images( $html ) {
+		$lazy     = (bool) $this->opt( 'native_lazy' );
 		$eager    = max( 0, (int) $this->opt( 'eager_count' ) );
-		$thumbs   = (bool) $this->opt( 'thumb_srcset' );
-		$a3_page  = ( false !== stripos( $html, 'data-lazy-type' ) || false !== stripos( $html, 'lazy_placeholder' ) );
+		$a3_page  = $lazy && ( false !== stripos( $html, 'data-lazy-type' ) || false !== stripos( $html, 'lazy_placeholder' ) );
 		$count    = 0;
 		$lazied   = 0;
 		$reverted = 0;
-		$srcset_dropped = 0;
 		$self     = $this;
+
+		$this->stats['srcset_capped']  = 0;
+		$this->stats['srcset_dropped'] = 0;
+		$this->stats['srcset_filled']  = 0;
 
 		$res = $this->outside(
 			$html,
 			array( 'comment', 'script', 'noscript', 'style', 'template', 'textarea' ),
-			function ( $part ) use ( &$count, &$lazied, &$reverted, &$srcset_dropped, $eager, $thumbs, $a3_page, $self ) {
+			function ( $part ) use ( &$count, &$lazied, &$reverted, $lazy, $eager, $a3_page, $self ) {
 				return preg_replace_callback(
 					'/<(img|iframe|video|source)\b' . Kozlov_Perf::ATTRS . '>/i',
-					function ( $m ) use ( &$count, &$lazied, &$reverted, &$srcset_dropped, $eager, $thumbs, $a3_page, $self ) {
+					function ( $m ) use ( &$count, &$lazied, &$reverted, $lazy, $eager, $a3_page, $self ) {
 						$tag  = $m[0];
 						$name = strtolower( $m[1] );
 
-						$is_a3 = ( false !== stripos( $tag, 'data-lazy-type' ) || false !== stripos( $tag, 'lazy_placeholder' ) );
-						// <source data-srcset> внутри <picture> a3 не помечает: восстанавливаем, если на странице есть a3-разметка.
-						if ( ! $is_a3 && 'source' === $name && $a3_page && preg_match( '/\sdata-srcset\s*=/i', $tag ) && ! preg_match( '/\ssrcset\s*=/i', $tag ) ) {
-							$is_a3 = true;
-						}
-						if ( $is_a3 ) {
-							$tag = $self->revert_a3( $tag );
-							$reverted++;
+						if ( $lazy ) {
+							$is_a3 = ( false !== stripos( $tag, 'data-lazy-type' ) || false !== stripos( $tag, 'lazy_placeholder' ) );
+							// <source data-srcset> внутри <picture> a3 не помечает: восстанавливаем, если на странице есть a3-разметка.
+							if ( ! $is_a3 && 'source' === $name && $a3_page && preg_match( '/\sdata-srcset\s*=/i', $tag ) && ! preg_match( '/\ssrcset\s*=/i', $tag ) ) {
+								$is_a3 = true;
+							}
+							if ( $is_a3 ) {
+								$tag = $self->revert_a3( $tag );
+								$reverted++;
+							}
 						}
 						if ( 'img' !== $name ) {
 							return $tag;
 						}
 
-						// Превью (src вида …-450x338.jpg) со srcset: браузер на retina берёт из srcset
-						// оригинал 800+ КБ вместо превью. Оставляем только src.
-						if ( $thumbs && preg_match( '/\ssrcset\s*=/i', $tag ) && preg_match( '/\ssrc\s*=\s*["\'][^"\']*-\d{2,4}x\d{2,4}\.(?:jpe?g|png|gif|webp|avif)(?:[?#][^"\']*)?["\']/i', $tag ) ) {
-							$tag = preg_replace( '/\ssrcset\s*=\s*(["\'])[^"\']*\1/i', '', $tag, 1 );
-							$tag = preg_replace( '/\ssizes\s*=\s*(["\'])[^"\']*\1/i', '', $tag, 1 );
-							$srcset_dropped++;
+						$tag = $self->thumb_srcset( $tag );
+
+						if ( $lazy ) {
+							$count++;
+							$has_loading = (bool) preg_match( '/\sloading\s*=/i', $tag );
+							if ( $count <= $eager ) {
+								// Первые N картинок: грузим сразу (убираем lazy, если ядро его поставило).
+								if ( $has_loading ) {
+									$tag = preg_replace( '/\sloading\s*=\s*(["\'])lazy\1/i', '', $tag, 1 );
+								}
+							} elseif ( ! $has_loading ) {
+								$tag = $self->add_attr( $tag, 'loading="lazy"' );
+								if ( ! preg_match( '/\sdecoding\s*=/i', $tag ) ) {
+									$tag = $self->add_attr( $tag, 'decoding="async"' );
+								}
+								$lazied++;
+							}
 						}
 
-						$count++;
-						$has_loading = (bool) preg_match( '/\sloading\s*=/i', $tag );
-						if ( $count <= $eager ) {
-							// Первые N картинок: грузим сразу (убираем lazy, если ядро его поставило).
-							if ( $has_loading ) {
-								$tag = preg_replace( '/\sloading\s*=\s*(["\'])lazy\1/i', '', $tag, 1 );
-							}
-						} elseif ( ! $has_loading ) {
-							$tag = $self->add_attr( $tag, 'loading="lazy"' );
-							if ( ! preg_match( '/\sdecoding\s*=/i', $tag ) ) {
-								$tag = $self->add_attr( $tag, 'decoding="async"' );
-							}
-							$lazied++;
-						}
-						return $tag;
+						return $self->sizes_auto( $tag );
 					},
 					$part
 				);
@@ -481,11 +507,365 @@ final class Kozlov_Perf {
 		if ( null === $res ) {
 			return $html;
 		}
-		$this->stats['img_total']   = $count;
-		$this->stats['img_lazy']    = $lazied;
-		$this->stats['a3_reverted'] = $reverted;
-		$this->stats['srcset_dropped'] = $srcset_dropped;
+		if ( $lazy ) {
+			$this->stats['img_total']   = $count;
+			$this->stats['img_lazy']    = $lazied;
+			$this->stats['a3_reverted'] = $reverted;
+		}
+		foreach ( array( 'srcset_capped', 'srcset_dropped', 'srcset_filled' ) as $k ) {
+			if ( empty( $this->stats[ $k ] ) ) {
+				unset( $this->stats[ $k ] );
+			}
+		}
 		return $res;
+	}
+
+	/* ---------- превью и srcset ---------- */
+
+	/** Значение атрибута тега или null. */
+	public function attr( $tag, $name ) {
+		if ( preg_match( '/\s' . preg_quote( $name, '/' ) . '\s*=\s*(["\'])(.*?)\1/is', $tag, $m ) ) {
+			return html_entity_decode( $m[2], ENT_QUOTES, 'UTF-8' );
+		}
+		return null;
+	}
+
+	/** Ставит атрибут (заменяет существующий или добавляет). */
+	public function set_attr( $tag, $name, $value ) {
+		$pair = $name . '="' . esc_attr( $value ) . '"';
+		$re   = '/\s' . preg_quote( $name, '/' ) . '\s*=\s*(["\'])[^"\']*\1/i';
+		if ( preg_match( $re, $tag ) ) {
+			return preg_replace_callback(
+				$re,
+				function () use ( $pair ) {
+					return ' ' . $pair;
+				},
+				$tag,
+				1
+			);
+		}
+		return $this->add_attr( $tag, $pair );
+	}
+
+	public function drop_attr( $tag, $name ) {
+		return preg_replace( '/\s' . preg_quote( $name, '/' ) . '\s*=\s*(["\'])[^"\']*\1/i', '', $tag, 1 );
+	}
+
+	/** Ширина и высота превью из имени файла (…-450x338.jpg) или null для оригинала. */
+	private function thumb_dims( $url ) {
+		$path = (string) wp_parse_url( $url, PHP_URL_PATH );
+		if ( preg_match( '/-(\d{2,4})x(\d{2,4})\.(?:jpe?g|png|gif|webp)$/i', $path, $m ) ) {
+			return array( (int) $m[1], (int) $m[2] );
+		}
+		return null;
+	}
+
+	/**
+	 * Превью (src вида …-450x338.jpg) получает srcset нужного размера.
+	 *
+	 * Режим cap (по умолчанию): из srcset WordPress остаются только варианты не шире srcset_max, у которых рядом
+	 * лежит WebP (его отдаёт WebP Express через <picture>), и без почти одинаковых по ширине. Тогда экран retina
+	 * берёт вариант 768–1024 px весом в десятки килобайт, а не тяжёлый JPEG/PNG оригинал, как было до 1.1.0.
+	 * Режим drop: srcset убирается (поведение 1.1.0). Режим keep: srcset не трогаем.
+	 * Превью без srcset (собранные плагинами вручную) получают его по адресу картинки, если включено srcset_fill.
+	 */
+	public function thumb_srcset( $tag ) {
+		try {
+			$src = $this->attr( $tag, 'src' );
+			if ( null === $src || '' === $src || ! $this->thumb_dims( $src ) ) {
+				return $tag;
+			}
+			$mode   = (string) $this->opt( 'srcset_mode' );
+			$srcset = $this->attr( $tag, 'srcset' );
+			if ( null === $this->upload_rel( $src ) ) {
+				// Превью не из uploads (чужой домен, CDN): как в 1.1.0, без srcset.
+				if ( null !== $srcset && 'keep' !== $mode ) {
+					$this->stats['srcset_dropped']++;
+					return $this->drop_attr( $this->drop_attr( $tag, 'srcset' ), 'sizes' );
+				}
+				return $tag;
+			}
+
+			if ( null !== $srcset && '' !== trim( $srcset ) ) {
+				if ( 'keep' === $mode ) {
+					return $tag;
+				}
+				$list = ( 'cap' === $mode ) ? $this->pick( $this->parse_srcset( $srcset ), $src ) : null;
+				if ( null === $list ) {
+					$tag = $this->drop_attr( $this->drop_attr( $tag, 'srcset' ), 'sizes' );
+					$this->stats['srcset_dropped']++;
+					return $tag;
+				}
+				$this->stats['srcset_capped']++;
+				return $this->apply_srcset( $tag, $list, $src );
+			}
+
+			if ( 'cap' !== $mode || ! $this->opt( 'srcset_fill' ) ) {
+				return $tag;
+			}
+			$list = $this->fill_list( $src );
+			if ( null === $list ) {
+				return $tag;
+			}
+			$this->stats['srcset_filled']++;
+			return $this->apply_srcset( $tag, $list, $src );
+		} catch ( \Throwable $e ) {
+			return $tag;
+		}
+	}
+
+	private function apply_srcset( $tag, array $list, $src ) {
+		$parts = array();
+		foreach ( $list as $e ) {
+			$parts[] = $e['url'] . ' ' . $e['w'] . 'w';
+		}
+		// Разделитель строго ", ": так его разбирает WebP Express при сборке <picture>.
+		$tag = $this->set_attr( $tag, 'srcset', implode( ', ', $parts ) );
+
+		$class = (string) $this->attr( $tag, 'class' );
+		$card  = trim( (string) $this->opt( 'card_sizes' ) );
+		if ( '' !== $card && preg_match( '/(?:^|\s)size-category-thumb2(?:\s|$)/', $class ) ) {
+			$sizes = $card;
+		} else {
+			$sizes = $this->attr( $tag, 'sizes' );
+			$sizes = ( null !== $sizes ) ? preg_replace( '/^\s*auto\s*,\s*/i', '', $sizes ) : '';
+			if ( '' === trim( $sizes ) ) {
+				$w     = (int) $this->attr( $tag, 'width' );
+				$dims  = $this->thumb_dims( $src );
+				$w     = $w > 0 ? $w : (int) $dims[0];
+				$sizes = '(max-width: ' . $w . 'px) 100vw, ' . $w . 'px';
+			}
+		}
+		$tag = $this->set_attr( $tag, 'sizes', $sizes );
+		return $this->set_attr( $tag, 'data-kperf', 'srcset' );
+	}
+
+	/**
+	 * Ленивой картинке с нашим srcset: sizes="auto, …". Браузеры с поддержкой (Chrome 126+) берут вариант по
+	 * фактической ширине картинки, остальные пропускают auto и читают список дальше.
+	 */
+	public function sizes_auto( $tag ) {
+		if ( 'srcset' !== $this->attr( $tag, 'data-kperf' ) || ! preg_match( '/\sloading\s*=\s*(["\'])lazy\1/i', $tag ) ) {
+			return $tag;
+		}
+		$sizes = (string) $this->attr( $tag, 'sizes' );
+		if ( '' === $sizes || preg_match( '/^\s*auto\b/i', $sizes ) ) {
+			return $tag;
+		}
+		return $this->set_attr( $tag, 'sizes', 'auto, ' . $sizes );
+	}
+
+	/** srcset → [ [url, w], … ] или null, если есть дескрипторы не по ширине (x) или запись не разобрать. */
+	private function parse_srcset( $srcset ) {
+		$out = array();
+		foreach ( preg_split( '/,\s+/', trim( $srcset ) ) as $item ) {
+			$item = trim( $item );
+			if ( '' === $item ) {
+				continue;
+			}
+			if ( ! preg_match( '/^(\S+)\s+(\d+)w$/i', $item, $m ) ) {
+				return null;
+			}
+			$out[] = array(
+				'url' => $m[1],
+				'w'   => (int) $m[2],
+			);
+		}
+		return $out ? $out : null;
+	}
+
+	/**
+	 * Отбор вариантов: src всегда остаётся; остальные только из uploads, не шире srcset_max и с WebP рядом
+	 * (если включено srcset_webp). Из почти одинаковых по ширине (разница меньше 10 %) остаётся больший:
+	 * 800 px оригинал вместо 768 px нарезки (он и чётче: один круг сжатия вместо двух).
+	 *
+	 * @return array|null Список по возрастанию ширины или null, если вариантов меньше двух.
+	 */
+	private function pick( $list, $src ) {
+		if ( ! is_array( $list ) ) {
+			return null;
+		}
+		$max     = max( 450, (int) $this->opt( 'srcset_max' ) );
+		$webp    = (bool) $this->opt( 'srcset_webp' );
+		$dims    = $this->thumb_dims( $src );
+		$src_rel = $this->upload_rel( $src );
+		// WebP Express собирает <picture> только если WebP есть для всех вариантов. Нет WebP у самого превью:
+		// <picture> не будет, и браузер взял бы большой JPEG/PNG. Тогда, как в 1.1.0, только превью.
+		if ( null === $src_rel || ( $webp && ! $this->has_webp( $src ) ) ) {
+			return null;
+		}
+		$keep = array();
+		foreach ( $list as $e ) {
+			$rel    = $this->upload_rel( $e['url'] );
+			$is_src = ( $rel === $src_rel );
+			if ( $is_src || null === $rel || isset( $keep[ $rel ] ) || $e['w'] > $max || ( $webp && ! $this->has_webp( $e['url'] ) ) ) {
+				continue;
+			}
+			$e['src']     = false;
+			$keep[ $rel ] = $e;
+		}
+		$src_w = (int) $dims[0];
+		foreach ( $list as $e ) {
+			if ( $this->upload_rel( $e['url'] ) === $src_rel ) {
+				$src_w = (int) $e['w'];
+				break;
+			}
+		}
+		$keep[ $src_rel ] = array(
+			'url' => $src,
+			'w'   => $src_w,
+			'src' => true,
+		);
+		$keep = array_values( $keep );
+		usort(
+			$keep,
+			function ( $a, $b ) {
+				return $b['w'] - $a['w'];
+			}
+		);
+		$out  = array();
+		$last = 0;
+		foreach ( $keep as $e ) {
+			if ( $e['src'] || ! $last || $e['w'] < 0.9 * $last ) {
+				$out[] = $e;
+				$last  = $e['w'];
+			}
+		}
+		if ( count( $out ) < 2 ) {
+			return null;
+		}
+		return array_reverse( $out );
+	}
+
+	/** Варианты для превью без srcset: через вложение WordPress, которому принадлежит файл. */
+	private function fill_list( $src ) {
+		$id = $this->attachment_for( $src );
+		if ( ! $id ) {
+			return null;
+		}
+		$meta = wp_get_attachment_metadata( $id );
+		$dims = $this->thumb_dims( $src );
+		if ( ! is_array( $meta ) || ! $dims || ! function_exists( 'wp_calculate_image_srcset' ) ) {
+			return null;
+		}
+		$srcset = wp_calculate_image_srcset( $dims, $src, $meta, $id );
+		if ( ! is_string( $srcset ) || '' === $srcset ) {
+			return null;
+		}
+		return $this->pick( $this->parse_srcset( $srcset ), $src );
+	}
+
+	/** ID вложения по адресу превью (…-300x225.jpg → оригинал). Результат кешируется, запросов не больше FILL_LIMIT за страницу. */
+	private function attachment_for( $src ) {
+		$key = 'att_' . md5( $src );
+		if ( isset( $this->memo[ $key ] ) ) {
+			return $this->memo[ $key ];
+		}
+		$hit = wp_cache_get( $key, 'kozlov_perf' );
+		if ( false !== $hit ) {
+			return $this->memo[ $key ] = (int) $hit;
+		}
+		if ( $this->lookups >= self::FILL_LIMIT ) {
+			return 0;
+		}
+		$this->lookups++;
+		$abs = $this->absolute_upload_url( $src );
+		$id  = 0;
+		if ( null !== $abs ) {
+			$orig = preg_replace( '/-\d{2,4}x\d{2,4}(\.[a-z0-9]+)$/i', '$1', $abs );
+			$id   = (int) attachment_url_to_postid( $orig );
+			if ( ! $id ) {
+				$id = (int) attachment_url_to_postid( preg_replace( '/(\.[a-z0-9]+)$/i', '-scaled$1', $orig ) );
+			}
+		}
+		wp_cache_set( $key, $id, 'kozlov_perf', DAY_IN_SECONDS );
+		return $this->memo[ $key ] = $id;
+	}
+
+	/** @var array Кеш на время запроса: пути, WebP, вложения. */
+	private $memo = array();
+
+	/** @var int Сколько вложений уже искали в базе на этой странице. */
+	private $lookups = 0;
+
+	/** @var array|null uploads: базовый адрес без схемы, путь, папка. */
+	private $up = null;
+
+	private function uploads() {
+		if ( null === $this->up ) {
+			$u        = wp_get_upload_dir();
+			$base     = isset( $u['baseurl'] ) ? (string) $u['baseurl'] : '';
+			$this->up = array(
+				'abs'  => rtrim( $base, '/' ) . '/',
+				'host' => rtrim( preg_replace( '#^https?:#i', '', $base ), '/' ) . '/',
+				'path' => rtrim( (string) wp_parse_url( $base, PHP_URL_PATH ), '/' ) . '/',
+				'dir'  => isset( $u['basedir'] ) ? rtrim( (string) $u['basedir'], '/\\' ) : '',
+			);
+		}
+		return $this->up;
+	}
+
+	/** Путь файла внутри uploads (декодированный) или null, если адрес не из uploads. */
+	public function upload_rel( $url ) {
+		$k = 'rel_' . $url;
+		if ( array_key_exists( $k, $this->memo ) ) {
+			return $this->memo[ $k ];
+		}
+		$up  = $this->uploads();
+		$u   = preg_replace( '/[?#].*$/', '', html_entity_decode( (string) $url, ENT_QUOTES, 'UTF-8' ) );
+		$u   = preg_replace( '#^https?:#i', '', $u );
+		$rel = null;
+		if ( '/' !== $up['host'] && 0 === stripos( $u, $up['host'] ) ) {
+			$rel = substr( $u, strlen( $up['host'] ) );
+		} elseif ( '/' !== $up['path'] && 0 === strpos( $u, $up['path'] ) && 0 !== strpos( $u, '//' ) ) {
+			$rel = substr( $u, strlen( $up['path'] ) );
+		}
+		if ( null !== $rel ) {
+			$rel = rawurldecode( $rel );
+			if ( '' === $rel || false !== strpos( $rel, '..' ) || false !== strpos( $rel, "\0" ) ) {
+				$rel = null;
+			}
+		}
+		return $this->memo[ $k ] = $rel;
+	}
+
+	private function absolute_upload_url( $url ) {
+		$rel = $this->upload_rel( $url );
+		if ( null === $rel ) {
+			return null;
+		}
+		$up = $this->uploads();
+		// Без процентного кодирования: в _wp_attached_file имена хранятся как есть (кириллица).
+		return $up['abs'] . $rel;
+	}
+
+	/** Есть ли WebP рядом с файлом (форматы хранения WebP Express: рядом с оригиналом или в отдельной папке). */
+	public function has_webp( $url ) {
+		$k = 'webp_' . $url;
+		if ( array_key_exists( $k, $this->memo ) ) {
+			return $this->memo[ $k ];
+		}
+		$rel = $this->upload_rel( $url );
+		$ok  = false;
+		if ( null !== $rel ) {
+			$up    = $this->uploads();
+			$file  = $up['dir'] . '/' . $rel;
+			$noext = preg_replace( '/\.[^.\/]+$/', '', $rel );
+			$wx    = WP_CONTENT_DIR . '/webp-express/webp-images';
+			$doc   = ( 0 === strpos( $file, ABSPATH ) ) ? substr( $file, strlen( ABSPATH ) ) : null;
+			$try   = array( $file . '.webp', $up['dir'] . '/' . $noext . '.webp', $wx . '/uploads/' . $rel . '.webp', $wx . '/uploads/' . $noext . '.webp' );
+			if ( null !== $doc ) {
+				$try[] = $wx . '/doc-root/' . $doc . '.webp';
+				$try[] = $wx . '/doc-root/' . preg_replace( '/\.[^.\/]+$/', '', $doc ) . '.webp';
+			}
+			foreach ( $try as $f ) {
+				if ( @is_file( $f ) ) { // phpcs:ignore WordPress.PHP.NoSilencedErrors
+					$ok = true;
+					break;
+				}
+			}
+		}
+		return $this->memo[ $k ] = $ok;
 	}
 
 	/** Возвращает разметку a3 Lazy Load к обычной: data-src → src, убирает заглушку и классы lazy. */
@@ -924,10 +1304,16 @@ final class Kozlov_Perf {
 	public function sanitize( $in ) {
 		$in  = is_array( $in ) ? $in : array();
 		$out = array();
-		foreach ( array( 'enabled', 'native_lazy', 'thumb_srcset', 'strip_unused', 'emoji', 'head_cleanup', 'dedupe', 'fix_ver', 'block_css', 'mobile_zoom' ) as $k ) {
+		foreach ( array( 'enabled', 'native_lazy', 'srcset_webp', 'srcset_fill', 'strip_unused', 'emoji', 'head_cleanup', 'dedupe', 'fix_ver', 'block_css', 'mobile_zoom' ) as $k ) {
 			$out[ $k ] = empty( $in[ $k ] ) ? 0 : 1;
 		}
 		$out['eager_count'] = isset( $in['eager_count'] ) ? max( 0, min( 50, (int) $in['eager_count'] ) ) : 8;
+		$mode               = isset( $in['srcset_mode'] ) ? (string) $in['srcset_mode'] : 'cap';
+		$out['srcset_mode'] = in_array( $mode, array( 'cap', 'drop', 'keep' ), true ) ? $mode : 'cap';
+		$out['srcset_max']  = isset( $in['srcset_max'] ) ? max( 450, min( 2048, (int) $in['srcset_max'] ) ) : 1024;
+		$sizes              = isset( $in['card_sizes'] ) ? trim( preg_replace( '/\s+/', ' ', sanitize_text_field( $in['card_sizes'] ) ) ) : self::CARD_SIZES;
+		// sizes: только символы медиа-выражений и calc(); иначе значение по умолчанию.
+		$out['card_sizes']  = ( '' === $sizes || preg_match( '/^[a-z0-9\s(),.:%+\-*\/]{1,600}$/i', $sizes ) ) ? $sizes : self::CARD_SIZES;
 		foreach ( array( 'dequeue_patterns', 'defer_patterns', 'preconnect' ) as $k ) {
 			$out[ $k ] = isset( $in[ $k ] ) ? sanitize_textarea_field( $in[ $k ] ) : '';
 		}
@@ -983,7 +1369,34 @@ final class Kozlov_Perf {
 					<label>Сколько первых картинок грузить сразу: <input type="number" min="0" max="50" name="<?php echo esc_attr( $n ); ?>[eager_count]" value="<?php echo esc_attr( (int) $o['eager_count'] ); ?>" style="width:70px"></label>
 					<span class="description">(логотип + слайдер + первый ряд афиши, обычно 6–10)</span>
 				</p>
-				<?php $cb( 'thumb_srcset', 'У превью (src вида …-450x338.jpg) убирать srcset и sizes', 'Без этого браузер на экранах retina берёт из srcset оригинал 200–850 КБ вместо превью 40 КБ: на главной это сотни мегабайт при прокрутке. Превью 450 px для карточки шириной ~200 px это уже 2x.' ); ?>
+				<h2 class="title">Превью для экранов retina</h2>
+				<p style="margin:0 0 6px 0">Превью (src вида …-450x338.jpg) со srcset от WordPress:</p>
+				<?php
+				foreach ( array(
+					'cap'  => 'Оставлять только лёгкие варианты (рекомендуется). Retina получает чёткую картинку 768–1024 px в WebP, обычный экран прежнее превью 450 px. Тяжёлые оригиналы в srcset не попадают.',
+					'drop' => 'Убирать srcset (как в 1.1.0). Везде одно превью 450 px: на retina и на широких карточках оно растягивается и мылится.',
+					'keep' => 'Не трогать (srcset WordPress целиком, вместе с оригиналами 200–850 КБ).',
+				) as $val => $label ) {
+					printf(
+						'<label style="display:block;margin:4px 0 4px 12px"><input type="radio" name="%1$s[srcset_mode]" value="%2$s" %3$s> %4$s</label>',
+						esc_attr( $n ),
+						esc_attr( $val ),
+						checked( $o['srcset_mode'], $val, false ),
+						esc_html( $label )
+					);
+				}
+				?>
+				<p style="margin:8px 0 10px 24px">
+					<label>Самый широкий вариант в srcset, px: <input type="number" min="450" max="2048" name="<?php echo esc_attr( $n ); ?>[srcset_max]" value="<?php echo esc_attr( (int) $o['srcset_max'] ); ?>" style="width:80px"></label>
+					<span class="description">(1024 хватает карточкам до 512 px на retina; оригинал 800 px из srcset тоже проходит)</span>
+				</p>
+				<?php $cb( 'srcset_webp', 'Брать в srcset только варианты, у которых рядом есть WebP', 'WebP Express собирает &lt;picture&gt; только если WebP есть для каждого варианта. С галочкой так будет всегда, и retina получает WebP весом в десятки килобайт. Если WebP нет у самого превью, у него остаётся только src.' ); ?>
+				<?php $cb( 'srcset_fill', 'Добавлять srcset превью, у которых его нет', 'Например, «Ещё в этот вечер» на странице концерта (картинки 300×225 без srcset). Вложение находится по адресу файла, результат кешируется на сутки, не больше ' . self::FILL_LIMIT . ' поисков на страницу.' ); ?>
+				<p style="margin:0 0 10px 24px">
+					<label>sizes для карточек афиши (класс size-category-thumb2):<br>
+					<textarea name="<?php echo esc_attr( $n ); ?>[card_sizes]" rows="3" style="width:100%;max-width:600px;font-family:monospace;font-size:12px"><?php echo esc_textarea( $o['card_sizes'] ); ?></textarea></label>
+					<span class="description">Ширина картинки карточки в теме при разной ширине окна (замер 12.11.2026). Пусто = sizes от WordPress. Ленивым картинкам впереди добавляется auto: Chrome сам берёт вариант по фактической ширине.</span>
+				</p>
 
 				<h2 class="title">Лишние скрипты и стили</h2>
 				<?php $cb( 'strip_unused', 'Убирать Easy FancyBox и YouTube Embed Plus со страниц, где они не нужны', 'Решение по готовому HTML страницы. FancyBox остаётся, если есть хоть одна ссылка, которую он может перехватить: класс/rel/data с fancybox, ссылка на картинку, PDF, SWF, YouTube, Vimeo, Dailymotion. YouTube Embed Plus остаётся, если на странице есть его embed (классы __youtube_prefs__/epyt-) или шорткод [embedyt].' ); ?>
