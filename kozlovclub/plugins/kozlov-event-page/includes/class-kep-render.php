@@ -466,11 +466,14 @@ class KEP_Render {
 		$stage = $d['stage'];
 		$addr  = self::same_street( $stage, $place['addr'] ) ? '' : $place['addr'];
 		$line  = trim( $stage . ( '' !== $stage && '' !== $addr ? ', ' : '' ) . $addr );
-		$h    .= '<div class="kep-where-row">' . self::icon( 'pin' ) . '<div><strong>' . esc_html( $line ) . '</strong>';
-		if ( '' !== $place['metro'] ) {
-			$h .= '<span>' . esc_html( $place['metro'] ) . '</span>';
+		if ( '' !== $line ) { // сцены нет и адреса нет: строку с меткой не выводим
+			$h .= '<div class="kep-where-row">' . self::icon( 'pin' ) . '<div><strong>' . esc_html( $line ) . '</strong>';
+			if ( '' !== $place['metro'] ) {
+				$h .= '<span>' . esc_html( $place['metro'] ) . '</span>';
+			}
+			$h .= '</div></div>';
 		}
-		$h .= '</div></div></div><div class="kep-where-btns">';
+		$h .= '</div><div class="kep-where-btns">';
 		$map = KEP_Settings::map_url( $ctx['code'] );
 		if ( '' !== $map ) {
 			$h .= '<a class="kep-btn" href="' . esc_url( $map ) . '" target="_blank" rel="noopener">' . self::icon( 'route' ) . 'Маршрут</a>';

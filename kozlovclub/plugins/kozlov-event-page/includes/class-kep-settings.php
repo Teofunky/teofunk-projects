@@ -211,6 +211,9 @@ class KEP_Settings {
 	 * @return array{addr:string,metro:string}
 	 */
 	public static function place( $code ) {
+		if ( '' === (string) $code ) {
+			return array( 'addr' => '', 'metro' => '' ); // сцена не распознана: адрес не угадываем, как и старая страница
+		}
 		$s = self::get();
 		if ( 'u' === $code ) {
 			return array( 'addr' => $s['addr_u'], 'metro' => $s['metro_u'] );
@@ -236,6 +239,9 @@ class KEP_Settings {
 	 * @return string
 	 */
 	public static function map_url( $code ) {
+		if ( '' === (string) $code ) {
+			return '';
+		}
 		$s   = self::get();
 		$own = 'u' === $code ? $s['map_u'] : $s['map_main'];
 		if ( '' !== (string) $own ) {

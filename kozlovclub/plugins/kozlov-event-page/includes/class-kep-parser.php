@@ -12,6 +12,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class KEP_Parser {
 
+	/** Сколько знаков блока может разойтись при подсчёте (пробелы, служебные символы). */
+	const SLACK = 2;
+
 	const MONTHS = array(
 		'янв' => 1, 'фев' => 2, 'мар' => 3, 'апр' => 4, 'мая' => 5, 'май' => 5, 'июн' => 6,
 		'июл' => 7, 'авг' => 8, 'сен' => 9, 'окт' => 10, 'ноя' => 11, 'дек' => 12,
@@ -190,9 +193,13 @@ class KEP_Parser {
 		$d['kept_link'] = 0;
 		$seen_artist    = false;
 
+		$checks = array(); // полнота по каждому блоку: [подпись, знаков в блоке, перенесено до блока]
 		foreach ( $desc->childNodes as $block ) {
 			if ( $block instanceof DOMText ) {
 				$d['orig_len'] += self::len( $block->textContent );
+				if ( self::len( $block->textContent ) > 0 ) {
+					$d['unknown'][] = 'текст вне блоков в описании';
+				}
 				continue;
 			}
 			if ( ! ( $block instanceof DOMElement ) ) {
@@ -205,8 +212,22 @@ class KEP_Parser {
 			if ( preg_match( '/ (bottom_block|concert_nav|buy_button|share_panel) /', $cls ) ) {
 				continue;
 			}
+			// Блок, который новая страница не разбирает (не блок анонса темы и не Kozlov Artists): остаётся старая страница.
+			if ( false === strpos( $cls, ' meta_block ' ) && false === strpos( $cls, ' ka-eb ' ) ) {
+				if ( self::has_content( $x, $block ) ) {
+					$d['unknown'][] = self::label( $block, 'в описании' );
+				}
+				continue;
+			}
+			// Формы, скрипты, кнопки Ticketscloud и обработчики on… в тексте: при выводе (wp_kses_post) они пропадают.
+			if ( false !== strpos( $cls, ' meta_block ' ) ) {
+				foreach ( self::controls( $x, $block ) as $what ) {
+					$d['unknown'][] = $what;
+				}
+			}
 			// Всё остальное считается содержимым анонса, которое нельзя потерять:
 			// текст, картинки и ссылки считаются до разбора и после.
+			$checks[]        = array( self::label( $block, 'в описании' ), self::content_len( $x, $block ), $d['kept_len'] );
 			$d['orig_len']  += self::len( $block->textContent );
 			$d['orig_img']  += $x->query( './/img', $block )->length;
 			$d['orig_link'] += $x->query( './/a[@href]', $block )->length;
@@ -260,7 +281,7 @@ class KEP_Parser {
 					if ( ! $d['quote'] ) {
 						$d['quote'] = $q;
 					}
-					$d['kept_len']  += self::len( $block->textContent );
+					$d['kept_len']  += self::len( $text ) + self::len( self::text( $author_el ) ); // только то, что показывается
 					$d['kept_img']  += self::count_img( $q['html'] . $q['author_html'] );
 					$d['kept_link'] += self::count_link( $q['html'] . $q['author_html'] );
 				}
@@ -314,6 +335,14 @@ class KEP_Parser {
 				$d['kept_link'] += self::count_link( $inner );
 				$d['flow'][]     = array( 't' => 'x', 'i' => count( $d['extra'] ) );
 				$d['extra'][]    = $inner;
+			}
+		}
+
+		// Полнота по каждому блоку, а не только по всему анонсу: блок, из которого перенесено не всё, оставляет старую страницу.
+		foreach ( $checks as $i => $c ) {
+			$kept = ( isset( $checks[ $i + 1 ] ) ? $checks[ $i + 1 ][2] : $d['kept_len'] ) - $c[2];
+			if ( $kept < $c[1] - self::SLACK ) {
+				$d['unknown'][] = sprintf( 'текст, который не перенёсся (%s, %d из %d знаков)', $c[0], max( 0, $kept ), $c[1] );
 			}
 		}
 
@@ -410,9 +439,50 @@ class KEP_Parser {
 		return '' !== self::text( $el ) || $x->query( './/img | .//a[@href] | .//iframe', $el )->length > 0;
 	}
 
-	private static function label( $el ) {
-		$cls = trim( $el->getAttribute( 'class' ) );
-		return 'блок ' . ( '' !== $cls ? '«' . $cls . '»' : $el->tagName ) . ' в шапке анонса';
+	private static function label( $el, $where = 'в шапке анонса' ) {
+		$cls = trim( preg_replace( '/\s+/', ' ', $el->getAttribute( 'class' ) ) );
+		return 'блок ' . ( '' !== $cls ? '«' . $cls . '»' : $el->tagName ) . ' ' . $where;
+	}
+
+	/**
+	 * Что в блоке анонса работает только на старой странице: формы, скрипты, кнопки Ticketscloud,
+	 * обработчики on… При выводе через wp_kses_post теги вырезаются, у кнопки пропадает tc-event.
+	 *
+	 * @param DOMXPath   $x     XPath.
+	 * @param DOMElement $block Блок.
+	 * @return string[]
+	 */
+	private static function controls( $x, $block ) {
+		$out = array();
+		if ( $x->query( './/*[@tc-event]', $block )->length ) {
+			$out[] = 'кнопка Ticketscloud в тексте';
+		}
+		foreach ( array( 'form', 'input', 'select', 'textarea', 'button', 'script', 'object', 'embed', 'canvas', 'svg', 'source' ) as $tag ) {
+			if ( $x->query( './/' . $tag . '[not(@tc-event)]', $block )->length ) {
+				$out[] = 'элемент «' . $tag . '» в тексте';
+			}
+		}
+		$on = $x->query( './/@*[starts-with(name(), "on")]', $block );
+		if ( $on->length ) {
+			$out[] = 'обработчик «' . $on->item( 0 )->nodeName . '» в тексте';
+		}
+		return $out;
+	}
+
+	/**
+	 * Знаков текста в блоке без стилей, скриптов и встраиваний: столько должно перенестись на новую страницу.
+	 *
+	 * @param DOMXPath   $x     XPath.
+	 * @param DOMElement $block Блок.
+	 * @return int
+	 */
+	private static function content_len( $x, $block ) {
+		$skip = 'self::style or self::script or self::template or self::noscript or self::iframe';
+		$n    = self::len( $block->textContent );
+		foreach ( $x->query( './/*[' . $skip . '][not(ancestor::*[' . $skip . '])]', $block ) as $el ) {
+			$n -= self::len( $el->textContent );
+		}
+		return max( 0, $n );
 	}
 
 	/**
