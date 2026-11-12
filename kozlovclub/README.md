@@ -16,7 +16,7 @@
 | [`plugins/kozlov-calendar`](plugins/kozlov-calendar) | Компактный календарь концертов: день или период, прошедшие даты неактивны, число концертов в кнопке | 1 (1.0.0 … 1.0.0) | 1.0.0 | 1.0.0 |
 | [`plugins/kozlov-core`](plugins/kozlov-core) | Модель данных сайта Клуба Алексея Козлова: тип записи «Концерт», сцены, жанры, поля, REST и функции для темы и плагинов | 4 (1.0.0 … 1.2.0) |  | 1.2.0 |
 | [`plugins/kozlov-editor-helpers`](plugins/kozlov-editor-helpers) | Помощь редакторам афиши: автоподстановка Ticketscloud ID при вводе кода события и часовой пояс UTC по умолчанию в новых событиях | 4 (1.0.0 … 1.1.0) | 1.1.0 |  |
-| [`plugins/kozlov-event-page`](plugins/kozlov-event-page) | Новая страница концерта | 19 (1.0.0 … 1.2.1) | 1.0.16 (ветка `kozlov-event-page-1.0.x`) | 1.2.1 |
+| [`plugins/kozlov-event-page`](plugins/kozlov-event-page) | Новая страница концерта | 20 (1.0.0 … 1.2.1) | 1.0.17 (ветка `kozlov-event-page-1.0.x`) | 1.2.1 |
 | [`plugins/kozlov-event-schema`](plugins/kozlov-event-schema) | Разметка schema.org MusicEvent (JSON-LD) и title/description для поисковиков на страницах концертов | 7 (1.0.0 … 1.4.0) | 1.3.0 | 1.4.0 |
 | [`plugins/kozlov-facade`](plugins/kozlov-facade) | Живой фасад клуба вместо слайдера на главной, только на телефонах | 14 (1.0.0 … 1.4.10) | 1.4.10 | 1.4.10 |
 | [`plugins/kozlov-import`](plugins/kozlov-import) | Перенос контента старого kozlovclub.ru (дамп базы от 22.10.2026) в Kozlov Core: пользователи, страницы, меню, концерты, фото | 15 (1.0.0 … 1.6.4) |  | 1.6.4 |
