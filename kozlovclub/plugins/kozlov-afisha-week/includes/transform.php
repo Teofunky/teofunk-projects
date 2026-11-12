@@ -111,7 +111,11 @@ function kaw_unlazy_img( $tag ) {
 	return $tag;
 }
 
-/** Отложенная карточка: картинки обычные и ленивые средствами браузера, без srcset (на retina иначе берётся оригинал). */
+/**
+ * Отложенная карточка: картинки обычные и ленивые средствами браузера.
+ * srcset остаётся, только если его уже ограничил Kozlov Perf 1.2.0+ (метка data-kperf="srcset": в нём лёгкие
+ * варианты с WebP, без тяжёлых оригиналов). Иначе srcset убирается: на retina браузер взял бы оригинал.
+ */
 function kaw_prepare_card( $card ) {
 	// запасная копия картинки для браузеров без JavaScript (a3 Lazy Load): в отложенной карточке не нужна
 	$clean = preg_replace( '#<noscript\b[^>]*>.*?</noscript>#is', '', $card );
@@ -120,7 +124,9 @@ function kaw_prepare_card( $card ) {
 		'#<img\b[^>]*>#i',
 		function ( $m ) {
 			$tag = kaw_unlazy_img( $m[0] );
-			$tag = preg_replace( '#\s(?:srcset|sizes)\s*=\s*(["\'])[^"\']*\1#i', '', $tag );
+			if ( ! preg_match( '#\sdata-kperf\s*=\s*(["\'])srcset\1#i', $tag ) ) {
+				$tag = preg_replace( '#\s(?:srcset|sizes)\s*=\s*(["\'])[^"\']*\1#i', '', $tag );
+			}
 			if ( ! preg_match( '#\sloading\s*=#i', $tag ) ) {
 				$tag = preg_replace( '#^<img\b#i', '<img loading="lazy"', $tag );
 			}

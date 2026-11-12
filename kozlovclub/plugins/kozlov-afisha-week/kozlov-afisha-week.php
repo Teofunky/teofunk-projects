@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       Kozlov Afisha Week
  * Description:       Афиша главной по неделям: сразу видны ближайшие 7 дней, остальное открывает кнопка «Показать концерты …». Карточки дальше недели остаются на странице в отложенном виде, поэтому фильтры и поиск (Kozlov Afisha Filters 1.0.10+) ищут по всей афише. Тему, базу и события не меняет.
- * Version:           1.0.3
+ * Version:           1.0.4
  * Requires at least: 5.3
  * Requires PHP:      7.2
  * Author:            Клуб Алексея Козлова
@@ -32,7 +32,7 @@ if ( defined( 'KAW_VERSION' ) ) {
 	return;
 }
 
-define( 'KAW_VERSION', '1.0.3' );
+define( 'KAW_VERSION', '1.0.4' );
 define( 'KAW_FILE', __FILE__ );
 define( 'KAW_URL', plugin_dir_url( __FILE__ ) );
 
