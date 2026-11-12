@@ -1,0 +1,582 @@
+# Образцы сильных вопросов для «Нейрожурналиста», версия 0.2.
+#
+# Это не переводы: каждый вопрос переформулирован по-русски под разговор с джазовым
+# музыкантом. Источник и номер показывают, где взята идея (номера см. в sources.yaml, поле numbering).
+# {в скобках} то, что подставляется из досье.
+# Поля: id, q (вопрос), technique (код приёма из techniques.yaml), theme, src, ref, note.
+
+version: "0.2"
+updated: "2026-11-12"
+
+questions:
+
+  # Истоки и вход
+
+  - id: Q01
+    q: "Была ли в вашем детстве вера или какая-то духовная жизнь? Что от неё осталось в музыке?"
+    technique: B5
+    theme: deep_experience
+    src: onbeing-cave-2023
+    ref: [1]
+    note: Фирменный первый вопрос Кристы Типпетт.
+
+  - id: Q02
+    q: "Где, по-вашему, в раннем детстве было посеяно чувство тайны, которое потом стало музыкой?"
+    technique: B5
+    theme: deep_experience
+    src: onbeing-rubin-2023
+    ref: [1]
+
+  - id: Q03
+    q: "Был ли путь, который вы всерьёз рассматривали вместо музыки? Что от него в вас осталось?"
+    technique: B5
+    theme: roots
+    src: onbeing-mcferrin-2011
+    ref: [2]
+    note: У Типпетт это вопрос о том, почему Макферрин в юности думал о монастыре.
+
+  - id: Q04
+    q: "Назовите по одной пластинке, книге или событию на каждые пять лет вашей жизни. Начнём с первой."
+    technique: B6
+    theme: roots
+    src: toneglow-orourke
+    ref: [1]
+    note: Список герой присылает до интервью.
+
+  - id: Q05
+    q: "Какая пластинка или фильм в детстве изменили вашу жизнь? Что стало другим на следующий день?"
+    technique: B1
+    theme: roots
+    src: toneglow-orourke
+    ref: [2]
+
+  - id: Q06
+    q: "Чего от вас ждали родители? Совпало ли это с тем, кем вы стали?"
+    technique: B2
+    theme: roots
+    src: freshair-rollins-1994
+    ref: [9]
+
+  - id: Q07
+    q: "Ваши родители слушали ту же музыку, что и вы? Где ваши вкусы разошлись?"
+    technique: B2
+    theme: roots
+    src: toneglow-orourke
+    ref: [8]
+
+  - id: Q08
+    q: "Кто в вашем раннем окружении был по-настоящему художником? Как вы это поняли?"
+    technique: B3
+    theme: roots
+    src: toneglow-railton-2023
+    ref: [10]
+
+  - id: Q09
+    q: "Что место, где вы выросли, дало вашему звуку такого, чего не дала бы никакая школа?"
+    technique: B4
+    theme: roots
+    src: panken-smith-1978
+    ref: [63]
+
+  - id: Q10
+    q: "Какой вопрос вам задают чаще всего? Каким он должен быть, чтобы вам было интересно отвечать?"
+    technique: G11
+    theme: craft
+    src: raskin-carter
+    ref: [12, 25]
+    note: Ответ идёт в стоп-лист этого героя.
+
+  # Слушание
+
+  - id: Q11
+    q: "Давайте послушаем начало {записи}. Что вы слышите в этих минутах сейчас, чего не слышали тогда?"
+    technique: A3
+    theme: authentic_art
+    src: iverson-carter-2007
+    ref: [2]
+
+  - id: Q12
+    q: "Я поставлю запись, не называя исполнителя. Кто это, по-вашему, и что в игре его выдало?"
+    technique: A5
+    theme: authentic_art
+    src: downbeat-blindfold-evans
+    ref: []
+
+  - id: Q13
+    q: "Сколько звёзд из пяти вы бы дали этой записи? Что бы вы изменили, будь это ваша сессия?"
+    technique: A5
+    theme: craft
+    src: downbeat-blindfold-evans
+    ref: []
+
+  - id: Q14
+    q: "Как вы сами слушаете музыку: целыми альбомами или кусками, в наушниках или дома?"
+    technique: C10
+    theme: authentic_art
+    src: raskin-carter
+    ref: [17, 18]
+
+  - id: Q15
+    q: "Какой альбом вы последним прослушали целиком, от начала до конца? Почему именно его?"
+    technique: C10
+    theme: authentic_art
+    src: raskin-carter
+    ref: [19, 20]
+
+  # Ремесло
+
+  - id: Q16
+    q: "Когда вы импровизируете, вы думаете? Если нет, то что происходит вместо мысли?"
+    technique: C1
+    theme: craft
+    src: freshair-rollins-1994
+    ref: [1]
+
+  - id: Q17
+    q: "Как вы занимаетесь сейчас, когда, казалось бы, всё уже умеете?"
+    technique: C6
+    theme: craft
+    src: freshair-rollins-1994
+    ref: [2]
+
+  - id: Q18
+    q: "Что вы физически делаете, когда {особенность игры, например, тянете бит вперёд и звучите расслабленно}?"
+    technique: C1
+    theme: craft
+    src: iverson-carter-2007
+    ref: [7]
+
+  - id: Q19
+    q: "В {вещь} первую минуту нет барабанов. Почему вы решили начать так?"
+    technique: C2
+    theme: craft
+    src: iverson-threadgill-2016
+    ref: [24]
+
+  - id: Q20
+    q: "Этому можно научить или это можно только найти самому?"
+    technique: C3
+    theme: authentic_art
+    src: iverson-carter-2007
+    ref: [9]
+
+  - id: Q21
+    q: "{Имя предшественника}. Что первое приходит в голову?"
+    technique: C4
+    theme: roots
+    src: iverson-carter-2007
+    ref: [25, 26, 28, 30]
+    note: Серия из 3–5 имён вместо вопроса «кто на вас повлиял».
+
+  - id: Q22
+    q: "Каким {партнёр} был на самом деле, вне сцены? Совпадает ли это с его репутацией?"
+    technique: C5
+    theme: deep_experience
+    src: raskin-carter
+    ref: [22]
+
+  - id: Q23
+    q: "Кто научил вас жить в дороге? Или это пришлось понять самому?"
+    technique: C9
+    theme: craft
+    src: raskin-carter
+    ref: [1]
+
+  - id: Q24
+    q: "Есть ли у вас ритуалы перед концертом или перед работой?"
+    technique: C9
+    theme: craft
+    src: gagosian-obrist-gates-2022
+    ref: [10]
+
+  - id: Q25
+    q: "Что снова возвращает вас к инструменту в дни, когда играть не хочется?"
+    technique: C9
+    theme: deep_experience
+    src: gagosian-obrist-gates-2022
+    ref: [7]
+
+  - id: Q26
+    q: "Кому вы показываете вещь, пока она не готова? Чьё мнение может её остановить?"
+    technique: C7
+    theme: craft
+    src: parisreview-murakami-2004
+    ref: [20]
+
+  - id: Q27
+    q: "В чём, кроме музыки, вы пытались стать по-настоящему хорошим? Есть ли связь с тем, как вы играете?"
+    technique: E7
+    theme: authentic_art
+    src: raskin-carter
+    ref: [14, 16]
+
+  - id: Q28
+    q: "{Инструмент} для вас близкий спутник или средство? Менялось ли это со временем?"
+    technique: C8
+    theme: deep_experience
+    src: toneglow-lewis-2021
+    ref: [14]
+
+  - id: Q29
+    q: "Ваша система звучит иначе, чем {близкий метод, например, двенадцатитоновая музыка}. В чём разница изнутри?"
+    technique: C1
+    theme: craft
+    src: iverson-threadgill-2016
+    ref: [38, 39]
+
+  # Путь
+
+  - id: Q30
+    q: "Когда вы решили, что музыка будет делом жизни, кто из близких в вас не поверил?"
+    technique: D1
+    theme: deep_experience
+    src: parisreview-murakami-2004
+    ref: [11, 12]
+
+  - id: Q31
+    q: "Бывает ли у вас страх перед выходом на сцену? Был ли случай, когда тело подвело?"
+    technique: D2
+    theme: deep_experience
+    src: raskin-carter
+    ref: [39, 40, 41]
+
+  - id: Q32
+    q: "Было ли чувство, что вы самозванец, когда вам доверили большую работу?"
+    technique: D2
+    theme: deep_experience
+    src: toneglow-railton-2023
+    ref: [31]
+
+  - id: Q33
+    q: "Вы надолго уходили со сцены. Как вы поняли, что пора вернуться?"
+    technique: D6
+    theme: deep_experience
+    src: freshair-rollins-1994
+    ref: [25]
+
+  - id: Q34
+    q: "Где вы занимались, когда дома было нельзя? Что вы там услышали?"
+    technique: D6
+    theme: craft
+    src: freshair-rollins-1994
+    ref: [24, 26]
+
+  - id: Q35
+    q: "Какая ваша запись нравится вам меньше всего? Что в ней не так?"
+    technique: D7
+    theme: authentic_art
+    src: toneglow-orourke
+    ref: [7]
+
+  - id: Q36
+    q: "Если бы вы могли ответить критику, который не понял вашу первую пластинку, что бы вы сказали?"
+    technique: D4
+    theme: authentic_art
+    src: panken-smith-1978
+    ref: [22]
+
+  - id: Q37
+    q: "Вас называют {ярлык}. Это про вас или про тех, кто так говорит?"
+    technique: D5
+    theme: authentic_art
+    src: toneglow-railton-2023
+    ref: [7]
+
+  - id: Q38
+    q: "В молодости вы считали себя радикалом? Назвали бы вы себя так сейчас?"
+    technique: D5
+    theme: authentic_art
+    src: raskin-carter
+    ref: [29, 30]
+
+  - id: Q39
+    q: "Вы чувствовали себя частью сообщества музыкантов или всегда немного в стороне?"
+    technique: D3
+    theme: roots
+    src: parisreview-murakami-2004
+    ref: [24]
+
+  # Глубокие переживания
+
+  - id: Q40
+    q: "Можно спросить о {трудная тема}? Если не хотите, скажите, и пойдём дальше."
+    technique: G10
+    theme: deep_experience
+    src: toneglow-orourke
+    ref: [5]
+    note: Обязательный ход перед вопросами Q41–Q44.
+
+  - id: Q41
+    q: "Что вы узнали о себе в самый трудный период? Как это слышно в вашей игре сейчас?"
+    technique: E8
+    theme: deep_experience
+    src: freshair-rollins-1994
+    ref: [20, 22]
+    note: Только если герой сам публично говорил об этом периоде.
+
+  - id: Q42
+    q: "Чего вы тогда боялись больше всего?"
+    technique: E8
+    theme: deep_experience
+    src: freshair-rollins-1994
+    ref: [15]
+
+  - id: Q43
+    q: "Расскажите о человеке, которому посвящена {вещь}. Какое воспоминание о нём самое живое?"
+    technique: E3
+    theme: deep_experience
+    src: toneglow-railton-2023
+    ref: [23, 24]
+
+  - id: Q44
+    q: "Кого из ушедших партнёров вам не хватает на сцене больше всего? Что исчезло вместе с ним?"
+    technique: E3
+    theme: deep_experience
+    src: iverson-carter-2007
+    ref: [12]
+
+  - id: Q45
+    q: "Есть ли в вашей музыке тоска по чему-то, чего нельзя достичь? Откуда она?"
+    technique: E9
+    theme: deep_experience
+    src: onbeing-cave-2023
+    ref: [3]
+    note: У Типпетт вопрос связан с беспокойным сердцем у Августина.
+
+  - id: Q46
+    q: "Бывают ли на сцене минуты, когда граница между этим миром и чем-то большим становится тонкой?"
+    technique: E9
+    theme: deep_experience
+    src: onbeing-cave-2023
+    ref: [5]
+    note: У Типпетт через кельтское понятие «тонких мест».
+
+  - id: Q47
+    q: "Вы верите, что что-то есть после смерти? Меняет ли это то, как вы играете?"
+    technique: E9
+    theme: deep_experience
+    src: raskin-carter
+    ref: [33]
+
+  - id: Q48
+    q: "Что, по-вашему, музыка пытается сказать там, где слов уже не хватает?"
+    technique: E10
+    theme: authentic_art
+    src: onbeing-cave-2023
+    ref: [9]
+
+  - id: Q49
+    q: "Почему музыка открывает в людях место, до которого не доходит ничто другое?"
+    technique: E10
+    theme: deep_experience
+    src: onbeing-mcferrin-2011
+    ref: [33]
+
+  - id: Q50
+    q: "Как вы думаете, музыка старше языка?"
+    technique: E10
+    theme: authentic_art
+    src: onbeing-mcferrin-2011
+    ref: [61]
+
+  - id: Q51
+    q: "Может ли музыка быть нравственной дисциплиной, например, способом справляться с гневом?"
+    technique: E10
+    theme: deep_experience
+    src: onbeing-mcferrin-2011
+    ref: [45]
+
+  - id: Q52
+    q: "Каково это: находиться внутри своего тела, когда вы играете?"
+    technique: E2
+    theme: deep_experience
+    src: onbeing-mcferrin-2011
+    ref: [12]
+
+  - id: Q53
+    q: "Вы понимали, о чём {альбом}, пока его делали, или поняли только потом?"
+    technique: E11
+    theme: authentic_art
+    src: onbeing-cave-2023
+    ref: [11]
+
+  - id: Q54
+    q: "В самой яростной музыке вашей молодости было что-то, что тянулось вверх?"
+    technique: E10
+    theme: deep_experience
+    src: onbeing-cave-2023
+    ref: [10]
+
+  - id: Q55
+    q: "Мне кажется, через все ваши вещи проходит {мотив}. Вы с этим согласны?"
+    technique: E1
+    theme: authentic_art
+    src: parisreview-murakami-2004
+    ref: [46]
+
+  - id: Q56
+    q: "Ваш путь, кажется, шёл наоборот: от мастерства к детской свободе, а не от свободы к мастерству. Это так?"
+    technique: G3
+    theme: authentic_art
+    src: onbeing-mcferrin-2011
+    ref: [18]
+
+  - id: Q57
+    q: "Что из того, что сейчас хвалят, через тридцать лет будет звучать так же? А что нет?"
+    technique: E5
+    theme: authentic_art
+    src: iverson-threadgill-2016
+    ref: [12]
+
+  # Человек и машина
+
+  - id: Q58
+    q: "Что в вашем ремесле нельзя подделать?"
+    technique: F1
+    theme: neuro_era
+    src: toneglow-lewis-2021
+    ref: [18]
+    note: Нейтральная формулировка из ТЗ.
+
+  - id: Q59
+    q: "Что в импровизации машина не повторит, даже если сыграет все ноты верно?"
+    technique: F1
+    theme: neuro_era
+    src: toneglow-lewis-2021
+    ref: [18, 21]
+
+  - id: Q60
+    q: "Вот {текст или запись}, которую нейросеть сделала «в вашем стиле». Что вы о ней думаете?"
+    technique: F3
+    theme: neuro_era
+    src: redhand-218
+    ref: []
+    note: Предъявленный образец вместо абстрактного вопроса. Решение за редактором.
+
+  - id: Q61
+    q: "Если машина научится делать вещи в вашем стиле так, что их не отличить, что останется только вашим?"
+    technique: F3
+    theme: neuro_era
+    src: fact-herndon-2022
+    ref: [22]
+
+  - id: Q62
+    q: "Должен ли музыкант защищать свой стиль так же, как защищают авторское право?"
+    technique: F4
+    theme: neuro_era
+    src: fact-herndon-2022
+    ref: [25]
+
+  - id: Q63
+    q: "Кому принадлежит ваш звук: только вам или всем, кто у вас учился и вас слушал?"
+    technique: F4
+    theme: neuro_era
+    src: artbasel-obrist-herndon-2024
+    ref: [3]
+
+  - id: Q64
+    q: "Был ли случай, когда вас по-настоящему тронуло то, что сделала машина? Что именно?"
+    technique: F5
+    theme: neuro_era
+    src: onbeing-rubin-2023
+    ref: [10]
+
+  - id: Q65
+    q: "Вы когда-нибудь работали с машиной как с партнёром? Что она показала вам о вас самом?"
+    technique: F2
+    theme: neuro_era
+    src: toneglow-lewis-2021
+    ref: [15, 22]
+
+  - id: Q66
+    q: "Новые инструменты годами никто не понимает. Каким, по-вашему, будет инструмент, которого сегодня боятся, лет через двадцать?"
+    technique: F2
+    theme: neuro_era
+    src: fader-herndon-2021
+    ref: [11]
+    note: У Дарвилла через пример Джона Чоунинга и ранней компьютерной музыки.
+
+  # Блиц
+
+  - id: Q67
+    q: "Что такое искусство, одной фразой?"
+    technique: G9
+    theme: authentic_art
+    src: gagosian-obrist-gates-2022
+    ref: [1]
+
+  - id: Q68
+    q: "Портят ли искусство деньги?"
+    technique: G9
+    theme: authentic_art
+    src: gagosian-obrist-gates-2022
+    ref: [2]
+
+  - id: Q69
+    q: "Какую роль в вашей работе играет случай?"
+    technique: G9
+    theme: craft
+    src: gagosian-obrist-gates-2022
+    ref: [6]
+
+  - id: Q70
+    q: "Что для вас значат названия пьес?"
+    technique: G9
+    theme: craft
+    src: gagosian-obrist-gates-2022
+    ref: [3]
+
+  - id: Q71
+    q: "Случилось ли с вами недавно что-то похожее на чудо?"
+    technique: G9
+    theme: deep_experience
+    src: gagosian-obrist-gates-2022
+    ref: [11]
+
+  # Финал
+
+  - id: Q72
+    q: "Какой ваш проект так и не осуществился? Что ему помешало?"
+    technique: H1
+    theme: authentic_art
+    src: gagosian-obrist-gates-2022
+    ref: [5]
+    note: Главный вопрос Ханса Ульриха Обриста.
+
+  - id: Q73
+    q: "Чьё присутствие в вашей жизни сильнее всего?"
+    technique: H4
+    theme: deep_experience
+    src: raskin-carter
+    ref: [47]
+
+  - id: Q74
+    q: "О чём вас никогда не спрашивали, а вы бы хотели ответить?"
+    technique: H2
+    theme: deep_experience
+    src: toneglow-lewis-2021
+    ref: [24]
+
+  - id: Q75
+    q: "Если вы окажетесь перед Богом, что вы ему скажете?"
+    technique: H3
+    theme: deep_experience
+    src: pozner-proust
+    ref: []
+    note: Последний вопрос анкеты Пруста в программе «Познер».
+
+  - id: Q76
+    q: "Если рай существует, что вы хотели бы там услышать?"
+    technique: H3
+    theme: deep_experience
+    src: pivot-lipton
+    ref: []
+    note: Последний вопрос анкеты Пиво и Липтона.
+
+  - id: Q77
+    q: "Назовите одну вещь, которую вы в себе любите."
+    technique: H3
+    theme: deep_experience
+    src: toneglow-railton-2023
+    ref: [33]
+    note: Постоянный финальный вопрос Tone Glow.

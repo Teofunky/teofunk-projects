@@ -73,6 +73,147 @@ coded:
     turns: 63
     new_topics: [1, 5, 7, 10, 11, 17, 18, 19, 23, 25, 26, 28, 30, 32, 33, 36, 38, 42, 43, 45, 46, 48, 50, 51, 55, 56, 58, 60, 61, 62, 63]
 
+# Пакет 2: отбор лучших вопросов (не полная разметка).
+# turns: примерное число вопросов интервьюера.
+# numbering: что значат номера в evidence и questions.yaml для этого источника.
+# in_length_stats: учитывать ли в статистике длины интервью.
+selected:
+  - id: fader-herndon-2021
+    outlet: The FADER Interview (подкаст, расшифровка)
+    interviewer: Jordan Darville
+    subject: Holly Herndon, композитор, голосовая модель Holly+
+    date: "2021-07"
+    url: https://www.thefader.com/2021/07/27/holly-herndon-on-the-power-of-machine-learning-and-developing-her-digital-twin-holly
+    turns: 14
+    numbering: номер реплики интервьюера
+    in_length_stats: true
+
+  - id: artbasel-obrist-herndon-2024
+    outlet: Art Basel Stories (разговор на DLD Munich 2024)
+    interviewer: Hans Ulrich Obrist
+    subject: Holly Herndon и Mat Dryhurst
+    date: "2024"
+    url: https://artbasel.com/stories/ai-holly-herndon-mat-dryhurst-data-training-art-making?lang=en
+    turns: 9
+    numbering: номер реплики интервьюера
+    in_length_stats: true
+
+  - id: fact-herndon-2022
+    outlet: Fact (печатный номер осень-зима 2022)
+    interviewer: Scott Wilson
+    subject: Holly Herndon и Mat Dryhurst
+    date: "2022"
+    url: https://factmag.com/2023/05/25/holly-herndon-mat-dryhurst-interview
+    turns: 10
+    numbering: номер реплики в общем разговоре (всего 27 реплик обеих сторон)
+    in_length_stats: true
+
+  - id: onbeing-cave-2023
+    outlet: On Being
+    interviewer: Krista Tippett
+    subject: Nick Cave
+    date: "2023-11-22"
+    url: https://onbeing.org/?p=1385356
+    turns: 18
+    numbering: порядковый номер вопроса
+    in_length_stats: true
+
+  - id: onbeing-mcferrin-2011
+    outlet: On Being
+    interviewer: Krista Tippett
+    subject: Bobby McFerrin, голос, импровизация
+    date: "2011-06-16"
+    url: https://onbeing.org/programs/bobby-mcferrin-catching-song/
+    turns: 55
+    numbering: порядковый номер вопроса, приблизительный
+    in_length_stats: true
+
+  - id: onbeing-rubin-2023
+    outlet: On Being
+    interviewer: Krista Tippett
+    subject: Rick Rubin, продюсер
+    date: "2023-03-16"
+    url: https://onbeing.org/?p=1382550
+    turns: 60
+    numbering: номер в отборе (вопросы в порядке разговора)
+    in_length_stats: true
+
+  - id: freshair-rollins-1994
+    outlet: Fresh Air (NPR), повтор в 2026
+    interviewer: Terry Gross
+    subject: Sonny Rollins, тенор-саксофон
+    date: "1994"
+    url: https://www.keranews.org/2026-05-29/remembering-tenor-saxophonist-sonny-rollins-a-titan-of-modern-jazz
+    turns: 27
+    numbering: порядковый номер вопроса
+    in_length_stats: true
+
+  - id: raskin-carter
+    outlet: Max Raskin, Interviews
+    interviewer: Max Raskin
+    subject: Ron Carter, контрабас
+    date: null
+    url: https://www.maxraskin.com/interviews/ron-carter
+    turns: 47
+    numbering: порядковый номер вопроса
+    in_length_stats: true
+
+  - id: electronicbeats-obrist-bjork-2011
+    outlet: Electronic Beats
+    interviewer: Hans Ulrich Obrist
+    subject: Björk, альбом-приложение Biophilia
+    date: "2011"
+    url: https://www.electronicbeats.net/bjork-hans-ulrich-obrist-interview-2011
+    turns: 39
+    numbering: номер реплики интервьюера
+    in_length_stats: true
+
+  - id: gagosian-obrist-gates-2022
+    outlet: Gagosian Quarterly, анкета Обриста
+    interviewer: Hans Ulrich Obrist
+    subject: Theaster Gates, художник
+    date: "2022-05"
+    url: https://gagosianquarterly.com/quarterly/2022/05/18/interview-hans-ulrich-obrist-questionnaire-theaster-gates/
+    turns: 11
+    numbering: порядковый номер вопроса анкеты
+    in_length_stats: false
+
+  - id: toneglow-orourke
+    outlet: Tone Glow 014 (по образцу Pitchfork 5-10-15-20)
+    interviewer: Joshua Minsoo Kim
+    subject: Jim O'Rourke
+    date: null
+    url: https://toneglow.substack.com/p/014-jim-orourke
+    turns: 120
+    numbering: номер в отборе из 8 вопросов; текст прочитан не полностью (около 75%)
+    in_length_stats: false
+
+# Форматы и фирменные вопросы: описаны по источникам, реплик не считали.
+formats:
+  - id: downbeat-blindfold-evans
+    outlet: DownBeat, Blindfold Test (живой, DC Jazz Festival)
+    subject: Orrin Evans, фортепиано
+    url: https://downbeat.com/news/detail/blindfold-test-orrin-evans
+    what: музыканту ставят шесть записей без сведений об исполнителях; он угадывает, обсуждает и оценивает по пятизвёздочной шкале
+
+  - id: redhand-218
+    outlet: The Red Hand Files №218 (письма читателей, январь 2023)
+    subject: Nick Cave
+    url: https://crackmagazine.net/2023/01/nick-cave-chatgpg-news/
+    what: читатель прислал песню, сделанную ChatGPT «в стиле Ника Кейва», и спросил, что тот думает; ответ стал одним из самых цитируемых высказываний музыканта об ИИ
+
+  - id: pozner-proust
+    outlet: программа «Познер», Первый канал
+    subject: гости программы
+    url: https://www.dp.ru/a/2012/06/04/Medvedev_skazal_chto_pred
+    what: в конце программы ведущий задаёт вопросы анкеты Пруста; последний вопрос о том, что гость скажет, оказавшись перед Богом
+
+  - id: pivot-lipton
+    outlet: Bernard Pivot (Apostrophes, Bouillon de culture), затем James Lipton (Inside the Actors Studio)
+    subject: гости программ
+    url: https://citizencaine.org/extras/actors-studio
+    what: десять коротких вопросов в конце каждого интервью; восходят к анкете Пруста
+
 # Посчитаны раньше (замер из ТЗ), по приёмам ещё не разобраны.
 counted_only:
   - {id: believer-muhly, outlet: The Believer, subject: Nico Muhly, turns: 19}
@@ -91,7 +232,7 @@ blocked:
     outlet: BOMB
     subject: Henry Threadgill (интервьюер Frederic Tuten)
     url: https://bombmagazine.org/articles/henry-threadgill
-    reason: сайт BOMB открывается только после подтверждения владельцем; запрос остался без ответа
+    reason: в пилоте запрос на чтение остался без ответа; в пакете 2 сайт вернул ошибку
   - id: believer-moran
     outlet: The Believer
     subject: Jason Moran (интервьюер Ross Simonini)

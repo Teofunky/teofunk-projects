@@ -1,4 +1,4 @@
-# Банк приёмов «Нейрожурналиста». Версия 0.1, пилот на 6 интервью.
+# Банк приёмов «Нейрожурналиста». Версия 0.2: пилот (6 интервью) и пакет 2 (11 интервью, 4 формата).
 #
 # Храним приёмы и собственные шаблоны вопросов, а не чужие тексты.
 # Поля карточки:
@@ -13,7 +13,7 @@
 #   notes         как применять нейросети, оговорки
 # Частоты не пишем руками: их считает bank_stats.py по полю evidence.
 
-version: "0.1"
+version: "0.2"
 updated: "2026-11-12"
 
 themes:
@@ -93,6 +93,20 @@ techniques:
       У нейросети личного опыта нет, поэтому она опирается на свидетельство с источником
       и никогда не выдумывает собственных воспоминаний.
 
+
+  - id: A5
+    name: Слепое прослушивание
+    family: A
+    goal: Услышать живую реакцию музыканта на чужую музыку без подсказок и репутаций.
+    template: "Я поставлю запись, не называя исполнителя. Кто это, по-вашему, и что в игре вас выдало?"
+    needs: [3–6 записей с таймкодами, подобранных под героя]
+    placement: middle
+    themes: [authentic_art, craft]
+    evidence: {downbeat-blindfold-evans: []}
+    notes: >
+      Формат DownBeat Blindfold Test: записи без сведений об исполнителях, герой угадывает,
+      обсуждает и ставит оценку от одной до пяти звёзд. В чате нужен плеер.
+      Подбор записей делает редактор или нейросеть из досье, ответ раскрывается после догадки.
   # B. Истоки
 
   - id: B1
@@ -108,6 +122,7 @@ techniques:
       parisreview-murakami-2004: [28, 29, 30]
       panken-smith-1978: [5, 17, 18]
       toneglow-railton-2023: [1, 2]
+      toneglow-orourke: [2]
     notes: Голый вопрос «как вы пришли в музыку» в пилоте не встретился ни разу.
 
   - id: B2
@@ -123,6 +138,8 @@ techniques:
       toneglow-lewis-2021: [5, 6]
       parisreview-murakami-2004: [11, 12, 14, 15]
       panken-smith-1978: [1]
+      freshair-rollins-1994: [8, 9]
+      toneglow-orourke: [8]
     notes: Деликатно. Если герой уходит от темы, не настаивать.
 
   - id: B3
@@ -155,6 +172,36 @@ techniques:
       toneglow-lewis-2021: [12]
     notes: ""
 
+
+  - id: B5
+    name: Духовный фон детства
+    family: B
+    goal: Начать с того, во что верили или чего искали в доме героя.
+    template: "Была ли в вашем детстве вера или какая-то духовная жизнь? Что от неё осталось в музыке?"
+    needs: []
+    placement: start
+    themes: [roots, deep_experience]
+    evidence:
+      onbeing-cave-2023: [1]
+      onbeing-mcferrin-2011: [1, 2]
+      onbeing-rubin-2023: [1]
+      raskin-carter: [31, 32]
+    notes: >
+      Фирменный первый вопрос Кристы Типпетт (On Being), она задаёт его почти всем гостям.
+      Ответ «нет, ничего не было» тоже ответ: тогда спросить, откуда пришло чувство тайны.
+
+  - id: B6
+    name: Жизнь по вехам
+    family: B
+    goal: Построить разговор о прошлом вокруг выбранных героем произведений.
+    template: "Назовите по одной пластинке, книге или событию на каждые пять лет вашей жизни. Начнём с первой."
+    needs: [список вех, который герой присылает до интервью]
+    placement: early
+    themes: [roots]
+    evidence: {toneglow-orourke: [1, 2]}
+    notes: >
+      Формат Pitchfork 5-10-15-20, у Tone Glow вехи стали заголовками разделов.
+      Удобно для приложения: список вех герой заполняет заранее, нейросеть строит по нему план.
   # C. Ремесло
 
   - id: C1
@@ -171,6 +218,7 @@ techniques:
       parisreview-murakami-2004: [6, 7, 8, 35, 76]
       panken-smith-1978: [23, 24]
       toneglow-lewis-2021: [16]
+      freshair-rollins-1994: [1]
     notes: Заменяет вопросы вроде «что для вас импровизация».
 
   - id: C2
@@ -229,6 +277,7 @@ techniques:
       iverson-threadgill-2016: [15, 17, 18, 19, 20, 21, 22, 23, 40, 49, 50]
       iverson-carter-2007: [12, 13]
       panken-smith-1978: [32, 54]
+      raskin-carter: [11, 22, 28]
     notes: С ушедшими партнёрами переходит в E3.
 
   - id: C6
@@ -242,6 +291,8 @@ techniques:
     evidence:
       parisreview-murakami-2004: [36, 37, 38, 39, 75]
       iverson-threadgill-2016: [29, 30, 31]
+      freshair-rollins-1994: [2]
+      raskin-carter: [43, 44, 45]
     notes: ""
 
   - id: C7
@@ -268,6 +319,31 @@ techniques:
       iverson-threadgill-2016: [42, 47]
     notes: ""
 
+
+  - id: C9
+    name: Дорога и ритуалы
+    family: C
+    goal: Спросить о быте музыканта, из которого складывается работа.
+    template: "Кто научил вас жить в дороге? Есть ли у вас ритуалы перед концертом?"
+    needs: []
+    placement: middle
+    themes: [craft]
+    evidence:
+      raskin-carter: [1, 2, 3, 10]
+      gagosian-obrist-gates-2022: [7, 10]
+    notes: Короткие бытовые вопросы снимают напряжение между тяжёлыми темами.
+
+  - id: C10
+    name: Как вы сами слушаете
+    family: C
+    goal: Узнать, как музыкант слушает музыку сегодня.
+    template: "Как вы слушаете музыку: целыми альбомами или кусками, в наушниках или дома? Какой альбом вы последним прослушали целиком?"
+    needs: []
+    placement: middle
+    themes: [authentic_art]
+    evidence:
+      raskin-carter: [17, 18, 19, 20, 21]
+    notes: Хороший мост к разговору о внимании слушателя и эпохе потоков.
   # D. Путь
 
   - id: D1
@@ -295,6 +371,7 @@ techniques:
     evidence:
       toneglow-railton-2023: [31]
       parisreview-murakami-2004: [12]
+      raskin-carter: [39, 40, 41, 42]
     notes: Задавать после того, как разговор набрал доверие.
 
   - id: D3
@@ -338,8 +415,32 @@ techniques:
       toneglow-railton-2023: [7]
       parisreview-murakami-2004: [55, 73]
       toneglow-lewis-2021: [8]
+      raskin-carter: [29, 30]
     notes: ""
 
+
+  - id: D6
+    name: Пауза и возвращение
+    family: D
+    goal: Поговорить об уходе со сцены и о том, что вернуло.
+    template: "Вы надолго уходили со сцены. Где вы тогда занимались и как поняли, что пора вернуться?"
+    needs: [паузы в карьере из досье]
+    placement: middle
+    themes: [deep_experience]
+    evidence:
+      freshair-rollins-1994: [23, 24, 25, 26, 27]
+    notes: У Терри Гросс это история Роллинза, который занимался на мосту, потому что дома было слишком громко.
+
+  - id: D7
+    name: Нелюбимая своя запись
+    family: D
+    goal: Получить честную самооценку.
+    template: "Какая ваша запись нравится вам меньше всего? Что в ней не так?"
+    needs: [дискография]
+    placement: late
+    themes: [authentic_art]
+    evidence: {toneglow-orourke: [7]}
+    notes: Задавать после того, как разговор набрал доверие.
   # E. Смысл и переживание
 
   - id: E1
@@ -364,6 +465,7 @@ techniques:
     evidence:
       toneglow-railton-2023: [17, 30]
       parisreview-murakami-2004: [38]
+      onbeing-mcferrin-2011: [12]
     notes: ""
 
   - id: E3
@@ -431,8 +533,63 @@ techniques:
       toneglow-railton-2023: [1, 2, 17, 28, 29]
       parisreview-murakami-2004: [62, 63, 64, 77, 78]
       panken-smith-1978: [15]
+      raskin-carter: [14, 15, 16]
     notes: ""
 
+
+  - id: E8
+    name: Падение и что оно дало
+    family: E
+    goal: Говорить о самом тёмном периоде через то, что он изменил в человеке и в музыке.
+    template: "Что вы узнали о себе в самый трудный период? Как это слышно в вашей игре сейчас?"
+    needs: [трудный период, о котором герой уже говорил публично]
+    placement: late
+    themes: [deep_experience]
+    evidence:
+      freshair-rollins-1994: [15, 16, 17, 20, 21, 22]
+    notes: >
+      Только если герой сам публично рассказывал о трудном периоде. Терри Гросс идёт
+      от фактов к вопросу «что вы узнали о себе», а не к подробностям падения.
+      Перед вопросом спросить разрешения (G10).
+
+  - id: E9
+    name: Вера и сомнение
+    family: E
+    goal: Дать говорить о вере, тоске по большему и сомнении без давления.
+    template: "Бывают ли на сцене минуты, когда граница между этим миром и чем-то большим становится тонкой?"
+    needs: []
+    placement: late
+    themes: [deep_experience, authentic_art]
+    evidence:
+      onbeing-cave-2023: [2, 3, 5, 7]
+      onbeing-mcferrin-2011: [2, 24, 27]
+      raskin-carter: [31, 32, 33, 34, 35]
+    notes: Не навязывать веру и не спорить с неверием. Вопрос открытый для любого ответа.
+
+  - id: E10
+    name: Что музыка делает с человеком
+    family: E
+    goal: Спросить о действии музыки, а не о её устройстве.
+    template: "Что, по-вашему, музыка пытается сказать там, где слов уже не хватает?"
+    needs: []
+    placement: late
+    themes: [authentic_art, deep_experience]
+    evidence:
+      onbeing-cave-2023: [9, 10]
+      onbeing-mcferrin-2011: [8, 33, 45, 61]
+      onbeing-rubin-2023: [3]
+    notes: ""
+
+  - id: E11
+    name: Смысл задним числом
+    family: E
+    goal: Узнать, понимал ли герой, что делает, пока делал.
+    template: "Вы понимали, о чём {альбом или вещь}, пока его делали, или поняли только потом?"
+    needs: [важная работа героя]
+    placement: middle
+    themes: [authentic_art, deep_experience]
+    evidence: {onbeing-cave-2023: [11]}
+    notes: ""
   # F. Человек и машина
 
   - id: F1
@@ -458,9 +615,53 @@ techniques:
     needs: [электроника, программы, эксперименты героя, если есть]
     placement: late
     themes: [neuro_era]
-    evidence: {toneglow-lewis-2021: [15, 16, 19, 22, 23]}
+    evidence:
+      toneglow-lewis-2021: [15, 16, 19, 22, 23]
+      electronicbeats-obrist-bjork-2011: [3, 23, 33]
     notes: Если опыта нет, приём пропускается.
 
+
+  - id: F3
+    name: Показать подделку
+    family: F
+    goal: Вместо абстрактного вопроса об ИИ дать герою реакцию на конкретную имитацию его стиля.
+    template: "Вот {текст или запись}, которую нейросеть сделала «в вашем стиле». Что вы о ней думаете?"
+    needs: [имитация, сделанная заранее, с пометкой, что это машина]
+    placement: late
+    themes: [neuro_era, authentic_art]
+    evidence:
+      redhand-218: []
+      fact-herndon-2022: [22]
+    notes: >
+      В The Red Hand Files №218 читатель прислал Нику Кейву песню ChatGPT «в его стиле»,
+      и ответ Кейва стал одним из самых цитируемых высказываний музыканта об ИИ.
+      Это третий вариант для спорного блока: не нейтральный и не оценочный вопрос, а предъявленный образец.
+      Риск: ответ может быть резким. Решение за редактором.
+
+  - id: F4
+    name: Чей это голос
+    family: F
+    goal: Спросить о праве на собственный звук, голос и стиль.
+    template: "Кому принадлежит ваш звук: только вам или всем, кто у вас учился и вас слушал? Нужно ли защищать стиль?"
+    needs: []
+    placement: late
+    themes: [neuro_era, authentic_art]
+    evidence:
+      fader-herndon-2021: [5, 6, 7]
+      artbasel-obrist-herndon-2024: [3, 6]
+      fact-herndon-2022: [8, 25]
+    notes: У Холли Херндон тема главная, потому что она сама сделала модель своего голоса.
+
+  - id: F5
+    name: Машина, которая тронула
+    family: F
+    goal: Спросить не о страхе, а о моменте, когда сделанное машиной вызвало чувство.
+    template: "Был ли случай, когда вас по-настоящему тронуло то, что сделала машина? Что именно?"
+    needs: []
+    placement: late
+    themes: [neuro_era, deep_experience]
+    evidence: {onbeing-rubin-2023: [10]}
+    notes: У Типпетт это вопрос о том, почему партия AlphaGo довела Рика Рубина до слёз.
   # G. Разговорные ходы
 
   - id: G1
@@ -475,6 +676,8 @@ techniques:
       toneglow-railton-2023: [6, 7, 9]
       panken-smith-1978: [7, 20]
       parisreview-murakami-2004: [58]
+      artbasel-obrist-herndon-2024: [3, 4, 5]
+      onbeing-cave-2023: [7]
     notes: Цитата только из досье с источником. По памяти нейросеть не цитирует.
 
   - id: G2
@@ -491,6 +694,7 @@ techniques:
       toneglow-railton-2023: [25, 30, 34]
       toneglow-lewis-2021: [17, 21, 22]
       panken-smith-1978: [12, 16]
+      toneglow-orourke: [3, 6]
     notes: ""
 
   - id: G3
@@ -507,6 +711,8 @@ techniques:
       toneglow-railton-2023: [22, 28]
       parisreview-murakami-2004: [31, 40, 43, 46, 72]
       panken-smith-1978: [13, 14, 45, 50, 57, 60]
+      onbeing-mcferrin-2011: [18]
+      electronicbeats-obrist-bjork-2011: [23]
     notes: >
       Главный ход Айверсона. У него наблюдения часто звучат как восхищение;
       в ТЗ комплименты запрещены, поэтому нейросеть формулирует наблюдение, а не похвалу.
@@ -556,6 +762,7 @@ techniques:
       parisreview-murakami-2004: [55, 69]
       panken-smith-1978: [7, 25, 27, 41]
       toneglow-railton-2023: [27]
+      fader-herndon-2021: [11]
     notes: ""
 
   - id: G7
@@ -586,19 +793,57 @@ techniques:
       panken-smith-1978: [12]
     notes: Снижает риск исказить смысл при редактуре.
 
+
+  - id: G9
+    name: Блиц коротких вопросов
+    family: G
+    goal: Быстрая серия коротких вопросов-определений для смены темпа.
+    template: "Что такое искусство, одной фразой? Портят ли его деньги? Какую роль играет случай?"
+    needs: []
+    placement: late
+    themes: [authentic_art]
+    evidence:
+      gagosian-obrist-gates-2022: [1, 2, 3, 6, 11]
+    notes: Анкета Обриста из 11 вопросов. В чате работает как отдельный блок перед финалом.
+
+  - id: G10
+    name: Разрешение на трудную тему
+    family: G
+    goal: Спросить согласия, прежде чем говорить о болезненном.
+    template: "Можно спросить о {трудная тема}? Если не хотите, скажите, и пойдём дальше."
+    needs: []
+    placement: any
+    themes: [deep_experience]
+    evidence: {toneglow-orourke: [5]}
+    notes: Для нейросети обязательный ход перед E3, E8 и D2.
+
+  - id: G11
+    name: Вопрос о вопросах
+    family: G
+    goal: Узнать, какие вопросы герою надоели, и спросить о том же иначе.
+    template: "Какой вопрос вам задают чаще всего? Каким он должен быть, чтобы вам было интересно отвечать?"
+    needs: []
+    placement: early
+    themes: []
+    evidence:
+      raskin-carter: [12, 25]
+    notes: Ответ пополняет стоп-лист заезженных вопросов для этого героя.
   # H. Финал
 
   - id: H1
-    name: Незавершённое
+    name: Незавершённое и нереализованный проект
     family: H
     goal: Закончить взглядом вперёд.
-    template: "Что из задуманного ещё не сделано? Что лежит в столе?"
+    template: "Какой ваш проект так и не осуществился? Что ему помешало?"
     needs: []
     placement: end
     themes: []
     evidence:
       toneglow-lewis-2021: [23]
       iverson-threadgill-2016: [45, 46]
+      artbasel-obrist-herndon-2024: [9]
+      gagosian-obrist-gates-2022: [5]
+      electronicbeats-obrist-bjork-2011: [9, 10]
     notes: ""
 
   - id: H2
@@ -622,5 +867,21 @@ techniques:
     needs: []
     placement: end
     themes: []
-    evidence: {toneglow-railton-2023: [33]}
-    notes: У Tone Glow такой вопрос есть; для Джазеты формулировку выбирает редактор.
+    evidence:
+      toneglow-railton-2023: [33]
+      pozner-proust: []
+      pivot-lipton: []
+    notes: >
+      Так делают Tone Glow, Познер (анкета Пруста, последний вопрос о том, что гость скажет
+      Богу) и Пиво с Липтоном (десять вопросов в конце). Формулировку для Джазеты выбирает редактор.
+
+  - id: H4
+    name: Главное присутствие
+    family: H
+    goal: Закончить человеком, а не карьерой.
+    template: "Чьё присутствие в вашей жизни сильнее всего?"
+    needs: []
+    placement: end
+    themes: [deep_experience]
+    evidence: {raskin-carter: [47]}
+    notes: Последний вопрос Макса Раскина в интервью с Роном Картером.
