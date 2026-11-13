@@ -152,6 +152,108 @@ def test_api_failure_retries_later():
         assert bot.s["turns"] and tg.to(5)[-1] == "Здравствуйте. Первый вопрос?"
 
 
+class Down(iv.FakeClient):
+    """API недоступно, пока down=True."""
+    def __init__(self, script=None):
+        super().__init__(script)
+        self.down = True
+
+    def create(self, **kw):
+        if self.down:
+            raise RuntimeError("overloaded")
+        return super().create(**kw)
+
+
+def test_message_before_first_question_does_not_crash():
+    # случай 13.11.2026: первый вопрос не задан из-за сбоя API, герой пишет, бот падал в flush
+    iv.time.sleep = lambda _s: None
+    with tempfile.TemporaryDirectory() as d:
+        bot, tg, clock = make(d)
+        bot.client = Down()
+        bot.handle(msg(5, "/start INV"))
+        bot.handle(msg(5, "здравствуйте, я тут", date=clock.t))
+        clock.t += 41
+        bot.tick()                                           # раньше: IndexError
+        assert bot.s["before_first"] == ["здравствуйте, я тут"] and not bot.s["turns"]
+        bot.client.down = False
+        clock.t += b.RETRY_AFTER + 1
+        bot.tick()
+        assert tg.to(5)[-1] == "Здравствуйте. Первый вопрос?"
+        assert "здравствуйте, я тут" in bot.client.calls[-1]["messages"][0]["content"]
+
+
+def test_message_while_next_question_fails_is_appended():
+    iv.time.sleep = lambda _s: None
+    with tempfile.TemporaryDirectory() as d:
+        bot, tg, clock = make(d)
+        bot.handle(msg(5, "/start INV"))
+        bot.client = Down()
+        bot.handle(msg(5, "ответ", date=clock.t))
+        clock.t += 41
+        bot.tick()                                           # ответ записан, второй вопрос не задан
+        bot.handle(msg(5, "и ещё", date=clock.t))
+        clock.t += 41
+        bot.tick()
+        assert bot.s["turns"][0]["answer"] == "ответ\n\nи ещё"      # не затёрт
+        bot.client.down = False
+        clock.t += b.RETRY_AFTER + 1
+        bot.tick()
+        assert tg.to(5)[-1] == "Второй вопрос?"
+
+
+def test_resume_asks_waiting_hero():
+    with tempfile.TemporaryDirectory() as d:
+        bot, tg, clock = make(d)
+        bot.s["hero_chat_id"] = 5                            # герой зашёл, вопроса не получил
+        bot.resume_hero()
+        assert tg.to(5) == ["Здравствуйте. Первый вопрос?"]
+        bot.resume_hero()                                    # вопрос уже отправлен: не дублировать
+        assert tg.to(5) == ["Здравствуйте. Первый вопрос?"]
+
+
+def test_api_call_shape_for_opus_5_5():
+    with tempfile.TemporaryDirectory() as d:
+        bot, tg, clock = make(d)
+        bot.handle(msg(5, "/start INV"))
+        kw = bot.client.calls[0]
+        assert kw["tool_choice"] == {"type": "auto"}         # "tool"/"any" Opus 5.5 отклоняет
+        assert kw["max_tokens"] >= 8000                      # размышление входит в max_tokens
+
+
+def test_no_tool_call_retries_with_nudge():
+    from types import SimpleNamespace as NS
+
+    class Chatty(iv.FakeClient):
+        def create(self, **kw):
+            if not self.calls:
+                self.calls.append(kw)
+                return NS(content=[NS(type="text", text="Здравствуйте!")], stop_reason="end_turn",
+                          usage=NS(input_tokens=1, output_tokens=1))
+            return super().create(**kw)
+
+    class Bad(Exception):
+        status_code = 400
+
+    class Rejecting(iv.FakeClient):
+        def create(self, **kw):
+            self.calls.append(kw)
+            raise Bad("invalid_request_error")
+
+    iv.time.sleep = lambda _s: None
+    s = {"hero": "Д", "turns": []}
+    c = Chatty()
+    decision, _ = iv.next_turn(c, "m", [], s)
+    assert decision["next_question"] == "Здравствуйте. Первый вопрос?"
+    assert c.calls[1]["messages"][0]["content"].endswith(iv.NUDGE)
+    r = Rejecting()
+    try:
+        iv.next_turn(r, "m", [], s)
+        raise AssertionError("ошибка 400 должна пробрасываться")
+    except Bad:
+        pass
+    assert len(r.calls) == 1                                 # 400 не повторяем
+
+
 if __name__ == "__main__":
     for name, fn in list(globals().items()):
         if name.startswith("test_"):

@@ -117,9 +117,11 @@ def short_streak(turns: list) -> int:
 
 def render_for_model(session: dict) -> str:
     turns = session["turns"]
+    early = "\n\n".join(session.get("before_first", []))
     if not turns:
-        return "Разговор ещё не начат. Сделай первый ход (next_action: open)."
-    lines = []
+        pre = f"До первого вопроса собеседник написал: «{early}»\n" if early else ""
+        return pre + "Разговор ещё не начат. Сделай первый ход (next_action: open)."
+    lines = [f"(до первого вопроса) {session['hero']}: {early}"] if early else []
     for t in turns:
         lines.append(f"Интервьюер: {t['question']}")
         if t.get("answer") is not None:
@@ -163,27 +165,46 @@ def write_outputs(session: dict, folder: Path) -> None:
 
 # ---------- вызов модели
 
+# Claude Opus 5.5 не принимает принудительный вызов инструмента (tool_choice "tool"/"any" дают 400)
+# и думает всегда; размышление входит в max_tokens. Поэтому tool_choice "auto", запас по токенам
+# и повтор с напоминанием, если модель ответила без next_turn.
+MAX_TOKENS = 12000
+NUDGE = "\n\n[Служебное: ответь только вызовом инструмента next_turn, без обычного текста.]"
+
+
+def _fatal(e: Exception) -> bool:
+    """Ошибка запроса (неверный параметр, ключ, модель): повтор не поможет."""
+    code = getattr(e, "status_code", None)
+    return isinstance(code, int) and 400 <= code < 500 and code not in (408, 409, 429)
+
+
 def next_turn(client, model: str, system: list, session: dict, retries: int = 2) -> tuple[dict, dict]:
     msg = render_for_model(session)
+    why = "нет ответа"
     for attempt in range(retries + 1):
         try:
             resp = client.messages.create(
-                model=model, max_tokens=2000, system=system,
-                messages=[{"role": "user", "content": msg}],
-                tools=[TURN_TOOL], tool_choice={"type": "tool", "name": "next_turn"},
+                model=model, max_tokens=MAX_TOKENS, system=system,
+                messages=[{"role": "user", "content": msg if attempt == 0 else msg + NUDGE}],
+                tools=[TURN_TOOL], tool_choice={"type": "auto"},
             )
-            break
         except Exception as e:  # сеть, лимиты, перегрузка
-            if attempt == retries:
+            if attempt == retries or _fatal(e):
                 raise
             print(f"[ошибка API: {e}; повтор через {5 * (attempt + 1)} с]", file=sys.stderr)
             time.sleep(5 * (attempt + 1))
-    block = next(b for b in resp.content if getattr(b, "type", "") == "tool_use")
-    u = resp.usage
-    usage = {"input": getattr(u, "input_tokens", 0), "output": getattr(u, "output_tokens", 0),
-             "cache_read": getattr(u, "cache_read_input_tokens", 0) or 0,
-             "cache_write": getattr(u, "cache_creation_input_tokens", 0) or 0}
-    return dict(block.input), usage
+            continue
+        block = next((b for b in resp.content if getattr(b, "type", "") == "tool_use"
+                      and getattr(b, "name", "next_turn") == "next_turn"), None)
+        if block is not None and str(dict(block.input).get("next_question", "")).strip():
+            u = resp.usage
+            usage = {"input": getattr(u, "input_tokens", 0), "output": getattr(u, "output_tokens", 0),
+                     "cache_read": getattr(u, "cache_read_input_tokens", 0) or 0,
+                     "cache_write": getattr(u, "cache_creation_input_tokens", 0) or 0}
+            return dict(block.input), usage
+        why = f"модель ответила без next_turn (stop_reason: {getattr(resp, 'stop_reason', '?')})"
+        print(f"[{why}; повтор с напоминанием]", file=sys.stderr)
+    raise RuntimeError(why)
 
 
 def clean_question(text: str) -> tuple[str, list]:

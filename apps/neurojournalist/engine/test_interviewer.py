@@ -63,7 +63,7 @@ def test_full_dry_run_writes_files_and_resumes():
         data = json.loads((folder / "session.json").read_text(encoding="utf-8"))
         assert [t["n"] for t in data["turns"]] == [1, 2]
         assert data["turns"][0]["answer"] == "первый ответ" and data["turns"][1]["answer"] is None
-        assert client.calls[0]["tool_choice"] == {"type": "tool", "name": "next_turn"}
+        assert client.calls[0]["tool_choice"] == {"type": "auto"}   # Opus 5.5 не принимает "tool"
         assert "**Тест:** первый ответ" in (folder / "transcript.md").read_text(encoding="utf-8")
         assert "`next_action`: deepen" in (folder / "log.md").read_text(encoding="utf-8")
 

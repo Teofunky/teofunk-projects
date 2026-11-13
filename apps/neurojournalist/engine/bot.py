@@ -235,14 +235,35 @@ class Bot:
         return self.clock() - self.last_at >= self.quiet
 
     def flush(self):
-        last = self.s["turns"][-1]
-        last["answer"] = "\n\n".join(self.pending)
-        last["answered_at"] = iv.now()
-        if "voice" in self.kinds:
-            last.setdefault("notes", []).append(f"ответ голосом, расшифровка OpenAI ({STT_MODEL})")
+        text, voice = "\n\n".join(self.pending), "voice" in self.kinds
         self.pending, self.kinds, self.last_at = [], [], None
+        turns = self.s["turns"]
+        if not turns:
+            # первый вопрос ещё не задан (например, сбой API): сохраняем как реплику до интервью
+            self.s.setdefault("before_first", []).append(text)
+        elif turns[-1].get("answer") is not None:
+            # ответ уже записан, а следующий вопрос не задан из-за сбоя: дописываем, не затираем
+            last = turns[-1]
+            last["answer"] += "\n\n" + text
+            last.setdefault("notes", []).append("дополнение пришло до следующего вопроса")
+        else:
+            last = turns[-1]
+            last["answer"] = text
+            last["answered_at"] = iv.now()
+            if voice:
+                last.setdefault("notes", []).append(f"ответ голосом, расшифровка OpenAI ({STT_MODEL})")
         self.save()
         self.next_question()
+
+    def resume_hero(self):
+        """После перезапуска: если герой уже привязан и ждёт вопроса, задать его."""
+        if not self.s.get("hero_chat_id") or self.s.get("finished"):
+            return
+        turns = self.s["turns"]
+        if not turns or turns[-1].get("answer") is not None:
+            self.next_question()
+        elif not turns[-1].get("sent_at"):
+            self.ask(turns[-1])
 
     def tick(self):
         """Вызывается после каждого опроса Telegram."""
@@ -277,7 +298,10 @@ def poll_forever(bot: Bot):
                 except Exception as e:
                     print(f"[ошибка обработки сообщения: {e}]", file=sys.stderr)
         bot.save()
-        bot.tick()
+        try:
+            bot.tick()
+        except Exception as e:                 # бот не должен падать посреди интервью
+            print(f"[ошибка хода бота: {e}]", file=sys.stderr)
 
 
 def main(argv=None):
@@ -330,6 +354,7 @@ def main(argv=None):
     print(f"Файлы сессии: {folder}")
     print("Остановить: Ctrl+C. Продолжить: python3 bot.py --resume <папка>\n")
     try:
+        bot.resume_hero()
         poll_forever(bot)
     except KeyboardInterrupt:
         bot.save()
