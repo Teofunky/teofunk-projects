@@ -96,6 +96,10 @@ class Telegram:
             return r.read()
 
 
+AUDIO_TYPES = {".ogg": "audio/ogg", ".oga": "audio/ogg", ".wav": "audio/wav", ".mp3": "audio/mpeg",
+               ".m4a": "audio/mp4", ".aiff": "audio/aiff"}
+
+
 def transcribe_openai(audio: bytes, filename: str = "voice.ogg") -> str:
     """Расшифровка через OpenAI; при ошибке модели по умолчанию пробует whisper-1."""
     key = os.environ.get("OPENAI_API_KEY")
@@ -108,7 +112,8 @@ def transcribe_openai(audio: bytes, filename: str = "voice.ogg") -> str:
         for name, value in (("model", model), ("language", "ru"), ("response_format", "json")):
             parts.append(f'--{boundary}\r\nContent-Disposition: form-data; name="{name}"\r\n\r\n{value}\r\n'.encode())
         parts.append(f'--{boundary}\r\nContent-Disposition: form-data; name="file"; filename="{filename}"\r\n'
-                     f'Content-Type: audio/ogg\r\n\r\n'.encode() + audio + b"\r\n")
+                     f'Content-Type: {AUDIO_TYPES.get(Path(filename).suffix.lower(), "audio/ogg")}\r\n\r\n'.encode()
+                     + audio + b"\r\n")
         parts.append(f"--{boundary}--\r\n".encode())
         req = urllib.request.Request("https://api.openai.com/v1/audio/transcriptions", b"".join(parts),
                                      {"Authorization": f"Bearer {key}",
