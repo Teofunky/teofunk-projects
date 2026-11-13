@@ -12,6 +12,7 @@ import interviewer as iv  # noqa: E402
 class FakeTG:
     def __init__(self):
         self.sent = []          # (chat_id, text)
+        self.calls = []         # прочие методы API: (method, params)
         self.typed = 0
 
     def send(self, chat_id, text):
@@ -19,6 +20,9 @@ class FakeTG:
 
     def typing(self, chat_id):
         self.typed += 1
+
+    def call(self, method, **params):
+        self.calls.append((method, params))
 
     def download(self, file_id):
         return b"OGG" + file_id.encode()
@@ -45,8 +49,10 @@ def make(tmp, script=None, stt=None):
     return bot, tg, clock
 
 
-def msg(chat, text=None, date=None, voice=None):
+def msg(chat, text=None, date=None, voice=None, mid=None):
     m = {"chat": {"id": chat}, "date": date or 0}
+    if mid:
+        m["message_id"] = mid
     if text is not None:
         m["text"] = text
     if voice:
@@ -252,6 +258,52 @@ def test_no_tool_call_retries_with_nudge():
     except Bad:
         pass
     assert len(r.calls) == 1                                 # 400 не повторяем
+
+
+def test_pending_answer_survives_restart():
+    with tempfile.TemporaryDirectory() as d:
+        bot, tg, clock = make(d)
+        bot.handle(msg(5, "/start INV"))
+        bot.handle(msg(5, "половина ответа", date=clock.t))
+        # бот упал до окончания тишины: поднимаем новый из файла
+        s = json.loads((Path(d) / "session.json").read_text(encoding="utf-8"))
+        bot2 = b.Bot(tg, iv.FakeClient(), "fake", bot.system, s, Path(d), quiet=40, clock=clock)
+        assert bot2.pending == ["половина ответа"]
+        clock.t += 41
+        bot2.tick()
+        assert bot2.s["turns"][0]["answer"] == "половина ответа" and tg.to(5)[-1] == "Второй вопрос?"
+
+
+def test_voice_original_saved_and_forwarded():
+    with tempfile.TemporaryDirectory() as d:
+        bot, tg, clock = make(d)
+        bot.handle(msg(9, "/start ED"))
+        bot.handle(msg(5, "/start INV"))
+        bot.handle(msg(5, voice="v1", date=clock.t, mid=77))
+        clock.t += 41
+        bot.tick()
+        t0 = bot.s["turns"][0]
+        assert t0["audio"] == ["audio/01-77.ogg"]
+        assert (Path(d) / "audio" / "01-77.ogg").read_bytes() == b"OGGv1"
+        assert ("forwardMessage", {"chat_id": 9, "from_chat_id": 5, "message_id": 77}) in tg.calls
+
+
+def test_voice_saved_even_if_transcription_fails():
+    def broken(_audio):
+        raise RuntimeError("нет ключа")
+    with tempfile.TemporaryDirectory() as d:
+        bot, tg, clock = make(d, stt=broken)
+        bot.handle(msg(5, "/start INV"))
+        bot.handle(msg(5, voice="v2", date=clock.t, mid=78))
+        assert (Path(d) / "audio" / "01-78.ogg").exists()
+
+
+def test_session_write_is_atomic():
+    with tempfile.TemporaryDirectory() as d:
+        bot, tg, clock = make(d)
+        bot.handle(msg(5, "/start INV"))
+        assert not list(Path(d).glob("*.tmp"))
+        json.loads((Path(d) / "session.json").read_text(encoding="utf-8"))
 
 
 if __name__ == "__main__":

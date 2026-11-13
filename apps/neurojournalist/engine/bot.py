@@ -136,12 +136,62 @@ class Bot:
                  stt=transcribe_openai, quiet=QUIET, clock=time.time):
         self.tg, self.client, self.model, self.system = tg, client, model, system
         self.s, self.folder, self.stt, self.quiet, self.clock = session, folder, stt, quiet, clock
-        self.pending, self.kinds, self.last_at = [], [], None
         self.retry_at = None
 
+    # недописанный ответ хранится в сессии: перезапуск или сбой бота его не теряет
+    @property
+    def pending(self):
+        return self.s.setdefault("pending", [])
+
+    @pending.setter
+    def pending(self, v):
+        self.s["pending"] = v
+
+    @property
+    def kinds(self):
+        return self.s.setdefault("pending_kinds", [])
+
+    @kinds.setter
+    def kinds(self, v):
+        self.s["pending_kinds"] = v
+
+    @property
+    def audio(self):
+        return self.s.setdefault("pending_audio", [])
+
+    @audio.setter
+    def audio(self, v):
+        self.s["pending_audio"] = v
+
+    @property
+    def last_at(self):
+        return self.s.get("pending_at")
+
+    @last_at.setter
+    def last_at(self, v):
+        self.s["pending_at"] = v
+
     # служебное
+    def save_audio(self, data: bytes, msg: dict) -> str:
+        """Оригинал голосового в папке сессии: audio/<ход>-<id сообщения>.ogg"""
+        n = len(self.s["turns"])
+        name = f"audio/{n:02d}-{msg.get('message_id', int(self.clock()))}.ogg"
+        path = self.folder / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(data)
+        return name
+
     def save(self):
         iv.write_outputs(self.s, self.folder)
+
+    def forward_to_editor(self, msg: dict):
+        """Пересылает наблюдателю само голосовое, чтобы сверять расшифровку на слух."""
+        if self.s.get("editor_chat_id") and msg.get("message_id"):
+            try:
+                self.tg.call("forwardMessage", chat_id=self.s["editor_chat_id"],
+                             from_chat_id=msg["chat"]["id"], message_id=msg["message_id"])
+            except Exception as e:
+                print(f"[не удалось переслать голосовое наблюдателю: {e}]", file=sys.stderr)
 
     def editor(self, text: str):
         if self.s.get("editor_chat_id"):
@@ -205,10 +255,14 @@ class Bot:
             return self.tg.send(msg["chat"]["id"], "Интервью завершено. Спасибо!")
         kind = "text"
         media = msg.get("voice") or msg.get("audio")
+        audio = None
         if media:
             kind = "voice"
             try:
-                text = self.stt(self.tg.download(media["file_id"]))
+                data = self.tg.download(media["file_id"])
+                audio = self.save_audio(data, msg)
+                self.forward_to_editor(msg)
+                text = self.stt(data)
             except Exception as e:
                 print(f"[расшифровка не удалась: {e}]", file=sys.stderr)
                 return self.tg.send(msg["chat"]["id"], "Не получилось расшифровать голосовое. "
@@ -224,11 +278,16 @@ class Bot:
             prev = turns[-2]
             prev["answer"] = (prev.get("answer") or "") + "\n\n" + text
             prev.setdefault("notes", []).append("дополнение пришло, пока готовился следующий вопрос")
+            if audio:
+                prev.setdefault("audio", []).append(audio)
             self.save()
             return
         self.pending.append(text)
         self.kinds.append(kind)
+        if audio:
+            self.audio.append(audio)
         self.last_at = self.clock()
+        self.save()
         if kind == "text":
             self.editor(f"Ответ: {text}")
 
@@ -240,12 +299,13 @@ class Bot:
         return self.clock() - self.last_at >= self.quiet
 
     def flush(self):
-        text, voice = "\n\n".join(self.pending), "voice" in self.kinds
-        self.pending, self.kinds, self.last_at = [], [], None
+        text, voice, audio = "\n\n".join(self.pending), "voice" in self.kinds, list(self.audio)
+        self.pending, self.kinds, self.audio, self.last_at = [], [], [], None
         turns = self.s["turns"]
         if not turns:
             # первый вопрос ещё не задан (например, сбой API): сохраняем как реплику до интервью
             self.s.setdefault("before_first", []).append(text)
+            self.s.setdefault("before_first_audio", []).extend(audio)
         elif turns[-1].get("answer") is not None:
             # ответ уже записан, а следующий вопрос не задан из-за сбоя: дописываем, не затираем
             last = turns[-1]
@@ -257,6 +317,8 @@ class Bot:
             last["answered_at"] = iv.now()
             if voice:
                 last.setdefault("notes", []).append(f"ответ голосом, расшифровка OpenAI ({STT_MODEL})")
+        if turns and audio:
+            turns[-1].setdefault("audio", []).extend(audio)
         self.save()
         self.next_question()
 

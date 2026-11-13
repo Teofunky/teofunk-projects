@@ -136,9 +136,16 @@ def render_for_model(session: dict) -> str:
     return "<transcript>\n" + "\n".join(lines) + "\n</transcript>\n\n" + "\n".join(tail)
 
 
+def _write(path: Path, text: str) -> None:
+    """Запись через временный файл: при сбое посреди записи старая версия остаётся целой."""
+    tmp = path.with_name(path.name + ".tmp")
+    tmp.write_text(text, encoding="utf-8")
+    os.replace(tmp, path)
+
+
 def write_outputs(session: dict, folder: Path) -> None:
     folder.mkdir(parents=True, exist_ok=True)
-    (folder / "session.json").write_text(json.dumps(session, ensure_ascii=False, indent=1), encoding="utf-8")
+    _write(folder / "session.json", json.dumps(session, ensure_ascii=False, indent=1))
     tr = [f"# Расшифровка: {session['hero']}", "",
           f"Начато {session['started']}. Модель {session['model']}. Дословно, без правок.", ""]
     lg = [f"# Журнал решений: {session['hero']}", "", "Собеседник журнал не видит.", ""]
@@ -146,6 +153,8 @@ def write_outputs(session: dict, folder: Path) -> None:
         tr += [f"**Интервьюер:** {t['question']}", ""]
         if t.get("answer") is not None:
             tr += [f"**{session['hero']}:** {t['answer']}", ""]
+        if t.get("audio"):
+            tr += ["_Голосовые (оригиналы в папке сессии): " + ", ".join(t["audio"]) + "_", ""]
         d = t["decision"]
         lg.append(f"## Ход {t['n']}")
         for key in ("claim", "new_detail", "unexplained_term", "tension", "emotion", "editorial_value",
@@ -159,8 +168,8 @@ def write_outputs(session: dict, folder: Path) -> None:
         for note in t.get("notes", []):
             lg.append(f"- `note`: {note}")
         lg.append("")
-    (folder / "transcript.md").write_text("\n".join(tr), encoding="utf-8")
-    (folder / "log.md").write_text("\n".join(lg), encoding="utf-8")
+    _write(folder / "transcript.md", "\n".join(tr))
+    _write(folder / "log.md", "\n".join(lg))
 
 
 # ---------- вызов модели
