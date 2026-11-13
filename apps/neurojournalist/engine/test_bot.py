@@ -306,6 +306,39 @@ def test_session_write_is_atomic():
         json.loads((Path(d) / "session.json").read_text(encoding="utf-8"))
 
 
+def test_outage_reported_once_and_recovery_announced():
+    import contextlib
+    import io
+
+    class Done(BaseException):
+        pass
+
+    with tempfile.TemporaryDirectory() as d:
+        bot, tg, clock = make(d)
+        bot.handle(msg(9, "/start ED"))
+        calls = {"n": 0}
+
+        def updates(offset, wait):
+            calls["n"] += 1
+            if calls["n"] <= 5:
+                raise OSError("[Errno 8] nodename nor servname provided")
+            if calls["n"] == 6:
+                return []
+            raise Done()
+
+        tg.updates = updates
+        b.time.sleep = lambda _s: None
+        err, out = io.StringIO(), io.StringIO()
+        with contextlib.redirect_stderr(err), contextlib.redirect_stdout(out):
+            try:
+                b.poll_forever(bot)
+            except Done:
+                pass
+        assert err.getvalue().count("нет связи с Telegram") == 1          # не 5 строк подряд
+        assert "связь с Telegram восстановлена" in out.getvalue()
+        assert tg.to(9)[-1].startswith("Связь восстанавливалась")
+
+
 if __name__ == "__main__":
     for name, fn in list(globals().items()):
         if name.startswith("test_"):

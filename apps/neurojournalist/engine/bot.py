@@ -347,15 +347,33 @@ class Bot:
         return 50
 
 
+def stamp() -> str:
+    return dt.datetime.now().strftime("%H:%M")
+
+
 def poll_forever(bot: Bot):
     offset = bot.s.get("tg_offset")
+    down_since = None                       # когда пропала связь; сообщаем один раз и при возврате
+    print(f"[{stamp()} жду сообщений]", flush=True)
     while True:
         try:
             updates = bot.tg.updates(offset, min(50, bot.wait_seconds()))
         except Exception as e:
-            print(f"[Telegram недоступен: {e}; повтор через 5 с]", file=sys.stderr)
+            if down_since is None:
+                down_since = time.time()
+                print(f"[{stamp()} нет связи с Telegram: {e}. Пробую каждые 5 с, "
+                      f"напишу, когда связь вернётся]", file=sys.stderr, flush=True)
             time.sleep(5)
             continue
+        if down_since is not None:
+            gap = max(1, round((time.time() - down_since) / 60))
+            down_since = None
+            print(f"[{stamp()} связь с Telegram восстановлена, перерыв около {gap} мин. Бот работает]",
+                  flush=True)
+            try:
+                bot.editor(f"Связь восстанавливалась (перерыв около {gap} мин). Бот работает.")
+            except Exception:
+                pass
         for u in updates:
             offset = u["update_id"] + 1
             bot.s["tg_offset"] = offset
