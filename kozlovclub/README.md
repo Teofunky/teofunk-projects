@@ -28,6 +28,7 @@
 | [`plugins/kozlov-redirect-guard`](plugins/kozlov-redirect-guard) | Диагностика и страховка для пустого ответа на адресах без слеша (/event/slug) | 3 (1.0.0 … 1.2.0) | 1.2.0 |  |
 | [`plugins/kozlov-smart-search`](plugins/kozlov-smart-search) | Мгновенный поиск по будущим концертам и страницам сайта | 6 (1.0.0 … 1.1.0) | 1.0.4 | 1.1.0 |
 | [`plugins/kozlov-streamvi`](plugins/kozlov-streamvi) | Переименовывает трансляцию StreamVi под концерты главной сцены: название концерта и первый абзац анонса | 1 (1.1.0 … 1.1.0) | 1.1.0 |  |
+| [`plugins/kozlov-streamvi-guard`](plugins/kozlov-streamvi-guard) | Страховка при потере связи сервера со StreamVi: ожидание подключения не дольше 3 с, пауза 5 мин после сбоя, «В эфире» в Kozlov TV по афише | 1 (1.0.0 … 1.0.0) |  |  |
 | [`plugins/kozlov-video`](plugins/kozlov-video) | Kozlov TV: одна страница /tv/ для эфира и записей концертов главной сцены через плеер VK Видео | 3 (1.0.0 … 1.1.1) | 1.1.1 |  |
 
 ## Как устроена история
