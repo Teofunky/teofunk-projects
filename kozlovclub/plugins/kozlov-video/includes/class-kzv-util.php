@@ -106,13 +106,23 @@ final class KZV_Util {
 		return (int) $d->format( 'j' ) . ' ' . self::MONTHS[ (int) $d->format( 'n' ) ] . ( $with_year ? ' ' . $d->format( 'Y' ) : '' );
 	}
 
-	/** «сегодня в 20:00», «завтра в 20:00», «12 ноября в 20:00». */
+	/**
+	 * «сегодня в 20:00», «завтра в 20:00», «12 ноября в 20:00».
+	 * Ночные концерты в афише стоят на 23:59: «сегодня в полночь», «в ночь на 13 декабря».
+	 */
 	public static function when_label( $ts, $now, DateTimeZone $tz ) {
 		$d     = ( new DateTimeImmutable( '@' . (int) $ts ) )->setTimezone( $tz );
 		$today = ( new DateTimeImmutable( '@' . (int) $now ) )->setTimezone( $tz )->setTime( 0, 0 );
 		$day   = $d->setTime( 0, 0 );
 		$diff  = (int) round( ( $day->getTimestamp() - $today->getTimestamp() ) / DAY_IN_SECONDS );
 		$time  = $d->format( 'H:i' );
+		if ( '23:59' === $time ) {
+			if ( 0 === $diff ) {
+				return 'сегодня в полночь';
+			}
+			$night = ( new DateTimeImmutable( '@' . ( (int) $ts + 120 ) ) )->setTimezone( $tz );
+			return 'в ночь на ' . self::date_label( $night->getTimestamp(), $tz, $night->format( 'Y' ) !== $today->format( 'Y' ) );
+		}
 		if ( 0 === $diff ) {
 			return 'сегодня в ' . $time;
 		}
@@ -157,6 +167,20 @@ final class KZV_Util {
 			return 'Завтра';
 		}
 		return self::ucfirst( self::WEEKDAYS[ (int) $d->format( 'N' ) ] ) . ', ' . (int) $d->format( 'j' ) . ' ' . self::MONTHS[ (int) $d->format( 'n' ) ];
+	}
+
+	/**
+	 * Флаг на время (блокировки). Хранит момент установки и сам проверяет возраст:
+	 * объектный кэш может не удалить временную запись вовремя, и флаг висел бы вечно.
+	 */
+	public static function flag_set( $name, $ttl ) {
+		set_transient( $name, time(), (int) $ttl );
+	}
+
+	public static function flag_on( $name, $ttl ) {
+		$v   = (int) get_transient( $name );
+		$age = time() - $v;
+		return $v > 1000000000 && $age >= 0 && $age < (int) $ttl;
 	}
 
 	public static function time_label( $ts, DateTimeZone $tz ) {

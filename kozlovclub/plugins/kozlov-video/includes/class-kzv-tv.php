@@ -195,6 +195,23 @@ final class KZV_TV {
 		return 'В эфире';
 	}
 
+	/**
+	 * Что показать в лампе, пока StreamVi не подтвердил эфир, а концерт по афише уже идёт.
+	 * soon: StreamVi ответил «эфира нет», концерт начался меньше часа назад (трансляция обычно стартует около 20:30).
+	 * guess: StreamVi не ответил, считаем, что эфир идёт, и ведём на канал VK Видео.
+	 *
+	 * @return string '' | soon | guess
+	 */
+	public static function pending( array $live, $now ) {
+		if ( ! empty( $live['live'] ) || empty( $live['current'] ) ) {
+			return '';
+		}
+		if ( empty( $live['known'] ) ) {
+			return 'guess';
+		}
+		return ( (int) $now - (int) $live['current']['start'] < HOUR_IN_SECONDS ) ? 'soon' : '';
+	}
+
 	/** Шапка: название канала и лампа эфира. */
 	public static function mast( array $live, array $prog, $now ) {
 		$next = null;
@@ -204,6 +221,7 @@ final class KZV_TV {
 				break;
 			}
 		}
+		$pending = self::pending( $live, $now );
 		ob_start();
 		?>
 		<header class="kzv-mast" data-kzv-mast>
@@ -217,6 +235,16 @@ final class KZV_TV {
 					<span class="kzv-lamp-dot" aria-hidden="true"></span>
 					<span class="kzv-lamp-text"><strong><?php echo esc_html( self::signal_label( (string) ( $live['signal'] ?? '' ) ) ); ?></strong><?php echo '' !== $live['title'] ? '<span>' . esc_html( $live['title'] ) . '</span>' : ''; ?></span>
 				</a>
+			<?php elseif ( 'guess' === $pending ) : ?>
+				<a class="kzv-lamp is-on" href="<?php echo esc_url( (string) KZV_Settings::get( 'vk_public' ) ); ?>" target="_blank" rel="noopener">
+					<span class="kzv-lamp-dot" aria-hidden="true"></span>
+					<span class="kzv-lamp-text"><strong>Сейчас в эфире в VK Видео</strong><span><?php echo esc_html( $live['current']['title'] ); ?></span></span>
+				</a>
+			<?php elseif ( 'soon' === $pending ) : ?>
+				<div class="kzv-lamp">
+					<span class="kzv-lamp-dot" aria-hidden="true"></span>
+					<span class="kzv-lamp-text"><strong>Эфир скоро начнётся</strong><span><?php echo esc_html( $live['current']['title'] ); ?></span></span>
+				</div>
 			<?php elseif ( $next ) : ?>
 				<div class="kzv-lamp">
 					<span class="kzv-lamp-dot" aria-hidden="true"></span>

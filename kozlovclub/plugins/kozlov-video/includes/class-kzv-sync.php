@@ -64,10 +64,10 @@ final class KZV_Sync {
 			return;
 		}
 		$st = KZV_Settings::state();
-		if ( time() - (int) $st['last_run'] < 10 * MINUTE_IN_SECONDS || get_transient( self::LOCK ) || get_transient( 'kzv_sync_soon' ) ) {
+		if ( time() - (int) $st['last_run'] < 10 * MINUTE_IN_SECONDS || KZV_Util::flag_on( self::LOCK, 5 * MINUTE_IN_SECONDS ) || KZV_Util::flag_on( 'kzv_sync_soon', 5 * MINUTE_IN_SECONDS ) ) {
 			return;
 		}
-		set_transient( 'kzv_sync_soon', 1, 5 * MINUTE_IN_SECONDS );
+		KZV_Util::flag_set( 'kzv_sync_soon', 5 * MINUTE_IN_SECONDS );
 		register_shutdown_function(
 			function () {
 				try {
@@ -105,11 +105,11 @@ final class KZV_Sync {
 				return $report;
 			}
 		}
-		if ( get_transient( self::LOCK ) ) {
+		if ( KZV_Util::flag_on( self::LOCK, 5 * MINUTE_IN_SECONDS ) ) {
 			$report['locked'] = true;
 			return $report;
 		}
-		set_transient( self::LOCK, 1, 5 * MINUTE_IN_SECONDS );
+		KZV_Util::flag_set( self::LOCK, 5 * MINUTE_IN_SECONDS );
 		try {
 			KZV_Settings::patch_state( array( 'last_run' => time() ) );
 			self::fetch_new( $report );

@@ -1,6 +1,8 @@
 <?php
 /**
  * Состояние эфира для блока «Сейчас в эфире». Один запрос к StreamVi на всех посетителей раз в 45 секунд.
+ * Срок хранения проверяется и по полю checked: объектный кэш (W3 Total Cache) может не удалять
+ * временные записи вовремя, и тогда страница часами показывала бы старое состояние.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -11,12 +13,13 @@ final class KZV_Live {
 	const TTL   = 45;
 
 	/**
-	 * @return array [ live, vk_oid, vk_id, yt_id, title, url, started, next => [ title, start, url ]|null, checked ]
+	 * @return array [ live, vk_oid, vk_id, yt_id, title, url, started, next => [ title, start, url ]|null,
+	 *                 current => [ title, start, url ]|null, checked, known, signal ]
 	 */
 	public static function state( $force = false ) {
 		if ( ! $force ) {
 			$c = get_transient( self::CACHE );
-			if ( is_array( $c ) ) {
+			if ( self::fresh( $c ) ) {
 				return $c;
 			}
 		}
@@ -30,12 +33,20 @@ final class KZV_Live {
 			'url'     => '',
 			'started' => 0,
 			'next'    => null,
+			'current' => null,
 			'checked' => $now,
 			'known'   => false,
 			'signal'  => '',
 		);
 
 		$around = KZV_Concerts::around( $now );
+		if ( $around['current'] ) {
+			$state['current'] = array(
+				'title' => KZV_Util::clean_title( $around['current']['title'] ),
+				'start' => (int) $around['current']['start'],
+				'url'   => (string) $around['current']['url'],
+			);
+		}
 		if ( $around['next'] ) {
 			$state['next'] = array(
 				'title' => KZV_Util::clean_title( $around['next']['title'] ),
@@ -80,6 +91,15 @@ final class KZV_Live {
 		}
 		set_transient( self::CACHE, $state, self::TTL );
 		return $state;
+	}
+
+	/** Запись из кэша годится, только если она полная и проверена не раньше TTL (+15 с запаса) назад. */
+	private static function fresh( $c ) {
+		if ( ! is_array( $c ) || ! isset( $c['checked'], $c['live'] ) || ! array_key_exists( 'current', $c ) ) {
+			return false;
+		}
+		$age = time() - (int) $c['checked'];
+		return $age >= 0 && $age <= self::TTL + 15;
 	}
 
 	private static function has_vk( array $links ) {

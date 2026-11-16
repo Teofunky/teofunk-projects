@@ -149,12 +149,16 @@ final class KZV_Concerts {
 		if ( '' === $key || mb_strlen( $key ) < 4 ) {
 			return null;
 		}
-		$cache = 'kzv_upcoming_' . (int) floor( $now / ( 15 * MINUTE_IN_SECONDS ) );
-		$list  = get_transient( $cache );
-		if ( ! is_array( $list ) ) {
-			$list = self::events( $now, $now + 120 * DAY_IN_SECONDS );
-			set_transient( $cache, $list, 20 * MINUTE_IN_SECONDS );
+		// один ключ с отметкой времени: ключи по 15-минуткам копились бы в кэше, который не чистит просроченное
+		$list = get_transient( 'kzv_upcoming' );
+		if ( ! is_array( $list ) || ! isset( $list['at'], $list['items'] ) || abs( $now - (int) $list['at'] ) > 15 * MINUTE_IN_SECONDS ) {
+			$list = array(
+				'at'    => (int) $now,
+				'items' => self::events( $now, $now + 120 * DAY_IN_SECONDS ),
+			);
+			set_transient( 'kzv_upcoming', $list, 20 * MINUTE_IN_SECONDS );
 		}
+		$list = (array) $list['items'];
 		foreach ( $list as $e ) {
 			if ( $e['start'] > $now && KZV_Util::title_key( $e['title'] ) === $key ) {
 				return $e;

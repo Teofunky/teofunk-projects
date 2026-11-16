@@ -9,6 +9,6 @@
 defined( 'WP_UNINSTALL_PLUGIN' ) || exit;
 
 wp_clear_scheduled_hook( 'kzv_sync' );
-foreach ( array( 'kzv_live_state', 'kzv_sync_lock', 'kzv_sync_soon' ) as $kzv_tr ) {
+foreach ( array( 'kzv_live_state', 'kzv_sync_lock', 'kzv_sync_soon', 'kzv_upcoming' ) as $kzv_tr ) {
 	delete_transient( $kzv_tr );
 }
