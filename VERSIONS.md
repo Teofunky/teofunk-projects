@@ -100,4 +100,4 @@
 
 ## kozlov-video
 
-[1.0.0](https://github.com/Teofunky/teofunk-projects/commit/8a61c809daf7b3713c1db969e45149ab03dad760) (07.11.2026) · [1.1.0](https://github.com/Teofunky/teofunk-projects/commit/19a44d9241a7576c08b49b922822bdab700abe82) (07.11.2026) · [1.1.1](https://github.com/Teofunky/teofunk-projects/commit/267759b105e178f73273532b9f9d8ab200dc1716) (07.11.2026)
+[1.0.0](https://github.com/Teofunky/teofunk-projects/commit/8a61c809daf7b3713c1db969e45149ab03dad760) (07.11.2026) · [1.1.0](https://github.com/Teofunky/teofunk-projects/commit/19a44d9241a7576c08b49b922822bdab700abe82) (07.11.2026) · [1.1.1](https://github.com/Teofunky/teofunk-projects/commit/267759b105e178f73273532b9f9d8ab200dc1716) (07.11.2026) · [1.1.2](https://github.com/Teofunky/teofunk-projects/commit/54da36b861b47e710b296afa2cf309b660f345fe) (16.11.2026)
