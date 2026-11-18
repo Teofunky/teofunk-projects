@@ -1,0 +1,11 @@
+{
+ "E10": {
+  "refs": [
+   "pr_fox",
+   "pr_woodpecker",
+   "pr_night_black"
+  ],
+  "result": "fox and woodpecker approved ('отличные'); shot 3 golden swallows rejected (flight looks wrong), cut",
+  "prompt": "A 20-second sequence that brings the three provided paintings to life. The paintings are the binding source for composition, characters, colors, brushwork and texture: weathered fresco on plaster and handmade paper, scratched botanical etchings, mineral pigments of rust red, faded turquoise, grey blue, bone white and pale ochre. Every frame must look like these paintings; never photorealism, never 3D. Keep each painting's own composition and framing as a 16:9 crop, and bring everything in it to life from the very first frame: strong living wind in every shot, grasses, white wild plants, thin branches and fur sway continuously and visibly; never a still frame. Each shot stays inside one painting and shots are linked by soft painterly dissolves; never paste a figure from one painting into another. No people, no new animals or birds beyond those already painted. No text, no speech, no music. Shot 1 (0-7s): the painting of the red fox standing among white wild plants: from the first frame strong wind sways the white plants and the red flowers in front of the fox and ruffles its fur; the fox breathes, twitches its ears, blinks with both eyes together, never one eye, and slowly turns its head; it stays the painted fox with the same face and golden eyes. Shot 2 (7-14s): soft dissolve to the painting of the woodpecker on the old tree by the pale blue river: the woodpecker taps the bark with quick pecks and turns its red-capped head, the thin branches and hanging seed pods sway in the wind, the white grasses bend, the blue water glimmers. Shot 3 (14-20s): soft dissolve to the painting of the dark night with the full moon and lace trees, framed on its upper part with the sky, the trees and the moon: the small golden swallows painted in the dark sky come alive, they beat their thin golden wings and fly in a loose flock between the trees toward the moon; they stay small golden line drawings exactly as painted, never realistic birds; the lace trees sway and the stars twinkle. Sound only: prairie wind, dry grass, a woodpecker tapping on wood, a far river, night crickets."
+ }
+}

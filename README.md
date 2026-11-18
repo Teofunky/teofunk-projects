@@ -16,6 +16,7 @@
 | [`kozlovclub/tools/`](kozlovclub/tools), [`kozlovclub/tests/`](kozlovclub/tests) | диагностика, служебные скрипты, тестовые стенды плагинов |
 | [`jazzartclub/themes/jazzart`](jazzartclub/themes/jazzart) | тема нового сайта jazzartclub.ru |
 | [`apps/`](apps) | Konnakol Master (с историей коммитов), Reel Practice, метроном PULSE, гитарные инструменты (Tone Lab, ЛЮФТ, Rig Lab, JSFX), SmartFind (умный поиск и уборка файлов на Mac), Нейрожурналист (банк вопросов для интервью Джазеты) |
+| [`apps/animation-toolkit/`](apps/animation-toolkit) | анимация из живописи («Трава помнит»): процедурное оживление картин, перекладка по Норштейну, монтаж под трек, звук, 1080p, промпты Seedance, копии скиллов |
 | [`sites/`](sites) | другие сайты: HATIK, AgroLook, Илья Вартанян, implantarm, Kontiky Film Lab, Mousework |
 | [`texts/`](texts) | «НеСелинджер», «Кто написал Баха» |
 
