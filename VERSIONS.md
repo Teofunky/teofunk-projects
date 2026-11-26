@@ -90,6 +90,10 @@
 
 [1.0.0](https://github.com/Teofunky/teofunk-projects/commit/2fb310c650ec692f4f575ccb8117f838e2d5efe6) (26.10.2026) · [1.1.0](https://github.com/Teofunky/teofunk-projects/commit/a8ba9b4a6586bf91517eb662703db20213608f65) (26.10.2026) · [1.2.0](https://github.com/Teofunky/teofunk-projects/commit/478bb9650845fb1f1ec8d119a62e0e8ccc16a9a2) (26.10.2026)
 
+## kozlov-slider-stats
+
+[1.0.0](https://github.com/Teofunky/teofunk-projects/commit/ccb3afb5430f3b0cbb28cd17a7cd21f609ce24d0) (26.11.2026)
+
 ## kozlov-smart-search
 
 [1.0.0](https://github.com/Teofunky/teofunk-projects/commit/69d04c0cdb4c54886c7e4283a165f1396242503a) (05.10.2026) · [1.0.1](https://github.com/Teofunky/teofunk-projects/commit/1657d242b203b8148fe50433d833b050f829f2c9) (06.10.2026) · [1.0.2](https://github.com/Teofunky/teofunk-projects/commit/a48a485c204837c5daceffc2e6d6313fb7faef5e) (06.10.2026) · [1.0.3](https://github.com/Teofunky/teofunk-projects/commit/250a0eb7ee5277f9770df4706f55609a2a485b83) (17.10.2026) · [1.0.4](https://github.com/Teofunky/teofunk-projects/commit/3c2c3bc51e8429c0df4f86568e33d2ec6077a9fb) (17.10.2026) · [1.1.0](https://github.com/Teofunky/teofunk-projects/commit/cfc26330f008eae0dfb31d9051eabf6ba7ff8899) (03.11.2026)
