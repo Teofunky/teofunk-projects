@@ -1,0 +1,113 @@
+== static: php -l, node --check
+No syntax errors detected in kozlovclub/plugins/kozlov-slider-stats/uninstall.php
+No syntax errors detected in kozlovclub/plugins/kozlov-slider-stats/includes/admin.php
+No syntax errors detected in kozlovclub/plugins/kozlov-slider-stats/kozlov-slider-stats.php
+kzsl.js: syntax ok
+
+== WordPress 7.1.5 (local, SQLite): activation, settings, options
+  ok   plugin activates without errors
+  ok   default settings written on activation
+  ok   page cache flushed on activation
+  ok   option is not autoloaded
+  ok   settings: digits only, missing keys fall back to defaults
+  ok   settings: broken option falls back to defaults
+  ok   plugin deactivates
+
+7 ok, 0 failed
+
+== WordPress 7.1.5 (local, HTTP): pages, admin, saving, editors
+  ok   home: config printed once
+  ok   home: counter, home=true, silent=false
+  ok   home: script in page with defer
+  ok   home: config comes before the script
+  ok   post page: script present with home=false (next on)
+  ok   no global JS variable printed
+  ok   next off: home only, nothing on other pages
+  ok   disabled: not a single line of the plugin on the site
+  ok   feed and REST: untouched
+  ok   logged-in editor: silent=true
+  ok   editor: no access to the settings page
+  ok   skip_editors off: editor events are sent
+  ok   admin: settings page with the goal table and Metrika link
+  ok   plugins list: «Настройки» link
+  ok   admin: save works (HTTP 302): {"enabled":1,"counter":"98765432","skip_editors":0,"next":1}
+  ok   admin: save flushes page cache
+  ok   admin: bad nonce changes nothing (HTTP 403)
+  ok   editor cannot save settings (HTTP 500)
+  ok   admin: counter without digits falls back to 44419291
+  ok   debug.log: no PHP notices or errors from the plugin
+
+20 ok, 0 failed
+
+== live kozlovclub.ru page, script injected locally, nothing sent to Metrika: desktop
+1) after 7.5 s on screen (autoplay):
+    kzsl_view | Десктоп › Показ слайдера › да
+    params | Десктоп › Показ слайда › НОВЫЙ ГОД СО СВЕТЛАНОЙ ЖАВОРОНКОВОЙ · 31 дек › позиция 1
+    params | Десктоп › Показ слайда › НАНИ ЕВА · 31 дек › позиция 2
+2) arrow click:
+    kzsl_swipe | Десктоп › Листание › стрелки
+    params | Десктоп › Показ слайда › НОВЫЙ ГОД 2026-2027 › позиция 3
+3) title click:
+    kzsl_click | Десктоп › Клик › НОВЫЙ ГОД 2026-2027 › Название
+4) active slide has no buy button
+sessionStorage: {"t":1795680970469,"v":"Десктоп","l":"НОВЫЙ ГОД 2026-2027","p":"/novyj-god","e":""}
+5) swipe goals total: 1 | view goals: 1
+page errors: []
+
+== live page: iPhone 13 (facade, shadow theatre, facade off)
+== facade: html class = kzh kzf-on kzf-top
+1) after 6 s:
+    kzsl_view | Телефон · фасад › Показ слайдера › да
+    params | Телефон · фасад › Показ слайда › НОВЫЙ ГОД 2026-2027 › позиция 1
+2) swipe on cards:
+    kzsl_swipe | Телефон · фасад › Листание › свайп
+    params | Телефон · фасад › Показ слайда › НАНИ ЕВА · 31 дек › позиция 2
+3) tap buy:
+    kzsl_click | Телефон · фасад › Клик › НАНИ ЕВА · 31 дек › Купить билет
+    kzsl_buy | Телефон · фасад › Кнопка покупки › НАНИ ЕВА · 31 дек › Купить билет
+4) tap title link:
+    kzsl_click | Телефон · фасад › Клик › НАНИ ЕВА · 31 дек › Название
+goal counts: {'kzsl_view': 1, 'kzsl_swipe': 1, 'kzsl_click': 2, 'kzsl_buy': 1}
+page errors: []
+== shadows: html class = kzh kzf-on kzf-top
+1) after 6 s:
+    kzsl_view | Телефон · театр теней › Показ слайдера › да
+    params | Телефон · театр теней › Показ слайда › НОВЫЙ ГОД 2026-2027 › позиция 1
+2) swipe on cards:
+    kzsl_swipe | Телефон · театр теней › Листание › свайп
+    params | Телефон · театр теней › Показ слайда › НАНИ ЕВА · 31 дек › позиция 2
+3) tap buy:
+    kzsl_click | Телефон · театр теней › Клик › НАНИ ЕВА · 31 дек › Купить билет
+    kzsl_buy | Телефон · театр теней › Кнопка покупки › НАНИ ЕВА · 31 дек › Купить билет
+4) tap title link:
+    kzsl_click | Телефон · театр теней › Клик › НАНИ ЕВА · 31 дек › Название
+goal counts: {'kzsl_view': 1, 'kzsl_swipe': 1, 'kzsl_click': 2, 'kzsl_buy': 1}
+page errors: []
+== phone, facade off: html class = kzh kzf-off
+1) after 6 s:
+    kzsl_view | Телефон · обычный слайдер › Показ слайдера › да
+    params | Телефон · обычный слайдер › Показ слайда › НОВЫЙ ГОД СО СВЕТЛАНОЙ ЖАВОРОНКОВОЙ · 31 дек › позиция 1
+2) swipe owl:
+    kzsl_swipe | Телефон · обычный слайдер › Листание › свайп
+    params | Телефон · обычный слайдер › Показ слайда › НАНИ ЕВА · 31 дек › позиция 2
+3) tap picture:
+    kzsl_click | Телефон · обычный слайдер › Клик › НАНИ ЕВА · 31 дек › Картинка
+goal counts: {'kzsl_view': 1, 'kzsl_swipe': 1, 'kzsl_click': 1}
+page errors: []
+
+== live page: buy on the next page, debug, editors, filtered home
+A1) desktop buy in slider:
+    kzsl_click | Десктоп › Клик › НАНИ ЕВА · 31 дек › Купить билет
+    kzsl_buy | Десктоп › Кнопка покупки › НАНИ ЕВА · 31 дек › Купить билет
+    stored: {'t': 1795681021987, 'v': 'Десктоп', 'l': 'НАНИ ЕВА · 31 дек', 'p': '/event/nani-eva-skazochnyj-novyj-god', 'e': '6ace47837478368535458a19'}
+    buttons with tc-event on concert page: 2
+A2) buy on concert page:
+    kzsl_buy_next | Десктоп › Покупка после клика › НАНИ ЕВА · 31 дек › этот же концерт
+A3) buy on another concert page:
+    kzsl_buy_next | Десктоп › Покупка после клика › НАНИ ЕВА · 31 дек › другой концерт
+B) concert page without a slider click, calls: 0
+C) debug: ym calls = 0 | panel: Слайдер в Метрике · проверка, в Метрику не отправляется
+параметры · Десктоп › Показ слайда › НОВЫЙ ГОД СО СВЕТЛАНОЙ ЖАВОРОНКОВОЙ · 31 дек › позиция 1
+kzsl_view · Десктоп › Показ слайдера › да
+D) silent: ym calls = 0
+E) filtered home: slider present = False | calls = 0 | errors: []
