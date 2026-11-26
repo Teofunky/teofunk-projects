@@ -76,4 +76,5 @@ async def main():
         await pg.wait_for_timeout(2500)
         print("E) filtered home: slider present =", await pg.evaluate("!!document.querySelector('.content_home .slider-wrapper .slider')"), "| calls =", len(await pg.evaluate(CALLS_JS)), "| errors:", errs[:3])
         await b.close()
-asyncio.run(main())
+if __name__ == "__main__":
+    asyncio.run(main())

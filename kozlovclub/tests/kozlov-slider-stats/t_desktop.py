@@ -35,4 +35,5 @@ async def main():
               "| methods:", [flat(c["p"]) for c in allc if "Листание" in flat(c["p"])])
         print("page errors:", errs[:5])
         await b.close()
-asyncio.run(main())
+if __name__ == "__main__":
+    asyncio.run(main())

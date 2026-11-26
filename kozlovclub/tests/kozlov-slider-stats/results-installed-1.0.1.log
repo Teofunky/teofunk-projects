@@ -1,0 +1,34 @@
+config: {"v":"1.0.1","counter":44419291,"home":true,"next":true,"silent":false}
+== desktop home
+    kzsl_view | Десктоп › Показ слайдера › слайдов: 3
+    kzsl_slide_view | Десктоп › Показ слайда › novyj-god-so-svetlanoj-zhavoronkovoj-acoustic-soul › №1 · НОВЫЙ ГОД СО СВЕТЛАНОЙ ЖАВОРОНКОВОЙ · 31 дек
+    kzsl_slide_view | Десктоп › Показ слайда › nani-eva-skazochnyj-novyj-god › №2 · НАНИ ЕВА · 31 дек
+    kzsl_swipe | Десктоп › Листание › стрелки
+    kzsl_slide_view | Десктоп › Показ слайда › novyj-god › №3 · НОВЫЙ ГОД 2026-2027
+    params | Десктоп › Листание › вкладки
+    kzsl_click | Десктоп › Клик › nani-eva-skazochnyj-novyj-god › Купить билет
+    kzsl_buy | Десктоп › Кнопка покупки › nani-eva-skazochnyj-novyj-god › Купить билет
+== desktop concert page
+    kzsl_buy_next | Десктоп › Кнопка покупки после клика › nani-eva-skazochnyj-novyj-god › этот же концерт
+errors: []
+== iPhone facade
+    kzsl_view | Телефон · фасад › Показ слайдера › слайдов: 4
+    kzsl_slide_view | Телефон · фасад › Показ слайда › novyj-god › №1 · НОВЫЙ ГОД 2026-2027
+    kzsl_swipe | Телефон · фасад › Листание › свайп
+    kzsl_slide_view | Телефон · фасад › Показ слайда › nani-eva-skazochnyj-novyj-god › №2 · НАНИ ЕВА · 31 дек
+    kzsl_click | Телефон · фасад › Клик › nani-eva-skazochnyj-novyj-god › Купить билет
+    kzsl_buy | Телефон · фасад › Кнопка покупки › nani-eva-skazochnyj-novyj-god › Купить билет
+errors: []
+== iPhone shadows
+    kzsl_view | Телефон · театр теней › Показ слайдера › слайдов: 4
+    kzsl_slide_view | Телефон · театр теней › Показ слайда › novyj-god › №1 · НОВЫЙ ГОД 2026-2027
+    kzsl_swipe | Телефон · театр теней › Листание › свайп
+    kzsl_slide_view | Телефон · театр теней › Показ слайда › nani-eva-skazochnyj-novyj-god › №2 · НАНИ ЕВА · 31 дек
+    kzsl_click | Телефон · театр теней › Клик › nani-eva-skazochnyj-novyj-god › Купить билет
+    kzsl_buy | Телефон · театр теней › Кнопка покупки › nani-eva-skazochnyj-novyj-god › Купить билет
+errors: []
+== iPhone ?kzsl=debug: ym calls = 0
+Слайдер в Метрике · проверка, в Метрику не отправляется. Выключить: ?kzsl=stop
+kzsl_slide_view · Телефон · фасад › Показ слайда › novyj-god › №1 · НОВЫЙ ГОД 2026-2027
+kzsl_view · Телефон · фасад › Показ слайдера › слайдов: 4
+errors: []

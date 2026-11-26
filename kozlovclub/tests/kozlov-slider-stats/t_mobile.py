@@ -58,4 +58,5 @@ async def main():
         await run(p, "https://kozlovclub.ru/", "0", "facade")
         await run(p, "https://kozlovclub.ru/", "1", "shadows")
         await run(p, "https://kozlovclub.ru/?kzf=off", None, "phone, facade off")
-asyncio.run(main())
+if __name__ == "__main__":
+    asyncio.run(main())

@@ -132,4 +132,5 @@ async def main():
         print("page errors:", errs)
         await ctx.close()
         await b.close()
-asyncio.run(main())
+if __name__ == "__main__":
+    asyncio.run(main())

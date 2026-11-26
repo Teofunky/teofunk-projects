@@ -21,6 +21,9 @@ def make_router(cfg, transform=None):
             resp = await r.fetch()
             body = await resp.text()
             body = body.replace("44419291", DUMMY)
+            # the plugin may already be installed on the site: its own config and script are removed, the test copy is injected
+            body = re.sub(r'<script type="application/json" id="kzsl-config">.*?</script>\s*', '', body, flags=re.S)
+            body = re.sub(r'<script[^>]*kozlov-slider-stats/assets/kzsl\.js[^>]*></script>\s*', '', body)
             inj = '<script type="application/json" id="kzsl-config">' + json.dumps(cfg) + '</script>\n<script>' + JS + '</script>\n'
             body = body.replace("</body>", inj + "</body>", 1)
             if transform: body = transform(body)
