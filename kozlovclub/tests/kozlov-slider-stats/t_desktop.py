@@ -3,7 +3,7 @@ async def main():
     async with async_playwright() as p:
         b = await p.chromium.launch(executable_path="/usr/bin/google-chrome", args=["--no-sandbox"])
         ctx = await b.new_context(viewport={"width": 1440, "height": 900}, locale="ru-RU")
-        await ctx.route("**/*", make_router({"v": "1.0.0", "counter": int(DUMMY), "home": True, "next": True, "silent": False}))
+        await ctx.route("**/*", make_router({"v": "1.0.1", "counter": int(DUMMY), "home": True, "next": True, "silent": False}))
         pg = await ctx.new_page()
         errs = []
         pg.on("pageerror", lambda e: errs.append(str(e)))
@@ -31,7 +31,8 @@ async def main():
         await pg.click(".slider .titles .nav[data-pos='0']")
         await pg.wait_for_timeout(300)
         allc = await pg.evaluate(CALLS_JS)
-        print("5) swipe goals total:", sum(1 for c in allc if c["goal"] == "kzsl_swipe"), "| view goals:", sum(1 for c in allc if c["goal"] == "kzsl_view"))
+        print("5) swipe goals total:", sum(1 for c in allc if c["goal"] == "kzsl_swipe"), "| view goals:", sum(1 for c in allc if c["goal"] == "kzsl_view"),
+              "| methods:", [flat(c["p"]) for c in allc if "Листание" in flat(c["p"])])
         print("page errors:", errs[:5])
         await b.close()
 asyncio.run(main())

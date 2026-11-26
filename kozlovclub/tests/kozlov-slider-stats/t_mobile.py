@@ -12,7 +12,7 @@ async def swipe(pg, sel, dx):
 async def run(p, url, hero_n=None, label=""):
     b = await p.chromium.launch(executable_path="/usr/bin/google-chrome", args=["--no-sandbox"])
     ctx = await b.new_context(**p.devices["iPhone 13"], locale="ru-RU")
-    await ctx.route("**/*", make_router({"v": "1.0.0", "counter": int(DUMMY), "home": True, "next": True, "silent": False}))
+    await ctx.route("**/*", make_router({"v": "1.0.1", "counter": int(DUMMY), "home": True, "next": True, "silent": False}))
     if hero_n is not None:
         await ctx.add_init_script(f"try{{localStorage.setItem('kzf_hero_n','{hero_n}')}}catch(e){{}}")
     pg = await ctx.new_page()

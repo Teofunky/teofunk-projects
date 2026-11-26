@@ -11,7 +11,7 @@ setopt "array('enabled'=>1,'counter'=>'44419291','skip_editors'=>1,'next'=>1)"
 H=$(curl -s "$B/"); P=$(curl -s "$B/?p=1")
 t '[[ $(grep -c "id=\"kzsl-config\"" <<<"$H") == 1 ]]' 'home: config printed once'
 t 'grep -q "\"counter\":44419291" <<<"$H" && grep -q "\"home\":true" <<<"$H" && grep -q "\"silent\":false" <<<"$H"' 'home: counter, home=true, silent=false'
-t 'grep "kzsl.js?ver=1.0.0" <<<"$H" | grep -q " defer "' 'home: script in page with defer'
+t 'grep "kzsl.js?ver=1.0.1" <<<"$H" | grep -q " defer "' 'home: script in page with defer'
 t '[[ $(grep -n "id=\"kzsl-config\"" <<<"$H" | cut -d: -f1) -lt $(grep -n "kzsl.js" <<<"$H" | cut -d: -f1) ]]' 'home: config comes before the script'
 t 'grep -q "kzsl.js" <<<"$P" && grep -q "\"home\":false" <<<"$P"' 'post page: script present with home=false (next on)'
 t '! grep -q "window.KZSL\|var kzsl" <<<"$H"' 'no global JS variable printed'

@@ -4,7 +4,7 @@ async def main():
         b = await p.chromium.launch(executable_path="/usr/bin/google-chrome", args=["--no-sandbox"])
         # A. slider buy on desktop, then the concert page, then its buy button
         ctx = await b.new_context(viewport={"width": 1440, "height": 900}, locale="ru-RU")
-        cfg = {"v": "1.0.0", "counter": int(DUMMY), "home": True, "next": True, "silent": False}
+        cfg = {"v": "1.0.1", "counter": int(DUMMY), "home": True, "next": True, "silent": False}
         state = {"cfg": cfg}
         async def route(r):
             return await make_router(state["cfg"])(r)

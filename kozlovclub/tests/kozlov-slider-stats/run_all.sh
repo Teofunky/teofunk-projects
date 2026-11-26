@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# All checks for Kozlov Slider Stats 1.0.0 in one run.
+# All checks for Kozlov Slider Stats in one run.
 set -u
 P=/home/claude/teofunk-projects/kozlovclub/plugins/kozlov-slider-stats
 echo "== static: php -l, node --check"
@@ -15,3 +15,5 @@ echo; echo "== live page: iPhone 13 (facade, shadow theatre, facade off)"
 python3 t_mobile.py
 echo; echo "== live page: buy on the next page, debug, editors, filtered home"
 python3 t_next.py
+echo; echo "== live page: scenarios from the outside audit of 1.0.0"
+python3 t_audit.py

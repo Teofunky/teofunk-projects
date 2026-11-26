@@ -12,7 +12,7 @@ def is_blocked(url):
     if "tcwidget.js" in url: return False
     return any(h in url for h in ("mc.yandex", "mail.ru", "vk.com", "ticketscloud", "googletag", "google-analytics", "an.yandex"))
 
-def make_router(cfg):
+def make_router(cfg, transform=None):
     async def route(r):
         url = r.request.url
         if is_blocked(url):
@@ -23,6 +23,7 @@ def make_router(cfg):
             body = body.replace("44419291", DUMMY)
             inj = '<script type="application/json" id="kzsl-config">' + json.dumps(cfg) + '</script>\n<script>' + JS + '</script>\n'
             body = body.replace("</body>", inj + "</body>", 1)
+            if transform: body = transform(body)
             return await r.fulfill(response=resp, body=body, headers={**resp.headers, "content-type": "text/html; charset=UTF-8"})
         await r.continue_()
     return route
